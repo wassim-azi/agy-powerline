@@ -295,6 +295,8 @@ Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`
 
 The `commit-msg` hook checks this locally. CI checks every commit in your PR and the PR title too, so `--no-verify` only postpones the error. To check a range yourself: `npm run lint:commits -- origin/develop..HEAD`.
 
+Pull requests are **squash-merged**: your PR becomes one commit on `develop`, and the PR title is its message. Give the PR a title that describes the whole change.
+
 ---
 
 ## 📒 Changelog
@@ -311,12 +313,12 @@ At release time the maintainer renames `## [Unreleased]` to the new version and 
 
 ## 🌿 Branches
 
-| Branch    | What it is                                                 | Who changes it                                             |
-| --------- | ---------------------------------------------------------- | ---------------------------------------------------------- |
-| `develop` | Where all work lands. Open your pull requests here.        | Anyone, through a reviewed pull request                    |
-| `main`    | Released code. Every npm release is published from `main`. | Only the maintainer, through a pull request from `develop` |
+| Branch    | What it is                                                 | Who changes it                                              |
+| --------- | ---------------------------------------------------------- | ----------------------------------------------------------- |
+| `develop` | Where all work lands. Open your pull requests here.        | Anyone, through a reviewed pull request                     |
+| `main`    | Released code. Every npm release is published from `main`. | Only the maintainer, by fast-forwarding `main` to `develop` |
 
-A pull request into `main` from any other branch or author fails a required CI check and can't be merged. If you opened one by mistake, change its base branch to `develop` ("Edit" next to the PR title).
+History is linear on both branches: no merge commits. A pull request into `main` from any other branch or author fails a required CI check and can't be merged. If you opened one by mistake, change its base branch to `develop` ("Edit" next to the PR title).
 
 ---
 
