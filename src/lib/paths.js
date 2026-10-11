@@ -81,9 +81,9 @@ function windowsNodeOnWslMessage(execPath = process.execPath) {
     "This Node binary is the Windows build (a /mnt/c/... path).",
     `  ${execPath}`,
     "Antigravity on Ubuntu/WSL needs Linux Node, or settings will get a Windows command.",
-    "Re-run with Linux Node:",
-    "  /usr/bin/node src/index.js init --yes",
-    "  /usr/bin/node $(which agy-powerline) init --yes",
+    "Install Node.js 20 or newer inside WSL (for example with nvm), then re-run:",
+    "  npm install -g agy-powerline",
+    "  agy-powerline init --yes",
   ].join("\n");
 }
 

@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- WSL: the install notes and the Windows-Node error now recommend Node.js 20+ installed for your user (for example with nvm) instead of Ubuntu's often too old `/usr/bin/node` (#6)
 - The git widget's uncommitted-changes color no longer looks like the caution color in the `light-paper`, `light-sky`, `light-sunset`, `dark-onyx`, `dark-metro` and `colorblind-light` themes (#7)
 
 ## [1.0.0] - 2026-10-11

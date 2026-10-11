@@ -109,12 +109,15 @@ Inside agy you can also use `/statusline <command>`, or go back to the built-in 
 
 ## WSL
 
-Use the Linux `node` (`/usr/bin/node`). Windows `npx` is often on PATH via `/mnt/c/Program Files/nodejs/npx`, which would write a Windows Node path into Linux settings. `init` and `doctor` refuse to run under a Windows Node binary and tell you to re-run with Linux Node. From a clone of the repo:
+Install agy-powerline with a **Linux** Node.js 20 or newer, inside WSL. Ubuntu's `apt` package (`/usr/bin/node`) is often older (Ubuntu 24.04 ships Node 18), and a global install with it needs `sudo`, which would make `init` write into root's home folder. Install Node for your user instead, for example with [nvm](https://github.com/nvm-sh/nvm):
 
 ```bash
-/usr/bin/node src/index.js init
-/usr/bin/node src/index.js configure
+nvm install 24
+npm install -g agy-powerline
+agy-powerline init
 ```
+
+`which node` should point into your Linux home (`~/.nvm/...`), not `/mnt/c/...`: Windows `npx` is often on the WSL `PATH` via `/mnt/c/Program Files/nodejs/npx`, which would write a Windows Node path into Linux settings. `init` and `doctor` refuse to run under a Windows Node binary and tell you to re-run with Linux Node.
 
 ## Performance
 
