@@ -123,6 +123,7 @@ function checkThemeQuality() {
       ["fiveHour", "warn"],
       ["caution", "warn"],
       ["git", "gitDirty"],
+      ["gitDirty", "caution"],
     ];
     for (const healthy of ["weekly", "context"]) {
       pairs.push([healthy, "caution"], [healthy, "warn"]);

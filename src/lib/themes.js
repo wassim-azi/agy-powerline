@@ -10,11 +10,12 @@ const { parseColor } = require("./colors");
 // Most dark-* and light-* colors come from VS Code's default themes (Dark+
 // and Light+ syntax, git decorations, warning/error and terminal colors);
 // nocturne, onyx, metro and cream take their palettes from community themes
-// (credited below). A few colors are darkened or lightened, same hue, where
-// the contrast checks need it.
+// (credited below). A few colors are adjusted where the checks below need
+// it: darkened or lightened for contrast, and gitDirty moved toward orange so
+// a dirty branch never looks like the caution state.
 // Palettes are checked by tests/shared/themes.test.js: pill text and lines
-// text reach WCAG AA (4.5:1), and the ok / caution / danger states are
-// clearly different from each other.
+// text reach WCAG AA (4.5:1), the ok / caution / danger states are clearly
+// different from each other, and so are gitDirty and caution.
 //
 // Color roles:
 //   text      pill text                  track     empty dots in lines meters
@@ -152,7 +153,7 @@ const THEMES = {
     thirdParty: "#d19a66",
     context: "#61afef",
     git: "#abb2bf",
-    gitDirty: "#d19a66",
+    gitDirty: "#e88a50",
     meta: "#abb2bf",
     caution: "#e5c07b",
     warn: "#e1727b",
@@ -168,7 +169,7 @@ const THEMES = {
     thirdParty: "#ff9e64",
     context: "#7aa2f7",
     git: "#73daca",
-    gitDirty: "#ff9e64",
+    gitDirty: "#ff8b52",
     meta: "#a9b1d6",
     caution: "#e0af68",
     warn: "#f7768e",
@@ -183,7 +184,7 @@ const THEMES = {
     thirdParty: "#795e26",
     context: "#0451a5",
     git: "#001080",
-    gitDirty: "#895503",
+    gitDirty: "#b04a00",
     meta: "#3b3b3b",
     caution: "#8d6503",
     warn: "#cd3131",
@@ -198,7 +199,7 @@ const THEMES = {
     thirdParty: "#0070c1",
     context: "#005fb8",
     git: "#001080",
-    gitDirty: "#895503",
+    gitDirty: "#b04a00",
     meta: "#3b3b3b",
     caution: "#8d6503",
     warn: "#cd3131",
@@ -213,7 +214,7 @@ const THEMES = {
     thirdParty: "#795e26",
     context: "#0451a5",
     git: "#bc05bc",
-    gitDirty: "#895503",
+    gitDirty: "#b04a00",
     meta: "#616161",
     caution: "#8d6503",
     warn: "#cd3131",
@@ -268,7 +269,7 @@ const THEMES = {
       thirdParty: "#8a5200",
       context: "#2856a8",
       git: "#4e4596",
-      gitDirty: "#8a5200",
+      gitDirty: "#a64800",
       meta: "#4b5466",
       caution: "#876900",
       warn: "#87002d",
