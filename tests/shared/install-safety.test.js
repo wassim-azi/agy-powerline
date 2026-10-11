@@ -15,6 +15,9 @@ const {
   InvalidConfigError,
 } = require("../../src/lib/shared");
 const { isSafeBranchName } = require("../../src/lib/git");
+const { saveDiskCache } = require("../../src/lib/exec");
+const { setLogDir, getLogPath, logWarning } = require("../../src/lib/log");
+const { writePayloadDump } = require("../../src/lib/payload-dump");
 const { stripControl } = require("../../src/lib/formatters");
 const { version } = require("../../package.json");
 
@@ -374,7 +377,66 @@ function testUninstallStopsOnUnparseableSettings() {
   }
 }
 
+// Our own files can hold the user's commands and their output: on a shared
+// machine they must not be readable by other accounts. settings.json is the
+// user's file, so it keeps whatever mode it had.
+function testOwnFilesArePrivate() {
+  if (process.platform === "win32") {
+    record("own files are private (0600)", true, "skipped (Windows profile folders are private)");
+    return;
+  }
+
+  const box = sandbox("private-files");
+  const mode = (file) => fs.statSync(file).mode & 0o777;
+  const configPath = path.join(box.installDir, "statusline.config.json");
+  const previousConfigDir = getConfigDir();
+  const previousLog = getLogPath();
+
+  try {
+    // An install from before this change: config readable by everyone.
+    fs.mkdirSync(box.installDir, { recursive: true });
+    fs.writeFileSync(configPath, "{}\n", { mode: 0o644 });
+    fs.chmodSync(configPath, 0o644);
+    writeSettings(box, '{\n  "theme": "dark"\n}\n');
+    fs.chmodSync(box.settingsPath, 0o640);
+
+    const res = runCli(["init", "--yes"], { env: box.env });
+
+    setConfigDir(box.installDir);
+    saveDiskCache({ k: { output: "secret", timestamp: Date.now() } });
+    setLogDir(box.installDir);
+    logWarning("private-file-test");
+    const dump = path.join(box.installDir, "last-payload.json");
+    writePayloadDump(dump, "{}");
+
+    const modes = {
+      config: mode(configPath),
+      cache: mode(path.join(box.installDir, ".exec-cache.json")),
+      log: mode(path.join(box.installDir, "agy-powerline.log")),
+      dump: mode(dump),
+      settings: mode(box.settingsPath),
+    };
+    record(
+      "own files are private (0600) and settings.json keeps its mode",
+      res.code === 0 &&
+        modes.config === 0o600 &&
+        modes.cache === 0o600 &&
+        modes.log === 0o600 &&
+        modes.dump === 0o600 &&
+        modes.settings === 0o640,
+      Object.entries(modes)
+        .map(([name, m]) => `${name} ${m.toString(8)}`)
+        .join(", ")
+    );
+  } finally {
+    setConfigDir(previousConfigDir);
+    setLogDir(previousLog ? path.dirname(previousLog) : null);
+    box.cleanup();
+  }
+}
+
 async function run() {
+  testOwnFilesArePrivate();
   testUninstallStopsOnUnparseableSettings();
   testBrokenConfigIsNeverOverwritten();
   testSaveConfigGuard();

@@ -7,9 +7,9 @@
 // branch names become placeholders. A field Antigravity adds later is left
 // out until it is listed here.
 
-const fs = require("fs");
 const path = require("path");
 const { stripControl } = require("./formatters");
+const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
 
 const NUMBER = "number";
 const BOOL = "boolean";
@@ -160,9 +160,9 @@ function writePayloadDump(target, rawInput) {
   }
 
   try {
-    const resolved = path.resolve(target);
-    fs.mkdirSync(path.dirname(resolved), { recursive: true });
-    fs.writeFileSync(resolved, JSON.stringify(body, null, 2) + "\n", "utf8");
+    writeFileAtomic(path.resolve(target), JSON.stringify(body, null, 2) + "\n", {
+      mode: PRIVATE_FILE_MODE,
+    });
   } catch {
     // Best-effort debug write; the bar matters more.
   }

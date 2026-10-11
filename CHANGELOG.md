@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Security
+
+- On macOS and Linux, the config, `exec` cache, problem log and payload dump are now readable by your account only, and saving Antigravity's `settings.json` keeps its permissions. Run `agy-powerline init --yes` after updating to apply this to existing files (#11)
+
 ## [1.0.1] - 2026-10-11
 
 ### Fixed

@@ -45,6 +45,8 @@ The CLI itself (`npx agy-powerline ...`) additionally:
 | The file you pass to `report --output`                                   | `report`, only when you ask for it                                                                                                                                                                                           |
 | `last-payload.json` (or the path you pass)                               | Only with `--dump-payload`, `AGY_POWERLINE_DUMP_PAYLOAD` or `AGY_POWERLINE_DEBUG`. It keeps only the fields the bar uses: no email, session or conversation IDs, and paths and the branch name are replaced by placeholders. |
 
+On macOS and Linux, `statusline.config.json`, `.exec-cache.json`, the problem log and the payload dump are created readable by your account only (`0600`), since they can hold your commands and their output; `init` narrows them in installs made by older versions. `settings.json` keeps the permissions it had. On Windows, your profile folder is private already.
+
 `init` and `uninstall` refuse to rewrite a `settings.json` they cannot parse. Likewise, `configure` and the `theme`/`layout`/`preset`/`caps` commands refuse to save over a `statusline.config.json` they cannot parse, so a typo never costs you your widgets. `uninstall --delete` removes only the files listed above and never a whole directory tree.
 
 ## Your email and session IDs

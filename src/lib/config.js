@@ -6,7 +6,7 @@ const { resolveColorModeId } = require("./colors");
 const { resolveThemeId } = require("./themes");
 const { stripControl, normalizeClock } = require("./formatters");
 const { normalizePowerline } = require("./powerline");
-const { writeFileAtomic } = require("./paths");
+const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
 
 // Display text in widget configs is printed as-is, so strip terminal control
 // from it. cmd/command are left alone: they are executed, not printed.
@@ -225,7 +225,9 @@ function saveConfig(config) {
     throw new InvalidConfigError(getConfigPath(), current.error);
   }
 
-  writeFileAtomic(getConfigPath(), JSON.stringify(mergeConfig(config), null, 2) + "\n");
+  writeFileAtomic(getConfigPath(), JSON.stringify(mergeConfig(config), null, 2) + "\n", {
+    mode: PRIVATE_FILE_MODE,
+  });
 }
 
 // Presets set the widget list only; the layout (Pills or Lines) stays the one

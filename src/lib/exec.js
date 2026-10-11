@@ -7,6 +7,7 @@ const crypto = require("crypto");
 const { execSync } = require("child_process");
 const { stripControl } = require("./formatters");
 const { logWarning } = require("./log");
+const { PRIVATE_FILE_MODE } = require("./paths");
 
 const DEFAULT_TIMEOUT_MS = 500;
 const DEFAULT_INTERVAL_SEC = 10;
@@ -54,7 +55,8 @@ function loadDiskCache() {
 
 // Several agy windows refresh at once, so the cache is written to a fresh temp
 // file and renamed into place: a reader never sees half a file. "wx" refuses a
-// file that already exists (or a planted link) in a shared temp folder.
+// file that already exists (or a planted link) in a shared temp folder, and the
+// file is owner-only because it holds the output of the user's commands.
 function saveDiskCache(cache) {
   let tmp = "";
   try {
@@ -64,7 +66,11 @@ function saveDiskCache(cache) {
       fs.mkdirSync(dir, { recursive: true });
     }
     tmp = `${file}.${process.pid}.${crypto.randomBytes(4).toString("hex")}.tmp`;
-    fs.writeFileSync(tmp, JSON.stringify(cache), { encoding: "utf8", flag: "wx" });
+    fs.writeFileSync(tmp, JSON.stringify(cache), {
+      encoding: "utf8",
+      flag: "wx",
+      mode: PRIVATE_FILE_MODE,
+    });
     fs.renameSync(tmp, file);
   } catch {
     // The cache is best effort: skip this write rather than risk a torn file.

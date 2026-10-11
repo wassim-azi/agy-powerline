@@ -9,7 +9,7 @@
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { writeFileAtomic, readInstallMeta } = require("./paths");
+const { writeFileAtomic, readInstallMeta, PRIVATE_FILE_MODE } = require("./paths");
 const { stripControl } = require("./formatters");
 
 const LOG_NAME = "agy-powerline.log";
@@ -246,7 +246,7 @@ function logEvent(level, code, details = {}) {
       lines = lines.slice(1);
     }
 
-    writeFileAtomic(file, lines.join("\n") + "\n");
+    writeFileAtomic(file, lines.join("\n") + "\n", { mode: PRIVATE_FILE_MODE });
   } catch {
     // Read-only disk, full disk, permissions: the bar matters more.
   }

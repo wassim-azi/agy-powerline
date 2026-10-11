@@ -28,17 +28,25 @@ const RUNTIME_FILES = [
   path.join("layouts", "pills.js"),
 ];
 
+// Files that can hold the user's commands, their output or session details.
+// They are written readable by the owner only, so other accounts on a shared
+// machine can't read them (Windows profile folders are private already).
+const PRIVATE_FILES = [
+  "statusline.config.json",
+  ".exec-cache.json",
+  "last-payload.json",
+  // LOG_NAME in log.js, spelled out because log.js requires this file.
+  "agy-powerline.log",
+];
+const PRIVATE_FILE_MODE = 0o600;
+
 // Everything init or the runtime may create in the install dir. uninstall
 // --delete removes only these, never the whole directory tree.
 const INSTALLED_FILES = [
   "statusline.js",
   "statusline.cmd",
   INSTALL_META_NAME,
-  "statusline.config.json",
-  ".exec-cache.json",
-  "last-payload.json",
-  // LOG_NAME in log.js, spelled out because log.js requires this file.
-  "agy-powerline.log",
+  ...PRIVATE_FILES,
   ...RUNTIME_FILES,
 ];
 
@@ -238,11 +246,24 @@ function writeJsonSafely(file, data) {
 }
 
 // Writes via temp file + rename so an interrupted write cannot leave a
-// truncated file behind.
-function writeFileAtomic(file, body) {
+// truncated file behind. The new file gets `mode` when given, otherwise the
+// mode the existing file had, so rewriting a file never widens who can read
+// it (the rename would otherwise reset it to the default).
+function writeFileAtomic(file, body, { mode } = {}) {
   fs.mkdirSync(path.dirname(file), { recursive: true });
   const tmp = `${file}.${process.pid}.tmp`;
-  fs.writeFileSync(tmp, body, "utf8");
+  const target = process.platform === "win32" ? undefined : (mode ?? existingMode(file));
+  fs.writeFileSync(tmp, body, { encoding: "utf8", mode: target ?? 0o666 });
+  if (target !== undefined) {
+    // The mode passed to writeFileSync is reduced by the umask; set it exactly.
+    // Some filesystems (e.g. Windows drives under WSL) refuse chmod; the write
+    // still matters more.
+    try {
+      fs.chmodSync(tmp, target);
+    } catch {
+      // Keep the mode writeFileSync gave it.
+    }
+  }
 
   try {
     fs.renameSync(tmp, file);
@@ -250,6 +271,29 @@ function writeFileAtomic(file, body) {
     // Windows can refuse to replace a file another process holds open.
     fs.writeFileSync(file, body, "utf8");
     fs.rmSync(tmp, { force: true });
+  }
+}
+
+function existingMode(file) {
+  try {
+    return fs.statSync(file).mode & 0o777;
+  } catch {
+    return undefined;
+  }
+}
+
+// Installs made before the private-file change left these files readable by
+// everyone; init narrows them. Best effort: a file we can't chmod stays as is.
+function restrictPrivateFiles(installDir) {
+  if (process.platform === "win32") {
+    return;
+  }
+  for (const name of PRIVATE_FILES) {
+    try {
+      fs.chmodSync(path.join(installDir, name), PRIVATE_FILE_MODE);
+    } catch {
+      // Missing file, or not ours to change.
+    }
   }
 }
 
@@ -305,6 +349,9 @@ module.exports = {
   INSTALL_META_NAME,
   RUNTIME_FILES,
   INSTALLED_FILES,
+  PRIVATE_FILES,
+  PRIVATE_FILE_MODE,
+  restrictPrivateFiles,
   resolveInstallDir,
   isTrustedInstallDir,
   statuslineCommand,

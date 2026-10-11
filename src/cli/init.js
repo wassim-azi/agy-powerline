@@ -11,6 +11,7 @@ const {
   readSettingsForUpdate,
   settingsBackupPath,
   writeJsonSafely,
+  restrictPrivateFiles,
   isWindowsNodeOnWsl,
   windowsNodeOnWslMessage,
   cmdBreakingChars,
@@ -81,6 +82,7 @@ async function initCommand(options = {}) {
 
   try {
     fs.mkdirSync(installDir, { recursive: true });
+    restrictPrivateFiles(installDir);
 
     const destStatusline = path.join(installDir, "statusline.js");
     const destConfig = path.join(installDir, "statusline.config.json");
