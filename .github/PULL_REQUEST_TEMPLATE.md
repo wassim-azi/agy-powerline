@@ -1,4 +1,4 @@
-<!-- Pull requests must target the `develop` branch. `main` only receives release merges from `develop`. -->
+<!-- Pull requests must target the `develop` branch and are squash-merged; the PR title becomes the commit message. `main` is only fast-forwarded to `develop` at release time. -->
 
 ## Description
 
