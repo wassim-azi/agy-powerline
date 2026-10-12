@@ -95,7 +95,8 @@ agy-powerline/
 ├── src/
 │   ├── index.js              # CLI entry point (Node's built-in util.parseArgs)
 │   ├── cli/                  # One file per command (init, configure, theme, layout, preset, caps,
-│   │                         # doctor, report, uninstall), tui-style.js and config-guard.js
+│   │                         # doctor, report, uninstall), bundle.js (the one-file installed
+│   │                         # runtime), tui-style.js and config-guard.js
 │   ├── lib/
 │   │   ├── shared.js         # renderStatusline(), the rendering entry point
 │   │   ├── session.js        # Extracts & normalizes fields from Antigravity's JSON payload
@@ -118,7 +119,8 @@ agy-powerline/
 │   │       ├── pills.js      # Powerline capsule layout
 │   │       └── lines.js      # Colored-text layout with 25-dot meters
 │   └── runtime/
-│       └── statusline.js     # Runtime script executed by Antigravity on every refresh
+│       └── statusline.js     # Runtime script executed by Antigravity on every refresh; init
+│                             # joins it with RUNTIME_FILES into one installed statusline.js
 ├── docs/                     # User docs beyond the README: configuration, install, troubleshooting
 ├── tests/
 │   ├── shared.js             # node:test entry for the cross-platform suites

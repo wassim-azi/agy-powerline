@@ -16,11 +16,11 @@ What `npx agy-powerline init` does, where files go, and how to set things up by 
 
 `init` never loses your other settings. It refuses to touch a `settings.json` that is not plain JSON (comments, trailing commas) and tells you what to add by hand. Before every change it saves the previous file as `settings.json.agy-powerline.bak`.
 
-| OS      | Scripts                                              | `statusLine.command` in settings                                     |
-| ------- | ---------------------------------------------------- | -------------------------------------------------------------------- |
-| Windows | `statusline.js`, its library files, `statusline.cmd` | `C:/Users/you/.agy-powerline/statusline.cmd` (no quotes)             |
-| macOS   | `statusline.js`, its library files                   | `'/opt/homebrew/bin/node' '/Users/you/.agy-powerline/statusline.js'` |
-| Linux   | `statusline.js`, its library files                   | `'/usr/bin/node' '/home/you/.agy-powerline/statusline.js'`           |
+| OS      | Scripts                           | `statusLine.command` in settings                                     |
+| ------- | --------------------------------- | -------------------------------------------------------------------- |
+| Windows | `statusline.js`, `statusline.cmd` | `C:/Users/you/.agy-powerline/statusline.cmd` (no quotes)             |
+| macOS   | `statusline.js`                   | `'/opt/homebrew/bin/node' '/Users/you/.agy-powerline/statusline.js'` |
+| Linux   | `statusline.js`                   | `'/usr/bin/node' '/home/you/.agy-powerline/statusline.js'`           |
 
 - The Node path is the binary that ran `init` (`process.execPath`), not a hard-coded Homebrew or `/usr/bin` path, so the bar works even when Antigravity starts without your shell's `PATH` (for example with nvm). If you later remove that Node version, run `init --yes` again with the new one.
 - On macOS and Linux the settings run `node statusline.js` directly, so no launcher file is written. They use `sh -c` with single-quoted Node and script paths so spaces in the home folder stay intact.
@@ -123,8 +123,8 @@ agy-powerline init
 
 Antigravity starts the statusline on every refresh, so that path stays small:
 
-- A refresh takes about 0.15–0.35 s on a Windows 11 laptop, measured the way Antigravity runs it there (through `cmd /c`); starting `cmd` and Node is about half of that.
-- The statusline command is one local Node script: no `npx`, jq, bash or ccusage.
+- agy-powerline's own work takes about 0.1 s per refresh on a Windows 11 laptop. Starting `cmd` and Node comes on top of that for any statusline command, about 0.1–0.25 s there depending on how busy the machine is (measured through `cmd /c`, the way Antigravity runs it on Windows).
+- The statusline command is one local Node script, installed as a single file so Node opens one file instead of about 16: no `npx`, jq, bash or ccusage.
 - Model, context, quotas and `vcs` come straight from Antigravity's JSON, and the flex layout uses its `terminal_width`.
 - The branch and dirty state come from the payload or from reading `.git` directly. The only process the bar starts on its own is `git rev-list` for ahead/behind counts, only when the branch tracks an upstream and points at a different commit, with a 150 ms timeout.
 - `exec` widgets you add run with their own timeout and cache (see [Shell command widget](configuration.md#shell-command-widget-exec)).
