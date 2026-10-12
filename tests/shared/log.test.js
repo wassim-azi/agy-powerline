@@ -301,7 +301,7 @@ function personalPayload() {
       current_dir: "/home/someone/projects/client-acme/src",
       project_dir: "/home/someone/projects/client-acme",
     },
-    subagents: [{ state: "errored", task: "summarize client-acme contract" }],
+    subagents: [{ name: "research", role: "summarize client-acme contract", status: "running" }],
     mcp_servers: ["corp-internal.host"],
     quota: {
       "gemini-5h": {
@@ -327,9 +327,12 @@ function testPayloadDump() {
       !("email" in safe) &&
       !("session_id" in safe) &&
       !("conversation_id" in safe) &&
-      !("subagents" in safe) &&
       !("mcp_servers" in safe),
     leaks.join(", ")
+  );
+  record(
+    "the dump keeps only each subagent's status",
+    JSON.stringify(safe.subagents) === JSON.stringify([{ status: "running" }])
   );
   record(
     "paths keep their relationship and the branch keeps its length",

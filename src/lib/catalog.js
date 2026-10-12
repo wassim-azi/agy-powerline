@@ -105,6 +105,12 @@ const WIDGET_CATALOG = [
     unique: true,
     description: "number of artifacts",
   },
+  {
+    id: "tasks",
+    label: "Subagents & Tasks",
+    unique: true,
+    description: "running subagents and background tasks, shown only when there are some",
+  },
   { id: "ram", label: "RAM Usage", unique: true, description: "memory used on this machine" },
   { id: "version", label: "CLI Version", unique: true, description: "Antigravity CLI version" },
   {

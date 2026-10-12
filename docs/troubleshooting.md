@@ -23,7 +23,7 @@ It then reports: Windows Node on WSL, stale installed scripts (fix: `npx agy-pow
 - **`[agy-powerline: invalid statusline.config.json, showing defaults]`:** your config has a JSON error (often a trailing comma). The bar uses the defaults until you fix or delete the file; `doctor` prints the exact error. `configure` and the `theme`/`layout`/`preset`/`caps` commands refuse to save until then, so your widgets are never overwritten.
 - **`init` refuses to edit `settings.json`:** the file isn't plain JSON (comments, trailing commas). Fix it, or add the `statusLine` entry by hand: see [Setting it up by hand](install.md#setting-it-up-by-hand).
 - **Windows: the bar doesn't start:** the install folder path may contain `&`, `(`, `^`, `,`, `;` or `=`. See [What `init` does](install.md#what-init-does).
-- **The demo shows widgets your live bar doesn't:** `render --demo` uses sample data. Widgets like `sandbox` and `artifacts` stay hidden in a real session until there is a sandbox or an artifact.
+- **The demo shows widgets your live bar doesn't:** `render --demo` uses sample data. Widgets like `sandbox`, `artifacts` and `tasks` stay hidden in a real session until there is a sandbox, an artifact or something running in the background.
 
 ## Reporting a bug
 

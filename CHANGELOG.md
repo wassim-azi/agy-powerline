@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `tasks` widget: running subagents and background tasks, e.g. `👥 2 subagents, 1 task`, hidden when nothing runs; part of the `full` preset (#14)
+
 ### Fixed
 
 - The statusline no longer hangs until Antigravity kills it when Antigravity keeps its input open without sending anything; repeated kills made Antigravity turn the statusline off (#13)

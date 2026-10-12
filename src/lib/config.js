@@ -40,6 +40,7 @@ const VALID_WIDGET_IDS = new Set([
   "plan",
   "agentState",
   "artifacts",
+  "tasks",
   "ram",
   "version",
   "sandbox",
@@ -294,6 +295,7 @@ const PRESETS = {
     description: "Session, project and git; context, tokens and cache; both quotas, on three rows",
     widgets: [
       { id: "agentState" },
+      { id: "tasks" },
       { id: "model" },
       { id: "plan" },
       { id: "sandbox" },

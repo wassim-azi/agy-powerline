@@ -52,6 +52,8 @@ const SCHEMA = {
   vcs: VCS,
   sandbox: { enabled: BOOL, allow_network: BOOL },
   artifact_count: NUMBER,
+  subagents: "subagents",
+  task_count: NUMBER,
   terminal_width: NUMBER,
 };
 
@@ -101,6 +103,12 @@ function pick(value, rule, seen) {
   }
   if (rule === BRANCH) {
     return typeof value === "string" && value ? branchPlaceholder(value) : undefined;
+  }
+  if (rule === "subagents") {
+    // Only the status: a subagent's name and role describe the user's work.
+    return Array.isArray(value)
+      ? value.slice(0, 50).map((agent) => pick(agent, { status: TEXT }, seen) || {})
+      : undefined;
   }
   if (rule === "quota") {
     if (typeof value !== "object") {

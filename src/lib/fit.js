@@ -12,6 +12,7 @@ const DROP_ORDER = [
   "totalTokens",
   "cacheHit",
   "artifacts",
+  "tasks",
   "plan",
   "ram",
   "project",

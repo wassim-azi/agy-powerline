@@ -175,6 +175,11 @@ function extractSession(data, config) {
     plan: firstText(data.plan_tier),
     agentState: firstText(data.agent_state),
     artifacts: Math.floor(count(data.artifact_count)),
+    // Finished subagents stay in the list Antigravity sends; only running ones count.
+    subagents: Array.isArray(data.subagents)
+      ? data.subagents.filter((agent) => agent?.status === "running").length
+      : 0,
+    tasks: Math.floor(count(data.task_count)),
     version: firstText(data.version),
     sandbox: data.sandbox?.enabled === true,
     sandboxNet: data.sandbox?.allow_network === true,

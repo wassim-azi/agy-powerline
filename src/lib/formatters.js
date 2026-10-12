@@ -477,6 +477,12 @@ function formatGitSync(ahead, behind, ascii = false) {
   return "";
 }
 
+// "2 subagents, 1 task", or "" when nothing runs.
+function formatTasks(subagents, tasks) {
+  const part = (n, word) => (n > 0 ? `${n} ${word}${n === 1 ? "" : "s"}` : "");
+  return [part(subagents, "subagent"), part(tasks, "task")].filter(Boolean).join(", ");
+}
+
 // Removes escape sequences and control characters from text that did not
 // come from us (payload fields, branch names, command output), so it cannot
 // drive the terminal: cursor moves, OSC 52 clipboard writes, hyperlinks...
@@ -555,6 +561,7 @@ module.exports = {
   shortModelName,
   formatTokenSplit,
   formatGitSync,
+  formatTasks,
   quotaColor,
   contextColor,
   resolveQuotaThresholds,

@@ -24,6 +24,7 @@ const {
   shortModelName,
   formatTokenSplit,
   formatGitSync,
+  formatTasks,
   homePath,
   basenameOf,
   label,
@@ -419,6 +420,14 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return null;
       }
       return pill(colors.meta, lbl(String(session.artifacts)));
+
+    case "tasks": {
+      const text = formatTasks(session.subagents, session.tasks);
+      if (!text) {
+        return null;
+      }
+      return pill(colors.meta, lbl(text));
+    }
 
     case "ram": {
       const pct = session.ramPct ?? 0;

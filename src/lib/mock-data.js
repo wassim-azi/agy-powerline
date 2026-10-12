@@ -62,6 +62,11 @@ function sampleData() {
     },
     sandbox: { enabled: false },
     artifact_count: 2,
+    subagents: [
+      { name: "research", role: "Find where the config is loaded", status: "running" },
+      { name: "review", role: "Check the error messages", status: "completed" },
+    ],
+    task_count: 1,
     plan_tier: "Pro",
     terminal_width: process.stdout.columns || 120,
   };

@@ -26,6 +26,37 @@ async function run() {
   testSplitTokens();
   testShortModel();
   testOneFormPerSetting();
+  testTasks();
+}
+
+function testTasks() {
+  const real = fixture("antigravity-1.3.3-subagents.json");
+  const tasks = [{ id: "tasks" }];
+
+  record(
+    "tasks shows running subagents and background tasks",
+    /1 subagent, 1 task/.test(render(real, tasks))
+  );
+  record(
+    "lines tasks shows running subagents and background tasks",
+    /1 subagent, 1 task/.test(render(real, tasks, { layout: "lines" }))
+  );
+
+  // Finished subagents stay in the payload's list; they must not count.
+  const mixed = {
+    ...real,
+    subagents: [{ status: "running" }, { status: "running" }, { status: "completed" }],
+    task_count: 3,
+  };
+  record("tasks counts only running subagents", /2 subagents, 3 tasks/.test(render(mixed, tasks)));
+
+  const idle = { ...real, subagents: [{ status: "completed" }] };
+  delete idle.task_count;
+  record("tasks hides when nothing runs", render(idle, tasks).trim() === "");
+  record(
+    "tasks shows background tasks alone",
+    /👥 2 tasks /.test(render({ ...idle, task_count: 2 }, tasks))
+  );
 }
 
 function testTightestQuota() {

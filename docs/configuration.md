@@ -63,6 +63,7 @@ Every value comes from the JSON Antigravity pipes on stdin. A widget with nothin
 - Custom text badge (`customText`, e.g. `{"id": "customText", "text": "Production"}` shows `🏷️ Production`; hidden without `text`)
 - Plan tier, agent state, CLI version
 - Artifact count
+- Running subagents and background tasks (`tasks` e.g. `👥 2 subagents, 1 task`: subagents whose `status` is `running`, and `task_count`; hidden when nothing runs)
 - Cache read / create
 - RAM usage of your machine (`ram`, read from the OS; caution color from 80%, danger from 90%)
 - Sandbox with network security state (`sandbox (net)` vs `sandbox (isolated)`)

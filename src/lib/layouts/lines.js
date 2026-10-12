@@ -8,6 +8,7 @@ const {
   paceIndex,
   paceGlyph,
   formatGitSync,
+  formatTasks,
   formatTokens,
   formatContextTokens,
   shortModelName,
@@ -373,6 +374,14 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         return null;
       }
       return fg(palette.text) + tag() + String(session.artifacts) + RESET;
+
+    case "tasks": {
+      const text = formatTasks(session.subagents, session.tasks);
+      if (!text) {
+        return null;
+      }
+      return fg(palette.text) + tag() + text + RESET;
+    }
 
     case "sandbox": {
       if (!session.sandbox) {
