@@ -88,6 +88,7 @@ Preview them all with `npx agy-powerline theme --gallery`.
 | `agentState`, `plan`, `sandbox`, `artifacts`, `version` | What the agent is doing, your plan, sandbox, artifacts, CLI version                                |
 | `tasks`                                                 | Running subagents and background tasks                                                             |
 | `mode`                                                  | Approval mode (e.g. accept-edits) and Vim mode                                                     |
+| `title`                                                 | The conversation's title                                                                           |
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`   | Session tokens and prompt cache usage                                                              |
 | `ram`                                                   | Memory used on your machine                                                                        |
 | `customText`, `exec`                                    | Your own text, or the output of a [shell command](docs/configuration.md#shell-command-widget-exec) |

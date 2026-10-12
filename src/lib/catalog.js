@@ -117,6 +117,12 @@ const WIDGET_CATALOG = [
     unique: true,
     description: "approval mode (e.g. accept-edits) and Vim mode, shown only when one is on",
   },
+  {
+    id: "title",
+    label: "Conversation Title",
+    unique: true,
+    description: "name of the current conversation, shown once it has one",
+  },
   { id: "ram", label: "RAM Usage", unique: true, description: "memory used on this machine" },
   { id: "version", label: "CLI Version", unique: true, description: "Antigravity CLI version" },
   {

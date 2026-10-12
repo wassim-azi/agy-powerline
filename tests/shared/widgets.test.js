@@ -28,6 +28,45 @@ async function run() {
   testOneFormPerSetting();
   testTasks();
   testMode();
+  testTitle();
+}
+
+function testTitle() {
+  const real = fixture("antigravity-1.3.3-title.json");
+  const title = [{ id: "title" }];
+
+  record("title shows the conversation title", /💬 hello /.test(render(real, title)));
+  record(
+    "lines title shows the conversation title",
+    /💬 hello/.test(render(real, title, { layout: "lines" }))
+  );
+
+  const long = renderStatusline(
+    {
+      ...real,
+      terminal_width: 0,
+      conversation_title: "Refactor the auth\nmiddleware and add \u001b[31mtests for it",
+    },
+    { ...defaultConfig(), widgets: title },
+    { color: "none" }
+  );
+  record(
+    "title is one line without escape sequences, cut to 30 columns",
+    /💬 Refactor the auth middleware… /.test(long) && !long.includes("\u001b[31m"),
+    JSON.stringify(long)
+  );
+  record(
+    "ASCII title ends a cut with three dots",
+    /Refactor the auth middlewar\.\.\. /.test(
+      render({ ...real, conversation_title: "Refactor the auth middleware and more" }, title, {
+        ascii: true,
+      })
+    )
+  );
+
+  const untitled = { ...real };
+  delete untitled.conversation_title;
+  record("title hides until the conversation has one", !/💬/.test(render(untitled, title)));
 }
 
 function testMode() {

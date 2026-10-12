@@ -183,6 +183,8 @@ function extractSession(data, config) {
     // Left out in the default mode, and with Vim editing off.
     approvalMode: firstText(data.cycle_mode),
     vimMode: firstText(data.vim?.mode),
+    // Left out until the conversation has a title; kept to one line.
+    title: firstText(data.conversation_title).replace(/\s+/g, " ").trim(),
     version: firstText(data.version),
     sandbox: data.sandbox?.enabled === true,
     sandboxNet: data.sandbox?.allow_network === true,

@@ -17,6 +17,7 @@ const TEXT = "text";
 const TIME = "time";
 const PATH = "path";
 const BRANCH = "branch";
+const TITLE = "title";
 
 const QUOTA = {
   remaining_fraction: NUMBER,
@@ -56,6 +57,7 @@ const SCHEMA = {
   task_count: NUMBER,
   cycle_mode: TEXT,
   vim: { mode: TEXT },
+  conversation_title: TITLE,
   terminal_width: NUMBER,
 };
 
@@ -105,6 +107,12 @@ function pick(value, rule, seen) {
   }
   if (rule === BRANCH) {
     return typeof value === "string" && value ? branchPlaceholder(value) : undefined;
+  }
+  if (rule === TITLE) {
+    // A title can name the user's work; the placeholder keeps its length.
+    return typeof value === "string" && value
+      ? "title" + "x".repeat(Math.max(0, Math.min(200, value.length) - 5))
+      : undefined;
   }
   if (rule === "subagents") {
     // Only the status: a subagent's name and role describe the user's work.

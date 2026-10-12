@@ -10,6 +10,7 @@ const {
   formatGitSync,
   formatTasks,
   formatMode,
+  clipText,
   formatTokens,
   formatContextTokens,
   shortModelName,
@@ -30,6 +31,7 @@ const {
   hasNoData,
   RAM_CAUTION,
   RAM_DANGER,
+  TITLE_MAX,
 } = require("../widget-style");
 
 const LINES = NAMED_COLORS;
@@ -394,6 +396,12 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       const color = approval ? palette.quotaHigh || palette.yellow || LINES.yellow : palette.text;
       return fg(color) + tag() + text + RESET;
     }
+
+    case "title":
+      if (!session.title) {
+        return null;
+      }
+      return fg(palette.text) + tag() + clipText(session.title, TITLE_MAX, ascii) + RESET;
 
     case "sandbox": {
       if (!session.sandbox) {

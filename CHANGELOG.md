@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `tasks` widget: running subagents and background tasks, e.g. `👥 2 subagents, 1 task`, hidden when nothing runs; part of the `full` preset (#14)
 - `mode` widget: the approval mode (e.g. `accept-edits`) and the Vim mode, which Antigravity's own status line shows; hidden in the default mode with Vim editing off; part of the `workspace` and `full` presets (#15)
+- `title` widget: the conversation's title on one line, cut to 30 columns, hidden until the conversation has one (#16)
 
 ### Fixed
 

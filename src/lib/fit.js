@@ -6,6 +6,7 @@ const { charWidth, visibleWidth } = require("./formatters");
 // first entry first. Ids not listed (custom ones) go before all of them.
 const DROP_ORDER = [
   "customText",
+  "title",
   "version",
   "cacheCreate",
   "cacheRead",

@@ -302,6 +302,7 @@ function personalPayload() {
       project_dir: "/home/someone/projects/client-acme",
     },
     subagents: [{ name: "research", role: "summarize client-acme contract", status: "running" }],
+    conversation_title: "client-acme contract review",
     mcp_servers: ["corp-internal.host"],
     quota: {
       "gemini-5h": {
@@ -329,6 +330,11 @@ function testPayloadDump() {
       !("conversation_id" in safe) &&
       !("mcp_servers" in safe),
     leaks.join(", ")
+  );
+  record(
+    "the dump keeps only the conversation title's length",
+    safe.conversation_title.length === raw.conversation_title.length &&
+      safe.conversation_title.startsWith("title")
   );
   record(
     "the dump keeps only each subagent's status",

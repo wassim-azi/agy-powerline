@@ -104,6 +104,7 @@ const WIDGET_TAGS = {
   artifacts: { icon: "📎", name: "Artifacts" },
   tasks: { icon: "👥", name: "" },
   mode: { icon: "🧭", name: "" },
+  title: { icon: "💬", name: "" },
   ram: { icon: "💻", name: "RAM" },
   version: { icon: "🔖", name: "" },
   sandbox: { icon: "🔒", name: "" },
@@ -128,6 +129,9 @@ function widgetTag(id, { emojis = true, raw = false, icon } = {}) {
   }
   return `${icon ?? tag.icon} ${tag.iconOnly ? "" : named}`;
 }
+
+// Longest conversation title shown, in terminal columns.
+const TITLE_MAX = 30;
 
 // RAM use (%) that turns the ram widget to the caution, then danger color.
 const RAM_CAUTION = 80;
@@ -156,4 +160,5 @@ module.exports = {
   hasNoData,
   RAM_CAUTION,
   RAM_DANGER,
+  TITLE_MAX,
 };

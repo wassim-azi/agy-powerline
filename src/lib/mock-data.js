@@ -68,6 +68,7 @@ function sampleData() {
     ],
     task_count: 1,
     cycle_mode: "accept-edits",
+    conversation_title: "Fix the config loader",
     plan_tier: "Pro",
     terminal_width: process.stdout.columns || 120,
   };

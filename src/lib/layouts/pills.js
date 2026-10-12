@@ -26,6 +26,7 @@ const {
   formatGitSync,
   formatTasks,
   formatMode,
+  clipText,
   homePath,
   basenameOf,
   label,
@@ -43,6 +44,7 @@ const {
   hasNoData,
   RAM_CAUTION,
   RAM_DANGER,
+  TITLE_MAX,
 } = require("../widget-style");
 
 const WHITE = [255, 255, 255];
@@ -439,6 +441,12 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       const approval = session.approvalMode && session.approvalMode !== "default";
       return pill(approval ? colors.caution : colors.meta, lbl(text));
     }
+
+    case "title":
+      if (!session.title) {
+        return null;
+      }
+      return pill(colors.meta, lbl(clipText(session.title, TITLE_MAX, ascii)));
 
     case "ram": {
       const pct = session.ramPct ?? 0;

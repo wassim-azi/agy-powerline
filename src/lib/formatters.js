@@ -488,6 +488,26 @@ function formatMode(approval, vim) {
   return [approval === "default" ? "" : approval, vim].filter(Boolean).join(", ");
 }
 
+// Cuts text to `max` terminal columns, ending with an ellipsis when cut.
+function clipText(text, max, ascii = false) {
+  const value = String(text);
+  if (visibleWidth(value) <= max) {
+    return value;
+  }
+  const ellipsis = ascii ? "..." : "…";
+  let out = "";
+  let width = 0;
+  for (const char of value) {
+    const w = charWidth(char.codePointAt(0));
+    if (width + w > max - ellipsis.length) {
+      break;
+    }
+    out += char;
+    width += w;
+  }
+  return out.trimEnd() + ellipsis;
+}
+
 // Removes escape sequences and control characters from text that did not
 // come from us (payload fields, branch names, command output), so it cannot
 // drive the terminal: cursor moves, OSC 52 clipboard writes, hyperlinks...
@@ -568,6 +588,7 @@ module.exports = {
   formatGitSync,
   formatTasks,
   formatMode,
+  clipText,
   quotaColor,
   contextColor,
   resolveQuotaThresholds,
