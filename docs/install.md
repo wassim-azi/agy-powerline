@@ -123,7 +123,7 @@ agy-powerline init
 
 Antigravity starts the statusline on every refresh, so that path stays small:
 
-- A refresh takes about 0.1 s on a typical laptop, most of it Node starting up.
+- A refresh takes about 0.15–0.35 s on a Windows 11 laptop, measured the way Antigravity runs it there (through `cmd /c`); starting `cmd` and Node is about half of that.
 - The statusline command is one local Node script: no `npx`, jq, bash or ccusage.
 - Model, context, quotas and `vcs` come straight from Antigravity's JSON, and the flex layout uses its `terminal_width`.
 - The branch and dirty state come from the payload or from reading `.git` directly. The only process the bar starts on its own is `git rev-list` for ahead/behind counts, only when the branch tracks an upstream and points at a different commit, with a 150 ms timeout.
