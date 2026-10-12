@@ -6,6 +6,8 @@ const path = require("path");
 const childProcess = require("child_process");
 const { record } = require("../helpers");
 const { renderStatusline, defaultConfig, sampleData } = require("../../src/lib/shared");
+const { getConfigDir, setConfigDir } = require("../../src/lib/config");
+const { SYNC_CACHE_NAME } = require("../../src/lib/git");
 
 const strip = (text) => text.replace(/\x1b\[[0-9;]*m/g, "");
 
@@ -148,6 +150,36 @@ async function run() {
 
     git(work, "pack-refs", "--all");
     record("packed refs (after git gc) still give ahead/behind", /⇡2 ⇣1/.test(render(payload)));
+
+    // From an install (a config next to the runtime), the counts are kept per
+    // commit pair and git runs again only when one of the two commits moves.
+    const installDir = path.join(root, "install");
+    fs.mkdirSync(installDir);
+    fs.writeFileSync(path.join(installDir, "statusline.config.json"), "{}");
+    const previousConfigDir = getConfigDir();
+    setConfigDir(installDir);
+    try {
+      const first = countGitCalls(() => render(payload));
+      const second = countGitCalls(() => render(payload));
+      record(
+        "ahead/behind runs git once per commit pair, then reads the cache",
+        first === 1 && second === 0 && /⇡2 ⇣1/.test(render(payload)),
+        `${first} then ${second} calls`
+      );
+
+      git(work, "commit", "-q", "--allow-empty", "-m", "mine 3");
+      const moved = countGitCalls(() => render(payload));
+      record(
+        "a new commit runs git again",
+        moved === 1 && /⇡3 ⇣1/.test(render(payload)),
+        `${moved} calls`
+      );
+
+      fs.writeFileSync(path.join(installDir, SYNC_CACHE_NAME), "not json");
+      record("a broken ahead/behind cache is ignored", /⇡3 ⇣1/.test(render(payload)));
+    } finally {
+      setConfigDir(previousConfigDir);
+    }
 
     git(work, "pull", "-q", "--rebase", "origin", "main");
     git(work, "push", "-q", "origin", "main");

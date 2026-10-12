@@ -4,6 +4,14 @@ const fs = require("fs");
 const path = require("path");
 const { logWarning } = require("./log");
 const { firstText } = require("./formatters");
+const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
+
+// Ahead/behind counts depend only on the two commits compared, so they are
+// kept per commit pair: git runs again only when the branch or its upstream
+// moves. Starting git costs ~60 ms on Windows, on every refresh otherwise.
+const SYNC_CACHE_NAME = ".git-sync-cache.json";
+const SYNC_CACHE_MAX = 20;
+const COMMIT = /^[0-9a-f]{40}(?:[0-9a-f]{24})?$/;
 
 // Only an absolute folder that exists can belong to the user's session. A
 // relative path (a Windows path read on Linux, for one) resolves against
@@ -217,6 +225,54 @@ function upstreamRef(commonDir, branch) {
   return remote === "." ? merge : `refs/remotes/${remote}/${tracked}`;
 }
 
+// Only next to a real install's config (like the exec cache); CLI previews
+// and other copies don't write it.
+function syncCachePath() {
+  try {
+    const { getConfigDir } = require("./config");
+    const dir = getConfigDir();
+    return dir && fs.existsSync(path.join(dir, "statusline.config.json"))
+      ? path.join(dir, SYNC_CACHE_NAME)
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function readSyncCache(file) {
+  try {
+    const data = JSON.parse(fs.readFileSync(file, "utf8"));
+    return data && typeof data === "object" && !Array.isArray(data) ? data : {};
+  } catch {
+    return {};
+  }
+}
+
+function cachedSync(file, key) {
+  const value = file ? readSyncCache(file)[key] : null;
+  const valid =
+    Array.isArray(value) &&
+    value.length === 2 &&
+    value.every((n) => Number.isInteger(n) && n >= 0 && n <= 1e7);
+  return valid ? { ahead: value[0], behind: value[1] } : null;
+}
+
+function saveSync(file, key, sync) {
+  if (!file) {
+    return;
+  }
+  try {
+    // Newest last; the oldest pairs go once there are more than SYNC_CACHE_MAX.
+    const cache = readSyncCache(file);
+    delete cache[key];
+    cache[key] = [sync.ahead, sync.behind];
+    const kept = Object.fromEntries(Object.entries(cache).slice(-SYNC_CACHE_MAX));
+    writeFileAtomic(file, JSON.stringify(kept), { mode: PRIVATE_FILE_MODE });
+  } catch {
+    // Best effort: the next refresh runs git again.
+  }
+}
+
 function getGitSync(gitDir, branch) {
   if (!gitDir || !isSafeBranchName(branch)) {
     return { ahead: 0, behind: 0 };
@@ -232,8 +288,17 @@ function getGitSync(gitDir, branch) {
       return { ahead: 0, behind: 0 };
     }
 
-    if (readRef(commonDir, upstream) === localHash) {
+    const upstreamHash = readRef(commonDir, upstream);
+    if (upstreamHash === localHash) {
       return { ahead: 0, behind: 0 };
+    }
+
+    const key =
+      COMMIT.test(localHash) && COMMIT.test(upstreamHash) ? `${localHash}..${upstreamHash}` : "";
+    const cacheFile = key ? syncCachePath() : null;
+    const cached = cachedSync(cacheFile, key);
+    if (cached) {
+      return cached;
     }
 
     const { execFileSync } = require("child_process");
@@ -253,10 +318,12 @@ function getGitSync(gitDir, branch) {
 
     const parts = out.split(/\s+/);
     if (parts.length >= 2) {
-      return {
+      const sync = {
         ahead: parseInt(parts[0], 10) || 0,
         behind: parseInt(parts[1], 10) || 0,
       };
+      saveSync(cacheFile, key, sync);
+      return sync;
     }
   } catch (err) {
     // A timeout or missing git is worth knowing about when ahead/behind
@@ -327,4 +394,5 @@ module.exports = {
   gitHasDirtyMarkers,
   vcsFromPayload,
   resolveGit,
+  SYNC_CACHE_NAME,
 };

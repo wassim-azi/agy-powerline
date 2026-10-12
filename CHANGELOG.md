@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - The statusline is installed as a single `statusline.js` instead of about 16 files, which cuts agy-powerline's own share of each refresh by about a third on Windows; run `npx agy-powerline init --yes` to switch, and `init` removes the old files (#23)
+- The ahead/behind counts are kept per pair of commits, so a branch that is ahead of or behind its upstream no longer starts `git` on every refresh (about 60 ms each on Windows) (#24)
 
 ## [1.1.0] - 2026-10-12
 

@@ -36,6 +36,8 @@ const PRIVATE_FILES = [
   "statusline.config.json",
   ".exec-cache.json",
   "last-payload.json",
+  // SYNC_CACHE_NAME in git.js: commit IDs of the repos you work in.
+  ".git-sync-cache.json",
   // LOG_NAME in log.js, spelled out because log.js requires this file.
   "agy-powerline.log",
 ];
