@@ -103,6 +103,7 @@ const WIDGET_TAGS = {
   agentState: { icon: "🟣", name: "Agent" },
   artifacts: { icon: "📎", name: "Artifacts" },
   tasks: { icon: "👥", name: "" },
+  mode: { icon: "🧭", name: "" },
   ram: { icon: "💻", name: "RAM" },
   version: { icon: "🔖", name: "" },
   sandbox: { icon: "🔒", name: "" },

@@ -25,6 +25,7 @@ const {
   formatTokenSplit,
   formatGitSync,
   formatTasks,
+  formatMode,
   homePath,
   basenameOf,
   label,
@@ -427,6 +428,16 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return null;
       }
       return pill(colors.meta, lbl(text));
+    }
+
+    case "mode": {
+      const text = formatMode(session.approvalMode, session.vimMode);
+      if (!text) {
+        return null;
+      }
+      // An approval mode like accept-edits changes what the agent may do alone.
+      const approval = session.approvalMode && session.approvalMode !== "default";
+      return pill(approval ? colors.caution : colors.meta, lbl(text));
     }
 
     case "ram": {

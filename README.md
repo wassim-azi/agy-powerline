@@ -42,7 +42,7 @@ Start from a preset, then adjust:
 | ----------- | ---------------------------------------------------------------------------- |
 | `default`   | Model, context, git; 5h and 7d quotas with resets on a second row            |
 | `compact`   | One line: short model, tightest quota, context %, git                        |
-| `workspace` | Project, git, agent state, model; context and tightest quota                 |
+| `workspace` | Project, git, agent state, model; context, tightest quota and mode           |
 | `limits`    | Every quota (5h, 7d, third-party), one per row                               |
 | `full`      | Everything: session, project and git; context, tokens and cache; both quotas |
 
@@ -87,6 +87,7 @@ Preview them all with `npx agy-powerline theme --gallery`.
 | `project`, `cwd`                                        | Project folder, current folder                                                                     |
 | `agentState`, `plan`, `sandbox`, `artifacts`, `version` | What the agent is doing, your plan, sandbox, artifacts, CLI version                                |
 | `tasks`                                                 | Running subagents and background tasks                                                             |
+| `mode`                                                  | Approval mode (e.g. accept-edits) and Vim mode                                                     |
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`   | Session tokens and prompt cache usage                                                              |
 | `ram`                                                   | Memory used on your machine                                                                        |
 | `customText`, `exec`                                    | Your own text, or the output of a [shell command](docs/configuration.md#shell-command-widget-exec) |

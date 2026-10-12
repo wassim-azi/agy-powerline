@@ -64,6 +64,7 @@ Every value comes from the JSON Antigravity pipes on stdin. A widget with nothin
 - Plan tier, agent state, CLI version
 - Artifact count
 - Running subagents and background tasks (`tasks` e.g. `👥 2 subagents, 1 task`: subagents whose `status` is `running`, and `task_count`; hidden when nothing runs)
+- Approval and Vim mode (`mode` e.g. `🧭 accept-edits, NORMAL`: `cycle_mode` and `vim.mode`; an approval mode shows in the caution color; hidden in the default mode with Vim editing off)
 - Cache read / create
 - RAM usage of your machine (`ram`, read from the OS; caution color from 80%, danger from 90%)
 - Sandbox with network security state (`sandbox (net)` vs `sandbox (isolated)`)

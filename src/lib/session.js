@@ -180,6 +180,9 @@ function extractSession(data, config) {
       ? data.subagents.filter((agent) => agent?.status === "running").length
       : 0,
     tasks: Math.floor(count(data.task_count)),
+    // Left out in the default mode, and with Vim editing off.
+    approvalMode: firstText(data.cycle_mode),
+    vimMode: firstText(data.vim?.mode),
     version: firstText(data.version),
     sandbox: data.sandbox?.enabled === true,
     sandboxNet: data.sandbox?.allow_network === true,

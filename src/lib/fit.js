@@ -19,6 +19,7 @@ const DROP_ORDER = [
   "cwd",
   "exec",
   "agentState",
+  "mode",
   "thirdPartyWeekly",
   "thirdPartyFiveHour",
   "weeklyReset",

@@ -27,6 +27,33 @@ async function run() {
   testShortModel();
   testOneFormPerSetting();
   testTasks();
+  testMode();
+}
+
+function testMode() {
+  const real = fixture("antigravity-1.3.3-modes.json");
+  const mode = [{ id: "mode" }];
+
+  record(
+    "mode shows the approval mode and the Vim mode",
+    /accept-edits, INSERT/.test(render(real, mode))
+  );
+  record(
+    "lines mode shows the approval mode and the Vim mode",
+    /accept-edits, INSERT/.test(render(real, mode, { layout: "lines" }))
+  );
+
+  const vimOnly = { ...real };
+  delete vimOnly.cycle_mode;
+  record("mode shows the Vim mode alone", /🧭 INSERT /.test(render(vimOnly, mode)));
+
+  const approvalOnly = { ...real };
+  delete approvalOnly.vim;
+  record("mode shows the approval mode alone", /🧭 accept-edits /.test(render(approvalOnly, mode)));
+
+  const neither = { ...vimOnly, cycle_mode: "default" };
+  delete neither.vim;
+  record("mode hides in the default mode with Vim editing off", !/🧭/.test(render(neither, mode)));
 }
 
 function testTasks() {

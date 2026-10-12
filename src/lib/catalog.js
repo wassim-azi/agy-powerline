@@ -111,6 +111,12 @@ const WIDGET_CATALOG = [
     unique: true,
     description: "running subagents and background tasks, shown only when there are some",
   },
+  {
+    id: "mode",
+    label: "Mode",
+    unique: true,
+    description: "approval mode (e.g. accept-edits) and Vim mode, shown only when one is on",
+  },
   { id: "ram", label: "RAM Usage", unique: true, description: "memory used on this machine" },
   { id: "version", label: "CLI Version", unique: true, description: "Antigravity CLI version" },
   {

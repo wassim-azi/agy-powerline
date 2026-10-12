@@ -483,6 +483,11 @@ function formatTasks(subagents, tasks) {
   return [part(subagents, "subagent"), part(tasks, "task")].filter(Boolean).join(", ");
 }
 
+// "accept-edits, NORMAL", or "" in the default mode with Vim editing off.
+function formatMode(approval, vim) {
+  return [approval === "default" ? "" : approval, vim].filter(Boolean).join(", ");
+}
+
 // Removes escape sequences and control characters from text that did not
 // come from us (payload fields, branch names, command output), so it cannot
 // drive the terminal: cursor moves, OSC 52 clipboard writes, hyperlinks...
@@ -562,6 +567,7 @@ module.exports = {
   formatTokenSplit,
   formatGitSync,
   formatTasks,
+  formatMode,
   quotaColor,
   contextColor,
   resolveQuotaThresholds,

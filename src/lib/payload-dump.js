@@ -54,6 +54,8 @@ const SCHEMA = {
   artifact_count: NUMBER,
   subagents: "subagents",
   task_count: NUMBER,
+  cycle_mode: TEXT,
+  vim: { mode: TEXT },
   terminal_width: NUMBER,
 };
 

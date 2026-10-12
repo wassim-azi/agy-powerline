@@ -41,6 +41,7 @@ const VALID_WIDGET_IDS = new Set([
   "agentState",
   "artifacts",
   "tasks",
+  "mode",
   "ram",
   "version",
   "sandbox",
@@ -261,7 +262,7 @@ const PRESETS = {
   workspace: {
     id: "workspace",
     name: "Several repos",
-    description: "Project, git, agent state and model; context and tightest quota below",
+    description: "Project, git, agent state and model; context, tightest quota and mode below",
     widgets: [
       { id: "project" },
       { id: "git" },
@@ -272,6 +273,7 @@ const PRESETS = {
       { id: "context" },
       { id: "separator" },
       { id: "quota" },
+      { id: "mode" },
     ],
   },
   limits: {
@@ -306,6 +308,7 @@ const PRESETS = {
       { id: "context" },
       { id: "totalTokens", split: true },
       { id: "cacheHit" },
+      { id: "mode" },
       { id: "lineBreak" },
       { id: "fiveHourBar" },
       { id: "fiveHourReset" },

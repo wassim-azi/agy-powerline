@@ -67,6 +67,7 @@ function sampleData() {
       { name: "review", role: "Check the error messages", status: "completed" },
     ],
     task_count: 1,
+    cycle_mode: "accept-edits",
     plan_tier: "Pro",
     terminal_width: process.stdout.columns || 120,
   };

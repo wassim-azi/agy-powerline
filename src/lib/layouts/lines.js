@@ -9,6 +9,7 @@ const {
   paceGlyph,
   formatGitSync,
   formatTasks,
+  formatMode,
   formatTokens,
   formatContextTokens,
   shortModelName,
@@ -381,6 +382,17 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         return null;
       }
       return fg(palette.text) + tag() + text + RESET;
+    }
+
+    case "mode": {
+      const text = formatMode(session.approvalMode, session.vimMode);
+      if (!text) {
+        return null;
+      }
+      // An approval mode like accept-edits changes what the agent may do alone.
+      const approval = session.approvalMode && session.approvalMode !== "default";
+      const color = approval ? palette.quotaHigh || palette.yellow || LINES.yellow : palette.text;
+      return fg(color) + tag() + text + RESET;
     }
 
     case "sandbox": {
