@@ -38,7 +38,7 @@ Read it first: it's plain text, and everything it contains is listed below. Then
 
 **What the report contains**
 
-- **Problems** agy-powerline ran into: crashes, a broken config, an unreadable payload, slow refreshes (over 750 ms, with the widget ids that were on), `exec` timeouts, and `git` timeouts. Each one is listed once with a count, the error type, the lines of agy-powerline's own code involved, and the agy-powerline, Node and Antigravity version numbers.
+- **Problems** agy-powerline ran into: crashes, a broken config, an unreadable payload, a payload that didn't arrive within a second, slow refreshes (over 750 ms, with the widget ids that were on), `exec` timeouts, and `git` timeouts. Each one is listed once with a count, the error type, the lines of agy-powerline's own code involved, and the agy-powerline, Node and Antigravity version numbers.
 - **Your system**: OS and version, CPU model and thread count, total and used memory, free disk space on the install drive, load average, terminal type and color support, the shell's name, and whether Node has full locale data.
 - **Your setup**: whether the installed scripts match the CLI, whether Antigravity points at this install, whether the config is valid, the layout, theme, powerline style, on/off options, and the list of widget ids.
 

@@ -4,7 +4,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
-const { record, ROOT, NODE, stageInstall } = require("../helpers");
+const { record, ROOT, NODE, PAYLOAD, stageInstall } = require("../helpers");
 const { getGitInfo } = require("../../src/lib/git");
 const {
   renderStatusline,
@@ -223,9 +223,56 @@ async function run() {
         !echoes(runtimeHostile.stderr),
       JSON.stringify(runtimeHostile.stderr)
     );
+
+    await testOpenStdin(statuslinePath);
   } finally {
     fs.rmSync(sandbox, { recursive: true, force: true });
   }
+}
+
+// Writes `input` to the runtime's stdin and never closes it, like Antigravity
+// in google-antigravity/antigravity-cli#698. Kills it after 8 s if it hangs.
+function runWithOpenStdin(statuslinePath, input) {
+  return new Promise((resolve) => {
+    const started = Date.now();
+    const child = spawn(NODE, [statuslinePath], { windowsHide: true });
+    let stdout = "";
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+    });
+    const guard = setTimeout(() => child.kill(), 8000);
+    child.on("close", (code) => {
+      clearTimeout(guard);
+      child.stdin.destroy();
+      resolve({ code, stdout, ms: Date.now() - started });
+    });
+    if (input) {
+      child.stdin.write(input);
+    }
+  });
+}
+
+async function testOpenStdin(statuslinePath) {
+  const silent = await runWithOpenStdin(statuslinePath, "");
+  record(
+    "runtime exits quietly when stdin stays open and empty",
+    silent.code === 0 && silent.stdout === "" && silent.ms < 5000,
+    `code ${silent.code}, ${silent.ms} ms, stdout ${JSON.stringify(silent.stdout)}`
+  );
+
+  const full = await runWithOpenStdin(statuslinePath, PAYLOAD);
+  record(
+    "runtime renders a complete payload even when stdin stays open",
+    full.code === 0 && /Gemini/.test(full.stdout) && full.ms < 5000,
+    `code ${full.code}, ${full.ms} ms`
+  );
+
+  const partial = await runWithOpenStdin(statuslinePath, PAYLOAD.slice(0, 40));
+  record(
+    "runtime exits quietly on a payload cut off by the stdin deadline",
+    partial.code === 0 && partial.stdout === "" && partial.ms < 5000,
+    `code ${partial.code}, ${partial.ms} ms, stdout ${JSON.stringify(partial.stdout)}`
+  );
 }
 
 // A fake repo (no git binary needed): .git/HEAD on a named branch.
