@@ -105,7 +105,7 @@ async function testWindowsInit() {
       res.code === 0 &&
       fs.existsSync(path.join(installDir, "statusline.cmd")) &&
       fs.existsSync(path.join(installDir, "statusline.js")) &&
-      fs.existsSync(path.join(installDir, "shared.js")) &&
+      !fs.existsSync(path.join(installDir, "shared.js")) &&
       fs.existsSync(path.join(installDir, "install.json")) &&
       settings.statusLine?.stack_with_default === true &&
       settings.statusLine?.padding === 2;

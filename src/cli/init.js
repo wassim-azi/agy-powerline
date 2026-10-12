@@ -18,9 +18,8 @@ const {
   cmdBreakingMessage,
 } = require("../lib/paths");
 const { createRl, confirm } = require("../lib/prompt");
+const { buildRuntimeBundle } = require("./bundle");
 
-const RUNTIME_DIR = path.join(__dirname, "..", "runtime");
-const LIB_DIR = path.join(__dirname, "..", "lib");
 const DIM = "\x1b[2m";
 const BOLD = "\x1b[1m";
 const CYAN = "\x1b[36m";
@@ -28,6 +27,27 @@ const GREEN = "\x1b[32m";
 const YELLOW = "\x1b[33m";
 const RED = "\x1b[31m";
 const RESET = "\x1b[0m";
+
+// Up to 1.1.0 the runtime was installed as separate files next to
+// statusline.js. They are part of the one-file statusline.js now; delete the
+// old copies by name (regular files only), then the emptied layouts folder.
+function removeSeparateRuntimeFiles(installDir) {
+  for (const rel of RUNTIME_FILES) {
+    const file = path.join(installDir, rel);
+    try {
+      if (fs.lstatSync(file).isFile()) {
+        fs.unlinkSync(file);
+      }
+    } catch {
+      // Not there: nothing to remove.
+    }
+  }
+  try {
+    fs.rmdirSync(path.join(installDir, "layouts"));
+  } catch {
+    // Missing, or holds something that isn't ours: leave it.
+  }
+}
 
 function assertUnixNode() {
   if (!isWindowsNodeOnWsl()) {
@@ -104,13 +124,8 @@ async function initCommand(options = {}) {
     }
 
     if (writeScripts) {
-      fs.copyFileSync(path.join(RUNTIME_DIR, "statusline.js"), destStatusline);
-      for (const rel of RUNTIME_FILES) {
-        const src = path.join(LIB_DIR, rel);
-        const dest = path.join(installDir, rel);
-        fs.mkdirSync(path.dirname(dest), { recursive: true });
-        fs.copyFileSync(src, dest);
-      }
+      fs.writeFileSync(destStatusline, buildRuntimeBundle(), "utf8");
+      removeSeparateRuntimeFiles(installDir);
 
       if (process.platform !== "win32") {
         try {

@@ -56,22 +56,49 @@ async function run() {
   testEnabledFalse();
   testCmdBreakingFolder();
   testDoctor();
+  testUpgradeFromSeparateFiles();
 }
 
 function testFreshInstall() {
   withBox("fresh", (box) => {
     const res = runCli(["init", "--yes"], { env: box.env });
     const settings = readJson(box.settingsPath);
-    const missing = ["statusline.js", "statusline.config.json", "install.json", ...RUNTIME_FILES]
+    const missing = ["statusline.js", "statusline.config.json", "install.json"]
       .filter((rel) => !fs.existsSync(path.join(box.installDir, rel)))
       .join(", ");
+    const separate = RUNTIME_FILES.filter((rel) => fs.existsSync(path.join(box.installDir, rel)));
     record(
-      "init on a fresh machine installs every runtime file and writes statusLine",
+      "init on a fresh machine installs the one-file runtime and writes statusLine",
       res.code === 0 &&
         !missing &&
+        separate.length === 0 &&
         settings?.statusLine?.type === "command" &&
         /statusline\.(js|cmd)/.test(settings.statusLine.command || ""),
-      missing || res.stderr
+      missing || separate.join(", ") || res.stderr
+    );
+  });
+}
+
+// Installs up to 1.1.0 copied the runtime files next to statusline.js. A new
+// init removes those copies (and the emptied layouts folder), nothing else.
+function testUpgradeFromSeparateFiles() {
+  withBox("upgrade", (box) => {
+    for (const rel of RUNTIME_FILES) {
+      const file = path.join(box.installDir, rel);
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, "// old copy\n", "utf8");
+    }
+    const mine = path.join(box.installDir, "my-notes.txt");
+    fs.writeFileSync(mine, "mine", "utf8");
+    const res = runCli(["init", "--yes"], { env: box.env });
+    const left = RUNTIME_FILES.filter((rel) => fs.existsSync(path.join(box.installDir, rel)));
+    record(
+      "init removes the separate runtime files of an older install and keeps other files",
+      res.code === 0 &&
+        left.length === 0 &&
+        !fs.existsSync(path.join(box.installDir, "layouts")) &&
+        fs.existsSync(mine),
+      left.join(", ") || res.stderr
     );
   });
 }

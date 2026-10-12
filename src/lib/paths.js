@@ -8,7 +8,8 @@ const AGY_SETTINGS = path.join(os.homedir(), ".gemini", "antigravity-cli", "sett
 
 const INSTALL_META_NAME = "install.json";
 
-// Library files init copies next to statusline.js (paths relative to src/lib).
+// Library files the runtime needs (paths relative to src/lib). init joins them
+// with src/runtime/statusline.js into the one installed statusline.js.
 const RUNTIME_FILES = [
   "shared.js",
   "colors.js",
@@ -41,7 +42,8 @@ const PRIVATE_FILES = [
 const PRIVATE_FILE_MODE = 0o600;
 
 // Everything init or the runtime may create in the install dir. uninstall
-// --delete removes only these, never the whole directory tree.
+// --delete removes only these, never the whole directory tree. RUNTIME_FILES
+// are listed for installs from 1.1.0 and earlier, which copied them separately.
 const INSTALLED_FILES = [
   "statusline.js",
   "statusline.cmd",

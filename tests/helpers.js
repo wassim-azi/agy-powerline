@@ -3,7 +3,8 @@
 const fs = require("fs");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
-const { toPosixPath, RUNTIME_FILES } = require("../src/lib/paths");
+const { toPosixPath } = require("../src/lib/paths");
+const { buildRuntimeBundle } = require("../src/cli/bundle");
 
 const ROOT = path.join(__dirname, "..");
 const RUNTIME_JS = path.join(ROOT, "src", "runtime", "statusline.js");
@@ -85,15 +86,11 @@ function looksRendered(stdout) {
   );
 }
 
+// Installs the runtime the way init does: one statusline.js built from the
+// runtime files.
 function stageInstall(dir) {
   fs.mkdirSync(dir, { recursive: true });
-  fs.copyFileSync(RUNTIME_JS, path.join(dir, "statusline.js"));
-  for (const rel of RUNTIME_FILES) {
-    const src = path.join(ROOT, "src", "lib", rel);
-    const dest = path.join(dir, rel);
-    fs.mkdirSync(path.dirname(dest), { recursive: true });
-    fs.copyFileSync(src, dest);
-  }
+  fs.writeFileSync(path.join(dir, "statusline.js"), buildRuntimeBundle(), "utf8");
   fs.writeFileSync(
     path.join(dir, "statusline.config.json"),
     JSON.stringify({ layout: "lines", emojis: true, widgets: [{ id: "model" }] }, null, 2),

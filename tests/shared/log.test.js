@@ -4,7 +4,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
-const { record, runCli, stageInstall, NODE, PAYLOAD } = require("../helpers");
+const { record, runCli, stageInstall, NODE, PAYLOAD, ROOT } = require("../helpers");
 const {
   LOG_NAME,
   MAX_ENTRIES,
@@ -16,7 +16,10 @@ const {
   readLog,
   logEvent,
   logError,
+  setBundleLines,
 } = require("../../src/lib/log");
+const { buildRuntimeBundle } = require("../../src/cli/bundle");
+const { RUNTIME_FILES } = require("../../src/lib/paths");
 const { safePayload } = require("../../src/lib/payload-dump");
 const { renderStatusline, defaultConfig, mergeConfig } = require("../../src/lib/shared");
 const { VALID_WIDGET_IDS } = require("../../src/lib/config");
@@ -446,6 +449,43 @@ async function run() {
   testRuntime();
   testReportCommand();
   testPayloadDump();
+  testBundleFrames();
+}
+
+// The installed statusline.js is the runtime files joined into one. Its line
+// table must point at each file's first line, and the problem log must turn a
+// line of the bundle back into the original file and line.
+function testBundleFrames() {
+  const bundle = buildRuntimeBundle();
+  const bundleLines = bundle.split("\n");
+  const table = JSON.parse(/setBundleLines\((\[.*\])\);/.exec(bundle)[1]);
+  const source = (key) =>
+    key === "statusline.js"
+      ? path.join(ROOT, "src", "runtime", "statusline.js")
+      : path.join(ROOT, "src", "lib", ...key.split("/"));
+  const firstLine = (key) =>
+    fs
+      .readFileSync(source(key), "utf8")
+      .replace(/^#!.*\n/, "")
+      .split("\n")[0];
+  const wrong = table.filter(([start, key]) => bundleLines[start - 1] !== firstLine(key));
+  record(
+    "the one-file runtime records where each runtime file starts",
+    table.length === RUNTIME_FILES.length + 1 && wrong.length === 0,
+    wrong.map(([, key]) => key).join(", ")
+  );
+
+  const pills = table.find(([, key]) => key === "layouts/pills.js");
+  const err = new Error("boom");
+  err.stack = `Error: boom\n    at buildSegment (${path.join(ROOT, "src", "statusline.js")}:${pills[0] + 41}:7)`;
+  setBundleLines(table);
+  const described = describeError(err);
+  setBundleLines(null);
+  record(
+    "a crash in the one-file runtime is logged with the original file and line",
+    described.frames?.[0] === "buildSegment layouts/pills.js:42",
+    JSON.stringify(described.frames)
+  );
 }
 
 module.exports = { run };

@@ -28,6 +28,28 @@ const IN_REPO = path.basename(__dirname) === "lib";
 let logDir = null;
 let context = {};
 
+// The installed statusline.js is the runtime files joined into one (see
+// src/cli/bundle.js). [first line, file name] for each of them, so a stack
+// frame can still name the original file and line.
+let bundleLines = null;
+
+function setBundleLines(lines) {
+  bundleLines = Array.isArray(lines) ? lines : null;
+}
+
+function originalFrame(rel, line) {
+  if (!bundleLines || rel !== "statusline.js") {
+    return `${rel}:${line}`;
+  }
+  let match = null;
+  for (const entry of bundleLines) {
+    if (entry[0] <= line) {
+      match = entry;
+    }
+  }
+  return match ? `${match[1]}:${line - match[0] + 1}` : `${rel}:${line}`;
+}
+
 // The copied runtime has no package.json; init records the version in
 // install.json instead.
 function agyPowerlineVersion() {
@@ -139,7 +161,7 @@ function ourFrames(stack) {
       continue;
     }
     const fn = match[1] && /^[\w$.<> ]{1,60}$/.test(match[1]) ? `${match[1]} ` : "";
-    frames.push(`${fn}${rel.split(path.sep).join("/")}:${match[3]}`);
+    frames.push(`${fn}${originalFrame(rel.split(path.sep).join("/"), Number(match[3]))}`);
     if (frames.length >= 8) {
       break;
     }
@@ -283,4 +305,5 @@ module.exports = {
   logError,
   logWarning,
   clearLog,
+  setBundleLines,
 };
