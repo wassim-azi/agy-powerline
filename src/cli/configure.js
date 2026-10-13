@@ -699,7 +699,7 @@ function drawMain() {
   const items = config.widgets.length
     ? config.widgets.map((widget) => {
         const meta = WIDGET_CATALOG.find((item) => item.id === widget.id);
-        let extra = meta?.description ?? "";
+        let extra = meta?.summary ?? "";
         if (widget.id === "exec" && widget.cmd) {
           extra = `cmd: ${widget.cmd}`;
         } else if (widget.text) {
@@ -1059,7 +1059,7 @@ function drawAdd() {
     ? widgets.map((widget) => ({
         lead: widgetIcon(widget.id),
         text: widget.label,
-        extra: widget.description,
+        extra: widget.summary,
       }))
     : [dim(`No widget matches "${searchQuery}". Backspace to edit, Esc to go back.`)];
   const hovered = widgets[cursor];

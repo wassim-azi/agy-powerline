@@ -100,7 +100,7 @@ agy-powerline/
 │   ├── lib/
 │   │   ├── shared.js         # renderStatusline(), the rendering entry point
 │   │   ├── session.js        # Extracts & normalizes fields from Antigravity's JSON payload
-│   │   ├── catalog.js        # Widget ids, labels and descriptions
+│   │   ├── catalog.js        # Widget ids, labels, descriptions and summaries
 │   │   ├── config.js         # Configuration loading, validation, defaults and presets
 │   │   ├── widget-style.js   # Each widget's icon and label (WIDGET_TAGS), colors, raw and pace options
 │   │   ├── fit.js            # Keeps rows within the terminal width (DROP_ORDER)
@@ -147,8 +147,16 @@ Adding a widget to `agy-powerline` takes 5 straightforward steps:
 In `src/lib/catalog.js`, add your widget definition to `WIDGET_CATALOG`:
 
 ```javascript
-{ id: "my_widget", label: "My Widget", unique: true, description: "short description" },
+{
+  id: "my_widget",
+  label: "My Widget",
+  unique: true,
+  description: "one sentence for the configure details panel",
+  summary: "six words at most",
+},
 ```
+
+`summary` is what the configure lists show next to the label, so keep it to six words; `description` is the full sentence in the details panel.
 
 ### 2. Whitelist the widget ID and give it a drop rank
 

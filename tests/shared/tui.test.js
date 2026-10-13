@@ -9,6 +9,7 @@ const {
   sampleData,
 } = require("../../src/lib/shared");
 const { visibleWidth } = require("../../src/lib/formatters");
+const { WIDGET_CATALOG } = require("../../src/lib/catalog");
 
 const SCREENS = [
   "main",
@@ -47,6 +48,17 @@ function testStateCues() {
     /Your widgets · 7 widgets/.test(main) &&
       /\b7 🔄 +7d Reset Timer/.test(main) &&
       !/\b11 /.test(main)
+  );
+
+  const long = WIDGET_CATALOG.filter((widget) => widget.summary.split(" ").length > 6);
+  const wide = strip(renderFrame({ config: defaultConfig(), columns: 160 }));
+  record(
+    "the lists show each widget's summary (six words at most), the details its description",
+    !long.length &&
+      /VCS Branch +branch and uncommitted changes/.test(main) &&
+      !/marked when there are uncommitted changes/.test(main) &&
+      /The model in use\./.test(wide),
+    long.map((widget) => widget.id).join(", ")
   );
 
   const presets = strip(renderFrame({ config: defaultConfig(), screen: "presets", columns: 160 }));
