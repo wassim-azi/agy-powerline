@@ -19,8 +19,11 @@ const {
   PRESETS,
   PRESET_ORDER,
   applyPreset,
+  resolveQuotaThresholds,
+  resolveContextThresholds,
 } = require("../lib/shared");
 const { resolveInstallDir } = require("../lib/paths");
+const { WIDGET_TAGS } = require("../lib/widget-style");
 const { loadEditableConfig } = require("./config-guard");
 const {
   parseColor,
@@ -29,7 +32,8 @@ const {
   getActiveDepth,
   resolveColorDepth,
 } = require("../lib/colors");
-const { makeUi } = require("./tui-style");
+const { makeUi, wrapText } = require("./tui-style");
+const { visibleWidth, stripControl } = require("../lib/formatters");
 const {
   STYLES,
   STYLE_ORDER,
@@ -115,6 +119,10 @@ let searchQuery = "";
 let glyphSlot = "separator";
 // null while browsing the glyph list; a string while typing a code point.
 let hexInput = null;
+// The widget being edited (its index in the list), and the text being typed
+// into one of its fields (null when not typing).
+let editIndex = 0;
+let textInput = null;
 
 function openUrl(url) {
   const target = String(url || "").trim();
@@ -277,6 +285,7 @@ const TABS = [
 const TAB_OF_SCREEN = {
   main: "main",
   add: "main",
+  edit: "main",
   presets: "presets",
   themes: "themes",
   customTheme: "themes",
@@ -287,13 +296,42 @@ const TAB_OF_SCREEN = {
 
 const PRESET_ICONS = { default: "🎯", compact: "⚡", workspace: "📂", limits: "🔋", full: "🚀" };
 
-// Set by renderFrame so tests can draw a screen at a fixed width.
+// Set by renderFrame so tests can draw a screen at a fixed size.
 let columnsOverride = null;
+let rowsOverride = null;
 let ui;
 
+// Window sizes where the editor changes shape: from MEDIUM columns the
+// descriptions line up in a column; from WIDE the list gets a details panel
+// next to it.
+const MEDIUM = 80;
+const WIDE = 140;
+// A list taller than the window scrolls, but keeps at least this many rows
+// before the editor gives up its spacing and the preview's toggles.
+const MIN_LIST_ROWS = 6;
+// What a short window gives up, one step at a time, so the list keeps rows.
+const COMPACT_STEPS = [
+  { tagline: true, gaps: true, notes: true, chips: true },
+  { tagline: false, gaps: true, notes: true, chips: true },
+  { tagline: false, gaps: false, notes: true, chips: true },
+  { tagline: false, gaps: false, notes: false, chips: true },
+  { tagline: false, gaps: false, notes: false, chips: false },
+];
+
+// First visible row of a scrolled list, kept between frames so the list only
+// moves when the cursor leaves the window.
+let scrollTop = 0;
+let scrollScreen = null;
+
+// The editor fills the window, so the live preview has the room the real bar
+// gets in agy.
 function frameWidth() {
   const columns = columnsOverride || process.stdout.columns || 100;
-  return Math.max(50, Math.min(columns - 1, 120));
+  return Math.max(50, columns - 1);
+}
+
+function frameHeight() {
+  return Math.max(12, rowsOverride || process.stdout.rows || 40);
 }
 
 function previewConfig() {
@@ -324,7 +362,32 @@ function dim(text) {
   return ui.muted(text);
 }
 
-function previewPanel(width) {
+// What the preview shows that isn't applied yet: the hovered theme, preset
+// or layout. Empty when the preview is the saved setup.
+function previewPending() {
+  if (screen === "themes") {
+    const hovered = THEME_ORDER[cursor];
+    return hovered && hovered !== config.theme ? "theme" : "";
+  }
+  if (screen === "presets") {
+    const hovered = PRESET_ORDER[cursor];
+    return hovered && hovered !== currentPreset() ? "preset" : "";
+  }
+  if (screen === "layout") {
+    const hovered = LAYOUT_ORDER[cursor];
+    return hovered && hovered !== config.layout ? "layout" : "";
+  }
+  return "";
+}
+
+// The preset whose widgets are exactly the current ones, if any.
+function currentPreset() {
+  const mine = JSON.stringify(config.widgets);
+  return PRESET_ORDER.find((id) => JSON.stringify(applyPreset(config, id).widgets) === mine);
+}
+
+// The bar's rows and the toggle chips under them.
+function previewParts(width) {
   const preview = previewConfig();
   const { dot } = ui.glyph;
   previewData.terminal_width = width - 4;
@@ -339,7 +402,9 @@ function previewPanel(width) {
   const layout = LAYOUTS[preview.layout]?.name ?? preview.layout;
   const style =
     preview.layout === "pills" ? ` ${dot} ${detectStyle(preview.powerline) ?? "custom"}` : "";
-  const title = `Live preview ${dim(`${dot} ${layout} ${dot} ${preview.theme}${style}`)}`;
+  const pending = previewPending();
+  const note = pending ? ` ${ui.accentText(`${dot} ${pending} preview, enter to apply`)}` : "";
+  const title = `Live preview ${dim(`${dot} ${layout} ${dot} ${preview.theme}${style}`)}${note}`;
   // The toggle keys work on the widget list, so only that screen names them.
   const key = (letter) => (screen === "main" ? letter : "");
   const chips = [
@@ -356,29 +421,269 @@ function previewPanel(width) {
     );
   }
 
-  return ui.panel(title, [...String(rendered).split("\n"), "", chips.join("   ")], width);
+  return { title, bar: String(rendered).split("\n"), chips: chips.join("   ") };
 }
 
-// Every screen: brand line, tabs, the screen's list panel, the live preview
-// and the keys for this screen.
-function screenFrame({ title, list, notes = [], keys }) {
+// Keeps the cursor's row inside a window of `space` rows; returns the slice
+// of the list to show.
+function windowRows(count, selected, space) {
+  if (scrollScreen !== screen) {
+    scrollScreen = screen;
+    scrollTop = 0;
+  }
+  if (count <= space) {
+    scrollTop = 0;
+    return { start: 0, end: count };
+  }
+  if (selected >= 0) {
+    if (selected < scrollTop) {
+      scrollTop = selected;
+    } else if (selected >= scrollTop + space) {
+      scrollTop = selected - space + 1;
+    }
+  }
+  scrollTop = Math.max(0, Math.min(scrollTop, count - space));
+  return { start: scrollTop, end: scrollTop + space };
+}
+
+// List items are { text, extra, value, number } or a plain line: extra is a
+// description, value a setting's current value. From MEDIUM columns they
+// line up in one column.
+function listRows(items, selected, rowWidth) {
+  const shown = (item) => item.value ?? item.extra ?? "";
+  const entries = items.filter((item) => typeof item !== "string");
+  const labels = entries.filter((item) => shown(item));
+  // A badge follows its label, so it counts toward the label's width.
+  const labelWidth = (item) =>
+    visibleWidth(item.text) + (item.badge ? 1 + visibleWidth(item.badge) : 0);
+  const widest = Math.max(0, ...labels.map(labelWidth));
+  const pad = frameWidth() >= MEDIUM ? Math.min(widest, Math.floor(rowWidth * 0.45)) : 0;
+  const leadWidth = Math.max(0, ...entries.map((item) => visibleWidth(item.lead ?? "")));
+  const lead = (item) =>
+    leadWidth ? (item.lead ?? "") + " ".repeat(leadWidth - visibleWidth(item.lead ?? "")) : "";
+  return items.map((item, index) =>
+    typeof item === "string"
+      ? item
+      : ui.row(index === selected, item.text, shown(item), item.number ?? null, {
+          pad,
+          lead: lead(item),
+          badge: item.badge,
+        })
+  );
+}
+
+// A widget's icon from the bar, when the bar shows icons.
+function widgetIcon(id) {
+  return config.emojis !== false && !config.ascii ? (WIDGET_TAGS[id]?.icon ?? "") : "";
+}
+
+// On a wide window the list and the details panel share the width evenly.
+function splitWidths(width) {
+  const list = Math.floor((width - 1) / 2);
+  return { list, details: width - 1 - list };
+}
+
+// Details entries are plain strings (wrapped to the panel), { dim: text }
+// (wrapped, in the muted color) or { raw: line } (as is: a rendered widget,
+// a heading, a row of tags).
+function detailsBody(lines, panelWidth) {
+  const wrapWidth = Math.min(panelWidth - 4, 88);
+  return lines.flatMap((entry) => {
+    if (typeof entry === "string") {
+      return wrapText(entry, wrapWidth);
+    }
+    if ("raw" in entry) {
+      return [entry.raw];
+    }
+    return wrapText(entry.dim, wrapWidth).map((line) => dim(line));
+  });
+}
+
+// Top lines, then blank lines, then bottom lines, in exactly `tall` rows;
+// when both don't fit, the top wins.
+function anchor(top, bottom, tall) {
+  const free = tall - top.length - bottom.length;
+  if (free < 0) {
+    return [...top, ...bottom].slice(0, tall);
+  }
+  return [...top, ...Array(free).fill(""), ...bottom];
+}
+
+// Every screen: brand line and tabs, the screen's list (with a details panel
+// beside it on a wide window, both as tall as the longer one, notes at the
+// bottom), the live preview and the keys. Panels fit their content rather
+// than the window, so a tall window doesn't get rows of empty boxes. A short
+// window gives up blank lines, the tagline, the notes and the preview's
+// toggles before the list starts to scroll.
+function screenFrame({ title, head = [], items, selected = cursor, notes = [], keys, details }) {
   const width = frameWidth();
-  const starText = `${ui.glyph.star} star`;
-  const star = `\x1b]8;;${REPO_URL}\x07${dim(starText)}\x1b]8;;\x07`;
+  const height = frameHeight();
+  const wide = Boolean(details) && width >= WIDE;
+  const widths = wide ? splitWidths(width) : { list: width, details: 0 };
+  const preview = previewParts(width);
+  const hints = ui.hints(keys, width - 1);
+  const notesWidth = wide ? widths.details : widths.list;
+  const noteLines = (step) =>
+    step.notes && notes.length
+      ? [
+          "",
+          ...detailsBody(
+            notes.map((n) => ({ dim: n })),
+            notesWidth
+          ),
+        ]
+      : [];
+  const detailLines = wide ? detailsBody(details.lines, widths.details) : [];
+
+  // Rows left for the list panel's body once everything else is drawn: the
+  // brand and tabs, both panels' borders, the preview and the key hints.
+  const bodySpace = (step) =>
+    height -
+    1 -
+    (step.gaps ? 3 : 0) -
+    (step.tagline ? 1 : 0) -
+    2 -
+    2 -
+    (2 + preview.bar.length + (step.chips ? 2 : 0)) -
+    hints.length;
+  const listSpace = (step) => bodySpace(step) - head.length - (wide ? 0 : noteLines(step).length);
+  const fits = (step) =>
+    listSpace(step) >= items.length &&
+    (!wide || detailLines.length + noteLines(step).length <= bodySpace(step));
+  const step =
+    COMPACT_STEPS.find(fits) ||
+    COMPACT_STEPS.find((s) => listSpace(s) >= MIN_LIST_ROWS) ||
+    COMPACT_STEPS[COMPACT_STEPS.length - 1];
+
+  const content = Math.max(
+    head.length + items.length + (wide ? 0 : noteLines(step).length),
+    wide ? detailLines.length + noteLines(step).length : 0
+  );
+  const tall = Math.max(1, Math.min(content, bodySpace(step)));
+  const { start, end } = windowRows(items.length, selected, Math.max(1, listSpace(step)));
+  const rows = listRows(items, selected, widths.list - 4).slice(start, end);
+  const { up, down } = ui.glyph;
+  const counts = {
+    above: start > 0 ? `${up} ${start} more` : "",
+    below: end < items.length ? `${down} ${items.length - end} more` : "",
+  };
+
+  const body = wide
+    ? ui.beside(
+        ui.panel(title, anchor([...head, ...rows], [], tall), widths.list, counts),
+        ui.panel(details.title, anchor(detailLines, noteLines(step), tall), widths.details)
+      )
+    : ui.panel(title, anchor([...head, ...rows], noteLines(step), tall), width, counts);
+
+  // The star link sits at the right end of the brand line, shortened to the
+  // star alone when the line is tight.
+  const link = (text) => `\x1b]8;;${REPO_URL}\x07${text}\x1b]8;;\x07`;
+  const star = link(`${ui.glyph.star} ${dim("Star on GitHub")}`);
+  const starShort = link(ui.glyph.star);
   const toast = flashMessage ? `   ${ui.toast(flashMessage)}` : "";
-  const body = notes.length ? [...list, "", ...notes.map(dim)] : list;
+  const brand = ` ${ui.wordmark("agy-powerline")} ${ui.tag(`v${VERSION}`)}${toast}`;
+  const gap = step.gaps ? [""] : [];
 
   return [
-    "",
-    ` ${ui.wordmark("agy-powerline")} ${dim(`v${VERSION}`)}  ${star}${toast}`,
-    ` ${dim(`${ui.glyph.sparkle} make agy feel like yours`)}`,
-    "",
+    ...gap,
+    ui.spread(brand, star) ?? ui.spread(brand, starShort) ?? `${brand}  ${starShort}`,
+    ...(step.tagline ? [` ${dim(`${ui.glyph.sparkle} Make agy feel like yours`)}`] : []),
+    ...(step.gaps ? [ui.rule()] : []),
     ui.tabs(TABS, TAB_OF_SCREEN[screen]),
-    "",
-    ...ui.panel(title, body, width),
-    ...previewPanel(width),
-    ...ui.hints(keys, width - 1),
+    ...gap,
+    ...body,
+    ...ui.panel(preview.title, [...preview.bar, ...(step.chips ? ["", preview.chips] : [])], width),
+    ...hints,
   ];
+}
+
+// One widget drawn on its own with the previewed theme and layout, for the
+// details panel; a widget with nothing to show in the sample data says so.
+function widgetPreview(widget) {
+  const width = splitWidths(frameWidth()).details - 4;
+  let rendered = "";
+  try {
+    rendered = renderStatusline(
+      { ...previewData, terminal_width: width },
+      { ...previewConfig(), widgets: [widget] },
+      { color: getActiveDepth() }
+    );
+  } catch {
+    // The full preview below reports render errors.
+  }
+  const lines = String(rendered).split("\n");
+  if (lines.every((line) => !line.replace(/\x1b\[[0-9;]*m/g, "").trim())) {
+    return [{ dim: "Hidden in this preview: the sample data has nothing for it." }];
+  }
+  return lines.map((line) => ({ raw: line }));
+}
+
+const capitalize = (text) => text.charAt(0).toUpperCase() + text.slice(1);
+
+const EXEC_NOTE = {
+  dim: "Runs only in agy, from your install folder; previews here show [cmd].",
+};
+
+const heading = (text) => ({ raw: ui.heading(text) });
+
+function presetsUsing(id) {
+  const names = PRESET_ORDER.filter((name) =>
+    PRESETS[name].widgets.some((widget) => widget.id === id)
+  ).map((name) => PRESETS[name].name);
+  return [
+    heading("In presets"),
+    names.length ? { raw: names.map(ui.tag).join(" ") } : { dim: "none" },
+  ];
+}
+
+// A widget's own settings from the config file, cleaned of control
+// characters before they reach the terminal.
+function widgetOptions(widget) {
+  return Object.entries(widget)
+    .filter(([key]) => key !== "id")
+    .map(([key, value]) => ({
+      raw: `${dim(key)}  ${stripControl(typeof value === "string" ? value : JSON.stringify(value))}`,
+    }));
+}
+
+function widgetDetails(widget) {
+  if (!widget) {
+    return { title: "No widgets", lines: ["Press a to add your first widget."] };
+  }
+  if (widget.id === "separator") {
+    return {
+      title: "Flex space",
+      lines: [
+        "Grows to fill the free space in its row, pushing the widgets after it to the right. In Pills it also starts a new pill.",
+      ],
+    };
+  }
+  if (widget.id === "lineBreak") {
+    return {
+      title: "New row",
+      lines: ["Starts a new row: the widgets after it go on the next line of the bar."],
+    };
+  }
+
+  const meta = WIDGET_CATALOG.find((item) => item.id === widget.id);
+  const options = widgetOptions(widget);
+  return {
+    title: [widgetIcon(widget.id), widgetLabel(widget.id)].filter(Boolean).join(" "),
+    lines: [
+      `${capitalize(meta?.description ?? widget.id)}.`,
+      "",
+      heading("Preview"),
+      ...widgetPreview(widget),
+      "",
+      heading("Options"),
+      ...(options.length
+        ? options
+        : [{ dim: "Defaults. Colors, labels and thresholds per widget: docs/configuration.md" }]),
+      "",
+      ...presetsUsing(widget.id),
+      ...(widget.id === "exec" ? ["", EXEC_NOTE] : []),
+    ],
+  };
 }
 
 function widgetCount() {
@@ -388,8 +693,11 @@ function widgetCount() {
 
 function drawMain() {
   const { upDown, shift } = ui.glyph;
-  const list = config.widgets.length
-    ? config.widgets.map((widget, index) => {
+  // Flex spaces and new rows are layout, not widgets: they get no number, so
+  // the numbers match the widget count in the title.
+  let number = 0;
+  const items = config.widgets.length
+    ? config.widgets.map((widget) => {
         const meta = WIDGET_CATALOG.find((item) => item.id === widget.id);
         let extra = meta?.description ?? "";
         if (widget.id === "exec" && widget.cmd) {
@@ -409,18 +717,27 @@ function drawMain() {
             widget.id === "separator"
               ? `${config.ascii ? "..." : "╌╌"} flex space`
               : `${config.ascii ? "--" : "↵"} new row`;
-          return ui.row(index === cursor, dim(divider), "", index + 1);
+          return { text: dim(divider), number: "" };
         }
-        return ui.row(index === cursor, widgetLabel(widget.id), extra, index + 1);
+        number += 1;
+        return {
+          lead: widgetIcon(widget.id),
+          text: widgetLabel(widget.id),
+          extra: stripControl(extra),
+          number,
+        };
       })
     : [dim(`${ui.glyph.sparkle} nothing here yet. Press a to add your first widget.`)];
 
   return screenFrame({
     title: `Your widgets ${dim(`${ui.glyph.dot} ${widgetCount()}`)}`,
-    list,
+    items,
+    selected: config.widgets.length ? cursor : -1,
+    details: widgetDetails(config.widgets[cursor]),
     keys: [
       [upDown, "move"],
       [`${shift}${upDown}`, "reorder"],
+      ["enter", "edit"],
       ["a", "add"],
       ["s", "flex space"],
       ["n", "new row"],
@@ -432,25 +749,342 @@ function drawMain() {
   });
 }
 
+// Widgets that take each option, as the layouts read them.
+const QUOTA_WIDGETS = new Set([
+  "quota",
+  "fiveHourBar",
+  "fiveHourPct",
+  "weeklyBar",
+  "weeklyPct",
+  "thirdPartyFiveHour",
+  "thirdPartyWeekly",
+]);
+const PACED_WIDGETS = new Set([
+  "fiveHourBar",
+  "weeklyBar",
+  "thirdPartyFiveHour",
+  "thirdPartyWeekly",
+]);
+const CONTEXT_WIDGETS = new Set(["context", "contextPct", "contextTokens"]);
+const RESET_WIDGETS = new Set(["fiveHourReset", "weeklyReset"]);
+const COLOR_SLOTS = ["model", "context", "git", "weekly", "thirdParty", "fiveHour", "meta"];
+// Longest custom badge text; the badge is meant to be a word or two.
+const TEXT_MAX = 40;
+
+const onOff = (value) => (value ? "on" : "off");
+
+// The options of one widget: cycle fields step through values, number fields
+// step by 5 with the arrows, text fields take typing, and fixed ones only show
+// their value. undefined means "not set": the widget follows the global
+// setting or its default.
+function editFields(widget) {
+  const quota = QUOTA_WIDGETS.has(widget.id);
+  const context = CONTEXT_WIDGETS.has(widget.id);
+  const thresholds = quota
+    ? resolveQuotaThresholds({}, config)
+    : context
+      ? resolveContextThresholds({}, config)
+      : null;
+  const fields = [
+    {
+      key: "color",
+      label: "Color",
+      values: [undefined, ...COLOR_SLOTS],
+      show: (value) => (value === undefined ? "theme default" : colorName(value)),
+      help: "Draws this widget in another of the theme's colors. Caution and danger colors still take over when a quota or the context runs low.",
+    },
+    {
+      key: "raw",
+      label: "Label",
+      values: [undefined, false, true],
+      show: (value) =>
+        value === undefined
+          ? `default (${config.minimalist ? "hidden" : "shown"})`
+          : value
+            ? "hidden, value only"
+            : "shown",
+      help: "Shows or hides the icon and label before the value. Default follows minimalist mode (m).",
+    },
+  ];
+
+  if (widget.id === "model") {
+    fields.push({
+      key: "short",
+      label: "Short name",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help: "3.8 Flash·High instead of Gemini 3.8 Flash (High).",
+    });
+  }
+  if (widget.id === "totalTokens") {
+    fields.push({
+      key: "split",
+      label: "Split",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help: "Input and output tokens apart (123.1K↑ 355.0K↓) instead of one total.",
+    });
+  }
+  if (RESET_WIDGETS.has(widget.id)) {
+    fields.push({
+      key: "format",
+      label: "Format",
+      values: [undefined, "time", "both"],
+      show: (value) => value ?? "countdown",
+      help: "countdown (2hr 47m), time (6:33pm) or both (6:33pm (2hr 47m)).",
+    });
+  }
+  if (widget.id === "customText") {
+    fields.push({
+      key: "text",
+      label: "Text",
+      text: true,
+      show: (value) => value || "(empty: hidden)",
+      help: "The badge's text. Enter to type, Enter again to keep it, Esc to cancel.",
+    });
+  }
+  if (widget.id === "exec") {
+    fields.push({
+      key: "cmd",
+      label: "Command",
+      fixed: true,
+      show: (value) => value || "(none)",
+      help: `The command runs only in agy, from your install folder. Edit it in ${getConfigPath()}.`,
+    });
+  }
+  if (thresholds) {
+    const what = quota ? "left" : "used";
+    fields.push(
+      {
+        key: "warn",
+        label: "Caution at",
+        number: thresholds.warn,
+        show: (value) => (value === undefined ? `default (${thresholds.warn}%)` : `${value}%`),
+        help: `Turns to the caution color at this share ${what}.`,
+      },
+      {
+        key: "crit",
+        label: "Danger at",
+        number: thresholds.crit,
+        show: (value) => (value === undefined ? `default (${thresholds.crit}%)` : `${value}%`),
+        help: `Turns to the danger color at this share ${what}.`,
+      },
+      {
+        key: "blink",
+        label: "Blink",
+        values: [undefined, true, "warn", false],
+        show: (value) =>
+          value === undefined
+            ? `default (${thresholds.blink ? "on" : "off"})`
+            : { true: "at danger", warn: "at caution and danger", false: "off" }[String(value)],
+        help: "Makes the widget blink when it reaches the danger (or caution) level. ASCII mode never blinks.",
+      }
+    );
+  }
+  if (PACED_WIDGETS.has(widget.id)) {
+    fields.push({
+      key: "pace",
+      label: "Pace marker",
+      values: [undefined, false, true],
+      show: (value) =>
+        value === undefined ? `default (${onOff(config.pacing !== false)})` : onOff(value),
+      help: "Marks where usage would be if it were spread evenly over the window. Default follows r.",
+    });
+  }
+  return fields;
+}
+
+// A theme slot's color name, in that color.
+function colorName(slot) {
+  const colors = themeColors(config.theme, config.customTheme);
+  const block = config.ascii ? "#" : "■";
+  return colors[slot] ? `${fg(colors[slot])}${block}${RESET} ${slot}` : String(slot);
+}
+
+function editedWidget() {
+  return config.widgets[editIndex];
+}
+
+function drawEdit() {
+  const widget = editedWidget();
+  const fields = editFields(widget);
+  const field = fields[cursor];
+  const typing = textInput !== null;
+  const caret = config.ascii ? "_" : "▏";
+  const items = fields.map((item) => ({
+    text: item.label,
+    value:
+      typing && item === field
+        ? `${BOLD}${textInput}${RESET}${caret}`
+        : stripControl(item.show(widget[item.key])),
+  }));
+  const label = [widgetIcon(widget.id), widgetLabel(widget.id)].filter(Boolean).join(" ");
+  const changeKeys = field?.text
+    ? [["enter", "type"]]
+    : field?.number !== undefined
+      ? [[ui.glyph.leftRight, "change"]]
+      : field?.fixed
+        ? []
+        : [[`enter ${ui.glyph.leftRight}`, "change"]];
+
+  return screenFrame({
+    title: `Edit ${dim(`${ui.glyph.dot} ${label}`)}`,
+    items,
+    // A wide window shows the help in the details panel instead.
+    notes: field && frameWidth() < WIDE ? [field.help] : [],
+    details: field && {
+      title: field.label,
+      lines: [field.help, "", heading("Preview"), ...widgetPreview(widget)],
+    },
+    keys: typing
+      ? [
+          ["type", "text"],
+          ["enter", "keep"],
+          ["esc", "cancel"],
+        ]
+      : [
+          [ui.glyph.upDown, "option"],
+          ...changeKeys,
+          ...(field?.fixed ? [] : [["x", "default"]]),
+          ["esc", "back"],
+        ],
+  });
+}
+
+function openEdit() {
+  const widget = config.widgets[cursor];
+  if (!widget || widget.id === "separator" || widget.id === "lineBreak") {
+    return;
+  }
+  editIndex = cursor;
+  textInput = null;
+  screen = "edit";
+  cursor = 0;
+}
+
+function closeEdit() {
+  textInput = null;
+  screen = "main";
+  cursor = editIndex;
+  clampCursor(config.widgets.length);
+}
+
+// Sets one option, or removes it when the value is undefined, then saves.
+function setOption(key, value) {
+  const widget = editedWidget();
+  if (value === undefined) {
+    delete widget[key];
+  } else {
+    widget[key] = value;
+  }
+  persist();
+}
+
+function stepOption(field, direction) {
+  const current = editedWidget()[field.key];
+  if (field.number !== undefined) {
+    const from = Number.isFinite(current) ? current : field.number;
+    setOption(field.key, Math.max(0, Math.min(100, from + direction * 5)));
+    return;
+  }
+  const index = field.values.findIndex((value) => value === current);
+  const next = (Math.max(0, index) + direction + field.values.length) % field.values.length;
+  setOption(field.key, field.values[next]);
+}
+
+function onEdit(key) {
+  const fields = editFields(editedWidget());
+  const field = fields[cursor];
+
+  if (textInput !== null) {
+    if (key.name === "escape") {
+      textInput = null;
+    } else if (key.name === "return") {
+      const text = stripControl(textInput).trim();
+      setOption(field.key, text || undefined);
+      textInput = null;
+    } else if (key.name === "backspace" || key.name === "delete") {
+      textInput = textInput.slice(0, -1);
+    } else if (key.sequence && key.sequence.length === 1 && !key.ctrl && !key.meta) {
+      const char = key.sequence;
+      if (char >= " " && char !== "\x7f" && textInput.length < TEXT_MAX) {
+        textInput += char;
+      }
+    }
+    return;
+  }
+
+  if (key.name === "escape") {
+    closeEdit();
+    return;
+  }
+  if (key.name === "up") {
+    moveCursor(-1, fields.length);
+    return;
+  }
+  if (key.name === "down") {
+    moveCursor(1, fields.length);
+    return;
+  }
+  if (!field || field.fixed) {
+    return;
+  }
+  if (key.name === "x" || key.name === "delete" || key.name === "backspace") {
+    setOption(field.key, undefined);
+    return;
+  }
+  if (field.text) {
+    if (key.name === "return") {
+      textInput = editedWidget()[field.key] ?? "";
+    }
+    return;
+  }
+  if (key.name === "left" || key.name === "right") {
+    stepOption(field, key.name === "left" ? -1 : 1);
+    return;
+  }
+  if (key.name === "return" && field.values) {
+    stepOption(field, 1);
+  }
+}
+
 function drawAdd() {
-  const items = filteredAddableWidgets();
+  const widgets = filteredAddableWidgets();
   const caret = config.ascii ? "_" : "▏";
   const search = searchQuery
     ? `${BOLD}${searchQuery}${RESET}${caret}`
     : `${caret}${dim("type to filter")}`;
-  const list = [`${config.ascii ? "search:" : "🔎"} ${search}`, ""];
-
-  if (!items.length) {
-    list.push(dim(`No widget matches "${searchQuery}". Backspace to edit, Esc to go back.`));
-  } else {
-    items.forEach((widget, index) => {
-      list.push(ui.row(index === cursor, widget.label, widget.description));
-    });
-  }
+  const head = [`${config.ascii ? "search:" : "🔎"} ${search}`, ""];
+  const items = widgets.length
+    ? widgets.map((widget) => ({
+        lead: widgetIcon(widget.id),
+        text: widget.label,
+        extra: widget.description,
+      }))
+    : [dim(`No widget matches "${searchQuery}". Backspace to edit, Esc to go back.`)];
+  const hovered = widgets[cursor];
 
   return screenFrame({
     title: "Add a widget",
-    list,
+    head,
+    items,
+    selected: widgets.length ? cursor : -1,
+    details: hovered
+      ? {
+          title: [widgetIcon(hovered.id), hovered.label].filter(Boolean).join(" "),
+          lines: [
+            `${capitalize(hovered.description)}.`,
+            "",
+            heading("Preview"),
+            ...widgetPreview({ id: hovered.id }),
+            "",
+            ...presetsUsing(hovered.id),
+            "",
+            { dim: hovered.unique ? "One per bar." : "Can be added more than once." },
+            ...(hovered.id === "exec" ? [EXEC_NOTE] : []),
+          ],
+        }
+      : { title: "No match", lines: ["Backspace edits the search, Esc clears it."] },
     keys: [
       ["type", "filter"],
       [ui.glyph.upDown, "move"],
@@ -461,17 +1095,51 @@ function drawAdd() {
   });
 }
 
+function presetDetails(id) {
+  const preset = PRESETS[id];
+  if (!preset) {
+    return null;
+  }
+  const rows = [[]];
+  for (const widget of preset.widgets) {
+    if (widget.id === "lineBreak") {
+      rows.push([]);
+    } else if (widget.id !== "separator") {
+      const icon = widgetIcon(widget.id);
+      rows[rows.length - 1].push(
+        icon ? `${icon} ${widgetLabel(widget.id)}` : widgetLabel(widget.id)
+      );
+    }
+  }
+  const count = rows.flat().length;
+  const plural = (n, word) => `${n} ${word}${n === 1 ? "" : "s"}`;
+  return {
+    title: preset.name,
+    lines: [
+      `${preset.description}.`,
+      "",
+      heading(`${plural(count, "widget")} on ${plural(rows.length, "row")}`),
+      ...rows.map((labels, index) => ({
+        raw: `${ui.accentText(String(index + 1))}  ${labels.join(dim(" · "))}`,
+      })),
+    ],
+  };
+}
+
 function drawPresets() {
-  const list = PRESET_ORDER.map((id, index) => {
+  const current = currentPreset();
+  const items = PRESET_ORDER.map((id) => {
     const preset = PRESETS[id];
-    const icon = config.ascii ? "" : `${PRESET_ICONS[id] || "•"} `;
-    return ui.row(index === cursor, `${icon}${preset.name}`, preset.description);
+    const lead = config.ascii ? "" : (PRESET_ICONS[id] ?? "");
+    const badge = id === current ? ui.chip("current", true) : "";
+    return { lead, text: preset.name, badge, extra: preset.description };
   });
 
   return screenFrame({
     title: "Presets",
-    list,
+    items,
     notes: ["A preset swaps your widgets; your layout and theme stay."],
+    details: presetDetails(PRESET_ORDER[cursor]),
     keys: [
       [ui.glyph.upDown, "preview"],
       ["enter", "apply"],
@@ -491,23 +1159,89 @@ function themeSwatch(colors) {
   );
 }
 
+const toHex = (rgb) => `#${rgb.map((part) => part.toString(16).padStart(2, "0")).join("")}`;
+
+// One color as a pill in that color with the theme's pill text, the way the
+// bar draws it, then its hex value.
+function colorLine(label, rgb, ink) {
+  return { raw: `${ui.pill(` ${label.padEnd(9)}`, rgb, ink)}  ${dim(toHex(rgb))}` };
+}
+
+const PALETTE_SLOTS = [
+  ["model", "Model"],
+  ["context", "Context"],
+  ["git", "Git"],
+  ["weekly", "7d quota"],
+  ["meta", "Details"],
+  ["fiveHour", "OK"],
+  ["caution", "Caution"],
+  ["warn", "Danger"],
+];
+
+function themeDetails(id) {
+  if (id === "custom") {
+    return {
+      title: "Custom",
+      lines: [
+        "Your own colors, on top of a base theme.",
+        "",
+        "Enter opens the color editor; the preview follows every change.",
+      ],
+    };
+  }
+  const theme = THEMES[id];
+  if (!theme) {
+    return null;
+  }
+  const background = { dark: "dark terminals", light: "light terminals" }[theme.kind];
+  return {
+    title: theme.name,
+    lines: [
+      `${theme.description}.`,
+      ...(background ? [{ raw: `${dim("For")} ${ui.tag(background)}` }] : []),
+      "",
+      heading("Palette"),
+      ...PALETTE_SLOTS.map(([slot, label]) =>
+        colorLine(label, theme.colors[slot], theme.colors.text)
+      ),
+      "",
+      heading("Sample"),
+      ...themeSample(theme.colors),
+    ],
+  };
+}
+
+// The editor drawn in the hovered theme: a selected and a normal row, and the
+// three states quotas and the context go through.
+function themeSample(colors) {
+  const { on } = ui.glyph;
+  const state = (slot, label) => `${fg(colors[slot])}${on} ${label}${RESET}`;
+  return [
+    { raw: ui.row(true, "Selected item", "its description") },
+    { raw: ui.row(false, "Normal item", "its description") },
+    {
+      raw: `  ${state("fiveHour", "ok")}   ${state("caution", "caution")}   ${state("warn", "danger")}`,
+    },
+  ];
+}
+
 function drawThemes() {
-  const list = THEME_ORDER.map((id, index) => {
+  const items = THEME_ORDER.map((id) => {
     const theme =
       THEMES[id] || (id === "custom" ? { name: "Custom", description: "Your own colors" } : null);
     if (!theme) {
       return "";
     }
     const swatch = themeSwatch(id === "custom" ? null : theme.colors);
-    const current = id === config.theme ? ` ${ui.chip("current", true)}` : "";
+    const badge = id === config.theme ? ui.chip("current", true) : "";
     const extra = id === "custom" ? `${theme.description}, Enter to edit` : theme.description;
-    const name = swatch ? `${swatch} ${theme.name}` : theme.name;
-    return ui.row(index === cursor, name + current, extra);
+    return { lead: swatch, text: theme.name, badge, extra };
   });
 
   return screenFrame({
     title: "Themes",
-    list,
+    items,
+    details: themeDetails(THEME_ORDER[cursor]),
     keys: [
       [ui.glyph.upDown, "preview"],
       ["enter", "apply"],
@@ -525,16 +1259,38 @@ function hexSwatch(hex) {
   }
 }
 
+// The curated colors in a row, the slot's current one in brackets.
+function curatedPalette(current) {
+  const block = config.ascii ? "#" : "■";
+  return CURATED_HEX_PALETTE.map((hex) => {
+    const swatch = `${fg(parseColor(hex))}${block}${RESET}`;
+    return hex === current ? `[${swatch}]` : ` ${swatch} `;
+  }).join("");
+}
+
 function drawCustomTheme() {
   const customColors = config.customTheme?.colors || {};
-  const list = CUSTOM_COLOR_SLOTS.map((slot, index) =>
-    ui.row(index === cursor, slot.label, hexSwatch(customColors[slot.key] || "(base)"))
-  );
+  const items = CUSTOM_COLOR_SLOTS.map((slot) => ({
+    text: slot.label,
+    value: hexSwatch(customColors[slot.key] || "(base)"),
+  }));
+  const slot = CUSTOM_COLOR_SLOTS[cursor];
+  const current = customColors[slot?.key];
 
   return screenFrame({
     title: "Custom theme",
-    list,
+    items,
     notes: ["Cycle a slot through curated colors; the preview updates as you go."],
+    details: slot && {
+      title: slot.label,
+      lines: [
+        current ? `Now ${current}.` : "Now the base theme's color.",
+        "",
+        curatedPalette(current),
+        "",
+        { dim: "← → and Enter step through these colors." },
+      ],
+    },
     keys: [
       [ui.glyph.upDown, "slot"],
       [ui.glyph.leftRight, "cycle color"],
@@ -578,10 +1334,38 @@ function powerlineRowValue(row) {
   return THEMES[config.theme]?.name ?? config.theme;
 }
 
+const POWERLINE_HELP = {
+  enabled:
+    "On: adjacent widgets share one pill, with a separator between them. Off: every widget gets its own pill.",
+  rowGap:
+    "Puts a blank line between Pills rows, so stacked pills don't touch. The bar takes more lines (three rows become five).",
+  style: "Sets start caps, end caps and separators in one go. Enter cycles the styles.",
+  separators: "Glyphs between widgets of a pill. With several, they cycle per join, left to right.",
+  startCaps: "Glyphs that open each pill. With several, they cycle per pill, left to right.",
+  endCaps: "Glyphs that close each pill. With several, they cycle per pill, left to right.",
+  theme: "Enter opens the Themes tab.",
+};
+
+function powerlineDetails(row) {
+  if (!row) {
+    return null;
+  }
+  const lines = [POWERLINE_HELP[row.id] ?? ""];
+  if (row.id === "style") {
+    const width = Math.max(...STYLE_ORDER.map((id) => STYLES[id].name.length));
+    lines.push(
+      "",
+      ...STYLE_ORDER.map((id) => `${STYLES[id].name.padEnd(width)}  ${dim(STYLES[id].description)}`)
+    );
+  }
+  if (row.slot) {
+    lines.push("", "Enter edits the list.");
+  }
+  return { title: row.label, lines };
+}
+
 function drawPowerline() {
-  const list = POWERLINE_ROWS.map((row, index) =>
-    ui.row(index === cursor, row.label, powerlineRowValue(row))
-  );
+  const items = POWERLINE_ROWS.map((row) => ({ text: row.label, value: powerlineRowValue(row) }));
   const notes =
     config.layout === "lines"
       ? ["Powerline shapes apply to Pills. Switch layout with l."]
@@ -592,8 +1376,9 @@ function drawPowerline() {
 
   return screenFrame({
     title: "Powerline",
-    list,
+    items,
     notes,
+    details: powerlineDetails(POWERLINE_ROWS[cursor]),
     keys: [
       [ui.glyph.upDown, "move"],
       ["enter", "toggle / cycle / edit"],
@@ -610,11 +1395,12 @@ function drawGlyphs() {
   if (hexInput !== null) {
     return screenFrame({
       title: `Powerline ${ui.glyph.dot} ${title}`,
-      list: [
+      items: [
         `Code point: ${BOLD}U+${hexInput}${RESET}${dim("_".repeat(6 - hexInput.length))}`,
         "",
         dim("Type 4-6 hex digits, e.g. E0B0 (Powerline), E0C0 (flame), 2588 (block)."),
       ],
+      selected: -1,
       keys: [
         ["enter", "apply"],
         ["esc", "cancel"],
@@ -622,23 +1408,36 @@ function drawGlyphs() {
     });
   }
 
-  const rows = list.length
+  const items = list.length
     ? list.map((hex, index) => {
         const inverted = isSeparator && config.powerline.separatorInvert[index] ? "inverted" : "";
-        return ui.row(index === cursor, glyphLabel(hex, glyphSlot), inverted);
+        return { text: glyphLabel(hex, glyphSlot), value: inverted };
       })
     : [
         dim(
           `None: ${isSeparator ? "widgets in a pill touch directly" : "pills have no cap on this side"}. Press a to add one.`
         ),
       ];
+  const hovered = list[cursor];
 
   return screenFrame({
     title: `Powerline ${ui.glyph.dot} ${title}`,
-    list: rows,
+    items,
+    selected: list.length ? cursor : -1,
     notes: isSeparator
       ? ["Invert swaps the separator colors; left-pointing glyphs get it automatically."]
       : [],
+    details: {
+      title,
+      lines: hovered
+        ? [
+            `${glyphChar(hovered, glyphSlot, config.ascii)}  ${glyphName(hovered)}`,
+            { dim: `U+${hovered}, ${cursor + 1} of ${list.length}` },
+            "",
+            POWERLINE_HELP[key],
+          ]
+        : [POWERLINE_HELP[key]],
+    },
     keys: [
       [ui.glyph.upDown, "select"],
       [ui.glyph.leftRight, "cycle preset"],
@@ -653,17 +1452,28 @@ function drawGlyphs() {
   });
 }
 
+const LAYOUT_HELP = {
+  pills: "Widgets sit in colored pills. The Powerline tab sets their caps, separators and joins.",
+  lines:
+    "Colored text on the terminal background, with dividers and dot meters. Powerline shapes don't apply.",
+};
+
 function drawLayout() {
-  const list = LAYOUT_ORDER.map((id, index) => {
+  const items = LAYOUT_ORDER.map((id) => {
     const layout = LAYOUTS[id];
-    const current = id === config.layout ? ` ${ui.chip("current", true)}` : "";
-    return ui.row(index === cursor, layout.name + current, layout.description);
+    const badge = id === config.layout ? ui.chip("current", true) : "";
+    return { text: layout.name, badge, extra: layout.description };
   });
+  const hovered = LAYOUTS[LAYOUT_ORDER[cursor]];
 
   return screenFrame({
     title: "Layout",
-    list,
+    items,
     notes: ["Both layouts use your widgets and theme; Powerline shapes apply to Pills."],
+    details: hovered && {
+      title: hovered.name,
+      lines: [`${hovered.description}.`, "", LAYOUT_HELP[hovered.id] ?? ""],
+    },
     keys: [
       [ui.glyph.upDown, "preview"],
       ["enter", "apply"],
@@ -680,6 +1490,7 @@ function frameLines() {
   });
 
   if (screen === "add") return drawAdd();
+  if (screen === "edit") return drawEdit();
   if (screen === "themes") return drawThemes();
   if (screen === "customTheme") return drawCustomTheme();
   if (screen === "presets") return drawPresets();
@@ -694,7 +1505,9 @@ function draw() {
 }
 
 // Draws one screen without a terminal, for tests. Options: config, screen,
-// cursor, columns, color ("truecolor", "256", "none"), search, flash, and
+// cursor, columns, rows, scroll (the first row shown of a long list), color
+// ("truecolor", "256", "none"), search, flash, editIndex and textInput (the
+// widget editor), and
 // widgets (a list used as is, even empty, which a saved config never is).
 function renderFrame(options = {}) {
   config = mergeConfig(options.config || {});
@@ -707,14 +1520,20 @@ function renderFrame(options = {}) {
   flashMessage = options.flash || "";
   glyphSlot = options.glyphSlot || "separator";
   hexInput = options.hexInput ?? null;
+  editIndex = options.editIndex ?? 0;
+  textInput = options.textInput ?? null;
   previewData = options.data || sampleData();
   columnsOverride = options.columns || 100;
+  rowsOverride = options.rows || 50;
+  scrollTop = options.scroll || 0;
+  scrollScreen = screen;
   const previousDepth = getActiveDepth();
   setActiveDepth(options.color || "truecolor");
   try {
     return frameLines().join("\n");
   } finally {
     columnsOverride = null;
+    rowsOverride = null;
     setActiveDepth(previousDepth);
   }
 }
@@ -835,6 +1654,11 @@ function onMain(key) {
   if (key.name === "i") {
     config.ascii = !config.ascii;
     persist();
+    return;
+  }
+
+  if (key.name === "return") {
+    openEdit();
     return;
   }
 
@@ -1279,7 +2103,8 @@ function onKey(_str, key) {
     return;
   }
 
-  if (isQuitKey(key, screen === "add" || hexInput !== null)) {
+  const typing = screen === "add" || hexInput !== null || textInput !== null;
+  if (isQuitKey(key, typing)) {
     quit();
     return;
   }
@@ -1290,7 +2115,7 @@ function onKey(_str, key) {
     return;
   }
 
-  if (screen !== "add" && key.name === "g") {
+  if (!typing && key.name === "g") {
     openRepo();
     draw();
     return;
@@ -1305,6 +2130,8 @@ function onKey(_str, key) {
 
   if (screen === "add") {
     onAdd(key);
+  } else if (screen === "edit") {
+    onEdit(key);
   } else if (screen === "themes") {
     onThemes(key);
   } else if (screen === "customTheme") {
@@ -1359,6 +2186,8 @@ function start() {
   process.stdin.on("keypress", onKey);
   process.on("SIGINT", quit);
   process.on("SIGTERM", quit);
+  // The frame follows the window width, so redraw before a resize wraps it.
+  process.stdout.on("resize", draw);
   process.stdout.write(ALT_ON + HIDE);
   draw();
 }

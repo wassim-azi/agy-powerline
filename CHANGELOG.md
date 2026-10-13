@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `configure` edits a widget's options: Enter on a widget sets its color, label, caution and danger levels, blink, pace marker, reset format, short model name or badge text, with the preview following each change (#29)
+
+### Changed
+
+- `configure` fits your window: it fills the full width instead of stopping at 120 columns, lines descriptions up in a column, splits the width evenly between the list and a details panel from 140 columns (the selected widget drawn on its own with its options, a preset's rows, a theme's colors), scrolls long lists inside their panel in short windows instead of pushing the screen out of view, and redraws when the window is resized; it also gets a fresher look: a header with the GitHub star link and the navigation keys at the right end, the active tab and the selected item as rounded pills, widget icons in the lists, accent-colored panel titles, and details with headings, preset tags and color blocks (#29)
+- `configure` is clearer about state: only widgets are numbered (flex spaces and new rows aren't), the preview title says when it shows a theme, preset or layout that isn't applied, the preset matching your widgets is marked `current` and lists its widgets with their icons, and a theme's details include a sample of the editor in that theme (#29)
+
 ## [1.1.1] - 2026-10-12
 
 ### Changed

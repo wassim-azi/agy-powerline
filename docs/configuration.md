@@ -19,12 +19,17 @@ Most people never edit it by hand: `configure` covers widgets, order, presets, t
 
 Tabs at the top lead to Widgets (`w`), Presets (`o`), Themes (`t`), Layout (`l`) and Powerline (`p`); a tab's letter opens it from any other tab, and `←` `→` or Tab / Shift+Tab move between them. Each screen shows its list, a live preview of your bar with on/off chips for the toggles (with their keys, on the widget list), and its keys at the bottom. In ASCII mode it uses plain `+-|` boxes, and without color it stays readable.
 
+The editor fits your window. It fills the full width, so the preview has the room your bar gets in agy. From 80 columns the descriptions line up in a column; from 140 columns the list and a details panel share the width evenly, and the details show the selected item: a widget drawn on its own with its options and presets, a preset's rows, a theme's colors, or what a Powerline setting does. In a short window the tagline, blank lines, notes and preview chips make way first, then long lists scroll inside their panel, with the rows out of view counted in its border (`↑ 4 more`, `↓ 12 more`). Resizing the window redraws it.
+
+Enter on a widget opens its options: color, label (shown or value only), and what that widget takes, such as the short model name, the reset timers' format, the custom badge's text, the caution and danger levels, blink and the pace marker. `↑` `↓` pick an option, `←` `→` or Enter change it, `x` sets it back to its default, and Esc returns to the list. Each change is saved right away and shows in the preview. A Shell Command's `cmd` is shown but edited only in the config file. The preview title says when it shows a theme, preset or layout you haven't applied yet, and the preset that matches your widgets is marked `current`.
+
 | Key                    | Action                                                                            |
 | ---------------------- | --------------------------------------------------------------------------------- |
 | ↑↓                     | Move cursor (with circular wrap-around at top/bottom; theme preview updates live) |
 | ←→, Tab, Shift+Tab     | Switch tab (Widgets, Presets, Themes, Layout, Powerline)                          |
 | `w`                    | Widgets (your widget list)                                                        |
 | Shift+↑↓               | Reorder widgets                                                                   |
+| Enter                  | Edit the selected widget's options (see below)                                    |
 | `a`                    | Add widget (includes live type-to-filter search across catalog)                   |
 | `s`                    | Insert Flex Separator after the current item                                      |
 | `n`                    | Insert New Line (next widgets go on the next row)                                 |
