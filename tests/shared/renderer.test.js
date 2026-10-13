@@ -418,6 +418,42 @@ async function run() {
       /Production/i.test(telemetryLinesOut)
   );
 
+  // agy's used_percentage counts cached tokens (and its own prompt), which
+  // input + output tokens leave out: the token count must match the percentage.
+  const realPayload = require("../fixtures/antigravity-1.3.0.json");
+  const contextOnly = (layout, id = "context") =>
+    renderStatusline(realPayload, { ...defaultConfig(), layout, widgets: [{ id }] });
+  record(
+    "context tokens agree with the percentage beside them (cached tokens included)",
+    ["pills", "lines"].every(
+      (layout) =>
+        /123\.1K\/1\.0M \(11\.7%\)/.test(contextOnly(layout)) &&
+        /123\.1K\/1\.0M/.test(contextOnly(layout, "contextTokens"))
+    )
+  );
+
+  const noSize = {
+    ...realPayload,
+    context_window: { ...realPayload.context_window, context_window_size: undefined },
+  };
+  const noTotals = {
+    ...realPayload,
+    context_window: {
+      ...realPayload.context_window,
+      total_input_tokens: 0,
+      total_output_tokens: 0,
+    },
+  };
+  record(
+    "without a window size, context tokens count input and cached tokens; totalTokens falls back to the latest request",
+    /119\.2K/.test(
+      renderStatusline(noSize, { ...defaultConfig(), widgets: [{ id: "contextTokens" }] })
+    ) &&
+      /5\.3K/.test(
+        renderStatusline(noTotals, { ...defaultConfig(), widgets: [{ id: "totalTokens" }] })
+      )
+  );
+
   // Exec shell-command widget tests
   const { runExecWidget, clearExecCache } = require("../../src/lib/shared");
   clearExecCache();

@@ -26,7 +26,7 @@ function sampleData() {
         input_tokens: 63382,
         output_tokens: 346,
         cache_creation_input_tokens: 0,
-        cache_read_input_tokens: 20857,
+        cache_read_input_tokens: 85935,
       },
     },
     exceeds_200k_tokens: false,

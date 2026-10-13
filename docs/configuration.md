@@ -59,7 +59,7 @@ Every value comes from the JSON Antigravity pipes on stdin. A widget with nothin
 - Tightest quota (`quota` e.g. `⏳ 7d 28.6% rem · 11hr 35m`: of the quota buckets for the model in use, the one closest to running out; `gemini-*` buckets for Gemini models, `3p-*` for the others)
 - 5h / 7d remaining quota meters (`fiveHourBar`, `weeklyBar`) with consumption-based fill direction, a [pace marker](#quota-pace-marker), and separate reset timers that show a countdown or the [exact reset time](#reset-times-and-clock) (`fiveHourReset`, `weeklyReset`)
 - 3P 5h / 7d remaining quota (5h hidden while `disabled`)
-- Context bar, %, tokens (`used_percentage`, `current_usage`)
+- Context bar, %, tokens (`used_percentage`, `context_window_size`; the tokens are the used share of the window, so they always match the %. Without a window size, `current_usage` input plus cached tokens)
 - Working directory (`cwd`, `~` for home), project folder (`workspace.project_dir`)
 - VCS branch with dirty marker and remote sync indicators (`git` — `vcs.branch` `*`, `⇡2 ⇣1` ahead/behind; reads `.git` directly, including packed refs and linked worktrees, and runs `git rev-list` only when the branch tracks an upstream and points at a different commit)
 - Session tokens (`totalTokens` e.g. `🪙 149.3K`: input + output tokens of the session; `"split": true` shows `123.1K↑ 355.0K↓`)

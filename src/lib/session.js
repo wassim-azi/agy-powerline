@@ -121,9 +121,18 @@ function contextUsedPercent(data) {
 function extractSession(data, config) {
   const contextPct = percent(contextUsedPercent(data));
   const contextSize = count(data.context_window?.context_window_size);
+  const current = data.context_window?.current_usage;
+  // Context tokens are the used share of the window, so they always agree with
+  // the percentage next to them: agy's percentage also counts cached tokens and
+  // its own system prompt and tools, which no sum of current_usage reproduces.
+  // Without a window size, count what current_usage lists as in the window.
   const usedTokens =
-    count(data.context_window?.current_usage?.input_tokens) +
-    count(data.context_window?.current_usage?.output_tokens);
+    contextSize > 0
+      ? Math.round((contextPct * contextSize) / 100)
+      : count(current?.input_tokens) +
+        count(current?.cache_read_input_tokens) +
+        count(current?.cache_creation_input_tokens);
+  const requestTokens = count(current?.input_tokens) + count(current?.output_tokens);
 
   // RAM is measured here; Antigravity doesn't send it.
   let ramPct = 0;
@@ -139,7 +148,7 @@ function extractSession(data, config) {
   const inputTokens = count(data.context_window?.total_input_tokens);
   const outputTokens = count(data.context_window?.total_output_tokens);
   const sessionTokens = inputTokens + outputTokens;
-  const totalTokens = sessionTokens > 0 ? sessionTokens : usedTokens;
+  const totalTokens = sessionTokens > 0 ? sessionTokens : requestTokens;
 
   // Share of the prompt served from cache in the latest request.
   const cacheReadTokens = count(usage?.cache_read_input_tokens);
