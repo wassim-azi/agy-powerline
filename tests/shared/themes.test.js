@@ -29,7 +29,7 @@ const WIDGET_KEYS = [
   "warn",
 ];
 const STATE_KEYS = ["fiveHour", "caution", "warn"];
-const MAX_PER_KIND = { dark: 9, light: 4, colorblind: 2 };
+const MAX_PER_KIND = { dark: 10, light: 4, colorblind: 2 };
 
 function linear(c) {
   c /= 255;
@@ -94,7 +94,7 @@ function checkThemeQuality() {
     counts[THEMES[id].kind] = (counts[THEMES[id].kind] || 0) + 1;
   }
   record(
-    "theme counts stay within limits (≤9 dark, ≤4 light, ≤2 color-blind)",
+    "theme counts stay within limits (≤10 dark, ≤4 light, ≤2 color-blind)",
     Object.entries(counts).every(([kind, n]) => n <= (MAX_PER_KIND[kind] ?? 0)) &&
       builtIn.every((id) => id.startsWith(`${THEMES[id].kind}-`)),
     JSON.stringify(counts)

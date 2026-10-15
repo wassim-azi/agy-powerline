@@ -62,12 +62,12 @@ Start from a preset, then adjust:
 
 ### Themes
 
-| Terminal background | Themes                                                                                                                                   |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Dark                | `dark-aurora` (default), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro` |
-| Light               | `light-paper`, `light-sky`, `light-sunset`, `light-cream`                                                                                |
-| Color-blind safe    | `colorblind-dark`, `colorblind-light`                                                                                                    |
-| Your own colors     | `custom` ([how](docs/configuration.md#custom-theme))                                                                                     |
+| Terminal background | Themes                                                                                                                                                     |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dark                | `dark-aurora` (default), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro`, `dark-macchiato` |
+| Light               | `light-paper`, `light-sky`, `light-sunset`, `light-cream`                                                                                                  |
+| Color-blind safe    | `colorblind-dark`, `colorblind-light`                                                                                                                      |
+| Your own colors     | `custom` ([how](docs/configuration.md#custom-theme))                                                                                                       |
 
 Preview them all with `npx agy-powerline theme --gallery`.
 

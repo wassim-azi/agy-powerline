@@ -9,10 +9,10 @@ const { parseColor } = require("./colors");
 //                 protanopia, deuteranopia and tritanopia
 // Most dark-* and light-* colors come from VS Code's default themes (Dark+
 // and Light+ syntax, git decorations, warning/error and terminal colors);
-// nocturne, onyx, metro and cream take their palettes from community themes
-// (credited below). A few colors are adjusted where the checks below need
-// it: darkened or lightened for contrast, and gitDirty moved toward orange so
-// a dirty branch never looks like the caution state.
+// nocturne, onyx, metro, cream and macchiato take their palettes from
+// community themes (credited below). A few colors are adjusted where the
+// checks below need it: darkened or lightened for contrast, and gitDirty
+// moved toward orange so a dirty branch never looks like the caution state.
 // Palettes are checked by tests/shared/themes.test.js: pill text and lines
 // text reach WCAG AA (4.5:1), the ok / caution / danger states are clearly
 // different from each other, and so are gitDirty and caution.
@@ -175,6 +175,22 @@ const THEMES = {
     warn: "#f7768e",
   }),
 
+  // Palette from Catppuccin Macchiato (catppuccin.com, MIT).
+  "dark-macchiato": theme("dark", "Dark Macchiato", "Pastel mauve, teal, peach and green", {
+    text: DARK_TEXT,
+    track: "#494d64",
+    model: "#c6a0f6",
+    fiveHour: "#a6da95",
+    weekly: "#7dc4e4",
+    thirdParty: "#f5a97f",
+    context: "#8aadf4",
+    git: "#8bd5ca",
+    gitDirty: "#f0c6c6",
+    meta: "#b8c0e0",
+    caution: "#eed49f",
+    warn: "#ed8796",
+  }),
+
   "light-paper": theme("light", "Light Paper", "VS Code Light+ colors", {
     text: LIGHT_TEXT,
     track: "#c8c8c8",
@@ -311,6 +327,7 @@ const THEME_ORDER = [
   "dark-nocturne",
   "dark-onyx",
   "dark-metro",
+  "dark-macchiato",
   "light-paper",
   "light-sky",
   "light-sunset",

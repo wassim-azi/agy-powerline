@@ -226,7 +226,7 @@ Add the widget to the widget table in `README.md` (and the same row in the trans
 
 ## 🎨 How to Add a New Theme
 
-Themes live in **one file** (`src/lib/themes.js`). There is room for at most 9 dark, 4 light and 2 color-blind themes, so a new theme usually replaces an existing one.
+Themes live in **one file** (`src/lib/themes.js`). There is room for at most 10 dark, 4 light and 2 color-blind themes, so a new theme usually replaces an existing one.
 
 1. Add the theme to `THEMES` and `THEME_ORDER`. The id starts with its kind (`dark-`, `light-` or `colorblind-`):
    ```javascript
