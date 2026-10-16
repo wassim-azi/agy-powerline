@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - The context widgets' token count matches the percentage next to it: it was input plus output tokens only, leaving out cached tokens (e.g. `5.3K/1.0M (11.7%)`), and is now the used share of the window (`123.1K/1.0M (11.7%)`) (#31)
+- The tightest quota widget no longer shows Gemini 4 Argon's separate weekly quota (Google AI Pro) while another Gemini model is in use, under a cut-off name like `gemini-argon-wtu-wee`; it shows that quota as `Argon 7d` when Argon is the model in use (#37)
 
 ## [1.1.1] - 2026-10-12
 

@@ -10,6 +10,10 @@ const SEVEN_DAYS = 7 * 86400;
 const QUOTA_BUCKETS = {
   "gemini-5h": { label: "5h", window: FIVE_HOURS },
   "gemini-weekly": { label: "7d", window: SEVEN_DAYS },
+  // Gemini 4 Argon on Google AI Pro: a weekly quota of its own, with no 5-hour
+  // window, sent whatever model is in use. On Ultra Argon counts toward the
+  // Gemini buckets and this one isn't sent.
+  "gemini-argon-wtu-weekly": { label: "Argon 7d", window: SEVEN_DAYS },
   "3p-5h": { label: "3P 5h", window: FIVE_HOURS },
   "3p-weekly": { label: "3P 7d", window: SEVEN_DAYS },
 };
@@ -68,8 +72,21 @@ function readQuota(data, key, windowSeconds) {
   };
 }
 
-// The bucket closest to running out for the model in use: gemini-* buckets
-// for Gemini models, 3p-* (third-party) buckets for the others. Without a
+// Which quota group a bucket belongs to.
+function bucketGroup(key) {
+  if (key.startsWith("gemini-argon-")) {
+    return "argon";
+  }
+  if (key.startsWith("gemini-")) {
+    return "gemini";
+  }
+  return key.startsWith("3p-") ? "3p" : null;
+}
+
+// The bucket closest to running out for the model in use: the Argon bucket
+// for Argon models, the other gemini-* buckets for Gemini models, 3p-*
+// (third-party) buckets for the others. Argon falls back to the Gemini
+// buckets, where its usage counts when there is no Argon bucket. Without a
 // matching bucket every bucket counts. Disabled buckets never do.
 function tightestQuota(data) {
   const buckets = data?.quota && typeof data.quota === "object" ? data.quota : {};
@@ -84,9 +101,17 @@ function tightestQuota(data) {
   }
 
   const model = firstText(data?.model?.display_name, data?.model?.id).toLowerCase();
-  const family = model.startsWith("gemini") ? "gemini-" : "3p-";
-  const forModel = usable.filter((quota) => quota.key.startsWith(family));
-  const pool = forModel.length ? forModel : usable;
+  const inGroup = (group) => usable.filter((quota) => bucketGroup(quota.key) === group);
+  let pool;
+  if (!model.startsWith("gemini")) {
+    pool = inGroup("3p");
+  } else if (model.includes("argon")) {
+    pool = inGroup("argon");
+    pool = pool.length ? pool : inGroup("gemini");
+  } else {
+    pool = inGroup("gemini");
+  }
+  pool = pool.length ? pool : usable;
 
   return pool.reduce((low, quota) => (!low || quota.remaining < low.remaining ? quota : low), null);
 }

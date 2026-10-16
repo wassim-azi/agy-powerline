@@ -56,7 +56,7 @@ Enter on a widget opens its options: color, label (shown or value only), and wha
 Every value comes from the JSON Antigravity pipes on stdin. A widget with nothing to show hides itself: a model, quota, reset time, context window or token usage that is missing from the payload (or unusable) is left out, not shown as `Unknown`, `0%` or `now`.
 
 - Model (`model.display_name`; `"short": true` shows `3.8 Flash·High` instead of `Gemini 3.8 Flash (High)`)
-- Tightest quota (`quota` e.g. `⏳ 7d 28.6% rem · 11hr 35m`: of the quota buckets for the model in use, the one closest to running out; `gemini-*` buckets for Gemini models, `3p-*` for the others)
+- Tightest quota (`quota` e.g. `⏳ 7d 28.6% rem · 11hr 35m`: of the quota buckets for the model in use, the one closest to running out; the Argon weekly bucket (`Argon 7d`) for Gemini 4 Argon, the other `gemini-*` buckets for the other Gemini models and for Argon on plans without an Argon bucket, `3p-*` for the others)
 - 5h / 7d remaining quota meters (`fiveHourBar`, `weeklyBar`) with consumption-based fill direction, a [pace marker](#quota-pace-marker), and separate reset timers that show a countdown or the [exact reset time](#reset-times-and-clock) (`fiveHourReset`, `weeklyReset`)
 - 3P 5h / 7d remaining quota (5h hidden while `disabled`)
 - Context bar, %, tokens (`used_percentage`, `context_window_size`; the tokens are the used share of the window, so they always match the %. Without a window size, `current_usage` input plus cached tokens)

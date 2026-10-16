@@ -145,6 +145,32 @@ function testTightestQuota() {
     claude
   );
 
+  // Google AI Pro sends Argon's own weekly bucket (8.2% left) whatever model
+  // is in use; it is not Flash's quota.
+  const argonPayload = fixture("antigravity-1.4.0-argon.json");
+  const flash = render(argonPayload, quota);
+  record(
+    "quota leaves the Argon bucket out for other Gemini models",
+    /7d 93\.9% rem/.test(flash) && !/Argon|argon/.test(flash),
+    flash
+  );
+
+  const argonModel = { display_name: "Gemini 4 Argon" };
+  const argon = render({ ...argonPayload, model: argonModel }, quota);
+  record(
+    "quota shows the Argon bucket for an Argon model",
+    /Argon 7d 8\.2% rem/.test(argon) && /6d 13h/.test(argon),
+    argon
+  );
+
+  // Ultra: no Argon bucket, Argon counts toward the Gemini buckets.
+  const ultra = render({ ...real, model: argonModel }, quota);
+  record(
+    "quota uses the Gemini buckets for Argon without an Argon bucket",
+    /7d 28\.6% rem/.test(ultra) && !/3P/.test(ultra),
+    ultra
+  );
+
   const unknown = render(
     {
       model: { display_name: "Gemini 3.8 Flash" },
