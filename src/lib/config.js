@@ -31,6 +31,8 @@ const VALID_WIDGET_IDS = new Set([
   "weeklyBar",
   "thirdPartyFiveHour",
   "thirdPartyWeekly",
+  "argonWeekly",
+  "argonReset",
   "context",
   "contextPct",
   "contextTokens",
@@ -280,7 +282,7 @@ const PRESETS = {
   limits: {
     id: "limits",
     name: "Heavy usage",
-    description: "5h, 7d and third-party quotas with resets, one quota per row",
+    description: "5h, 7d, third-party and Argon quotas with resets, one quota per row",
     widgets: [
       { id: "fiveHourBar" },
       { id: "fiveHourReset" },
@@ -290,6 +292,9 @@ const PRESETS = {
       { id: "lineBreak" },
       { id: "thirdPartyFiveHour" },
       { id: "thirdPartyWeekly" },
+      { id: "lineBreak" },
+      { id: "argonWeekly" },
+      { id: "argonReset" },
     ],
   },
   full: {

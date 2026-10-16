@@ -59,6 +59,7 @@ Every value comes from the JSON Antigravity pipes on stdin. A widget with nothin
 - Tightest quota (`quota` e.g. `⏳ 7d 28.6% rem · 11hr 35m`: of the quota buckets for the model in use, the one closest to running out; the Argon weekly bucket (`Argon 7d`) for Gemini 4 Argon, the other `gemini-*` buckets for the other Gemini models and for Argon on plans without an Argon bucket, `3p-*` for the others)
 - 5h / 7d remaining quota meters (`fiveHourBar`, `weeklyBar`) with consumption-based fill direction, a [pace marker](#quota-pace-marker), and separate reset timers that show a countdown or the [exact reset time](#reset-times-and-clock) (`fiveHourReset`, `weeklyReset`)
 - 3P 5h / 7d remaining quota (5h hidden while `disabled`)
+- Argon 7d remaining quota meter and reset timer (`argonWeekly`, `argonReset`, from the `gemini-argon-wtu-weekly` bucket): on Google AI Pro, Gemini 4 Argon has a weekly quota of its own with no 5-hour window, sent whatever model is in use, so you can see it while working on another model. Hidden when the bucket isn't sent, e.g. on Ultra, where Argon counts toward the Gemini 5h / 7d quotas
 - Context bar, %, tokens (`used_percentage`, `context_window_size`; the tokens are the used share of the window, so they always match the %. Without a window size, `current_usage` input plus cached tokens)
 - Working directory (`cwd`, `~` for home), project folder (`workspace.project_dir`)
 - VCS branch with dirty marker and remote sync indicators (`git` — `vcs.branch` `*`, `⇡2 ⇣1` ahead/behind; reads `.git` directly, including packed refs and linked worktrees, and runs `git rev-list` only when the branch tracks an upstream and points at a different commit)
@@ -94,7 +95,7 @@ Any widget accepts these options:
 
 ## Quota pace marker
 
-Every 5h, 7d and third-party quota meter carries a marker, `┃` (`|` in ASCII mode), at the point the quota window has reached. The bar fills from the left as quota is used, so you can read it at a glance:
+Every 5h, 7d, third-party and Argon quota meter carries a marker, `┃` (`|` in ASCII mode), at the point the quota window has reached. The bar fills from the left as quota is used, so you can read it at a glance:
 
 ```
 ⏳ ███  ┃       72.0% rem    fill behind the marker: you're using quota slower than time passes

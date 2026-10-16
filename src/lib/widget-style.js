@@ -93,6 +93,8 @@ const WIDGET_TAGS = {
   weeklyReset: { icon: "🔄", name: "Reset" },
   thirdPartyFiveHour: { icon: "🧪", name: "3P 5h" },
   thirdPartyWeekly: { icon: "🧪", name: "3P 7d" },
+  argonWeekly: { icon: "🔮", name: "Argon 7d" },
+  argonReset: { icon: "🔄", name: "Argon reset" },
   context: { icon: "💾", name: "Context", iconOnly: true },
   contextPct: { icon: "💾", name: "Context" },
   contextTokens: { icon: "💾", name: "Context" },

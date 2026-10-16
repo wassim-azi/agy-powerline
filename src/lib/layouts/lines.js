@@ -292,6 +292,12 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
     case "thirdPartyWeekly":
       return session.thirdPartyWeekly ? quotaMeter(session.thirdPartyWeekly) : null;
 
+    case "argonWeekly":
+      return session.argonWeekly ? quotaMeter(session.argonWeekly) : null;
+
+    case "argonReset":
+      return quotaReset(session.argonWeekly, true);
+
     case "context": {
       const { thresh, blinkSeq, color } = contextState();
       return (

@@ -758,15 +758,17 @@ const QUOTA_WIDGETS = new Set([
   "weeklyPct",
   "thirdPartyFiveHour",
   "thirdPartyWeekly",
+  "argonWeekly",
 ]);
 const PACED_WIDGETS = new Set([
   "fiveHourBar",
   "weeklyBar",
   "thirdPartyFiveHour",
   "thirdPartyWeekly",
+  "argonWeekly",
 ]);
 const CONTEXT_WIDGETS = new Set(["context", "contextPct", "contextTokens"]);
-const RESET_WIDGETS = new Set(["fiveHourReset", "weeklyReset"]);
+const RESET_WIDGETS = new Set(["fiveHourReset", "weeklyReset", "argonReset"]);
 const COLOR_SLOTS = ["model", "context", "git", "weekly", "thirdParty", "fiveHour", "meta"];
 // Longest custom badge text; the badge is meant to be a word or two.
 const TEXT_MAX = 40;

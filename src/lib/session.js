@@ -6,6 +6,7 @@ const { resolveGit } = require("./git");
 
 const FIVE_HOURS = 5 * 3600;
 const SEVEN_DAYS = 7 * 86400;
+const ARGON_BUCKET = "gemini-argon-wtu-weekly";
 // The buckets Antigravity sends, with the short names the bar shows.
 const QUOTA_BUCKETS = {
   "gemini-5h": { label: "5h", window: FIVE_HOURS },
@@ -13,7 +14,7 @@ const QUOTA_BUCKETS = {
   // Gemini 4 Argon on Google AI Pro: a weekly quota of its own, with no 5-hour
   // window, sent whatever model is in use. On Ultra Argon counts toward the
   // Gemini buckets and this one isn't sent.
-  "gemini-argon-wtu-weekly": { label: "Argon 7d", window: SEVEN_DAYS },
+  [ARGON_BUCKET]: { label: "Argon 7d", window: SEVEN_DAYS },
   "3p-5h": { label: "3P 5h", window: FIVE_HOURS },
   "3p-weekly": { label: "3P 7d", window: SEVEN_DAYS },
 };
@@ -203,6 +204,7 @@ function extractSession(data, config) {
     weekly: readQuota(data, "gemini-weekly", SEVEN_DAYS),
     thirdPartyFiveHour: readQuota(data, "3p-5h", FIVE_HOURS),
     thirdPartyWeekly: readQuota(data, "3p-weekly", SEVEN_DAYS),
+    argonWeekly: readQuota(data, ARGON_BUCKET, SEVEN_DAYS),
     tightestQuota: tightestQuota(data),
     cwd: firstText(data.cwd, data.workspace?.current_dir),
     project: firstText(data.workspace?.project_dir),

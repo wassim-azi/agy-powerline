@@ -53,6 +53,11 @@ function sampleData() {
         reset_time: weeklyReset.toISOString(),
         reset_in_seconds: 86400 + 17 * 3600,
       },
+      "gemini-argon-wtu-weekly": {
+        remaining_fraction: 0.64,
+        reset_time: new Date(now + 4 * 86400 * 1000 + 9 * 3600 * 1000).toISOString(),
+        reset_in_seconds: 4 * 86400 + 9 * 3600,
+      },
     },
     agent_state: "thinking",
     vcs: {

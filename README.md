@@ -43,7 +43,7 @@ Start from a preset, then adjust:
 | `default`   | Model, context, git; 5h and 7d quotas with resets on a second row            |
 | `compact`   | One line: short model, tightest quota, context %, git                        |
 | `workspace` | Project, git, agent state, model; context, tightest quota and mode           |
-| `limits`    | Every quota (5h, 7d, third-party), one per row                               |
+| `limits`    | Every quota (5h, 7d, third-party, Argon), one per row                        |
 | `full`      | Everything: session, project and git; context, tokens and cache; both quotas |
 
 ### Themes
@@ -82,6 +82,7 @@ Preview them all with `npx agy-powerline theme --gallery`.
 | `fiveHourReset`, `weeklyReset`                          | Time until the quota resets, or the reset time                                                     |
 | `quota`                                                 | The quota closest to running out, with its reset                                                   |
 | `thirdPartyFiveHour`, `thirdPartyWeekly`                | Third-party model quotas                                                                           |
+| `argonWeekly`, `argonReset`                             | Gemini 4 Argon's own weekly quota (Google AI Pro) and its reset                                    |
 | `context`, `contextPct`, `contextTokens`                | Context window used: meter, percentage or token counts                                             |
 | `git`                                                   | Branch, uncommitted changes and ahead/behind                                                       |
 | `project`, `cwd`                                        | Project folder, current folder                                                                     |

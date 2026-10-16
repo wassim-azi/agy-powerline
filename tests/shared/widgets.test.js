@@ -171,6 +171,24 @@ function testTightestQuota() {
     ultra
   );
 
+  const argonWidgets = [{ id: "argonWeekly" }, { id: "argonReset" }];
+  const argonPills = render(argonPayload, argonWidgets);
+  record(
+    "argonWeekly and argonReset show Argon's own quota whatever the model",
+    /🔮 Argon 7d: .*8\.2% rem/.test(argonPills) && /Argon reset: 6d 13h/.test(argonPills),
+    argonPills
+  );
+  const argonLines = render(argonPayload, argonWidgets, { layout: "lines" });
+  record(
+    "lines argonWeekly and argonReset show Argon's quota and reset",
+    /Argon 7d: .*8\.2% rem/.test(argonLines) && /Argon reset: 6d 13h/.test(argonLines),
+    argonLines
+  );
+  for (const layout of ["pills", "lines"]) {
+    const hidden = render(real, argonWidgets, { layout });
+    record(`${layout} Argon widgets hide without an Argon bucket`, hidden.trim() === "", hidden);
+  }
+
   const unknown = render(
     {
       model: { display_name: "Gemini 3.8 Flash" },

@@ -74,6 +74,20 @@ const WIDGET_CATALOG = [
     summary: "third-party 7-day quota left",
   },
   {
+    id: "argonWeekly",
+    label: "Argon 7d Remaining",
+    unique: true,
+    description: "Gemini 4 Argon's own 7-day quota left (Google AI Pro), hidden when not sent",
+    summary: "Argon 7-day quota left",
+  },
+  {
+    id: "argonReset",
+    label: "Argon Reset Timer",
+    unique: true,
+    description: "time until Gemini 4 Argon's 7-day quota resets, hidden when not sent",
+    summary: "when the Argon quota resets",
+  },
+  {
     id: "context",
     label: "Context Bar",
     unique: true,

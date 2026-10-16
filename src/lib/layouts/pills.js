@@ -312,6 +312,48 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       );
     }
 
+    // Argon is a Gemini model, so its quota takes the Gemini 7d color; the
+    // 🔮 tag tells the two apart.
+    case "argonWeekly": {
+      if (!session.argonWeekly) {
+        return null;
+      }
+      const thresh = resolveQuotaThresholds(widget, config);
+      const rem = session.argonWeekly.remaining;
+      const level = rem <= thresh.crit ? "crit" : rem <= thresh.warn ? "warn" : "normal";
+      const blink = !ascii && shouldBlink(level, thresh.blink);
+      const color = quotaColor(rem, colors.weekly, {
+        crit: thresh.crit,
+        warn: thresh.warn,
+        critColor: colors.warn,
+        warnColor: colors.caution,
+      });
+      return meterSegment(
+        color,
+        rem,
+        meterLabel(),
+        `${close} ${rem.toFixed(1)}% rem `,
+        true,
+        blink,
+        pace(session.argonWeekly)
+      );
+    }
+
+    case "argonReset": {
+      const text = session.argonWeekly
+        ? formatResetText(session.argonWeekly, {
+            format: widget.format,
+            fallback: "countdown",
+            weekly: true,
+            clock: config.clock,
+          })
+        : "";
+      if (!text) {
+        return null;
+      }
+      return pill(colors.weekly, lbl(text));
+    }
+
     case "context": {
       const thresh = resolveContextThresholds(widget, config);
       const level =
