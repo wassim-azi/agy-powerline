@@ -78,7 +78,8 @@ jobs:
         run: node src/index.js report
 
       # Same as release.yml: the repo-only "prepare" script is removed before
-      # packing, so the published package has no install scripts.
+      # packing, so the published package has no install scripts. npm always
+      # packs every README, so the translations (README.<lang>.md) ship too.
       - name: Verify published package
         shell: bash
         run: |
@@ -86,7 +87,7 @@ jobs:
           npm pack --dry-run --json > pack.json
           node -e "
             const files = require('./pack.json')[0].files.map((f) => f.path);
-            const bad = files.filter((f) => !/^(src\/|README\.md$|CHANGELOG\.md$|LICENSE$|package\.json$)/.test(f));
+            const bad = files.filter((f) => !/^(src\/|README(\.[a-z]{2}(-[A-Z]{2})?)?\.md$|CHANGELOG\.md$|LICENSE$|package\.json$)/.test(f));
             if (bad.length) throw new Error('Unexpected files in package: ' + bad.join(', '));
             const scripts = require('./package.json').scripts || {};
             const hooks = ['preinstall', 'install', 'postinstall', 'prepare'].filter((s) => s in scripts);
