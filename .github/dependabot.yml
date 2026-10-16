@@ -1,13 +1,17 @@
 version: 2
 updates:
   # Dependency PRs go to develop, like every other contribution, with
-  # Conventional Commit messages ("chore(deps): bump ...").
+  # Conventional Commit messages ("chore(deps): bump ..."). A new version is
+  # proposed only after 7 days, so a compromised release has time to be
+  # caught and pulled first.
   - package-ecosystem: "npm"
     directory: "/"
     target-branch: "develop"
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "chore"
       include: "scope"
@@ -18,6 +22,8 @@ updates:
     schedule:
       interval: "monthly"
     open-pull-requests-limit: 5
+    cooldown:
+      default-days: 7
     commit-message:
       prefix: "ci"
       include: "scope"

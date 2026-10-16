@@ -43,6 +43,9 @@ jobs:
         with:
           node-version: 24.x
           registry-url: https://registry.npmjs.org
+          # A cache restored from another run could leak into the published
+          # package; the release always installs from scratch.
+          package-manager-cache: false
 
       - name: Check the release tag matches package.json
         env:

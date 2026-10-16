@@ -1,0 +1,28 @@
+name: Workflow audit
+
+# zizmor audits the GitHub Actions workflows themselves: script injection,
+# token permissions, risky triggers, unpinned actions. release.yml publishes
+# to npm, so a weakness here would reach every user.
+on:
+  push:
+    branches: [develop, main]
+    paths: [".github/workflows/**", ".github/dependabot.yml"]
+  pull_request:
+    branches: [develop, main]
+    paths: [".github/workflows/**", ".github/dependabot.yml"]
+
+permissions: {}
+
+jobs:
+  zizmor:
+    name: zizmor
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # findings appear in the Security tab
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: zizmorcore/zizmor-action@85b2b9fb8e3325e7a23d7d0a9d7ba5ae0f999e3e # v0.7.1

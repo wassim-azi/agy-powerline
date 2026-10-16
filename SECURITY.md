@@ -71,6 +71,10 @@ Text that does not come from your own config (payload fields, branch names, comm
 - Zero runtime dependencies.
 - Releases are published from GitHub Actions with [npm provenance](https://docs.npmjs.com/generating-provenance-statements), so you can verify that a published version was built from this repository.
 - No install scripts (`preinstall`, `install`, `postinstall`, `prepare`) in the published package; CI checks this on every change.
+- The release workflow installs without a cache, so nothing from an earlier run can end up in the published package.
+- GitHub Actions are pinned to exact commits, and [zizmor](https://docs.zizmor.sh/) audits the workflows on every change to them.
+- Dependabot proposes a new dependency version only after it has been out for 7 days.
+- [OpenSSF Scorecard](https://scorecard.dev/) checks the repository's supply-chain practices every week; results are in the repository's Security tab.
 
 ---
 

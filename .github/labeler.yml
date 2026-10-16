@@ -1,0 +1,43 @@
+# Labels for pull requests, applied by .github/workflows/labeler.yml. The
+# release notes (.github/release.yml) group pull requests by these labels.
+# Labels come from the files a PR touches or from its branch name.
+
+bug:
+  - head-branch: ["^fix/"]
+
+enhancement:
+  - head-branch: ["^feat/"]
+
+documentation:
+  - head-branch: ["^docs/"]
+  - changed-files:
+      - any-glob-to-any-file:
+          - "docs/**"
+          - "README*.md"
+          - "CONTRIBUTING.md"
+          - "SECURITY.md"
+          - "CODE_OF_CONDUCT.md"
+
+theme:
+  - changed-files:
+      - any-glob-to-any-file: ["src/lib/themes.js"]
+
+widget:
+  - changed-files:
+      - any-glob-to-any-file: ["src/lib/catalog.js"]
+
+github_actions:
+  - changed-files:
+      - any-glob-to-any-file: [".github/workflows/**"]
+
+"platform: windows":
+  - changed-files:
+      - any-glob-to-any-file: ["tests/platform/windows.test.js"]
+
+"platform: macos":
+  - changed-files:
+      - any-glob-to-any-file: ["tests/platform/macos.test.js"]
+
+"platform: linux":
+  - changed-files:
+      - any-glob-to-any-file: ["tests/platform/linux.test.js"]
