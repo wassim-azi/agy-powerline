@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `configure` edits a widget's options: Enter on a widget sets its color, label, caution and danger levels, blink, pace marker, reset format, short model name or badge text, with the preview following each change (#29)
+- The README in Simplified Chinese (`README.zh-CN.md`) and Japanese (`README.ja.md`), with a language switcher at the top of each README (#34)
 - `argonWeekly` and `argonReset` widgets show Gemini 4 Argon's own weekly quota on Google AI Pro and when it resets, whatever model you're using; the `limits` preset gets them as a fourth row, which hides when there's no Argon quota (#38)
 
 ### Changed

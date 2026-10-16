@@ -220,7 +220,7 @@ Run `npm test` to ensure it passes, then `npm run test:update` if the bar's outp
 
 ### 5. Document it
 
-Add the widget to the widget table in `README.md` and to the Widgets list in `docs/configuration.md`, and add a `CHANGELOG.md` entry.
+Add the widget to the widget table in `README.md` (and the same row in the translations `README.zh-CN.md` and `README.ja.md`; a description in English is fine if you don't speak the language) and to the Widgets list in `docs/configuration.md`, and add a `CHANGELOG.md` entry.
 
 ---
 
@@ -240,7 +240,7 @@ Themes live in **one file** (`src/lib/themes.js`). There is room for at most 9 d
    Dark themes use bright colors with `DARK_TEXT`; light themes use deep colors with `LIGHT_TEXT` (white).
 2. Run `npm test`. The theme tests check that every color reaches 4.5:1 contrast against the pill text and the terminal background, and that `fiveHour` (ok), `caution` and `warn` (danger) are clearly different. Color-blind themes must also pass simulated protanopia, deuteranopia and tritanopia.
 3. Look at it with `node src/index.js theme --gallery` on a terminal of the matching background.
-4. Add it to the themes table in `README.md`.
+4. Add it to the themes table in `README.md`, `README.zh-CN.md` and `README.ja.md`.
 
 ---
 
