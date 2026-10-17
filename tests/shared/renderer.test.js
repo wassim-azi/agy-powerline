@@ -502,6 +502,55 @@ async function run() {
     firstVal.length > 0 && firstVal === secondVal
   );
 
+  const execDir = fs.mkdtempSync(path.join(os.tmpdir(), "agy-exec-interval-"));
+  const previousHome = process.env.AGY_POWERLINE_HOME;
+  const originalNow = Date.now;
+  let now = originalNow();
+  try {
+    process.env.AGY_POWERLINE_HOME = execDir;
+    fs.writeFileSync(path.join(execDir, "statusline.config.json"), "{}");
+    clearExecCache();
+    Date.now = () => now;
+    const valueFile = path.join(execDir, "value.txt");
+    const widget = {
+      id: "exec",
+      cmd: "node -e \"console.log(require('fs').readFileSync('value.txt', 'utf8'))\"",
+      interval: 3600,
+    };
+    fs.writeFileSync(valueFile, "first");
+    const initial = runExecWidget(widget, { cwd: execDir });
+    fs.writeFileSync(valueFile, "second");
+    now += 5000;
+    record(
+      "runExecWidget reads a one-hour interval in seconds",
+      initial === "first" && runExecWidget(widget, { cwd: execDir }) === "first"
+    );
+    now += 3594999;
+    record(
+      "runExecWidget keeps cached output until the full interval has passed",
+      runExecWidget(widget, { cwd: execDir }) === "first"
+    );
+    now += 1;
+    record(
+      "runExecWidget refreshes output when the interval expires",
+      runExecWidget(widget, { cwd: execDir }) === "second"
+    );
+    widget.interval = 0;
+    fs.writeFileSync(valueFile, "third");
+    const uncached = runExecWidget(widget, { cwd: execDir });
+    fs.writeFileSync(valueFile, "fourth");
+    record(
+      "runExecWidget does not cache output with interval zero",
+      uncached === "third" && runExecWidget(widget, { cwd: execDir }) === "fourth"
+    );
+  } finally {
+    Date.now = originalNow;
+    clearExecCache();
+    if (previousHome === undefined) delete process.env.AGY_POWERLINE_HOME;
+    else process.env.AGY_POWERLINE_HOME = previousHome;
+    fs.rmSync(execDir, { recursive: true, force: true });
+  }
+
   // Exec timeout handling: long running command does not hang or throw
   const timeoutWidget = {
     id: "exec",

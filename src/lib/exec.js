@@ -141,7 +141,7 @@ function runExecWidget(widget, session = {}) {
   if (widget.interval != null) {
     const parsed = Number(widget.interval);
     if (Number.isFinite(parsed) && parsed >= 0) {
-      intervalMs = parsed >= 1000 ? parsed : parsed * 1000;
+      intervalMs = parsed * 1000;
     }
   }
 

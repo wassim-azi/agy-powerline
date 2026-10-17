@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Exec widget intervals are always read in seconds; values of 1000 or more were read as milliseconds (#68).
 - The statusline exits quietly when Antigravity closes its output pipe (#45, thanks @dannyward630)
 - `init` and `uninstall` keep a `settings.json` symlinked by a dotfile manager (stow, chezmoi, yadm) as a link and write the change into the file it points to; they used to replace the link with a plain file, so the real file never got the change. The same goes for a symlinked `statusline.config.json`
 - A second `init` no longer loses your original `settings.json`: the first backup is now kept as `settings.json.agy-powerline.original.bak` and never replaced, next to the latest one
