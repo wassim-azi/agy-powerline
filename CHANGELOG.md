@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.0] - 2026-10-16
 
+- `clock` widget: displays the current time in both Pills and Lines layouts, with configurable 12/24-hour formatting.
+
 ### Added
 
 - `configure` edits a widget's options: Enter on a widget sets its color, label, caution and danger levels, blink, pace marker, reset format, short model name or badge text, with the preview following each change (#29)

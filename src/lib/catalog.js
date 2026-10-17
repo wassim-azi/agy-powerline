@@ -222,6 +222,13 @@ const WIDGET_CATALOG = [
     summary: "session tokens, total or split",
   },
   {
+    id: "clock",
+    label: "Clock",
+    unique: true,
+    description: "current local time",
+    summary: "current local time",
+  },
+  {
     id: "exec",
     label: "Shell Command",
     unique: false,

@@ -15,7 +15,13 @@ function render(data, widgets, options = {}) {
   return strip(
     renderStatusline(
       { ...data, terminal_width: options.width ?? 0 },
-      { ...defaultConfig(), layout: options.layout || "pills", ascii: options.ascii, widgets },
+      {
+        ...defaultConfig(),
+        layout: options.layout || "pills",
+        ascii: options.ascii,
+        widgets,
+        ...(options.clock ? { clock: options.clock } : {}),
+      },
       { color: options.color || "none" }
     )
   );
@@ -28,9 +34,30 @@ async function run() {
   testOneFormPerSetting();
   testTasks();
   testMode();
+  testClock();
   testTitle();
 }
 
+function testClock() {
+  const real = fixture("antigravity-1.3.0.json");
+  const clock = [{ id: "clock" }];
+
+  record("clock renders in the pills layout", /Clock: /.test(render(real, clock)));
+
+  record(
+    "clock renders in the lines layout",
+    /Clock: /.test(render(real, clock, { layout: "lines" }))
+  );
+
+  record(
+    "clock supports 12-hour formatting",
+    /Clock: \d{1,2}:\d{2}\s*[AP]M/i.test(
+      render(real, clock, {
+        clock: { ...defaultConfig().clock, hour12: true },
+      })
+    )
+  );
+}
 function testTitle() {
   const real = fixture("antigravity-1.3.3-title.json");
   const title = [{ id: "title" }];
