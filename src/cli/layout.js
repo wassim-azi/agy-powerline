@@ -1,3 +1,5 @@
+"use strict";
+
 const {
   LAYOUTS,
   LAYOUT_ORDER,

@@ -1,3 +1,5 @@
+"use strict";
+
 const readline = require("readline");
 
 function createRl() {
