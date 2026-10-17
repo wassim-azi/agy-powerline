@@ -1,3 +1,5 @@
+"use strict";
+
 const { spawn } = require("child_process");
 
 function spawnCapture(file, args, input, timeoutMs = 15000) {
