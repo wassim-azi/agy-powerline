@@ -48,7 +48,7 @@ const {
   glyphName,
 } = require("../lib/powerline");
 
-const REPO_URL = "https://github.com/wassim-azi/agy-powerline";
+const { REPO_URL } = require("./repo-url");
 
 const CSI = "\x1b[";
 const RESET = `${CSI}0m`;
