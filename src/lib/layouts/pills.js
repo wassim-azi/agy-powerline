@@ -16,6 +16,7 @@ const { pickGlyph, glyphChar } = require("../powerline");
 const {
   quotaColor,
   contextColor,
+  formatClockTime,
   resolveQuotaThresholds,
   resolveContextThresholds,
   shouldBlink,
@@ -119,6 +120,8 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
   }
 
   switch (id) {
+    case "clock":
+      return pill(colors.meta, lbl(formatClockTime(new Date(), config.clock)));
     case "model":
       if (!session.model) {
         return null;

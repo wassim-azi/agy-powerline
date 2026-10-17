@@ -5,6 +5,7 @@ const {
   basenameOf,
   homePath,
   formatResetText,
+  formatClockTime,
   paceIndex,
   paceGlyph,
   formatGitSync,
@@ -225,6 +226,8 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
   }
 
   switch (id) {
+    case "clock":
+      return fg(palette.text) + tag() + formatClockTime(new Date(), config.clock) + RESET;
     case "model":
       if (!session.model) {
         return null;

@@ -52,6 +52,7 @@ const VALID_WIDGET_IDS = new Set([
   "cacheCreate",
   "cacheHit",
   "totalTokens",
+  "clock",
   "exec",
   "customText",
   "separator",
