@@ -1,6 +1,6 @@
 # agy-powerline
 
-[English](README.md) | **简体中文** | [日本語](README.ja.md)
+[English](README.md) | **简体中文** | [日本語](README.ja.md) | [français](README.fr.md)
 
 [![CI](https://github.com/wassim-azi/agy-powerline/actions/workflows/ci.yml/badge.svg)](https://github.com/wassim-azi/agy-powerline/actions/workflows/ci.yml)
 [![Version](https://img.shields.io/npm/v/agy-powerline.svg)](https://www.npmjs.com/package/agy-powerline)
