@@ -19,6 +19,7 @@ const {
 } = require("../lib/paths");
 const { createRl, confirm } = require("../lib/prompt");
 const { buildRuntimeBundle } = require("./bundle");
+const { REPO_URL } = require("./repo-url");
 
 const DIM = "\x1b[2m";
 const BOLD = "\x1b[1m";
@@ -27,8 +28,6 @@ const GREEN = "\x1b[32m";
 const YELLOW = "\x1b[33m";
 const RED = "\x1b[31m";
 const RESET = "\x1b[0m";
-
-const REPO_URL = "https://github.com/wassim-azi/agy-powerline";
 
 // Up to 1.1.0 the runtime was installed as separate files next to
 // statusline.js. They are part of the one-file statusline.js now; delete the
