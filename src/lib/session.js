@@ -3,6 +3,7 @@
 const os = require("os");
 const { formatReset, resetInSeconds, firstText } = require("./formatters");
 const { resolveGit, resolveGitDetails } = require("./git");
+const { resolveUsage } = require("./usage");
 
 const FIVE_HOURS = 5 * 3600;
 const SEVEN_DAYS = 7 * 86400;
@@ -144,7 +145,9 @@ function contextUsedPercent(data) {
   return (current * 100) / size;
 }
 
-function extractSession(data, config) {
+// options.readUsage: the statusline itself may read agy's conversation
+// databases; previews only use the usage cache.
+function extractSession(data, config, options = {}) {
   const git = resolveGit(data, config);
   const gitDetails = resolveGitDetails(data, config);
   // Once git status has been read for gitFiles, the branch's dirty marker can
@@ -234,6 +237,8 @@ function extractSession(data, config) {
     sandboxNet: data.sandbox?.allow_network === true,
     git,
     gitDetails,
+    // Only read when tokensToday or tokensWeek is on the bar.
+    usage: resolveUsage(config, { read: options.readUsage === true }),
     terminalWidth: terminalWidth(data.terminal_width ?? process.stdout.columns ?? 0),
   };
 }

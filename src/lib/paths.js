@@ -27,6 +27,7 @@ const RUNTIME_FILES = [
   "fit.js",
   "log.js",
   "payload-dump.js",
+  "usage.js",
   path.join("layouts", "lines.js"),
   path.join("layouts", "pills.js"),
 ];
@@ -44,6 +45,9 @@ const PRIVATE_FILES = [
   ".git-sync-cache.json",
   // STATUS_CACHE_NAME in git.js: repo paths with their file and line counts.
   ".git-status-cache.json",
+  // USAGE_CACHE_NAME in usage.js: tokens per day, keyed by a hash of each
+  // conversation database's path.
+  ".usage-cache.json",
   // LOG_NAME in log.js, spelled out because log.js requires this file.
   "agy-powerline.log",
 ];

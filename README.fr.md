@@ -108,6 +108,7 @@ Prévisualisez tous les thèmes avec `npx agy-powerline theme --gallery`.
 | `mode`                                                        | Mode d’approbation (par exemple `accept-edits`) et mode Vim                                                          |
 | `title`                                                       | Titre de la conversation                                                                                             |
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Tokens de la session et utilisation du cache des prompts                                                             |
+| `tokensToday`, `tokensWeek`                                   | Tokens utilisés aujourd’hui et sur les 7 derniers jours, toutes conversations confondues (Node 22.13+)               |
 | `ram`                                                         | Mémoire utilisée sur votre machine                                                                                   |
 | `customText`, `exec`                                          | Texte personnalisé ou résultat d’une [commande shell](docs/configuration.md#shell-command-widget-exec)               |
 

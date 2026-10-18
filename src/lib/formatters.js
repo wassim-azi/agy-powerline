@@ -271,6 +271,24 @@ function formatTokenSplit(input, output, ascii = false) {
     : `${formatTokens(input)}↑ ${formatTokens(output)}↓`;
 }
 
+// The usage widgets' text: "1.2M", or "1.0M↑ 245.3K↓" with "split", plus the
+// share of a "budget" when one is set ("1.2M (60%)"). null with no tokens.
+function formatUsage(tokens, widget = {}, ascii = false) {
+  const input = Number(tokens?.input) || 0;
+  const output = Number(tokens?.output) || 0;
+  const total = input + output;
+  if (!(total > 0)) {
+    return null;
+  }
+  const value = widget?.split ? formatTokenSplit(input, output, ascii) : formatTokens(total);
+  const budget = widget?.budget;
+  const pct =
+    typeof budget === "number" && Number.isFinite(budget) && budget > 0
+      ? (total * 100) / budget
+      : null;
+  return { text: pct === null ? value : `${value} (${Math.round(pct)}%)`, pct };
+}
+
 // "used/window", or just the used tokens while the window size is unknown.
 function formatContextTokens(used, size) {
   return size > 0 ? `${formatTokens(used)}/${formatTokens(size)}` : formatTokens(used);
@@ -630,6 +648,7 @@ module.exports = {
   formatContextTokens,
   shortModelName,
   formatTokenSplit,
+  formatUsage,
   formatGitSync,
   formatGitOperation,
   gitChangeParts,

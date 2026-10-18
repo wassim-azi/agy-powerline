@@ -25,6 +25,7 @@ const {
 const { runStatuslineCommand } = require("../lib/run");
 const { detectColorDepth } = require("../lib/colors");
 const { readLog, getLogPath } = require("../lib/log");
+const { USAGE_PERIODS, usageAvailable } = require("../lib/usage");
 const { version } = require("../../package.json");
 
 const DIM = "\x1b[2m";
@@ -144,6 +145,15 @@ async function doctorCommand(options = {}) {
     console.log(`${RED} statusline.config.json is not valid JSON.${RESET}`);
     console.log(`  ${DIM}${configState.error}${RESET}`);
     console.log("  The bar shows the defaults until you fix the file or delete it.");
+  }
+
+  // Not a failure: the widgets just hide.
+  if (configState.config.widgets.some((widget) => USAGE_PERIODS[widget.id]) && !usageAvailable()) {
+    console.log();
+    console.log(
+      `${YELLOW} usage widgets need Node 22.13 or newer${RESET} (this is ${process.version}).`
+    );
+    console.log("  tokensToday and tokensWeek stay hidden until Node is updated.");
   }
 
   const breaking = cmdBreakingChars(installDir);

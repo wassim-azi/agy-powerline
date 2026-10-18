@@ -106,6 +106,7 @@ Preview them all with `npx agy-powerline theme --gallery`. For one color sweep a
 | `mode`                                                        | Approval mode (e.g. accept-edits) and Vim mode                                                           |
 | `title`                                                       | The conversation's title                                                                                 |
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Session tokens and prompt cache usage                                                                    |
+| `tokensToday`, `tokensWeek`                                   | Tokens used today and over the last 7 days, all conversations (Node 22.13+)                              |
 | `ram`                                                         | Memory used on your machine                                                                              |
 | `customText`, `exec`                                          | Your own text, or the output of a [shell command](docs/configuration.md#shell-command-widget-exec)       |
 

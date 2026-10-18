@@ -14,6 +14,8 @@ const DROP_ORDER = [
   "cacheRead",
   "totalTokens",
   "cacheHit",
+  "tokensToday",
+  "tokensWeek",
   "artifacts",
   "tasks",
   "plan",

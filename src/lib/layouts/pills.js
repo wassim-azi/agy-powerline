@@ -27,6 +27,7 @@ const {
   formatContextTokens,
   shortModelName,
   formatTokenSplit,
+  formatUsage,
   formatGitSync,
   formatGitOperation,
   gitChangeParts,
@@ -622,6 +623,32 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
             : formatTokens(session.totalTokens)
         )
       );
+
+    case "tokensToday":
+    case "tokensWeek": {
+      const usage = formatUsage(
+        session.usage?.[id === "tokensToday" ? "today" : "week"],
+        widget,
+        ascii
+      );
+      if (!usage) {
+        return null;
+      }
+      if (usage.pct === null) {
+        return pill(colors.meta, lbl(usage.text));
+      }
+      // A budget alerts like the context widgets: caution, then danger.
+      const thresh = resolveContextThresholds(widget, config);
+      const level =
+        usage.pct >= thresh.crit ? "crit" : usage.pct >= thresh.warn ? "warn" : "normal";
+      const color = contextColor(usage.pct, colors.meta, false, {
+        crit: thresh.crit,
+        warn: thresh.warn,
+        critColor: colors.warn,
+        warnColor: colors.caution,
+      });
+      return pill(color, lbl(usage.text), !ascii && shouldBlink(level, thresh.blink));
+    }
 
     case "customText": {
       if (!widget?.text) {

@@ -108,6 +108,7 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 | `mode`                                                        | 承認モード（例：accept-edits）と Vim モード                                                              |
 | `title`                                                       | 会話のタイトル                                                                                           |
 | `totalTokens`、`cacheHit`、`cacheRead`、`cacheCreate`         | セッションのトークン数とプロンプトキャッシュの使用状況                                                   |
+| `tokensToday`、`tokensWeek`                                   | 今日と過去 7 日間のトークン使用量（すべての会話、Node 22.13 以降）                                       |
 | `ram`                                                         | マシンのメモリ使用量                                                                                     |
 | `customText`、`exec`                                          | 任意のテキスト、または [シェルコマンド](docs/configuration.md#shell-command-widget-exec)の出力           |
 

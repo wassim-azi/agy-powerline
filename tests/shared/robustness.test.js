@@ -265,6 +265,49 @@ async function testStdoutErrorIsLogged() {
   }
 }
 
+// The usage widgets load node:sqlite, which prints an ExperimentalWarning on
+// Node 22: the installed runtime's stderr must stay empty all the same.
+function testUsageStderr() {
+  const { loadSqlite } = require("../../src/lib/usage");
+  if (!loadSqlite()?.DatabaseSync) {
+    record(`usage stderr check skipped: needs node:sqlite (Node ${process.version})`, true);
+    return;
+  }
+  const { makeConversationDb, generator } = require("./usage.test");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "agy-usage-stderr-"));
+  const home = path.join(root, "home");
+  const installDir = path.join(home, ".agy-powerline");
+  const conversations = path.join(home, ".gemini", "antigravity-cli", "conversations");
+  fs.mkdirSync(conversations, { recursive: true });
+  stageInstall(installDir);
+  fs.writeFileSync(
+    path.join(installDir, "statusline.config.json"),
+    JSON.stringify({ widgets: [{ id: "tokensToday" }], color: "none" })
+  );
+  makeConversationDb(path.join(conversations, "c.db"), {
+    gens: [generator({ input: 1200, output: 34, id: "x" }, Date.now())],
+  });
+  const env = { ...process.env, HOME: home, USERPROFILE: home };
+  delete env.AGY_POWERLINE_HOME;
+
+  try {
+    const result = spawnSync(NODE, [path.join(installDir, "statusline.js")], {
+      input: PAYLOAD,
+      env,
+      encoding: "utf8",
+      windowsHide: true,
+      timeout: 15000,
+    });
+    record(
+      "with usage widgets on the bar, the runtime's stderr stays empty",
+      result.status === 0 && result.stderr === "" && /Today: 1\.2K/.test(result.stdout),
+      `exit ${result.status}, stderr ${JSON.stringify(result.stderr)}, stdout ${JSON.stringify(result.stdout)}`
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
+}
+
 // An exec command handed the payload may never read it, exit before reading
 // it, or hang: none of these may break or stall the bar.
 function testExecPayloadFailures() {
@@ -358,6 +401,7 @@ async function run() {
   testWrongPayloadTypes();
   testBadGradients();
   testExecPayloadFailures();
+  testUsageStderr();
   await testConcurrentExecCache();
   await testStdoutEpipe();
   await testStdoutErrorIsLogged();

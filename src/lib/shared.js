@@ -93,7 +93,9 @@ function renderBar(data, config, overrides) {
   // sequences from every string before any layout prints it.
   // Valid JSON can still be null, a number or an array; read those as empty.
   const payload = data && typeof data === "object" && !Array.isArray(data) ? data : {};
-  const session = sanitizeDeep(extractSession(payload, resolved));
+  const session = sanitizeDeep(
+    extractSession(payload, resolved, { readUsage: overrides.usage === "read" })
+  );
   // Exec widgets only run when the caller opts in ("run"); CLI previews keep
   // the default placeholder so rendering a config never executes it.
   session.execMode =

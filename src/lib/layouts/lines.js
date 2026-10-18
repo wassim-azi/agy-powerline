@@ -29,6 +29,7 @@ const {
   formatContextTokens,
   shortModelName,
   formatTokenSplit,
+  formatUsage,
   resolveQuotaThresholds,
   resolveContextThresholds,
   shouldBlink,
@@ -544,6 +545,32 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
           : formatTokens(session.totalTokens)) +
         RESET
       );
+
+    case "tokensToday":
+    case "tokensWeek": {
+      const usage = formatUsage(
+        session.usage?.[id === "tokensToday" ? "today" : "week"],
+        widget,
+        ascii
+      );
+      if (!usage) {
+        return null;
+      }
+      // A budget alerts like the context widgets: caution, then danger.
+      const thresh = resolveContextThresholds(widget, config);
+      const level =
+        usage.pct === null
+          ? "normal"
+          : usage.pct >= thresh.crit
+            ? "crit"
+            : usage.pct >= thresh.warn
+              ? "warn"
+              : "normal";
+      const color =
+        level === "crit" ? palette.quotaCrit : level === "warn" ? palette.quotaHigh : palette.text;
+      const blinkSeq = !ascii && shouldBlink(level, thresh.blink) ? BLINK : "";
+      return blinkSeq + fg(palette.text) + tag() + fg(color) + usage.text + RESET;
+    }
 
     case "customText": {
       if (!widget?.text) {

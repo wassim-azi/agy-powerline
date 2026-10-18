@@ -17,6 +17,7 @@ registerSuite("meters", "./shared/meters.test");
 registerSuite("widgets", "./shared/widgets.test");
 registerSuite("configurator screens", "./shared/tui.test");
 registerSuite("git", "./shared/git.test");
+registerSuite("usage", "./shared/usage.test");
 registerSuite("problem log", "./shared/log.test");
 registerSuite("cli", "./shared/cli.test");
 registerSuite("readme", "./shared/readme.test");

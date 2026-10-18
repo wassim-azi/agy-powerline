@@ -258,6 +258,21 @@ const WIDGET_CATALOG = [
     summary: "session tokens, total or split",
   },
   {
+    id: "tokensToday",
+    label: "Tokens Today",
+    unique: true,
+    description: "tokens used today in all agy conversations, from agy's local data (Node 22.13+)",
+    summary: "tokens used today, all conversations",
+  },
+  {
+    id: "tokensWeek",
+    label: "Tokens 7 Days",
+    unique: true,
+    description:
+      "tokens used in the last 7 days in all agy conversations, from agy's local data (Node 22.13+)",
+    summary: "tokens used over 7 days",
+  },
+  {
     id: "exec",
     label: "Shell Command",
     unique: false,
