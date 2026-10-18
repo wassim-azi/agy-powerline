@@ -2,7 +2,7 @@
 
 const os = require("os");
 const { formatReset, resetInSeconds, firstText } = require("./formatters");
-const { resolveGit } = require("./git");
+const { resolveGit, resolveGitDetails } = require("./git");
 
 const FIVE_HOURS = 5 * 3600;
 const SEVEN_DAYS = 7 * 86400;
@@ -145,6 +145,14 @@ function contextUsedPercent(data) {
 }
 
 function extractSession(data, config) {
+  const git = resolveGit(data, config);
+  const gitDetails = resolveGitDetails(data, config);
+  // Once git status has been read for gitFiles, the branch's dirty marker can
+  // count uncommitted files too, not only an unfinished merge or rebase.
+  const files = gitDetails?.files;
+  if (git && files && gitDetails.branch === git.branch) {
+    git.dirty = git.dirty || files.staged + files.modified + files.conflicts > 0;
+  }
   const contextPct = percent(contextUsedPercent(data));
   const contextSize = count(data.context_window?.context_window_size);
   const current = data.context_window?.current_usage;
@@ -224,7 +232,8 @@ function extractSession(data, config) {
     version: firstText(data.version),
     sandbox: data.sandbox?.enabled === true,
     sandboxNet: data.sandbox?.allow_network === true,
-    git: resolveGit(data, config),
+    git,
+    gitDetails,
     terminalWidth: terminalWidth(data.terminal_width ?? process.stdout.columns ?? 0),
   };
 }

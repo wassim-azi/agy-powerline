@@ -90,25 +90,26 @@ Prévisualisez tous les thèmes avec `npx agy-powerline theme --gallery`.
 
 ## Widgets
 
-| Widget                                                  | Informations affichées                                                                                               |
-| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `model`                                                 | Modèle utilisé                                                                                                       |
-| `fiveHourBar`, `weeklyBar`                              | Quota restant sur 5h/7d sous forme de jauge, avec un [indicateur de rythme](docs/configuration.md#quota-pace-marker) |
-| `fiveHourPct`, `weeklyPct`                              | Pourcentage de quota restant sur 5h/7d                                                                               |
-| `fiveHourReset`, `weeklyReset`                          | Temps restant avant la réinitialisation du quota, ou heure de réinitialisation                                       |
-| `quota`                                                 | Quota le plus proche de sa limite, avec son heure de réinitialisation                                                |
-| `thirdPartyFiveHour`, `thirdPartyWeekly`                | Quotas des modèles tiers                                                                                             |
-| `argonWeekly`, `argonReset`                             | Quota hebdomadaire propre à Gemini 4 Argon (Google AI Pro) et sa réinitialisation                                    |
-| `context`, `contextPct`, `contextTokens`                | Fenêtre de contexte utilisée : jauge, pourcentage ou nombre de tokens                                                |
-| `git`                                                   | Branche, modifications non validées et commits en avance ou en retard                                                |
-| `project`, `cwd`                                        | Dossier du projet et dossier courant                                                                                 |
-| `agentState`, `plan`, `sandbox`, `artifacts`, `version` | Activité de l’agent, abonnement Antigravity, bac à sable, artefacts et version de la CLI                             |
-| `tasks`                                                 | Sous-agents actifs et tâches en arrière-plan                                                                         |
-| `mode`                                                  | Mode d’approbation (par exemple `accept-edits`) et mode Vim                                                          |
-| `title`                                                 | Titre de la conversation                                                                                             |
-| `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`   | Tokens de la session et utilisation du cache des prompts                                                             |
-| `ram`                                                   | Mémoire utilisée sur votre machine                                                                                   |
-| `customText`, `exec`                                    | Texte personnalisé ou résultat d’une [commande shell](docs/configuration.md#shell-command-widget-exec)               |
+| Widget                                                        | Informations affichées                                                                                               |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `model`                                                       | Modèle utilisé                                                                                                       |
+| `fiveHourBar`, `weeklyBar`                                    | Quota restant sur 5h/7d sous forme de jauge, avec un [indicateur de rythme](docs/configuration.md#quota-pace-marker) |
+| `fiveHourPct`, `weeklyPct`                                    | Pourcentage de quota restant sur 5h/7d                                                                               |
+| `fiveHourReset`, `weeklyReset`                                | Temps restant avant la réinitialisation du quota, ou heure de réinitialisation                                       |
+| `quota`                                                       | Quota le plus proche de sa limite, avec son heure de réinitialisation                                                |
+| `thirdPartyFiveHour`, `thirdPartyWeekly`                      | Quotas des modèles tiers                                                                                             |
+| `argonWeekly`, `argonReset`                                   | Quota hebdomadaire propre à Gemini 4 Argon (Google AI Pro) et sa réinitialisation                                    |
+| `context`, `contextPct`, `contextTokens`                      | Fenêtre de contexte utilisée : jauge, pourcentage ou nombre de tokens                                                |
+| `git`                                                         | Branche, modifications non validées et commits en avance ou en retard                                                |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree` | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree             |
+| `project`, `cwd`                                              | Dossier du projet et dossier courant                                                                                 |
+| `agentState`, `plan`, `sandbox`, `artifacts`, `version`       | Activité de l’agent, abonnement Antigravity, bac à sable, artefacts et version de la CLI                             |
+| `tasks`                                                       | Sous-agents actifs et tâches en arrière-plan                                                                         |
+| `mode`                                                        | Mode d’approbation (par exemple `accept-edits`) et mode Vim                                                          |
+| `title`                                                       | Titre de la conversation                                                                                             |
+| `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Tokens de la session et utilisation du cache des prompts                                                             |
+| `ram`                                                         | Mémoire utilisée sur votre machine                                                                                   |
+| `customText`, `exec`                                          | Texte personnalisé ou résultat d’une [commande shell](docs/configuration.md#shell-command-widget-exec)               |
 
 Un widget qui n’a rien à afficher se masque automatiquement. Vous pouvez personnaliser sa couleur, masquer son libellé ou définir ses propres seuils d’alerte : consultez la [documentation de configuration](docs/configuration.md).
 

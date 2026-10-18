@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `dark-macchiato` theme: Catppuccin Macchiato palette (#33, thanks @yatharth2soni)
 - Gradients: `"gradient": "sunset"` (or `npx agy-powerline gradient sunset`) colors each row with one sweep from left to right, from eight presets or your own hex colors, with text kept readable and caution and danger colors kept as they are (#80)
 - `exec` widgets can read the session JSON on stdin with `"payload": true` (your email and session IDs are removed first) and keep the colors their command prints with `"colors": true`; `docs/configuration.md` has recipes (#81)
+- Git detail widgets, each opt-in: `gitChanges` (lines added and removed), `gitFiles` (staged, modified, untracked and conflicted files), `gitSha` (commit ID), `gitStash` (stash count) and `gitWorktree` (linked worktree name); with `gitFiles` on the bar, the `git` widget's dirty marker also counts uncommitted files (#82)
 - The README in French (`README.fr.md`) (#51)
 
 ### Changed

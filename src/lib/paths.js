@@ -40,6 +40,8 @@ const PRIVATE_FILES = [
   "last-payload.json",
   // SYNC_CACHE_NAME in git.js: commit IDs of the repos you work in.
   ".git-sync-cache.json",
+  // STATUS_CACHE_NAME in git.js: repo paths with their file and line counts.
+  ".git-status-cache.json",
   // LOG_NAME in log.js, spelled out because log.js requires this file.
   "agy-powerline.log",
 ];

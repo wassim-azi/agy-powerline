@@ -19,6 +19,8 @@ const {
   paceIndex,
   paceGlyph,
   formatGitSync,
+  gitChangeParts,
+  gitFileParts,
   formatTasks,
   formatMode,
   clipText,
@@ -382,6 +384,52 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         RESET
       );
     }
+
+    case "gitChanges": {
+      const parts = gitChangeParts(session.gitDetails?.changes, ascii);
+      if (!parts.length) {
+        return null;
+      }
+      const shade = { added: palette.quotaLow, removed: palette.quotaCrit };
+      return (
+        fg(palette.git) +
+        tag() +
+        parts.map((part) => fg(shade[part.kind]) + part.text).join(" ") +
+        RESET
+      );
+    }
+
+    case "gitFiles": {
+      const parts = gitFileParts(session.gitDetails?.files, ascii);
+      if (!parts.length) {
+        return null;
+      }
+      const shade = (kind) => (kind === "conflicts" ? palette.quotaCrit : palette.git);
+      return (
+        fg(palette.git) +
+        tag() +
+        parts.map((part) => fg(shade(part.kind)) + part.text).join(" ") +
+        RESET
+      );
+    }
+
+    case "gitSha":
+      if (!session.gitDetails?.sha) {
+        return null;
+      }
+      return fg(palette.git) + tag() + session.gitDetails.sha + RESET;
+
+    case "gitStash":
+      if (!(session.gitDetails?.stash > 0)) {
+        return null;
+      }
+      return fg(palette.git) + tag() + session.gitDetails.stash + RESET;
+
+    case "gitWorktree":
+      if (!session.gitDetails?.worktree) {
+        return null;
+      }
+      return fg(palette.git) + tag() + session.gitDetails.worktree + RESET;
 
     case "plan":
       if (!session.plan) {

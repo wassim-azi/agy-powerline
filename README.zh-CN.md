@@ -90,25 +90,26 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 ## 组件
 
-| 组件                                                    | 显示内容                                                                             |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `model`                                                 | 当前使用的模型                                                                       |
-| `fiveHourBar`、`weeklyBar`                              | 以进度条显示 5h / 7d 剩余配额，带[进度标记](docs/configuration.md#quota-pace-marker) |
-| `fiveHourPct`、`weeklyPct`                              | 以百分比显示 5h / 7d 剩余配额                                                        |
-| `fiveHourReset`、`weeklyReset`                          | 距配额重置的时间，或重置时刻                                                         |
-| `quota`                                                 | 最接近用完的配额及其重置时间                                                         |
-| `thirdPartyFiveHour`、`thirdPartyWeekly`                | 第三方模型的配额                                                                     |
-| `argonWeekly`、`argonReset`                             | Gemini 4 Argon 独立的每周配额（Google AI Pro）及其重置时间                           |
-| `context`、`contextPct`、`contextTokens`                | 已用的上下文窗口：进度条、百分比或 token 数                                          |
-| `git`                                                   | 分支、未提交的更改以及领先/落后的提交数                                              |
-| `project`、`cwd`                                        | 项目文件夹、当前文件夹                                                               |
-| `agentState`、`plan`、`sandbox`、`artifacts`、`version` | 代理正在做什么、你的套餐、沙箱、产物、CLI 版本                                       |
-| `tasks`                                                 | 正在运行的子代理和后台任务                                                           |
-| `mode`                                                  | 审批模式（如 accept-edits）和 Vim 模式                                               |
-| `title`                                                 | 对话标题                                                                             |
-| `totalTokens`、`cacheHit`、`cacheRead`、`cacheCreate`   | 会话 token 数和提示缓存的使用情况                                                    |
-| `ram`                                                   | 本机已用内存                                                                         |
-| `customText`、`exec`                                    | 你自己的文本，或 [shell 命令](docs/configuration.md#shell-command-widget-exec)的输出 |
+| 组件                                                          | 显示内容                                                                                                 |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `model`                                                       | 当前使用的模型                                                                                           |
+| `fiveHourBar`、`weeklyBar`                                    | 以进度条显示 5h / 7d 剩余配额，带[进度标记](docs/configuration.md#quota-pace-marker)                     |
+| `fiveHourPct`、`weeklyPct`                                    | 以百分比显示 5h / 7d 剩余配额                                                                            |
+| `fiveHourReset`、`weeklyReset`                                | 距配额重置的时间，或重置时刻                                                                             |
+| `quota`                                                       | 最接近用完的配额及其重置时间                                                                             |
+| `thirdPartyFiveHour`、`thirdPartyWeekly`                      | 第三方模型的配额                                                                                         |
+| `argonWeekly`、`argonReset`                                   | Gemini 4 Argon 独立的每周配额（Google AI Pro）及其重置时间                                               |
+| `context`、`contextPct`、`contextTokens`                      | 已用的上下文窗口：进度条、百分比或 token 数                                                              |
+| `git`                                                         | 分支、未提交的更改以及领先/落后的提交数                                                                  |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree` | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree |
+| `project`、`cwd`                                              | 项目文件夹、当前文件夹                                                                                   |
+| `agentState`、`plan`、`sandbox`、`artifacts`、`version`       | 代理正在做什么、你的套餐、沙箱、产物、CLI 版本                                                           |
+| `tasks`                                                       | 正在运行的子代理和后台任务                                                                               |
+| `mode`                                                        | 审批模式（如 accept-edits）和 Vim 模式                                                                   |
+| `title`                                                       | 对话标题                                                                                                 |
+| `totalTokens`、`cacheHit`、`cacheRead`、`cacheCreate`         | 会话 token 数和提示缓存的使用情况                                                                        |
+| `ram`                                                         | 本机已用内存                                                                                             |
+| `customText`、`exec`                                          | 你自己的文本，或 [shell 命令](docs/configuration.md#shell-command-widget-exec)的输出                     |
 
 没有内容可显示的组件会自动隐藏。组件可以更改颜色、去掉标签，或设置自己的告警阈值：见 [Configuration](docs/configuration.md)。
 

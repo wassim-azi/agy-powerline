@@ -88,25 +88,26 @@ Preview them all with `npx agy-powerline theme --gallery`. For one color sweep a
 
 ## Widgets
 
-| Widget                                                  | Shows                                                                                              |
-| ------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `model`                                                 | The model in use                                                                                   |
-| `fiveHourBar`, `weeklyBar`                              | 5h / 7d quota left as a meter, with a [pace marker](docs/configuration.md#quota-pace-marker)       |
-| `fiveHourPct`, `weeklyPct`                              | 5h / 7d quota left as a percentage                                                                 |
-| `fiveHourReset`, `weeklyReset`                          | Time until the quota resets, or the reset time                                                     |
-| `quota`                                                 | The quota closest to running out, with its reset                                                   |
-| `thirdPartyFiveHour`, `thirdPartyWeekly`                | Third-party model quotas                                                                           |
-| `argonWeekly`, `argonReset`                             | Gemini 4 Argon's own weekly quota (Google AI Pro) and its reset                                    |
-| `context`, `contextPct`, `contextTokens`                | Context window used: meter, percentage or token counts                                             |
-| `git`                                                   | Branch, uncommitted changes and ahead/behind                                                       |
-| `project`, `cwd`                                        | Project folder, current folder                                                                     |
-| `agentState`, `plan`, `sandbox`, `artifacts`, `version` | What the agent is doing, your plan, sandbox, artifacts, CLI version                                |
-| `tasks`                                                 | Running subagents and background tasks                                                             |
-| `mode`                                                  | Approval mode (e.g. accept-edits) and Vim mode                                                     |
-| `title`                                                 | The conversation's title                                                                           |
-| `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`   | Session tokens and prompt cache usage                                                              |
-| `ram`                                                   | Memory used on your machine                                                                        |
-| `customText`, `exec`                                    | Your own text, or the output of a [shell command](docs/configuration.md#shell-command-widget-exec) |
+| Widget                                                        | Shows                                                                                                    |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `model`                                                       | The model in use                                                                                         |
+| `fiveHourBar`, `weeklyBar`                                    | 5h / 7d quota left as a meter, with a [pace marker](docs/configuration.md#quota-pace-marker)             |
+| `fiveHourPct`, `weeklyPct`                                    | 5h / 7d quota left as a percentage                                                                       |
+| `fiveHourReset`, `weeklyReset`                                | Time until the quota resets, or the reset time                                                           |
+| `quota`                                                       | The quota closest to running out, with its reset                                                         |
+| `thirdPartyFiveHour`, `thirdPartyWeekly`                      | Third-party model quotas                                                                                 |
+| `argonWeekly`, `argonReset`                                   | Gemini 4 Argon's own weekly quota (Google AI Pro) and its reset                                          |
+| `context`, `contextPct`, `contextTokens`                      | Context window used: meter, percentage or token counts                                                   |
+| `git`                                                         | Branch, uncommitted changes and ahead/behind                                                             |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree` | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree |
+| `project`, `cwd`                                              | Project folder, current folder                                                                           |
+| `agentState`, `plan`, `sandbox`, `artifacts`, `version`       | What the agent is doing, your plan, sandbox, artifacts, CLI version                                      |
+| `tasks`                                                       | Running subagents and background tasks                                                                   |
+| `mode`                                                        | Approval mode (e.g. accept-edits) and Vim mode                                                           |
+| `title`                                                       | The conversation's title                                                                                 |
+| `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Session tokens and prompt cache usage                                                                    |
+| `ram`                                                         | Memory used on your machine                                                                              |
+| `customText`, `exec`                                          | Your own text, or the output of a [shell command](docs/configuration.md#shell-command-widget-exec)       |
 
 A widget with nothing to show hides itself. Widgets can be recolored, made label-free or given their own alert thresholds: see [Configuration](docs/configuration.md).
 
@@ -145,7 +146,7 @@ Run `npx agy-powerline doctor` first: it checks the install and tells you how to
 
 - **No network calls, no telemetry.** Everything comes from the data agy passes to the bar, from `.git` and from your OS. The only link out is `g` in `configure`, which opens the GitHub page in your browser.
 - **Your settings are safe.** `init` and `uninstall` back up `settings.json` and refuse to edit a file they can't parse.
-- **Nothing runs unless you add it.** Apart from a quick `git` call for ahead/behind counts, the only commands the bar runs are `exec` widgets you configure yourself.
+- **Nothing runs unless you add it.** Apart from quick `git` calls for ahead/behind counts and for the file and line counts of the git widgets you add, the only commands the bar runs are `exec` widgets you configure yourself.
 - **Zero runtime dependencies**, published from CI with [npm provenance](https://docs.npmjs.com/generating-provenance-statements).
 
 Full details: [SECURITY.md](SECURITY.md).

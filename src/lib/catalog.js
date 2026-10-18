@@ -131,6 +131,42 @@ const WIDGET_CATALOG = [
     summary: "branch, changes and ahead/behind",
   },
   {
+    id: "gitChanges",
+    label: "Git Line Changes",
+    unique: true,
+    description:
+      "lines added and removed since the last commit, staged or not (new files that aren't staged don't count)",
+    summary: "lines added and removed",
+  },
+  {
+    id: "gitFiles",
+    label: "Git File Counts",
+    unique: true,
+    description: "how many files are staged, modified, untracked and in conflict",
+    summary: "staged, modified, untracked file counts",
+  },
+  {
+    id: "gitSha",
+    label: "Git Commit",
+    unique: true,
+    description: "short ID of the commit checked out",
+    summary: "short commit ID",
+  },
+  {
+    id: "gitStash",
+    label: "Git Stash Count",
+    unique: true,
+    description: "how many stashes the repository holds; hidden when there are none",
+    summary: "number of stashes",
+  },
+  {
+    id: "gitWorktree",
+    label: "Git Worktree",
+    unique: true,
+    description: "name of the linked worktree you're in; hidden in the main one",
+    summary: "linked worktree name",
+  },
+  {
     id: "plan",
     label: "Plan Tier",
     unique: true,

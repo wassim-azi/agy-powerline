@@ -90,25 +90,26 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 
 ## ウィジェット
 
-| ウィジェット                                            | 表示内容                                                                                                |
-| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `model`                                                 | 使用中のモデル                                                                                          |
-| `fiveHourBar`、`weeklyBar`                              | 5h / 7d クォータの残りをメーターで表示（[ペースマーカー](docs/configuration.md#quota-pace-marker)付き） |
-| `fiveHourPct`、`weeklyPct`                              | 5h / 7d クォータの残りをパーセントで表示                                                                |
-| `fiveHourReset`、`weeklyReset`                          | クォータがリセットされるまでの時間、またはリセット時刻                                                  |
-| `quota`                                                 | 最も早く尽きそうなクォータとそのリセット                                                                |
-| `thirdPartyFiveHour`、`thirdPartyWeekly`                | サードパーティモデルのクォータ                                                                          |
-| `argonWeekly`、`argonReset`                             | Gemini 4 Argon 専用の週間クォータ（Google AI Pro）とそのリセット                                        |
-| `context`、`contextPct`、`contextTokens`                | 使用中のコンテキストウィンドウ：メーター、パーセント、またはトークン数                                  |
-| `git`                                                   | ブランチ、未コミットの変更、ahead/behind                                                                |
-| `project`、`cwd`                                        | プロジェクトのフォルダー、現在のフォルダー                                                              |
-| `agentState`、`plan`、`sandbox`、`artifacts`、`version` | エージェントの動作状況、プラン、サンドボックス、アーティファクト、CLI のバージョン                      |
-| `tasks`                                                 | 実行中のサブエージェントとバックグラウンドタスク                                                        |
-| `mode`                                                  | 承認モード（例：accept-edits）と Vim モード                                                             |
-| `title`                                                 | 会話のタイトル                                                                                          |
-| `totalTokens`、`cacheHit`、`cacheRead`、`cacheCreate`   | セッションのトークン数とプロンプトキャッシュの使用状況                                                  |
-| `ram`                                                   | マシンのメモリ使用量                                                                                    |
-| `customText`、`exec`                                    | 任意のテキスト、または [シェルコマンド](docs/configuration.md#shell-command-widget-exec)の出力          |
+| ウィジェット                                                  | 表示内容                                                                                                 |
+| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `model`                                                       | 使用中のモデル                                                                                           |
+| `fiveHourBar`、`weeklyBar`                                    | 5h / 7d クォータの残りをメーターで表示（[ペースマーカー](docs/configuration.md#quota-pace-marker)付き）  |
+| `fiveHourPct`、`weeklyPct`                                    | 5h / 7d クォータの残りをパーセントで表示                                                                 |
+| `fiveHourReset`、`weeklyReset`                                | クォータがリセットされるまでの時間、またはリセット時刻                                                   |
+| `quota`                                                       | 最も早く尽きそうなクォータとそのリセット                                                                 |
+| `thirdPartyFiveHour`、`thirdPartyWeekly`                      | サードパーティモデルのクォータ                                                                           |
+| `argonWeekly`、`argonReset`                                   | Gemini 4 Argon 専用の週間クォータ（Google AI Pro）とそのリセット                                         |
+| `context`、`contextPct`、`contextTokens`                      | 使用中のコンテキストウィンドウ：メーター、パーセント、またはトークン数                                   |
+| `git`                                                         | ブランチ、未コミットの変更、ahead/behind                                                                 |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree` | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree |
+| `project`、`cwd`                                              | プロジェクトのフォルダー、現在のフォルダー                                                               |
+| `agentState`、`plan`、`sandbox`、`artifacts`、`version`       | エージェントの動作状況、プラン、サンドボックス、アーティファクト、CLI のバージョン                       |
+| `tasks`                                                       | 実行中のサブエージェントとバックグラウンドタスク                                                         |
+| `mode`                                                        | 承認モード（例：accept-edits）と Vim モード                                                              |
+| `title`                                                       | 会話のタイトル                                                                                           |
+| `totalTokens`、`cacheHit`、`cacheRead`、`cacheCreate`         | セッションのトークン数とプロンプトキャッシュの使用状況                                                   |
+| `ram`                                                         | マシンのメモリ使用量                                                                                     |
+| `customText`、`exec`                                          | 任意のテキスト、または [シェルコマンド](docs/configuration.md#shell-command-widget-exec)の出力           |
 
 表示する内容のないウィジェットは自動的に隠れます。ウィジェットごとに色を変えたり、ラベルを外したり、独自の警告しきい値を設定したりできます。詳しくは [Configuration](docs/configuration.md) を参照してください。
 

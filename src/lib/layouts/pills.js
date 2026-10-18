@@ -27,6 +27,8 @@ const {
   shortModelName,
   formatTokenSplit,
   formatGitSync,
+  gitChangeParts,
+  gitFileParts,
   formatTasks,
   formatMode,
   clipText,
@@ -448,6 +450,42 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         lbl(`${mark}${session.git.branch}${syncPart}`)
       );
     }
+
+    case "gitChanges": {
+      const parts = gitChangeParts(session.gitDetails?.changes, ascii);
+      if (!parts.length) {
+        return null;
+      }
+      return pill(colors.git, lbl(parts.map((part) => part.text).join(" ")));
+    }
+
+    case "gitFiles": {
+      const files = session.gitDetails?.files;
+      const parts = gitFileParts(files, ascii);
+      if (!parts.length) {
+        return null;
+      }
+      const color = files.conflicts > 0 ? colors.gitDirty : colors.git;
+      return pill(color, lbl(parts.map((part) => part.text).join(" ")));
+    }
+
+    case "gitSha":
+      if (!session.gitDetails?.sha) {
+        return null;
+      }
+      return pill(colors.git, lbl(session.gitDetails.sha));
+
+    case "gitStash":
+      if (!(session.gitDetails?.stash > 0)) {
+        return null;
+      }
+      return pill(colors.git, lbl(String(session.gitDetails.stash)));
+
+    case "gitWorktree":
+      if (!session.gitDetails?.worktree) {
+        return null;
+      }
+      return pill(colors.git, lbl(session.gitDetails.worktree));
 
     case "plan":
       if (!session.plan) {

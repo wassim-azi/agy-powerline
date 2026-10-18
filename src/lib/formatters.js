@@ -460,6 +460,31 @@ function visibleWidth(text) {
   return width;
 }
 
+// "+128 −34" as parts, so Lines can color each; zero counts are left out.
+function gitChangeParts(changes, ascii = false) {
+  const parts = [];
+  if (changes?.added > 0) {
+    parts.push({ kind: "added", text: `+${changes.added}` });
+  }
+  if (changes?.removed > 0) {
+    parts.push({ kind: "removed", text: `${ascii ? "-" : "−"}${changes.removed}` });
+  }
+  return parts;
+}
+
+const GIT_FILE_MARKS = {
+  unicode: { staged: "+", modified: "●", untracked: "?", conflicts: "≠" },
+  ascii: { staged: "S", modified: "M", untracked: "?", conflicts: "!" },
+};
+
+// "+2 ●3 ?1 ≠1" as parts: staged, modified, untracked, in conflict.
+function gitFileParts(files, ascii = false) {
+  const marks = GIT_FILE_MARKS[ascii ? "ascii" : "unicode"];
+  return Object.keys(marks)
+    .filter((kind) => files?.[kind] > 0)
+    .map((kind) => ({ kind, text: `${marks[kind]}${files[kind]}` }));
+}
+
 function formatGitSync(ahead, behind, ascii = false) {
   const up = ascii ? "^" : "⇡";
   const down = ascii ? "v" : "⇣";
@@ -586,6 +611,8 @@ module.exports = {
   shortModelName,
   formatTokenSplit,
   formatGitSync,
+  gitChangeParts,
+  gitFileParts,
   formatTasks,
   formatMode,
   clipText,

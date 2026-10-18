@@ -62,7 +62,12 @@ Every value comes from the JSON Antigravity pipes on stdin. A widget with nothin
 - Argon 7d remaining quota meter and reset timer (`argonWeekly`, `argonReset`, from the `gemini-argon-wtu-weekly` bucket): on Google AI Pro, Gemini 4 Argon has a weekly quota of its own with no 5-hour window, sent whatever model is in use, so you can see it while working on another model. Hidden when the bucket isn't sent, e.g. on Ultra, where Argon counts toward the Gemini 5h / 7d quotas
 - Context bar, %, tokens (`used_percentage`, `context_window_size`; the tokens are the used share of the window, so they always match the %. Without a window size, `current_usage` input plus cached tokens)
 - Working directory (`cwd`, `~` for home), project folder (`workspace.project_dir`)
-- VCS branch with dirty marker and remote sync indicators (`git` — `vcs.branch` `*`, `⇡2 ⇣1` ahead/behind; reads `.git` directly, including packed refs and linked worktrees, and runs `git rev-list` only when the branch tracks an upstream and points at a different commit)
+- VCS branch with dirty marker and remote sync indicators (`git` — `vcs.branch` `*`, `⇡2 ⇣1` ahead/behind; reads `.git` directly, including packed refs and linked worktrees, and runs `git rev-list` only when the branch tracks an upstream and points at a different commit; with `gitFiles` on the bar, uncommitted files mark it dirty too, not only an unfinished merge or rebase)
+- Git details, each opt-in and hidden when there's nothing to show:
+  - `gitChanges` (`📝 Lines: +128 −34`): lines added and removed since the last commit, staged or not, from `git diff --shortstat HEAD`. New files count once they're staged.
+  - `gitFiles` (`📄 Files: +2 ●3 ?1 ≠1`): staged, modified, untracked and conflicted files, from `git status`; `S2 M3 ?1 !1` in ASCII mode. The pill takes the dirty color while there's a conflict.
+  - `gitSha` (`📌 Commit: a1b2c3d`), `gitStash` (`💼 Stash: 2`), `gitWorktree` (`🌳 Worktree: feature-x`, only in a linked worktree): read from `.git`, no process.
+  - `git status` and `git diff` run only for the widgets that need them, with a 300 ms timeout, at most once every 5 seconds per repository and commit (`.git-status-cache.json` in the install folder). They never take the index lock or look into submodules. A repository whose own `.git/config` sets `fsmonitor`, a `filter`, a `diff` driver or an `include` gets neither, since git would run the programs those name: `gitFiles` and `gitChanges` stay hidden there.
 - Session tokens (`totalTokens` e.g. `🪙 149.3K`: input + output tokens of the session; `"split": true` shows `123.1K↑ 355.0K↓`)
 - Prompt cache hit rate (`cacheHit` e.g. `⚡ 85%`: share of the latest prompt read from cache)
 - Custom shell command (`exec`, see [below](#shell-command-widget-exec))
