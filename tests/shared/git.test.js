@@ -279,6 +279,130 @@ function testGitDetails(root, git) {
   );
 }
 
+// A rebase, merge, cherry-pick, revert or bisect in progress, on real repos.
+function testGitOperations(root, git) {
+  const write = (file, text) => fs.writeFileSync(file, text);
+  const render = (cwd, extra = {}, widget = {}) =>
+    strip(
+      renderStatusline(
+        { ...sampleData(), cwd, vcs: { type: "git" } },
+        { ...defaultConfig(), widgets: [{ id: "git", ...widget }], ...extra },
+        { color: "none", env: {} }
+      )
+    );
+  const attempt = (...args) => {
+    try {
+      git(...args);
+    } catch {
+      // The conflict is the point.
+    }
+  };
+
+  // main: base then "main" on x.txt; feature (from base): "theirs" on x.txt,
+  // then a second commit on y.txt.
+  const repo = (name) => {
+    const dir = path.join(root, name);
+    fs.mkdirSync(dir);
+    git(dir, "init", "-q");
+    write(path.join(dir, "x.txt"), "base\n");
+    git(dir, "add", "x.txt");
+    git(dir, "commit", "-q", "-m", "base");
+    git(dir, "checkout", "-q", "-b", "feature");
+    write(path.join(dir, "x.txt"), "theirs\n");
+    git(dir, "commit", "-q", "-am", "theirs");
+    write(path.join(dir, "y.txt"), "y\n");
+    git(dir, "add", "y.txt");
+    git(dir, "commit", "-q", "-m", "second");
+    git(dir, "checkout", "-q", "main");
+    write(path.join(dir, "x.txt"), "main\n");
+    git(dir, "commit", "-q", "-am", "main");
+    return dir;
+  };
+
+  const rebasing = repo("op-rebase");
+  git(rebasing, "checkout", "-q", "feature");
+  attempt(rebasing, "rebase", "main");
+  const rebaseOut = render(rebasing);
+  record(
+    "a stopped rebase shows REBASE with its step and the branch being rebased, not a SHA",
+    /● feature\|REBASE 1\/2/.test(rebaseOut),
+    rebaseOut
+  );
+  const rebaseLines = render(rebasing, { layout: "lines" });
+  record(
+    "the Lines layout shows the rebase too",
+    rebaseLines.includes("(feature* REBASE 1/2)"),
+    rebaseLines
+  );
+  const rebaseAscii = render(rebasing, { ascii: true });
+  record(
+    "ASCII mode shows the same label in plain ASCII",
+    rebaseAscii.includes("* feature|REBASE 1/2") && !/[^\x00-\x7f]/.test(rebaseAscii),
+    rebaseAscii
+  );
+  const hidden = render(rebasing, {}, { operation: false });
+  record(
+    '"operation": false hides the label and keeps the dirty marker',
+    !hidden.includes("REBASE") && /● feature/.test(hidden),
+    hidden
+  );
+  record(
+    "raw mode keeps the label: it's part of the value",
+    /feature\|REBASE 1\/2/.test(render(rebasing, { minimalist: true }))
+  );
+
+  // The repo controls these files: hostile values lose the step or the branch.
+  const state = path.join(rebasing, ".git", "rebase-merge");
+  write(path.join(state, "msgnum"), "abc\n");
+  const noStep = render(rebasing);
+  write(path.join(state, "msgnum"), "1e9\n");
+  const exponent = render(rebasing);
+  write(path.join(state, "head-name"), "refs/heads/../x\n");
+  const unsafe = render(rebasing);
+  record(
+    "a hostile msgnum or head-name drops the step or the branch, without crashing",
+    /REBASE(?! \d)/.test(noStep) &&
+      /REBASE(?! \d)/.test(exponent) &&
+      !unsafe.includes("../x") &&
+      /[0-9a-f]{7}\|REBASE/.test(unsafe),
+    [noStep, exponent, unsafe].join(" / ")
+  );
+
+  const merging = repo("op-merge");
+  attempt(merging, "merge", "-q", "feature");
+  record("a conflicting merge shows MERGING", /main\|MERGING/.test(render(merging)));
+
+  const picking = repo("op-pick");
+  attempt(picking, "cherry-pick", "feature~1");
+  record(
+    "a conflicting cherry-pick shows CHERRY-PICKING",
+    /\|CHERRY-PICKING/.test(render(picking))
+  );
+
+  const reverting = repo("op-revert");
+  git(reverting, "revert", "--no-commit", "HEAD");
+  record("git revert --no-commit shows REVERTING", /\|REVERTING/.test(render(reverting)));
+
+  const bisecting = repo("op-bisect");
+  git(bisecting, "bisect", "start");
+  record("git bisect start shows BISECTING", /\|BISECTING/.test(render(bisecting)));
+
+  // A linked worktree keeps its merge state in its own git dir.
+  const main = repo("op-tree-main");
+  const tree = path.join(root, "op-tree");
+  git(main, "worktree", "add", "-q", "-b", "side", tree, "HEAD~1");
+  write(path.join(tree, "x.txt"), "side\n");
+  git(tree, "commit", "-q", "-am", "side");
+  attempt(tree, "merge", "-q", "feature");
+  const treeOut = render(tree);
+  const mainOut = render(main);
+  record(
+    "a linked worktree mid-merge shows MERGING, and only there",
+    /side\|MERGING/.test(treeOut) && !/MERGING/.test(mainOut),
+    `${treeOut} / ${mainOut}`
+  );
+}
+
 async function run() {
   if (!hasGit()) {
     record("git suite skipped: git is not installed", true);
@@ -430,6 +554,7 @@ async function run() {
       inTree
     );
     testGitDetails(root, git);
+    testGitOperations(root, git);
   } catch (err) {
     record("git suite ran without errors", false, String(err.stderr || err.message));
   } finally {

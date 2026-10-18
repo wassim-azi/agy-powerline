@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Git detail widgets, each opt-in: `gitChanges` (lines added and removed), `gitFiles` (staged, modified, untracked and conflicted files), `gitSha` (commit ID), `gitStash` (stash count) and `gitWorktree` (linked worktree name); with `gitFiles` on the bar, the `git` widget's dirty marker also counts uncommitted files (#82)
 - `npx agy-powerline export [file]` and `npx agy-powerline import <file>` save and load your config: import shows what changes and previews the bar first, `--merge` changes only the settings in the file, new shell commands need their own confirmation or `--allow-exec`, and the previous config is kept as `statusline.config.json.bak` (#83)
 - The README in French (`README.fr.md`) (#51, thanks @dharamdan01)
+- The `git` widget shows a rebase (with its step, `REBASE 2/5`), `git am`, merge, cherry-pick, revert or bisect in progress, and the branch being rebased instead of a commit ID; `"operation": false` hides it (#92)
 
 ### Changed
 

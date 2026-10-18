@@ -502,6 +502,26 @@ function formatGitSync(ahead, behind, ascii = false) {
   return "";
 }
 
+const GIT_OPERATION_LABELS = {
+  rebase: "REBASE",
+  am: "AM",
+  merge: "MERGING",
+  "cherry-pick": "CHERRY-PICKING",
+  revert: "REVERTING",
+  bisect: "BISECTING",
+};
+
+// "REBASE 2/5", "MERGING", or "" with no operation. Plain ASCII in both modes.
+function formatGitOperation(op) {
+  const name = GIT_OPERATION_LABELS[op?.name];
+  if (!name) {
+    return "";
+  }
+  return Number.isInteger(op.step) && Number.isInteger(op.total)
+    ? `${name} ${op.step}/${op.total}`
+    : name;
+}
+
 // "2 subagents, 1 task", or "" when nothing runs.
 function formatTasks(subagents, tasks) {
   const part = (n, word) => (n > 0 ? `${n} ${word}${n === 1 ? "" : "s"}` : "");
@@ -611,6 +631,7 @@ module.exports = {
   shortModelName,
   formatTokenSplit,
   formatGitSync,
+  formatGitOperation,
   gitChangeParts,
   gitFileParts,
   formatTasks,

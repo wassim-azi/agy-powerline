@@ -19,6 +19,7 @@ const {
   paceIndex,
   paceGlyph,
   formatGitSync,
+  formatGitOperation,
   gitChangeParts,
   gitFileParts,
   formatTasks,
@@ -370,6 +371,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       if (!session.git || !session.git.branch) {
         return null;
       }
+      const opStr = widget.operation === false ? "" : formatGitOperation(session.git.operation);
       const syncStr = formatGitSync(session.git.ahead, session.git.behind, ascii);
       const syncPart = syncStr ? ` ${syncStr}` : "";
       return (
@@ -378,6 +380,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         "(" +
         session.git.branch +
         (session.git.dirty ? `${fg(palette.gitDirty)}*` : "") +
+        (opStr ? `${fg(palette.gitDirty)} ${opStr}` : "") +
         (syncPart ? `${fg(palette.git)}${syncPart}` : "") +
         fg(palette.git) +
         ")" +

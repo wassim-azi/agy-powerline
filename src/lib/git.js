@@ -89,6 +89,84 @@ function gitHasDirtyMarkers(gitDir) {
   });
 }
 
+function readText(file) {
+  try {
+    return fs.readFileSync(file, "utf8").trim();
+  } catch {
+    return null;
+  }
+}
+
+function pathExists(file) {
+  try {
+    fs.accessSync(file);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const STEP_MAX = 100000;
+
+// The repo controls these files: only a plain whole number in range counts.
+function readStep(file) {
+  const text = readText(file);
+  const n = text !== null && /^\d{1,6}$/.test(text) ? Number(text) : 0;
+  return n >= 1 && n <= STEP_MAX ? n : null;
+}
+
+// What an unfinished rebase keeps, by backend: [folder, step file, total file].
+const REBASE_STATES = [
+  ["rebase-merge", "msgnum", "end"],
+  ["rebase-apply", "next", "last"],
+];
+
+// Checked in this order after a rebase or `git am`; the first one found wins.
+const OPERATION_MARKERS = [
+  ["MERGE_HEAD", "merge"],
+  ["CHERRY_PICK_HEAD", "cherry-pick"],
+  ["REVERT_HEAD", "revert"],
+  ["BISECT_LOG", "bisect"],
+];
+
+// The operation git is in the middle of in this worktree, from files only:
+// { name, step, total, folder } or null. A linked worktree keeps these in its
+// own git dir, which findGitDir() returns.
+function readOperation(gitDir) {
+  for (const [folder, stepFile, totalFile] of REBASE_STATES) {
+    const dir = path.join(gitDir, folder);
+    let name = folder === "rebase-merge" || pathExists(path.join(dir, "rebasing")) ? "rebase" : "";
+    if (!name && pathExists(path.join(dir, "applying"))) {
+      name = "am";
+    }
+    if (!name || !pathExists(dir)) {
+      continue;
+    }
+    const step = readStep(path.join(dir, stepFile));
+    const total = readStep(path.join(dir, totalFile));
+    const counted = step !== null && total !== null;
+    return { name, step: counted ? step : null, total: counted ? total : null, folder };
+  }
+
+  for (const [file, name] of OPERATION_MARKERS) {
+    if (pathExists(path.join(gitDir, file))) {
+      return { name, step: null, total: null, folder: "" };
+    }
+  }
+
+  return null;
+}
+
+// A rebase detaches HEAD; the branch being rebased is named in head-name.
+function rebasedBranch(gitDir, operation) {
+  if (operation?.name !== "rebase") {
+    return "";
+  }
+  const ref = readText(path.join(gitDir, operation.folder, "head-name")) || "";
+  const branch = ref.startsWith("refs/heads/") ? ref.slice("refs/heads/".length) : "";
+  return isSafeBranchName(branch) ? branch : "";
+}
+
 function getGitInfo(cwd) {
   if (!cwd) {
     return null;
@@ -102,12 +180,13 @@ function getGitInfo(cwd) {
     }
 
     const head = fs.readFileSync(path.join(gitDir, "HEAD"), "utf8").trim();
+    const operation = readOperation(gitDir);
     let branch = "";
 
     if (head.startsWith("ref: ")) {
       branch = head.replace(/^ref:\s+refs\/heads\//, "").replace(/^ref:\s+/, "");
     } else if (head) {
-      branch = head.slice(0, 7);
+      branch = rebasedBranch(gitDir, operation) || head.slice(0, 7);
     }
 
     if (!branch) {
@@ -121,6 +200,11 @@ function getGitInfo(cwd) {
       dirty: gitHasDirtyMarkers(gitDir),
       ahead: sync.ahead,
       behind: sync.behind,
+      operation: operation && {
+        name: operation.name,
+        step: operation.step,
+        total: operation.total,
+      },
     };
   } catch {
     return null;
@@ -304,7 +388,8 @@ function getGitSync(gitDir, branch) {
     const { execFileSync } = require("child_process");
     const out = execFileSync(
       "git",
-      ["rev-list", "--left-right", "--count", `${branch}...@{upstream}`, "--"],
+      // The branch's own upstream: during a rebase HEAD is detached and has none.
+      ["rev-list", "--left-right", "--count", `${branch}...${branch}@{upstream}`, "--"],
       {
         cwd: path.dirname(gitDir),
         timeout: 150,
@@ -643,6 +728,7 @@ function resolveGit(data, config) {
       ...fromPayload,
       ahead: same ? local.ahead : 0,
       behind: same ? local.behind : 0,
+      operation: same ? local.operation : null,
     };
   }
 
@@ -652,6 +738,7 @@ function resolveGit(data, config) {
       dirty: Boolean(local.dirty || fromPayload?.dirty),
       ahead: local.ahead,
       behind: local.behind,
+      operation: local.operation,
     };
   }
 
@@ -662,6 +749,7 @@ function resolveGit(data, config) {
 module.exports = {
   findGitDir,
   getGitInfo,
+  readOperation,
   getGitSync,
   isSafeBranchName,
   GIT_DIRTY_MARKERS,

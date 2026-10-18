@@ -27,6 +27,7 @@ const {
   shortModelName,
   formatTokenSplit,
   formatGitSync,
+  formatGitOperation,
   gitChangeParts,
   gitFileParts,
   formatTasks,
@@ -443,11 +444,13 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return null;
       }
       const mark = session.git.dirty ? `${ascii ? "* " : "● "}` : "";
+      const opStr = widget.operation === false ? "" : formatGitOperation(session.git.operation);
+      const opPart = opStr ? `|${opStr}` : "";
       const syncStr = formatGitSync(session.git.ahead, session.git.behind, ascii);
       const syncPart = syncStr ? ` ${syncStr}` : "";
       return pill(
         session.git.dirty ? colors.gitDirty : colors.git,
-        lbl(`${mark}${session.git.branch}${syncPart}`)
+        lbl(`${mark}${session.git.branch}${opPart}${syncPart}`)
       );
     }
 
