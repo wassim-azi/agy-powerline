@@ -57,7 +57,7 @@ For a Nerd Font–free terminal, turn on ASCII mode (`i` in `configure`).
 
 `npx agy-powerline configure` opens an editor with a live preview of your bar. Use `←` `→` to switch between Widgets, Presets, Themes, Layout and Powerline, `↑` `↓` to move, Enter to pick, `q` to save and quit. The keys for each screen are shown at the bottom; the full list is in [Configuration](docs/configuration.md#configurator-keys).
 
-Prefer a browser? [Build your bar in the browser](https://wassim-azi.github.io/agy-powerline/configure/) with live previews, then download or import it.
+Prefer a browser? [Build your bar in the browser](https://agy-powerline.com/configure/) with live previews, then download or import it.
 
 Changes apply to a running `agy` on its next refresh.
 
@@ -82,7 +82,7 @@ Start from a preset, then adjust:
 | Color-blind safe    | `colorblind-dark`, `colorblind-light`                                                                                                                      |
 | Your own colors     | `custom` ([how](docs/configuration.md#custom-theme))                                                                                                       |
 
-Preview them all with `npx agy-powerline theme --gallery`. For one color sweep across each row, add a gradient: `npx agy-powerline gradient <name>` with `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono` or your own colors ([how](docs/configuration.md#gradients)).
+Preview them all in the [theme gallery](https://agy-powerline.com/) or with `npx agy-powerline theme --gallery`. For one color sweep across each row, add a gradient: `npx agy-powerline gradient <name>` with `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono` or your own colors ([how](docs/configuration.md#gradients)).
 
 ### Layouts
 

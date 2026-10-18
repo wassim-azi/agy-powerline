@@ -27,6 +27,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - `init` ends with a link to the project page
+- The Pages site (https://agy-powerline.com/) shares a header, footer, design tokens, SVG favicon, dark/light/system theme toggle, terminal window frames and 404 page across the theme gallery and web configurator, with a hero section and one-click theme links on the gallery (#114)
 
 ### Fixed
 

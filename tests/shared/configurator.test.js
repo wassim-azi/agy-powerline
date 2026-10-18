@@ -58,6 +58,24 @@ async function run() {
       external.slice(0, 5).join(", ")
     );
 
+    const iconMatch = html.match(
+      /<link\s+[^>]*rel="icon"[^>]*href="(data:image\/svg\+xml;base64,([^"]+))"/
+    );
+    const iconSvg = iconMatch ? Buffer.from(iconMatch[2], "base64").toString("utf8").trim() : "";
+    record(
+      "the configurator has a base64 SVG favicon",
+      iconSvg.startsWith("<svg") && iconSvg.includes("</svg>")
+    );
+
+    record(
+      "the configurator has the shared header, relative links to Themes and Configurator, and the repo link",
+      /<header class="site-header">/.test(html) &&
+        /<a class="nav-link" href="\.\.\/">Themes<\/a>/.test(html) &&
+        /<a class="nav-link" href="\.\/" aria-current="page">Configurator<\/a>/.test(html) &&
+        html.includes(`href="${REPO_URL}"`) &&
+        /<footer class="site-footer">/.test(html)
+    );
+
     const missingThemes = THEME_ORDER.filter((id) => !html.includes(`value="${id}"`));
     record(
       "the configurator page contains every theme id",

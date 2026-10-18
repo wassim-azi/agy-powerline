@@ -8,175 +8,56 @@
       http-equiv="Content-Security-Policy"
       content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"
     />
-    <meta
-      name="description"
-      content="Build and customize your agy-powerline statusline in the browser with live previews, themes, and instant config export."
-    />
-    <title>agy-powerline Configurator</title>
+    <!--SITE_HEAD-->
     <style>
-      :root {
-        --bg: #f4f5f7;
-        --surface: #ffffff;
-        --fg: #1c1f26;
-        --muted: #5b6270;
-        --line: #dde0e6;
-        --accent: #3d5fc4;
-        --accent-fg: #ffffff;
-        --accent-soft: #edf2ff;
-        --danger: #cf222e;
-        --danger-soft: #ffebe9;
-        --warning: #9a6700;
-        --warning-soft: #fff8c5;
-        --success: #1a7f37;
-        --success-soft: #dafbe1;
-        --term-dark-bg: #1d1f27;
-        --term-dark-fg: #d4d6de;
-        --term-light-bg: #fbfbf8;
-        --term-light-fg: #2b2d34;
-        --term-edge: #c9ccd4;
-        --font-ui: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        --font-mono:
-          "Cascadia Mono", ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
-      }
-      @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) {
-          --bg: #13151b;
-          --surface: #1a1d25;
-          --fg: #e6e8ee;
-          --muted: #9aa1b0;
-          --line: #2c303b;
-          --accent: #8fa8ff;
-          --accent-fg: #10131a;
-          --accent-soft: #1d2538;
-          --danger: #ff7b72;
-          --danger-soft: #3c1e22;
-          --warning: #d29922;
-          --warning-soft: #382c16;
-          --success: #3fb950;
-          --success-soft: #14321d;
-          --term-edge: #3a3f4c;
-          color-scheme: dark;
-        }
-      }
-      :root[data-theme="dark"] {
-        --bg: #13151b;
-        --surface: #1a1d25;
-        --fg: #e6e8ee;
-        --muted: #9aa1b0;
-        --line: #2c303b;
-        --accent: #8fa8ff;
-        --accent-fg: #10131a;
-        --accent-soft: #1d2538;
-        --danger: #ff7b72;
-        --danger-soft: #3c1e22;
-        --warning: #d29922;
-        --warning-soft: #382c16;
-        --success: #3fb950;
-        --success-soft: #14321d;
-        --term-edge: #3a3f4c;
-        color-scheme: dark;
-      }
-      :root[data-theme="light"] {
-        --bg: #f4f5f7;
-        --surface: #ffffff;
-        --fg: #1c1f26;
-        --muted: #5b6270;
-        --line: #dde0e6;
-        --accent: #3d5fc4;
-        --accent-fg: #ffffff;
-        --accent-soft: #edf2ff;
-        --danger: #cf222e;
-        --danger-soft: #ffebe9;
-        --warning: #9a6700;
-        --warning-soft: #fff8c5;
-        --success: #1a7f37;
-        --success-soft: #dafbe1;
-        --term-edge: #c9ccd4;
-        color-scheme: light;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-      body {
-        margin: 0;
-        background: var(--bg);
-        color: var(--fg);
-        font-family: var(--font-ui);
-        font-size: 15px;
-        line-height: 1.5;
-      }
+      /* SITE_CSS */
       .wrap {
-        max-width: 1100px;
+        max-width: 1180px;
+        width: 100%;
         margin: 0 auto;
         padding-inline: 16px;
         padding-block: 24px 64px;
         display: grid;
         gap: 24px;
       }
-
-      /* Header */
-      .header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 12px;
-        padding-bottom: 12px;
-        border-bottom: 1px solid var(--line);
-      }
-      .brand {
+      .page-heading {
         display: flex;
         align-items: baseline;
-        gap: 10px;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 8px 16px;
       }
-      .brand h1 {
+      .page-heading h1 {
         margin: 0;
         font-size: 1.5rem;
         font-weight: 700;
         letter-spacing: -0.02em;
       }
+      .page-heading p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
       .tag {
         font-family: var(--font-mono);
         font-size: 0.75rem;
-        padding: 2px 7px;
-        border-radius: 999px;
-        background: var(--surface);
-        border: 1px solid var(--line);
+        padding: 2px 8px;
+        border-radius: var(--radius-pill);
+        background: var(--bg);
+        border: 1px solid var(--border-strong);
         color: var(--muted);
       }
-      .nav-links {
-        display: flex;
-        align-items: center;
-        gap: 16px;
-      }
-      .nav-links a {
-        color: var(--accent);
-        text-decoration: none;
-        font-size: 0.9rem;
-      }
-      .nav-links a:hover {
-        text-decoration: underline;
-      }
-      .btn-theme-toggle {
-        background: var(--surface);
-        border: 1px solid var(--line);
-        color: var(--fg);
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-size: 0.85rem;
-        cursor: pointer;
-      }
 
-      /* Sticky preview section */
+      /* Preview section */
       .preview-card {
         background: var(--surface);
         border: 1px solid var(--line);
-        border-radius: 12px;
+        border-radius: var(--radius-lg);
         padding: 16px;
         display: grid;
         gap: 12px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        box-shadow: var(--shadow-sm);
+        min-width: 0;
       }
       .preview-toolbar {
         display: flex;
@@ -200,122 +81,29 @@
       .tool-label {
         color: var(--muted);
         font-size: 0.75rem;
+        font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.05em;
       }
-
-      /* Segmented radios */
-      .seg {
-        display: inline-flex;
-        border: 1px solid var(--line);
-        border-radius: 6px;
-        overflow: hidden;
-        background: var(--surface);
-      }
-      .seg input {
-        position: absolute;
-        opacity: 0;
-        pointer-events: none;
-      }
-      .seg label {
-        padding: 4px 10px;
-        font-size: 0.82rem;
-        cursor: pointer;
-        color: var(--fg);
-        border-right: 1px solid var(--line);
-        user-select: none;
-      }
-      .seg label:last-of-type {
-        border-right: 0;
-      }
-      .seg input:checked + label {
-        background: var(--accent);
-        color: var(--accent-fg);
-      }
-      .seg input:focus-visible + label {
-        outline: 2px solid var(--accent);
-        outline-offset: -2px;
-      }
-
-      /* Terminal screen */
       .term-wrap {
         position: relative;
+        min-width: 0;
       }
-      .term {
-        border: 1px solid var(--term-edge);
-        border-radius: 8px;
-        padding: 14px 16px;
-        overflow-x: auto;
+      .term-wrap .term {
         min-height: 48px;
-        background: var(--term-dark-bg);
-        color: var(--term-dark-fg);
-      }
-      .term[data-bg="light"] {
-        background: var(--term-light-bg);
-        color: var(--term-light-fg);
-      }
-      .screen {
-        font-family: var(--font-mono);
-        font-size: 13px;
-        white-space: pre;
-        width: max-content;
-      }
-      .ln {
-        height: 1.45em;
-        line-height: 1.45em;
-      }
-      .r,
-      .g {
-        display: inline-block;
-        height: 1.45em;
-        vertical-align: top;
-      }
-      .g {
-        width: 0.62em;
-        background: var(--b);
-        position: relative;
-      }
-      .g::before {
-        content: "";
-        position: absolute;
-        inset: 0;
-        background: var(--c);
-      }
-      .cap-l::before {
-        border-radius: 999px 0 0 999px;
-      }
-      .cap-r::before {
-        border-radius: 0 999px 999px 0;
-      }
-      .tri::before {
-        clip-path: polygon(0 0, 100% 50%, 0 100%);
-      }
-      .tri-l::before {
-        clip-path: polygon(100% 0, 0 50%, 100% 100%);
-      }
-      .slant-ul::before {
-        clip-path: polygon(0 0, 100% 0, 0 100%);
-      }
-      .slant-lr::before {
-        clip-path: polygon(0 100%, 100% 0, 100% 100%);
-      }
-      .slant-ur::before {
-        clip-path: polygon(0 0, 100% 0, 100% 100%);
-      }
-      .slant-ll::before {
-        clip-path: polygon(0 0, 100% 100%, 0 100%);
+        padding: 14px 16px;
       }
 
       /* Sections & Panels */
       .panels {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 24px;
       }
       @media (min-width: 900px) {
         .panels-2col {
           display: grid;
-          grid-template-columns: 1fr 1fr;
+          grid-template-columns: repeat(2, minmax(0, 1fr));
           gap: 24px;
         }
       }
@@ -323,10 +111,12 @@
       .card {
         background: var(--surface);
         border: 1px solid var(--line);
-        border-radius: 12px;
+        border-radius: var(--radius-lg);
         padding: 20px;
         display: grid;
         gap: 16px;
+        box-shadow: var(--shadow-sm);
+        min-width: 0;
       }
       .card-title {
         margin: 0;
@@ -346,8 +136,8 @@
       .palette-search {
         width: 100%;
         padding: 8px 12px;
-        border: 1px solid var(--line);
-        border-radius: 6px;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-sm);
         font-family: inherit;
         font-size: 0.9rem;
         background: var(--bg);
@@ -355,7 +145,7 @@
       }
       .palette-list {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
         gap: 8px;
         max-height: 320px;
         overflow-y: auto;
@@ -368,12 +158,13 @@
         padding: 8px 10px;
         background: var(--bg);
         border: 1px solid var(--line);
-        border-radius: 6px;
+        border-radius: var(--radius-sm);
         cursor: pointer;
         text-align: left;
         color: var(--fg);
+        font-family: inherit;
         font-size: 0.85rem;
-        transition: border-color 0.15s;
+        transition: border-color 120ms ease;
       }
       .btn-palette-item:hover {
         border-color: var(--accent);
@@ -390,19 +181,23 @@
       }
       .palette-special {
         display: flex;
+        flex-wrap: wrap;
         gap: 8px;
         margin-top: 4px;
       }
       .btn-special {
         flex: 1;
+        min-width: 120px;
         padding: 7px 12px;
         background: var(--surface);
         border: 1px dashed var(--accent);
-        border-radius: 6px;
+        border-radius: var(--radius-sm);
         color: var(--accent);
         cursor: pointer;
+        font-family: inherit;
         font-size: 0.85rem;
-        font-weight: 500;
+        font-weight: 600;
+        transition: background-color 120ms ease;
       }
       .btn-special:hover {
         background: var(--accent-soft);
@@ -415,7 +210,7 @@
       }
       .row-box {
         border: 1px solid var(--line);
-        border-radius: 8px;
+        border-radius: var(--radius-md);
         padding: 10px;
         background: var(--bg);
         display: grid;
@@ -433,7 +228,7 @@
       .widget-item {
         background: var(--surface);
         border: 1px solid var(--line);
-        border-radius: 6px;
+        border-radius: var(--radius-sm);
         padding: 8px 12px;
         display: grid;
         gap: 8px;
@@ -470,15 +265,19 @@
       }
       .btn-icon {
         background: transparent;
-        border: 1px solid var(--line);
+        border: 1px solid var(--border-strong);
         border-radius: 4px;
         color: var(--fg);
         cursor: pointer;
         padding: 3px 7px;
+        font-family: inherit;
         font-size: 0.8rem;
+        transition:
+          border-color 120ms ease,
+          background-color 120ms ease;
       }
       .btn-icon:disabled {
-        opacity: 0.3;
+        opacity: 0.35;
         cursor: not-allowed;
       }
       .btn-icon:not(:disabled):hover {
@@ -509,7 +308,7 @@
       }
       .opt-input {
         padding: 4px 8px;
-        border: 1px solid var(--line);
+        border: 1px solid var(--border-strong);
         border-radius: 4px;
         background: var(--bg);
         color: var(--fg);
@@ -520,7 +319,7 @@
       /* Alert banners */
       .alert {
         padding: 10px 14px;
-        border-radius: 6px;
+        border-radius: var(--radius-sm);
         font-size: 0.85rem;
         line-height: 1.4;
       }
@@ -543,7 +342,7 @@
       /* Look / Styling Controls */
       .form-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
         gap: 14px;
       }
       .form-group {
@@ -551,8 +350,8 @@
         gap: 4px;
       }
       .form-label {
-        font-size: 0.8rem;
-        font-weight: 500;
+        font-size: 0.78rem;
+        font-weight: 600;
         color: var(--muted);
         text-transform: uppercase;
         letter-spacing: 0.05em;
@@ -560,17 +359,12 @@
       .form-select,
       .form-input {
         padding: 8px 10px;
-        border: 1px solid var(--line);
-        border-radius: 6px;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-sm);
         background: var(--bg);
         color: var(--fg);
         font-family: inherit;
         font-size: 0.9rem;
-      }
-      .form-select:focus,
-      .form-input:focus {
-        outline: 2px solid var(--accent);
-        outline-offset: -1px;
       }
       .toggles-list {
         display: flex;
@@ -591,7 +385,7 @@
       .output-box {
         background: var(--bg);
         border: 1px solid var(--line);
-        border-radius: 6px;
+        border-radius: var(--radius-sm);
         padding: 12px;
         font-family: var(--font-mono);
         font-size: 0.85rem;
@@ -605,39 +399,13 @@
         flex-wrap: wrap;
         gap: 10px;
       }
-      .btn {
-        padding: 8px 16px;
-        border-radius: 6px;
-        font-size: 0.88rem;
-        font-weight: 500;
-        cursor: pointer;
-        border: 1px solid transparent;
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .btn-primary {
-        background: var(--accent);
-        color: var(--accent-fg);
-      }
-      .btn-primary:hover {
-        opacity: 0.92;
-      }
-      .btn-secondary {
-        background: var(--surface);
-        border-color: var(--line);
-        color: var(--fg);
-      }
-      .btn-secondary:hover {
-        background: var(--bg);
-      }
-
       .cli-snippet {
         display: flex;
         align-items: center;
+        gap: 8px;
         background: var(--bg);
-        border: 1px solid var(--line);
-        border-radius: 6px;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-sm);
         padding: 6px 10px;
         font-family: var(--font-mono);
         font-size: 0.82rem;
@@ -645,6 +413,8 @@
       }
       .cli-snippet code {
         flex: 1;
+        white-space: nowrap;
+        overflow-x: auto;
       }
 
       /* Toast notification */
@@ -654,15 +424,17 @@
         right: 24px;
         background: var(--surface);
         color: var(--fg);
-        border: 1px solid var(--line);
-        border-radius: 8px;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-md);
         padding: 10px 18px;
         font-size: 0.9rem;
-        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        box-shadow: var(--shadow-md);
         opacity: 0;
         pointer-events: none;
         transform: translateY(8px);
-        transition: all 0.2s ease;
+        transition:
+          opacity 150ms ease,
+          transform 150ms ease;
         z-index: 100;
       }
       .toast.show {
@@ -672,35 +444,20 @@
     </style>
   </head>
   <body>
-    <div class="wrap">
-      <!-- Header -->
-      <header class="header">
-        <div class="brand">
-          <h1>agy-powerline</h1>
-          <span class="tag">Configurator</span>
-        </div>
-        <nav class="nav-links">
-          <a href="../">Theme Gallery</a>
-          <a href="https://github.com/wassim-azi/agy-powerline" target="_blank" rel="noopener"
-            >GitHub</a
-          >
-          <button
-            type="button"
-            class="btn-theme-toggle"
-            id="themeToggleBtn"
-            aria-label="Toggle page theme"
-          >
-            🌓 Theme
-          </button>
-        </nav>
-      </header>
+    <!--SITE_HEADER-->
+
+    <main class="wrap" id="main">
+      <div class="page-heading">
+        <h1>Statusline Configurator</h1>
+        <p>Customize widgets, themes and powerline style with a live preview.</p>
+      </div>
 
       <!-- Live Preview Card -->
       <section class="preview-card" aria-label="Live Preview">
         <div class="preview-toolbar">
           <div class="preview-tools">
             <div class="tool-item">
-              <span class="tool-label">Width</span>
+              <label class="tool-label" for="widthSlider">Width</label>
               <input
                 type="range"
                 id="widthSlider"
@@ -716,6 +473,7 @@
             <div class="tool-item">
               <span class="tool-label">Sample</span>
               <fieldset class="seg">
+                <legend class="sr-only">Sample quota state</legend>
                 <input type="radio" name="sampleKind" id="sampleNormal" value="normal" checked />
                 <label for="sampleNormal">Normal</label>
                 <input type="radio" name="sampleKind" id="sampleCaution" value="caution" />
@@ -728,6 +486,7 @@
           <div class="tool-item">
             <span class="tool-label">Terminal</span>
             <fieldset class="seg">
+              <legend class="sr-only">Terminal background</legend>
               <input type="radio" name="termBg" id="termBgDark" value="dark" checked />
               <label for="termBgDark">Dark</label>
               <input type="radio" name="termBg" id="termBgLight" value="light" />
@@ -736,8 +495,18 @@
           </div>
         </div>
         <div class="term-wrap">
-          <div class="term" id="termScreen" data-bg="dark">
-            <div class="screen" id="previewOutput"></div>
+          <div class="term-frame" id="termFrame" data-bg="dark">
+            <div class="term-titlebar">
+              <div class="term-dots" aria-hidden="true">
+                <span class="term-dot"></span>
+                <span class="term-dot"></span>
+                <span class="term-dot"></span>
+              </div>
+              <span class="term-title" id="termTitle">dark-aurora · dark terminal</span>
+            </div>
+            <div class="term" id="termScreen" data-bg="dark">
+              <div class="screen" id="previewOutput"></div>
+            </div>
           </div>
         </div>
       </section>
@@ -780,7 +549,7 @@
 
       <!-- Look & Feel -->
       <section class="card" aria-label="Look and Style">
-        <h2 class="card-title">Look & Style</h2>
+        <h2 class="card-title">Look &amp; Style</h2>
         <div class="form-grid">
           <div class="form-group">
             <label class="form-label" for="presetSelect">Preset</label>
@@ -814,7 +583,7 @@
             </select>
           </div>
           <div class="form-group" id="customGradientGroup" style="display: none">
-            <label class="form-label">Custom Gradient Stops</label>
+            <span class="form-label">Custom Gradient Stops</span>
             <div style="display: flex; gap: 8px; align-items: center">
               <input
                 type="color"
@@ -829,7 +598,7 @@
         </div>
 
         <div style="margin-top: 8px">
-          <span class="form-label">Options & Flags</span>
+          <span class="form-label">Options &amp; Flags</span>
           <div class="toggles-list">
             <label class="toggle-item"
               ><input type="checkbox" id="toggleEmojis" checked /> Emojis</label
@@ -848,6 +617,7 @@
         <div style="margin-top: 8px">
           <span class="form-label">Color Depth</span>
           <fieldset class="seg" style="margin-top: 4px">
+            <legend class="sr-only">Color depth</legend>
             <input type="radio" name="colorDepth" id="depthTruecolor" value="truecolor" checked />
             <label for="depthTruecolor">Truecolor (24-bit)</label>
             <input type="radio" name="colorDepth" id="depth256" value="256" />
@@ -859,7 +629,7 @@
       </section>
 
       <!-- Output & Share -->
-      <section class="card" aria-label="Output & Apply">
+      <section class="card" aria-label="Output &amp; Apply">
         <h2 class="card-title">Apply Your Config</h2>
         <div class="output-box" id="configJson"></div>
         <div class="action-row">
@@ -880,7 +650,7 @@
         </div>
 
         <div style="display: grid; gap: 6px">
-          <span class="form-label">Share link</span>
+          <label class="form-label" for="shareUrlInput">Share link</label>
           <div class="cli-snippet" id="shareUrlRow">
             <input
               type="text"
@@ -908,7 +678,7 @@
             padding-top: 16px;
           "
         >
-          <span class="form-label">Paste a config to load</span>
+          <label class="form-label" for="pasteInput">Paste a config to load</label>
           <textarea
             class="form-input"
             id="pasteInput"
@@ -922,11 +692,16 @@
           <div id="pasteFeedback"></div>
         </div>
       </section>
-    </div>
+    </main>
 
-    <div class="toast" id="toast"></div>
+    <!--SITE_FOOTER-->
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
     <!-- Scripts will be injected here during build -->
+    <script>
+      /* SITE_THEME_SCRIPT */
+    </script>
     <script>
       /* BUNDLE_PLACEHOLDER */
     </script>
@@ -939,7 +714,7 @@
         const Agy = window.AgyConfigurator;
         const Page = window.AgyPageLogic;
 
-        let state = {
+        const state = {
           config: Agy.defaultConfig(),
           width: 96,
           sample: "normal",
@@ -951,6 +726,8 @@
         // DOM elements
         const previewOutput = document.getElementById("previewOutput");
         const termScreen = document.getElementById("termScreen");
+        const termFrame = document.getElementById("termFrame");
+        const termTitle = document.getElementById("termTitle");
         const widthSlider = document.getElementById("widthSlider");
         const widthVal = document.getElementById("widthVal");
         const activeWidgetsList = document.getElementById("activeWidgetsList");
@@ -976,7 +753,6 @@
         const shareTooLong = document.getElementById("shareTooLong");
         const execWarning = document.getElementById("execWarning");
         const toast = document.getElementById("toast");
-        const themeToggleBtn = document.getElementById("themeToggleBtn");
         const pasteInput = document.getElementById("pasteInput");
         const pasteFeedback = document.getElementById("pasteFeedback");
 
@@ -984,6 +760,13 @@
           toast.textContent = msg;
           toast.classList.add("show");
           setTimeout(() => toast.classList.remove("show"), 2500);
+        }
+
+        function syncTermChrome() {
+          const themeId = state.config.theme || "dark-aurora";
+          termScreen.setAttribute("data-bg", state.termBg);
+          if (termFrame) termFrame.setAttribute("data-bg", state.termBg);
+          if (termTitle) termTitle.textContent = `${themeId} · ${state.termBg} terminal`;
         }
 
         // Initialize selectors
@@ -1080,7 +863,7 @@
             history.replaceState(null, "", "#" + share.hash);
           }
 
-          // Active widgets
+          syncTermChrome();
           renderActiveWidgets();
           updatePreview();
         }
@@ -1134,14 +917,14 @@
                               return `<option value="${v === undefined ? "" : v}" ${sel ? "selected" : ""}>${display}</option>`;
                             })
                             .join("");
-                          return `<div class="opt-row"><span class="opt-label">${field.label}</span><select class="opt-input field-select" data-idx="${idx}" data-key="${field.key}">${opts}</select></div>`;
+                          return `<div class="opt-row"><span class="opt-label">${field.label}</span><select class="opt-input field-select" aria-label="${field.label}" data-idx="${idx}" data-key="${field.key}">${opts}</select></div>`;
                         }
                         if (field.number !== undefined) {
                           const currentVal = val !== undefined ? val : field.number;
-                          return `<div class="opt-row"><span class="opt-label">${field.label}</span><input type="number" min="0" max="100" class="opt-input field-number" data-idx="${idx}" data-key="${field.key}" value="${currentVal}" style="width: 70px;" /></div>`;
+                          return `<div class="opt-row"><span class="opt-label">${field.label}</span><input type="number" min="0" max="100" class="opt-input field-number" aria-label="${field.label}" data-idx="${idx}" data-key="${field.key}" value="${currentVal}" style="width: 70px;" /></div>`;
                         }
                         if (field.text) {
-                          return `<div class="opt-row"><span class="opt-label">${field.label}</span><input type="text" class="opt-input field-text" data-idx="${idx}" data-key="${field.key}" value="${val || ""}" style="flex: 1;" /></div>`;
+                          return `<div class="opt-row"><span class="opt-label">${field.label}</span><input type="text" class="opt-input field-text" aria-label="${field.label}" data-idx="${idx}" data-key="${field.key}" value="${val || ""}" style="flex: 1;" /></div>`;
                         }
                         return "";
                       })
@@ -1157,10 +940,10 @@
                       <span class="widget-extra">${extra || ""}</span>
                     </div>
                     <div class="widget-actions">
-                      <button type="button" class="btn-icon btn-up" data-idx="${idx}" title="Move Up" ${idx === 0 ? "disabled" : ""}>↑</button>
-                      <button type="button" class="btn-icon btn-down" data-idx="${idx}" title="Move Down" ${idx === widgets.length - 1 ? "disabled" : ""}>↓</button>
-                      ${w.id !== "separator" && w.id !== "lineBreak" ? `<button type="button" class="btn-icon btn-opt" data-idx="${idx}" title="Options">${isOpen ? "▲" : "⚙"}</button>` : ""}
-                      <button type="button" class="btn-icon btn-remove" data-idx="${idx}" title="Remove">✕</button>
+                      <button type="button" class="btn-icon btn-up" data-idx="${idx}" title="Move Up" aria-label="Move ${tag.label || w.id} up" ${idx === 0 ? "disabled" : ""}>↑</button>
+                      <button type="button" class="btn-icon btn-down" data-idx="${idx}" title="Move Down" aria-label="Move ${tag.label || w.id} down" ${idx === widgets.length - 1 ? "disabled" : ""}>↓</button>
+                      ${w.id !== "separator" && w.id !== "lineBreak" ? `<button type="button" class="btn-icon btn-opt" data-idx="${idx}" title="Options" aria-label="${tag.label || w.id} options" aria-expanded="${isOpen ? "true" : "false"}">${isOpen ? "▲" : "⚙"}</button>` : ""}
+                      <button type="button" class="btn-icon btn-remove" data-idx="${idx}" title="Remove" aria-label="Remove ${tag.label || w.id}">✕</button>
                     </div>
                   </div>
                   ${drawerHtml}
@@ -1286,11 +1069,17 @@
             syncControls();
           });
 
-          // Width slider
+          // Width slider (coalesced with requestAnimationFrame for 60fps+ INP)
+          let widthRaf = 0;
           widthSlider.addEventListener("input", (e) => {
             state.width = Number(e.target.value);
             widthVal.textContent = `${state.width} cols`;
-            updatePreview();
+            if (!widthRaf) {
+              widthRaf = requestAnimationFrame(() => {
+                widthRaf = 0;
+                updatePreview();
+              });
+            }
           });
 
           // Sample radios
@@ -1308,7 +1097,7 @@
             radio.addEventListener("change", (e) => {
               if (e.target.checked) {
                 state.termBg = e.target.value;
-                termScreen.setAttribute("data-bg", state.termBg);
+                syncTermChrome();
               }
             });
           });
@@ -1330,11 +1119,9 @@
             if (t && (t.kind === "light" || e.target.value.endsWith("-light"))) {
               document.getElementById("termBgLight").checked = true;
               state.termBg = "light";
-              termScreen.setAttribute("data-bg", "light");
             } else {
               document.getElementById("termBgDark").checked = true;
               state.termBg = "dark";
-              termScreen.setAttribute("data-bg", "dark");
             }
             syncControls();
           });
@@ -1436,15 +1223,6 @@
               .then(() => showToast("Copied share link!"));
           });
 
-          // Page Theme Toggle
-          themeToggleBtn.addEventListener("click", () => {
-            const current =
-              document.documentElement.getAttribute("data-theme") ||
-              (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
-            const next = current === "dark" ? "light" : "dark";
-            document.documentElement.setAttribute("data-theme", next);
-          });
-
           // Load Pasted Config
           document.getElementById("loadPastedBtn").addEventListener("click", () => {
             const text = pasteInput.value;
@@ -1477,6 +1255,11 @@
               const decoded = Page.decodeConfig(window.location.hash);
               if (decoded) {
                 state.config = decoded;
+                const t = Agy.THEMES[state.config.theme];
+                if (t && (t.kind === "light" || String(state.config.theme).endsWith("-light"))) {
+                  document.getElementById("termBgLight").checked = true;
+                  state.termBg = "light";
+                }
               }
             } catch {
               // Ignore invalid hash

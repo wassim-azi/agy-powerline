@@ -8,6 +8,7 @@
 const fs = require("fs");
 const path = require("path");
 const { buildBrowserBundle } = require("./bundle");
+const { injectSiteChrome } = require("../site/layout");
 const {
   THEMES,
   THEME_ORDER,
@@ -68,7 +69,14 @@ function buildConfiguratorHtml() {
   const templatePath = path.join(__dirname, "template.html");
   const pageLogicPath = path.join(__dirname, "page.js");
 
-  const template = fs.readFileSync(templatePath, "utf8");
+  const rawTemplate = fs.readFileSync(templatePath, "utf8");
+  const template = injectSiteChrome(rawTemplate, {
+    title: "agy-powerline Configurator — Build Your Statusline in the Browser",
+    description:
+      "Build and customize your agy-powerline statusline in the browser with live previews, themes, and instant config export.",
+    currentPage: "configurator",
+    rootPrefix: "../",
+  });
   const bundleCode = buildBrowserBundle();
   const pageLogicCode = fs.readFileSync(pageLogicPath, "utf8");
 
