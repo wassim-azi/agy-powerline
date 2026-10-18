@@ -36,6 +36,8 @@ const RUNTIME_FILES = [
 // machine can't read them (Windows profile folders are private already).
 const PRIVATE_FILES = [
   "statusline.config.json",
+  // The config before the last import (BACKUP_SUFFIX in cli/import.js).
+  "statusline.config.json.bak",
   ".exec-cache.json",
   "last-payload.json",
   // SYNC_CACHE_NAME in git.js: commit IDs of the repos you work in.

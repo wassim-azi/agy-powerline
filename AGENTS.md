@@ -42,7 +42,7 @@ Suite names are the `registerSuite()` calls in `tests/shared.js` (e.g. `renderer
 ## Code map
 
 - `src/index.js`: CLI entry; argument parsing with Node's `util.parseArgs` (`COMMANDS` table at the top). It also implements `render` itself (`renderFromStdin()`).
-- `src/cli/*.js`: one file per other command (`init`, `configure`, `theme`, `gradient`, `layout`, `preset`, `caps`, `doctor`, `report`, `uninstall`), plus `bundle.js` (builds the one-file installed runtime), `tui-style.js` (the configure TUI's panels, tabs and keycaps) and `config-guard.js` (refuses to save over a config with a JSON error).
+- `src/cli/*.js`: one file per other command (`init`, `configure`, `theme`, `gradient`, `layout`, `preset`, `caps`, `export`, `import`, `doctor`, `report`, `uninstall`), plus `bundle.js` (builds the one-file installed runtime), `tui-style.js` (the configure TUI's panels, tabs and keycaps) and `config-guard.js` (refuses to save over a config with a JSON error).
 - `src/runtime/statusline.js`: the script Antigravity runs on every refresh.
 - `src/lib/shared.js`: `renderStatusline()`, the rendering entry point.
 - `src/lib/session.js`: turns the Antigravity payload into a normalized `session` object; `git.js` reads branch, dirty state and ahead/behind.
@@ -78,7 +78,7 @@ These protect users' machines. Don't relax them, and if a task seems to require 
 ## Testing rules
 
 - Tests report through `record(name, ok, detail)` from `tests/helpers.js`; each suite exports `async run()` and is registered with `registerSuite()` in `tests/shared.js`. Follow that pattern for new tests.
-- **Never touch the real home directory.** Tests that run the CLI must use a temp dir and override `HOME`, `USERPROFILE` and `AGY_POWERLINE_HOME`; see `sandbox()` in `tests/shared/install-safety.test.js`. This also applies when you run CLI commands by hand: `theme`, `layout`, `preset`, `caps`, `init` and `uninstall` write to the real `~/.agy-powerline` and Antigravity settings otherwise.
+- **Never touch the real home directory.** Tests that run the CLI must use a temp dir and override `HOME`, `USERPROFILE` and `AGY_POWERLINE_HOME`; see `sandbox()` in `tests/shared/install-safety.test.js`. This also applies when you run CLI commands by hand: `theme`, `gradient`, `layout`, `preset`, `caps`, `import`, `init` and `uninstall` write to the real `~/.agy-powerline` and Antigravity settings otherwise.
 - Don't run `node src/index.js configure`: it's an interactive TUI and will hang. To check a configure screen, render it with `renderFrame()` the way `tests/shared/tui.test.js` does.
 - Never edit files in `tests/snapshots/` by hand; regenerate them with `npm run test:update`.
 - Snapshot rendering pins time, timezone and RAM (`frozen()`) and the terminal width (`inputs()`), both in `tests/shared/snapshots.test.js`. New widgets that read the clock or the machine must stay deterministic there.

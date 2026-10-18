@@ -124,6 +124,8 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 | `npx agy-powerline gradient <name>`       | Color each row with a gradient (`--list`, `off`)             |
 | `npx agy-powerline layout <pills\|lines>` | レイアウトを切り替え                                         |
 | `npx agy-powerline caps <style>`          | カプセルの形を切り替え：`round`、`angled`、`slanted`、`flat` |
+| `npx agy-powerline export [file]`         | Save your config to a file, to back it up or share it        |
+| `npx agy-powerline import <file>`         | Load a config, after showing what changes (`--merge`)        |
 | `npx agy-powerline doctor`                | インストールを確認し、問題を説明                             |
 | `npx agy-powerline report`                | プライバシーに配慮したバグレポートを作成                     |
 | `npx agy-powerline uninstall [--delete]`  | agy から削除（`--delete` でファイルも削除）                  |

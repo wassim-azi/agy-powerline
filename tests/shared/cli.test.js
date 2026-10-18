@@ -191,6 +191,190 @@ async function run() {
   } finally {
     fs.rmSync(sandbox, { recursive: true, force: true });
   }
+
+  testExportImport();
+}
+
+// export and import in a home of their own: round trip, merge, refusals, the
+// backup, and shell commands that must never come in unnoticed.
+function testExportImport() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "agy-verify-share-"));
+  const home = path.join(root, "home");
+  const installDir = path.join(home, ".agy-powerline");
+  fs.mkdirSync(home, { recursive: true });
+  const env = { ...process.env, HOME: home, USERPROFILE: home, AGY_POWERLINE_HOME: installDir };
+  const configPath = path.join(installDir, "statusline.config.json");
+  const readConfig = () => JSON.parse(fs.readFileSync(configPath, "utf8"));
+  const file = (name, data) => {
+    const target = path.join(root, name);
+    fs.writeFileSync(target, typeof data === "string" ? data : JSON.stringify(data));
+    return target;
+  };
+  const cli = (...args) => runCli(args, { env });
+
+  try {
+    cli("theme", "dark-ocean");
+    cli("layout", "lines");
+
+    const stdout = cli("export");
+    let exported = null;
+    try {
+      exported = JSON.parse(stdout.stdout);
+    } catch {
+      // checked below
+    }
+    record(
+      "export without a file prints the config as JSON with the release that wrote it",
+      stdout.code === 0 &&
+        exported?.agyPowerline?.version === require("../../package.json").version &&
+        exported.theme === "dark-ocean" &&
+        Array.isArray(exported.widgets),
+      `exit ${stdout.code}`
+    );
+
+    const out = path.join(root, "my-bar.json");
+    const written = cli("export", out);
+    const again = cli("export", out);
+    const forced = cli("export", out, "--force");
+    record(
+      "export <file> writes it, refuses to replace it, and replaces it with --force",
+      written.code === 0 &&
+        fs.existsSync(out) &&
+        again.code === 1 &&
+        /already exists/.test(again.stderr) &&
+        forced.code === 0,
+      `${written.code} ${again.code} ${forced.code}`
+    );
+
+    cli("theme", "light-paper");
+    cli("layout", "pills");
+    const before = fs.readFileSync(configPath, "utf8");
+    const roundTrip = cli("import", out, "--yes");
+    const restored = readConfig();
+    record(
+      "import --yes brings an exported config back as it was",
+      roundTrip.code === 0 &&
+        restored.theme === "dark-ocean" &&
+        restored.layout === "lines" &&
+        JSON.stringify(restored.widgets) === JSON.stringify(exported.widgets),
+      `exit ${roundTrip.code}`
+    );
+    record(
+      "import keeps the previous config as statusline.config.json.bak",
+      fs.readFileSync(`${configPath}.bak`, "utf8") === before
+    );
+
+    const merged = cli(
+      "import",
+      file("theme-only.json", { theme: "dark-neon" }),
+      "--merge",
+      "--yes"
+    );
+    const afterMerge = readConfig();
+    record(
+      "import --merge changes only the settings the file has",
+      merged.code === 0 && afterMerge.theme === "dark-neon" && afterMerge.layout === "lines",
+      `exit ${merged.code}`
+    );
+    const replaced = cli("import", file("theme-only.json", { theme: "dark-neon" }), "--yes");
+    record(
+      "import without --merge replaces the whole config, with defaults for the rest",
+      replaced.code === 0 && readConfig().layout === "pills",
+      `exit ${replaced.code}`
+    );
+
+    const noTty = cli("import", file("theme-only.json", { theme: "dark-ember" }));
+    record(
+      "import without --yes and without a TTY changes nothing",
+      noTty.code === 1 && /No TTY/.test(noTty.stderr) && readConfig().theme === "dark-neon",
+      `exit ${noTty.code}`
+    );
+
+    const unknown = cli(
+      "import",
+      file("unknown.json", { widgets: [{ id: "model" }, { id: "nope" }], wat: 1 }),
+      "--yes"
+    );
+    record(
+      "import lists the widgets and settings it leaves out",
+      unknown.code === 0 &&
+        /unknown widget "nope"/.test(unknown.stdout) &&
+        /"wat"/.test(unknown.stdout),
+      unknown.stdout
+    );
+
+    const unchanged = fs.readFileSync(configPath, "utf8");
+    const refusals = [
+      ["a non-JSON file", file("bad.json", "{ not json")],
+      ["a top-level array", file("array.json", "[]")],
+      ["a file over 256 KB", file("big.json", JSON.stringify({ x: "y".repeat(300 * 1024) }))],
+      ["a missing file", path.join(root, "missing.json")],
+      [
+        "a file from a newer major release",
+        file("newer.json", { agyPowerline: { version: "99.0.0" } }),
+      ],
+    ];
+    for (const [label, target] of refusals) {
+      const result = cli("import", target, "--yes", "--allow-exec");
+      record(
+        `import refuses ${label} and changes nothing`,
+        result.code === 1 &&
+          /Nothing was changed/.test(result.stderr) &&
+          fs.readFileSync(configPath, "utf8") === unchanged,
+        `exit ${result.code}: ${result.stderr.trim()}`
+      );
+    }
+
+    const ESC = String.fromCharCode(27);
+    const withCommand = file("command.json", {
+      widgets: [{ id: "model" }, { id: "exec", cmd: `echo ${ESC}]52;c;ZXZpbA==${ESC}\\ hi` }],
+    });
+    const blocked = cli("import", withCommand, "--yes");
+    record(
+      "import refuses new shell commands without --allow-exec, even with --yes",
+      blocked.code === 1 &&
+        /adds shell commands/.test(blocked.stderr) &&
+        fs.readFileSync(configPath, "utf8") === unchanged,
+      `exit ${blocked.code}`
+    );
+    record(
+      "a new command is shown in full, with its control characters escaped",
+      blocked.stdout.includes("echo \\u001b]52;c;ZXZpbA==\\u001b\\ hi") &&
+        !blocked.stdout.includes(ESC + "]52"),
+      JSON.stringify(blocked.stdout.slice(-200))
+    );
+    const allowed = cli("import", withCommand, "--yes", "--allow-exec");
+    record(
+      "import --yes --allow-exec brings the command in",
+      allowed.code === 0 && readConfig().widgets.some((widget) => widget.id === "exec"),
+      `exit ${allowed.code}`
+    );
+    const known = cli("import", withCommand, "--merge", "--yes");
+    record(
+      "a command already in the config needs no --allow-exec",
+      known.code === 0 && !/adds .* shell command/.test(known.stdout),
+      `exit ${known.code}`
+    );
+    const note = cli("export");
+    record(
+      "export warns on stderr when the config holds commands, and keeps stdout pure JSON",
+      /exec widget command/.test(note.stderr) && JSON.parse(note.stdout).widgets.length === 2
+    );
+
+    fs.writeFileSync(configPath, "{ broken");
+    const brokenImport = cli("import", out, "--yes");
+    const brokenExport = cli("export");
+    record(
+      "export and import refuse to work over a config with a JSON error",
+      brokenImport.code === 1 &&
+        brokenExport.code === 1 &&
+        brokenExport.stdout === "" &&
+        fs.readFileSync(configPath, "utf8") === "{ broken",
+      `${brokenImport.code} ${brokenExport.code}`
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 }
 
 module.exports = { run };

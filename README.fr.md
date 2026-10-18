@@ -124,6 +124,8 @@ Un widget qui n’a rien à afficher se masque automatiquement. Vous pouvez pers
 | `npx agy-powerline gradient <name>`       | Color each row with a gradient (`--list`, `off`)                       |
 | `npx agy-powerline layout <pills\|lines>` | Changer de disposition                                                 |
 | `npx agy-powerline caps <style>`          | Changer la forme des capsules : `round`, `angled`, `slanted`, `flat`   |
+| `npx agy-powerline export [file]`         | Save your config to a file, to back it up or share it                  |
+| `npx agy-powerline import <file>`         | Load a config, after showing what changes (`--merge`)                  |
 | `npx agy-powerline doctor`                | Vérifier l’installation et expliquer les éventuels problèmes           |
 | `npx agy-powerline report`                | Générer un rapport de bogue respectueux de la vie privée               |
 | `npx agy-powerline uninstall [--delete]`  | Retirer la barre d’état d’agy (`--delete` supprime aussi ses fichiers) |

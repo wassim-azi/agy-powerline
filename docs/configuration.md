@@ -339,6 +339,22 @@ Or from the command line: `npx agy-powerline gradient sunset`, `npx agy-powerlin
 - **What stays:** caution and danger colors, the dirty-branch color, and a widget's own `color` or `textColor` ([widget options](#widget-options)) keep their colors.
 - Gradients follow the [color depth](#terminals-ascii-mode-colors-narrow-windows): exact colors in truecolor, the nearest ones in 256-color mode, none with `NO_COLOR`.
 
+## Share or back up your config
+
+`export` writes your config to a file, and `import` loads one, on another machine or after an experiment:
+
+```sh
+npx agy-powerline export my-bar.json     # or: npx agy-powerline export > my-bar.json
+npx agy-powerline import my-bar.json
+```
+
+- **`export [file]`** writes the config the bar uses, with the agy-powerline version that wrote it. Without a file it prints to stdout, so the output can go into a gist or an issue. It never replaces an existing file unless you pass `--force`. When the config has `exec` widgets, it says so on stderr: their commands are in the file, so check them before you share it.
+- **`import <file>`** shows what would change (theme, layout, style, gradient, settings, thresholds, clock, and the widgets row by row), lists the settings it leaves out because this version can't use them (an unknown widget id, theme or layout), and previews the bar, before asking to apply it (default No). `--yes` applies without asking.
+- **Replace or merge:** by default the file replaces your whole config, with defaults for whatever it leaves out. `--merge` changes only the settings the file has; `widgets` is then replaced as a whole when the file has it.
+- **Shell commands:** every `exec` command the file would add is printed in full first, and needs its own yes (default No). `--yes` alone doesn't accept them; `--allow-exec` does. Without a terminal to ask in, an import that adds commands is refused unless you pass `--allow-exec`.
+- **Undo:** before writing, your config is copied to `statusline.config.json.bak` next to it; `npx agy-powerline import ~/.agy-powerline/statusline.config.json.bak` brings it back. The bar shows the imported config on its next refresh.
+- `import` refuses files over 256 KB, files that aren't a JSON object, and files exported by a newer major version of agy-powerline. Like `configure`, `export` and `import` refuse to work over a config that has a JSON error.
+
 ## Terminals: ASCII mode, colors, narrow windows
 
 **No Nerd Font?** Enable ASCII mode: caps and separators become plain text (`[` `]`, `<` `>`, `/`; joins default to `>`), dot meters become `#`/`-`, markers become `*`, and emojis turn off. Toggle with `i` in the TUI, set `"ascii": true`, pass `render --ascii`, or export `AGY_POWERLINE_ASCII=1`.

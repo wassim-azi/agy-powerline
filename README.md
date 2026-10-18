@@ -122,6 +122,8 @@ A widget with nothing to show hides itself. Widgets can be recolored, made label
 | `npx agy-powerline gradient <name>`       | Color each row with a gradient (`--list`, `off`)            |
 | `npx agy-powerline layout <pills\|lines>` | Switch layout                                               |
 | `npx agy-powerline caps <style>`          | Switch the pill shape: `round`, `angled`, `slanted`, `flat` |
+| `npx agy-powerline export [file]`         | Save your config to a file, to back it up or share it       |
+| `npx agy-powerline import <file>`         | Load a config, after showing what changes (`--merge`)       |
 | `npx agy-powerline doctor`                | Check the install and explain what's wrong                  |
 | `npx agy-powerline report`                | Write a privacy-safe bug report                             |
 | `npx agy-powerline uninstall [--delete]`  | Remove it from agy (`--delete` also removes its files)      |

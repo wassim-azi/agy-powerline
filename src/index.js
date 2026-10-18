@@ -11,6 +11,8 @@ const { layoutCommand } = require("./cli/layout");
 const { presetCommand } = require("./cli/preset");
 const { capsCommand } = require("./cli/caps");
 const { gradientCommand } = require("./cli/gradient");
+const { exportCommand } = require("./cli/export");
+const { importCommand } = require("./cli/import");
 const { doctorCommand } = require("./cli/doctor");
 const { uninstallCommand } = require("./cli/uninstall");
 const { reportCommand } = require("./cli/report");
@@ -114,6 +116,32 @@ const COMMANDS = [
       list: { type: "boolean", short: "l", help: "list all gradient presets with a preview" },
     },
     run: (arg, opts) => gradientCommand(arg, opts),
+  },
+  {
+    name: "export",
+    arg: "[file]",
+    description: "Write your config to a file (or to stdout without one) to back it up or share it",
+    options: {
+      force: { type: "boolean", help: "replace the file if it already exists" },
+    },
+    run: (arg, opts) => exportCommand(arg, opts),
+  },
+  {
+    name: "import",
+    arg: "<file>",
+    description: "Load a config from a file, after showing what changes",
+    options: {
+      merge: {
+        type: "boolean",
+        help: "change only the settings the file has (default: replace the whole config)",
+      },
+      yes: { type: "boolean", short: "y", help: "apply without asking" },
+      "allow-exec": {
+        type: "boolean",
+        help: "accept the shell commands (exec widgets) the file adds; --yes alone doesn't",
+      },
+    },
+    run: (arg, opts) => importCommand(arg, opts),
   },
   {
     name: "doctor",
