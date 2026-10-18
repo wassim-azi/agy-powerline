@@ -14,6 +14,20 @@ What `npx agy-powerline init` does, where files go, and how to set things up by 
 
 `init` copies the scripts to `~/.agy-powerline` and adds a `statusLine` entry to Antigravity's `settings.json`. It asks before overwriting existing scripts or another `statusLine`; pass `--yes` to skip the prompts (required without a TTY). Restart `agy` (or open a new session) after `init` so it reloads settings.
 
+On a first install in a terminal (no `statusline.config.json` yet, no `--yes`), `init` asks three questions, each with a preview of the bar it gives:
+
+1. **Preset:** `default`, `compact`, `workspace`, `limits` or `full`. Enter keeps `default`.
+2. **Layout:** `pills` or `lines`. Enter keeps `pills`.
+3. **Terminal background:** dark, light or color-blind, then the themes for it (Enter keeps `dark-aurora`, `light-paper` or `colorblind-dark`).
+
+Answer with the number of a choice. `npx agy-powerline preset`, `layout`, `theme` and `configure` change your choice later. Without a terminal, or with `--yes`, nothing is asked and you get the default bar. Running `init` again never replaces your config.
+
+For scripted installs, `--preset <id>`, `--layout <id>` and `--theme <id>` set those choices and skip their question, with or without `--yes`. The theme also takes `dark`, `light` and `colorblind`. Each value is checked before anything is written: an unknown one stops `init` with the list of valid ids. With an existing config, the flags change only those settings in it, and `init` says so.
+
+```sh
+npx agy-powerline init --yes --preset compact --layout lines --theme light
+```
+
 `init` never loses your other settings. It refuses to touch a `settings.json` that is not plain JSON (comments, trailing commas) and tells you what to add by hand. Before every change it saves the previous file as `settings.json.agy-powerline.bak`. The first time, it also keeps your untouched file as `settings.json.agy-powerline.original.bak`, which later runs never replace. A `settings.json` linked into place by a dotfile manager (stow, chezmoi, yadm) stays a link: the change goes into the file it points to.
 
 | OS      | Scripts                           | `statusLine.command` in settings                                     |

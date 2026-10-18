@@ -57,6 +57,112 @@ async function run() {
   testCmdBreakingFolder();
   testDoctor();
   testUpgradeFromSeparateFiles();
+  testChoiceFlags();
+  await testChoose();
+}
+
+function testChoiceFlags() {
+  withBox("choices", (box) => {
+    const res = runCli(
+      ["init", "--yes", "--preset", "compact", "--layout", "lines", "--theme", "light"],
+      {
+        env: box.env,
+      }
+    );
+    const config = readJson(path.join(box.installDir, "statusline.config.json"));
+    record(
+      "init --preset --layout --theme writes those three, with the light alias resolved",
+      res.code === 0 &&
+        config?.layout === "lines" &&
+        config?.theme === "light-paper" &&
+        JSON.stringify(config.widgets.map((widget) => widget.id)) ===
+          JSON.stringify(["model", "quota", "contextPct", "git"]),
+      res.stderr || JSON.stringify(config)
+    );
+
+    // A config of your own is kept; a flag changes only its setting.
+    const file = path.join(box.installDir, "statusline.config.json");
+    fs.writeFileSync(file, JSON.stringify({ ...config, theme: "dark-ocean" }, null, 2));
+    runCli(["init", "--yes"], { env: box.env });
+    const kept = readJson(file);
+    const themed = runCli(["init", "--yes", "--theme", "dark-ember"], { env: box.env });
+    const changed = readJson(file);
+    record(
+      "a second init keeps the config it finds, and --theme changes only the theme",
+      kept?.theme === "dark-ocean" &&
+        changed?.theme === "dark-ember" &&
+        changed.layout === "lines" &&
+        JSON.stringify(changed.widgets) === JSON.stringify(kept.widgets) &&
+        /kept yours, with theme dark-ember/.test(stripAnsi(themed.stdout)),
+      themed.stdout
+    );
+  });
+
+  withBox("choice-unknown", (box) => {
+    const res = runCli(["init", "--yes", "--preset", "nope"], { env: box.env });
+    record(
+      "an unknown --preset exits 1 and writes nothing: no settings, no scripts",
+      res.code === 1 &&
+        /Unknown preset "nope"/.test(stripAnsi(res.stderr)) &&
+        /Available presets: default, compact/.test(res.stderr) &&
+        !fs.existsSync(box.installDir) &&
+        !fs.existsSync(box.settingsPath),
+      res.stderr
+    );
+    const layout = runCli(["init", "--yes", "--layout", "grid"], { env: box.env });
+    const theme = runCli(["init", "--yes", "--theme", "neon-pink"], { env: box.env });
+    record(
+      "unknown --layout and --theme values are refused the same way",
+      layout.code === 1 &&
+        theme.code === 1 &&
+        /Unknown layout "grid"/.test(layout.stderr) &&
+        /Unknown theme "neon-pink"/.test(theme.stderr) &&
+        !fs.existsSync(box.installDir)
+    );
+  });
+
+  withBox("choice-no-tty", (box) => {
+    const res = runCli(["init"], { env: box.env });
+    const config = readJson(path.join(box.installDir, "statusline.config.json"));
+    record(
+      "without a terminal, init asks nothing and installs the default bar",
+      res.code === 0 &&
+        !/Which widgets|Choose 1-/.test(stripAnsi(res.stdout)) &&
+        config?.theme === "dark-aurora" &&
+        config?.layout === "pills",
+      res.stdout + res.stderr
+    );
+  });
+}
+
+// choose() with a fake readline that answers from a list.
+async function testChoose() {
+  const { choose } = require("../../src/lib/prompt");
+  const ask = async (answers, defaultIndex = 0) => {
+    const asked = [];
+    const rl = {
+      question: (query, callback) => {
+        asked.push(query);
+        callback(answers.shift() ?? "");
+      },
+    };
+    const index = await choose(rl, "Pick", ["a", "b", "c"], defaultIndex, () => {});
+    return { index, asked: asked.length };
+  };
+  const enter = await ask([""], 1);
+  const two = await ask(["2"]);
+  const third = await ask(["9", "x", "1"], 2);
+  const bad = await ask(["9", "x", "0"], 2);
+  record(
+    "choose(): Enter keeps the default, a number picks, and three bad answers keep the default",
+    enter.index === 1 &&
+      two.index === 1 &&
+      third.index === 0 &&
+      third.asked === 3 &&
+      bad.index === 2 &&
+      bad.asked === 3,
+    JSON.stringify({ enter, two, third, bad })
+  );
 }
 
 function testFreshInstall() {

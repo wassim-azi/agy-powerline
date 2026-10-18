@@ -2,7 +2,23 @@
 
 const fs = require("fs");
 const path = require("path");
-const { defaultConfig, saveConfig, setConfigDir } = require("../lib/shared");
+const {
+  defaultConfig,
+  saveConfig,
+  setConfigDir,
+  readConfigFile,
+  applyPreset,
+  renderStatusline,
+  sampleData,
+  resolveColorDepth,
+  PRESETS,
+  PRESET_ORDER,
+  LAYOUTS,
+  LAYOUT_ORDER,
+  THEMES,
+  THEME_ORDER,
+  canonicalThemeId,
+} = require("../lib/shared");
 const {
   AGY_SETTINGS,
   RUNTIME_FILES,
@@ -19,7 +35,8 @@ const {
   cmdBreakingChars,
   cmdBreakingMessage,
 } = require("../lib/paths");
-const { createRl, confirm } = require("../lib/prompt");
+const { createRl, confirm, choose } = require("../lib/prompt");
+const { printInvalidConfig } = require("./config-guard");
 const { buildRuntimeBundle } = require("./bundle");
 const { REPO_URL } = require("./repo-url");
 
@@ -61,6 +78,117 @@ function assertUnixNode() {
   process.exit(1);
 }
 
+function unknownChoice(kind, value, ids) {
+  console.error(`${RED}error${RESET} Unknown ${kind} "${value}".`);
+  console.error(` Available ${kind}s: ${ids.join(", ")}`);
+  console.error(` Run ${CYAN}npx agy-powerline ${kind} --list${RESET} to view details.`);
+  process.exitCode = 1;
+  return null;
+}
+
+// --preset, --layout and --theme, checked before anything is written. Returns
+// the ids given ({} for none), or null after printing what's wrong.
+function readChoiceFlags(options) {
+  const choices = {};
+  if (options.preset !== undefined) {
+    if (!PRESETS[options.preset]) {
+      return unknownChoice("preset", options.preset, PRESET_ORDER);
+    }
+    choices.preset = options.preset;
+  }
+  if (options.layout !== undefined) {
+    if (!LAYOUTS[options.layout]) {
+      return unknownChoice("layout", options.layout, LAYOUT_ORDER);
+    }
+    choices.layout = options.layout;
+  }
+  if (options.theme !== undefined) {
+    // Aliases (dark, light, colorblind) name a theme too.
+    const theme = canonicalThemeId(options.theme);
+    if (!THEMES[theme]) {
+      return unknownChoice("theme", options.theme, THEME_ORDER);
+    }
+    choices.theme = theme;
+  }
+  return choices;
+}
+
+function applyChoices(config, choices) {
+  const next = choices.preset ? applyPreset(config, choices.preset) : { ...config };
+  if (choices.layout) {
+    next.layout = choices.layout;
+  }
+  if (choices.theme) {
+    next.theme = choices.theme;
+  }
+  return next;
+}
+
+// The bar a choice gives, fitted to the terminal's width (less the indent).
+// exec widgets keep their [cmd] placeholder: nothing runs here.
+function preview(config, rows = Infinity) {
+  const width = Math.max(40, (process.stdout.columns || 80) - 6);
+  const color = resolveColorDepth({ configColor: config.color, env: process.env });
+  return renderStatusline({ ...sampleData(), terminal_width: width }, config, { color })
+    .split("\n")
+    .slice(0, rows)
+    .join("\n");
+}
+
+const BACKGROUNDS = [
+  ["dark", "dark"],
+  ["light", "light"],
+  ["colorblind", "color-blind"],
+];
+
+// The questions of a first install in a terminal, for what the flags left open.
+async function askChoices(rl, given) {
+  const choices = { ...given };
+  const base = defaultConfig();
+  const option = (id, description, config, rows) =>
+    `${id}${description ? `  ${DIM}${description}${RESET}` : ""}\n${preview(config, rows)}`;
+
+  if (!choices.preset) {
+    const index = await choose(
+      rl,
+      `\n${BOLD} Which widgets?${RESET}`,
+      PRESET_ORDER.map((id) =>
+        option(id, PRESETS[id].description, applyChoices(base, { ...choices, preset: id }))
+      )
+    );
+    choices.preset = PRESET_ORDER[index];
+  }
+
+  if (!choices.layout) {
+    const index = await choose(
+      rl,
+      `\n${BOLD} Which layout?${RESET}`,
+      LAYOUT_ORDER.map((id) =>
+        option(id, LAYOUTS[id].description, applyChoices(base, { ...choices, layout: id }))
+      )
+    );
+    choices.layout = LAYOUT_ORDER[index];
+  }
+
+  if (!choices.theme) {
+    const background = await choose(
+      rl,
+      `\n${BOLD} Your terminal's background?${RESET}`,
+      BACKGROUNDS.map(([, label]) => label)
+    );
+    const kind = BACKGROUNDS[background][0];
+    const ids = THEME_ORDER.filter((id) => THEMES[id]?.kind === kind);
+    const index = await choose(
+      rl,
+      `\n${BOLD} Which theme?${RESET}`,
+      ids.map((id) => option(id, "", applyChoices(base, { ...choices, theme: id }), 1))
+    );
+    choices.theme = ids[index];
+  }
+
+  return choices;
+}
+
 function reportUnreadableSettings(error, command) {
   console.error(`${RED}error${RESET} ${AGY_SETTINGS} is not valid JSON, so it was left untouched.`);
   console.error(`  ${error}`);
@@ -77,11 +205,32 @@ async function initCommand(options = {}) {
   const interactive = Boolean(process.stdin.isTTY && process.stdout.isTTY);
   const installDir = resolveInstallDir();
   const command = statuslineCommand(installDir);
+  const destConfig = path.join(installDir, "statusline.config.json");
 
   console.log();
   console.log(`${CYAN}${BOLD} agy-powerline${RESET}`);
   console.log(`${DIM} Antigravity statusline installer${RESET}`);
   console.log();
+
+  let choices = readChoiceFlags(options);
+  if (!choices) {
+    return;
+  }
+
+  // Re-running init never replaces a config; flags change only their settings
+  // in it, and a config with a JSON error isn't touched at all.
+  const firstInstall = !fs.existsSync(destConfig);
+  let existingConfig = null;
+  if (!firstInstall && Object.keys(choices).length) {
+    setConfigDir(installDir);
+    const existing = readConfigFile();
+    if (existing.error) {
+      printInvalidConfig(existing.error);
+      process.exitCode = 1;
+      return;
+    }
+    existingConfig = existing.config;
+  }
 
   // Validate settings.json before writing anything, so a file we cannot
   // safely update never ends up half-installed or overwritten.
@@ -104,11 +253,18 @@ async function initCommand(options = {}) {
   const rl = interactive && !yes ? createRl() : null;
 
   try {
+    if (firstInstall && rl) {
+      choices = await askChoices(rl, choices);
+      console.log();
+      console.log(` ${BOLD}${choices.preset} · ${choices.layout} · ${choices.theme}${RESET}`);
+      console.log(preview(applyChoices(defaultConfig(), choices)));
+      console.log();
+    }
+
     fs.mkdirSync(installDir, { recursive: true });
     restrictPrivateFiles(installDir);
 
     const destStatusline = path.join(installDir, "statusline.js");
-    const destConfig = path.join(installDir, "statusline.config.json");
 
     let writeScripts = true;
 
@@ -147,9 +303,11 @@ async function initCommand(options = {}) {
 
     writeInstallMeta(installDir);
 
-    if (!fs.existsSync(destConfig)) {
-      setConfigDir(installDir);
-      saveConfig(defaultConfig());
+    setConfigDir(installDir);
+    if (firstInstall) {
+      saveConfig(applyChoices(defaultConfig(), choices));
+    } else if (existingConfig) {
+      saveConfig(applyChoices(existingConfig, choices));
     }
 
     const statusLine = await updateAgySettings(command, current, {
@@ -169,9 +327,18 @@ async function initCommand(options = {}) {
     if (typeof statusLine?.padding === "number") {
       console.log(`  padding  ${DIM}${statusLine.padding} line(s)${RESET}`);
     }
+    if (existingConfig) {
+      const changed = Object.entries(choices).map(([key, value]) => `${key} ${value}`);
+      console.log(`  config   ${DIM}kept yours, with ${changed.join(", ")}${RESET}`);
+    } else if (!firstInstall) {
+      console.log(`  config   ${DIM}kept yours${RESET}`);
+    }
     console.log();
     console.log(" Next:");
     console.log(`${CYAN}  npx agy-powerline configure${RESET}`);
+    console.log(
+      `${CYAN}  npx agy-powerline preset${RESET} / ${CYAN}layout${RESET} / ${CYAN}theme${RESET}  ${DIM}change one of your choices${RESET}`
+    );
     console.log(`${CYAN}  npx agy-powerline doctor${RESET}`);
     console.log("  then restart Antigravity / open a new session.");
     console.log();
@@ -250,4 +417,5 @@ async function updateAgySettings(command, { exists, settings }, { yes, rl, stack
 
 module.exports = {
   initCommand,
+  askChoices,
 };

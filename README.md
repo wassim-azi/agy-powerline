@@ -30,7 +30,7 @@ npx agy-powerline configure   # optional: pick widgets, theme and layout
 agy                           # start Antigravity
 ```
 
-`init` asks before replacing anything and backs up Antigravity's `settings.json` first. Restart `agy` once after `init`. Details: [what `init` does](docs/install.md).
+On a first install `init` asks for a preset, a layout and a theme, with a preview of each; add `--yes` to skip the questions. It asks before replacing anything and backs up Antigravity's `settings.json` first. Restart `agy` once after `init`. Details: [what `init` does](docs/install.md).
 
 Or let agy install it: paste this into an `agy` session.
 

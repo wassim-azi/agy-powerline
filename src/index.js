@@ -50,6 +50,17 @@ const COMMANDS = [
         value: "<lines>",
         help: "set padding blank lines above statusline",
       },
+      preset: {
+        type: "string",
+        value: "<id>",
+        help: "start from this widget preset (skips the question)",
+      },
+      layout: { type: "string", value: "<id>", help: "use this layout (skips the question)" },
+      theme: {
+        type: "string",
+        value: "<id>",
+        help: "use this theme, or dark, light, colorblind (skips the question)",
+      },
     },
     run: (_arg, opts) =>
       initCommand({
