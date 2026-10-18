@@ -72,7 +72,7 @@ async function run() {
       bad.push(dir);
     }
     for (const match of text.matchAll(
-      /npx (?:-y )?agy-powerline(?:@latest)? ([a-z]+)([^`\n|]*)/g
+      /(?:npx (?:-y )?agy-powerline(?:@latest)?|src\/index\.js) ([a-z]+)([^`\n|]*)/g
     )) {
       mentioned.push({
         skill: dir,

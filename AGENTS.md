@@ -57,7 +57,7 @@ Suite names are the `registerSuite()` calls in `tests/shared.js` (e.g. `renderer
 - `src/lib/log.js`: the local problem log; `payload-dump.js`: privacy-safe payload dumps; `mock-data.js`: the `render --demo` sample payload; `run.js`: runs a command and captures its output (doctor's live check); `prompt.js`: yes/no prompts for `init` and `uninstall`.
 - `tests/shared/*.test.js`: cross-platform suites; `tests/platform/`: launcher tests per OS; `tests/snapshots/`: expected output; `tests/fixtures/`: sample payloads.
 - `docs/`: user docs beyond the README (`configuration.md`, `install.md`, `troubleshooting.md`).
-- `scripts/gallery/`: the `npm run gallery` theme preview and `npm run screenshots`; `scripts/hooks/`: the git hooks (`.githooks/` points at them).
+- `scripts/gallery/`: the `npm run gallery` theme preview and `npm run screenshots`; `scripts/hooks/`: the git hooks (`.githooks/` points at them); `scripts/release/`: the plugin archives `release.yml` attaches to each release.
 
 The installed runtime is a **copy**: `init` joins `src/runtime/statusline.js` and the files listed in `RUNTIME_FILES` (`src/lib/paths.js`) into one `~/.agy-powerline/statusline.js` (`src/cli/bundle.js`), because Node opens one file much faster than many. If runtime code needs a new file in `src/lib/`, add it to `RUNTIME_FILES`. The runtime must never require `src/cli/` or anything outside that list; inside the bundle such a require fails.
 

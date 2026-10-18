@@ -4,6 +4,7 @@ What `npx agy-powerline init` does, where files go, and how to set things up by 
 
 - [What `init` does](#what-init-does)
 - [Install from inside agy (plugin)](#install-from-inside-agy-plugin)
+- [Install without npm](#install-without-npm)
 - [Where files live](#where-files-live)
 - [Upgrading](#upgrading)
 - [Uninstalling](#uninstalling)
@@ -57,7 +58,7 @@ The repository is also an agy plugin with two skills:
 agy plugin install https://github.com/wassim-azi/agy-powerline   # or /plugin install … inside agy
 ```
 
-- **`agy-powerline-setup`** checks that Node.js is 20 or newer, runs `npx -y agy-powerline@latest init --yes`, then `npx agy-powerline doctor`, sums up the result and asks you to restart agy once. Run it with `/agy-powerline-setup`, or just ask agy to set up agy-powerline.
+- **`agy-powerline-setup`** checks that Node.js is 20 or newer, runs `npx -y agy-powerline@latest init --yes`, then `npx agy-powerline doctor`, sums up the result and asks you to restart agy once. If npx can't reach npm, it runs the same commands from the plugin's own copy instead ([Install without npm](#install-without-npm)). Run it with `/agy-powerline-setup`, or just ask agy to set up agy-powerline.
 - **`agy-powerline-customize`** maps requests such as "make it light", "show only one line" or "add a gradient" to the `theme`, `preset`, `layout`, `caps`, `gradient`, `export` and `import` commands: it lists the choices first, then applies one and shows the preview.
 
 The skills run commands through agy's shell tool, so agy asks you before each one, as for any command. They never edit `settings.json` by hand, never start `configure` (an interactive editor) and never pass `--allow-exec` to `import` without your yes to the commands shown.
@@ -67,6 +68,29 @@ agy copies the plugin to `~/.gemini/config/plugins/agy-powerline/`. The bar itse
 - **Update:** run the setup skill again, or `npx agy-powerline@latest init --yes`. Reinstall the plugin to get newer skills.
 - **Remove:** `agy plugin uninstall agy-powerline` removes the skills only; the bar stays. `npx agy-powerline uninstall` removes the bar from agy's settings (add `--delete` to remove its files).
 - **macOS:** if installing from the GitHub URL fails with `unsupported extension format` (google-antigravity/antigravity-cli#327, closed upstream), update agy, or clone the repository and run `agy plugin install <path to the clone>`.
+
+## Install without npm
+
+Where npm or cloning from GitHub is blocked, each [GitHub release](https://github.com/wassim-azi/agy-powerline/releases) has files you can download once and install from. Node.js 20 or newer is still needed; agy-powerline has no dependencies to fetch.
+
+- **The bar only:** `agy-powerline-<version>.tgz` is the npm package. Extract it and run `init` from it:
+
+  ```sh
+  tar -xzf agy-powerline-<version>.tgz
+  node package/src/index.js init --yes
+  ```
+
+- **The plugin, with its skills:** `agy-powerline-plugin-<version>.zip` (or `.tar.gz`) holds an `agy-powerline` folder. Extract it, then install that folder:
+
+  ```sh
+  agy plugin install ./agy-powerline
+  ```
+
+  Then run the setup skill. When npx can't reach npm, it runs `init` and `doctor` from the plugin's copy in `~/.gemini/config/plugins/agy-powerline/`, so you get the version the archive came with.
+
+Restart agy once afterwards, as after any `init`. Later commands work the same way: `node <folder>/src/index.js theme --list` stands in for `npx agy-powerline theme --list`. To update, download the newer release's file and repeat.
+
+Each of these files has a signed attestation next to it (`<file>.sigstore.json`); [SECURITY.md](../SECURITY.md) shows how to check a download with `gh attestation verify`.
 
 ## Where files live
 

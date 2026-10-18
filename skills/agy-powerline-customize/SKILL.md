@@ -9,6 +9,8 @@ Each command below changes `~/.agy-powerline/statusline.config.json` and prints 
 
 Always list first, then apply, then show the user the preview the command printed.
 
+If npx can't download the package (a network, proxy or registry error), run the same command with `node <home>/.gemini/config/plugins/agy-powerline/src/index.js` in place of `npx agy-powerline`, with the user's home directory written out, when that file exists.
+
 | The user asks for                                      | List                                            | Apply                                   |
 | ------------------------------------------------------ | ----------------------------------------------- | --------------------------------------- |
 | Another look or colors ("make it light", "dark theme") | `npx agy-powerline theme --list`                | `npx agy-powerline theme <id>`          |

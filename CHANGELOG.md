@@ -12,10 +12,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CodeQL static code analysis workflow (`.github/workflows/codeql.yml`)
 - README badges for the live web configurator, GitHub stars, CodeQL, and OS platform logos
 - Star History chart in READMEs
+- Each GitHub release has plugin archives attached (`agy-powerline-plugin-<version>.zip` and `.tar.gz`), for `agy plugin install` where npm or cloning from GitHub is blocked; `docs/install.md` → Install without npm (#123)
+
+### Changed
+
+- The setup and customize skills run commands from the plugin's own copy when npx can't reach npm (#123)
 
 ### Security
 
 - Each GitHub release has the npm tarball attached with its signed build attestation; check it with `gh attestation verify` (see `SECURITY.md`) (#117)
+- The plugin archives on each release have the same signed build attestation as the tarball (#123)
 
 ## [1.3.0] - 2026-10-18
 

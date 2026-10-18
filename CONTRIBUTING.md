@@ -133,7 +133,8 @@ agy-powerline/
 │   └── platform/             # Windows / macOS / Linux launcher tests
 └── scripts/
     ├── gallery/              # npm run gallery / screenshots: previews of every theme
-    └── hooks/                # Git hooks: pre-commit (Prettier, ESLint), commit-msg
+    ├── hooks/                # Git hooks: pre-commit (Prettier, ESLint), commit-msg
+    └── release/              # Plugin archives attached to each GitHub release
 ```
 
 ---

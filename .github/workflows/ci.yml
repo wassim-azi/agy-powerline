@@ -125,6 +125,32 @@ jobs:
             console.log(files.length + ' files OK, no install scripts');
           "
 
+      # release.yml attaches these to every release. Built here too, so a
+      # broken archive shows up on the pull request rather than at release.
+      - name: Verify plugin archives
+        if: runner.os == 'Linux' && matrix.node-version == '24.x'
+        run: |
+          node scripts/release/plugin-archives.js dist > plugin-files.txt
+          TAR="dist/$(sed -n 1p plugin-files.txt)"
+          ZIP="dist/$(sed -n 2p plugin-files.txt)"
+          tar -tzf "$TAR" | sort > tar.txt
+          unzip -Z1 "$ZIP" | sort > zip.txt
+          for entry in agy-powerline/plugin.json agy-powerline/package.json \
+            agy-powerline/src/index.js agy-powerline/skills/agy-powerline-setup/SKILL.md \
+            agy-powerline/skills/agy-powerline-customize/SKILL.md; do
+            grep -qx "$entry" tar.txt || { echo "::error::$entry missing from $TAR"; exit 1; }
+            grep -qx "$entry" zip.txt || { echo "::error::$entry missing from $ZIP"; exit 1; }
+          done
+          if grep -v '^agy-powerline/' tar.txt zip.txt; then
+            echo "::error::Archive entries outside agy-powerline/"
+            exit 1
+          fi
+          if tar -xzOf "$TAR" agy-powerline/package.json | grep -q '"prepare"'; then
+            echo "::error::The archived package.json still has the prepare script"
+            exit 1
+          fi
+          echo "$(grep -vc '/$' tar.txt) files in $TAR and $ZIP"
+
   gallery:
     name: Theme preview
     runs-on: ubuntu-latest
