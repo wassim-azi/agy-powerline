@@ -4,12 +4,12 @@ name: Release
 # This is the only way a version reaches npm or any other platform. Uses npm trusted
 # publishing (OIDC): no long-lived npm token is stored in the repo, and the
 # package gets a provenance attestation linking it to this workflow run.
+# The same tarball, with a signed GitHub attestation, is attached to the release.
 on:
   release:
     types: [published]
 
-permissions:
-  contents: read
+permissions: {}
 
 jobs:
   publish:
@@ -20,7 +20,10 @@ jobs:
     environment: npm-publish
     permissions:
       contents: read
-      id-token: write # required for trusted publishing and provenance
+      id-token: write # required for trusted publishing, provenance and the attestation
+      attestations: write # stores the tarball's attestation on GitHub
+    outputs:
+      tarball: ${{ steps.pack.outputs.tarball }}
 
     steps:
       - name: Checkout repository
@@ -69,8 +72,68 @@ jobs:
       - name: Remove repo-only scripts
         run: npm pkg delete scripts.prepare
 
+      # Packed once, so the file on npm and the file on the GitHub release are
+      # the same bytes.
+      - name: Pack the tarball
+        id: pack
+        run: |
+          TARBALL="$(node -p "const p = require('./package.json'); p.name + '-' + p.version + '.tgz'")"
+          npm pack
+          test -f "$TARBALL"
+          echo "tarball=$TARBALL" >> "$GITHUB_OUTPUT"
+
+      # Signed with Sigstore through GitHub's OIDC identity. Done before the
+      # publish, so a version never reaches npm without its attestation.
+      - name: Attest the tarball
+        id: attest
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: ${{ steps.pack.outputs.tarball }}
+
+      - name: Name the attestation bundle after the tarball
+        env:
+          TARBALL: ${{ steps.pack.outputs.tarball }}
+          BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        run: cp "$BUNDLE" "$TARBALL.sigstore.json"
+
       # Authenticates with npm trusted publishing (OIDC, configured on
       # npmjs.com for this workflow and environment): no npm token exists.
       # Needs npm 11.5.1 or later, which Node 24 ships with.
       - name: Publish with provenance
-        run: npm publish --provenance --access public
+        env:
+          TARBALL: ${{ steps.pack.outputs.tarball }}
+        run: npm publish "./$TARBALL" --provenance --access public
+
+      - name: Keep the tarball and its attestation for the release
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-files
+          path: |
+            ${{ steps.pack.outputs.tarball }}
+            ${{ steps.pack.outputs.tarball }}.sigstore.json
+          if-no-files-found: error
+          retention-days: 1
+
+  # A separate job holds the only write access to the repository, so the job
+  # that runs npm and the tests can't change releases.
+  attach:
+    name: Attach to the GitHub release
+    needs: publish
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # uploads files to the release
+
+    steps:
+      - name: Download the tarball and its attestation
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-files
+
+      - name: Upload them to the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.event.release.tag_name }}
+          TARBALL: ${{ needs.publish.outputs.tarball }}
+        run: |
+          gh release upload "$TAG" "$TARBALL" "$TARBALL.sigstore.json" \
+            --repo "$GITHUB_REPOSITORY" --clobber

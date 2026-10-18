@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - README badges for the live web configurator, GitHub stars, CodeQL, and OS platform logos
 - Star History chart in READMEs
 
+### Security
+
+- Each GitHub release has the npm tarball attached with its signed build attestation; check it with `gh attestation verify` (see `SECURITY.md`) (#117)
+
 ## [1.3.0] - 2026-10-18
 
 ### Added
