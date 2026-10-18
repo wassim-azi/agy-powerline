@@ -26,6 +26,7 @@ registerSuite("configurator", "./shared/configurator.test");
 registerSuite("plugin", "./shared/plugin.test");
 registerSuite("robustness", "./shared/robustness.test");
 registerSuite("security", "./shared/security.test");
+registerSuite("fuzz", "./shared/fuzz.test");
 registerSuite("install safety", "./shared/install-safety.test");
 registerSuite("init and doctor", "./shared/init-doctor.test");
 registerSuite("snapshots", "./shared/snapshots.test");
