@@ -77,24 +77,27 @@ jobs:
       - name: Run OS-specific native tests
         run: npm run test:platform
 
-      # Antigravity runs the bar with `cmd /c <statusLine.command>`. This runs
-      # the command init wrote from the runner's own cmd, not through Node, in
-      # a home path with a space in it. cmd only fails a step on its last
-      # command, so each line exits on its own failure.
+      # Antigravity starts the bar as `cmd /c <statusLine.command>`. This starts
+      # the command init wrote the same way, from the runner's shell rather
+      # than through Node, in a home path with a space in it. The step keeps
+      # the default pwsh: zizmor flags `shell: cmd`, which ignores failures.
       - name: Smoke-test the cmd launcher
         if: runner.os == 'Windows'
-        shell: cmd
         run: |
-          set "HOME=%RUNNER_TEMP%\agy home"
-          set "USERPROFILE=%RUNNER_TEMP%\agy home"
-          set "AGY_POWERLINE_HOME="
-          node src\index.js init --yes || exit /b 1
-          for /f "usebackq delims=" %%c in (`node -p "require(process.env.USERPROFILE + '/.gemini/antigravity-cli/settings.json').statusLine.command"`) do set "BAR=%%c"
-          echo statusLine.command: %BAR%
-          echo {"model":{"display_name":"Gemini"}} | cmd /c "%BAR%" > "%RUNNER_TEMP%\bar.txt" 2> "%RUNNER_TEMP%\bar.err" || (type "%RUNNER_TEMP%\bar.err" & exit /b 1)
-          type "%RUNNER_TEMP%\bar.txt"
-          findstr /c:"Gemini" "%RUNNER_TEMP%\bar.txt" > nul || (echo The bar did not render & exit /b 1)
-          for %%f in ("%RUNNER_TEMP%\bar.err") do if %%~zf gtr 0 (type "%RUNNER_TEMP%\bar.err" & exit /b 1)
+          $env:HOME = $env:USERPROFILE = Join-Path $env:RUNNER_TEMP "agy home"
+          Remove-Item Env:AGY_POWERLINE_HOME -ErrorAction Ignore
+          node src/index.js init --yes
+          if ($LASTEXITCODE) { exit 1 }
+          $settings = Join-Path $env:USERPROFILE ".gemini/antigravity-cli/settings.json"
+          $bar = (Get-Content $settings -Raw | ConvertFrom-Json).statusLine.command
+          "statusLine.command: $bar"
+          $errFile = Join-Path $env:RUNNER_TEMP "bar.err"
+          $out = '{"model":{"display_name":"Gemini"}}' | cmd.exe /d /c $bar 2> $errFile
+          $code = $LASTEXITCODE
+          $err = Get-Content $errFile -Raw
+          $out
+          if ($code -or $err) { "cmd exited $code. stderr: $err"; exit 1 }
+          if ("$out" -notmatch "Gemini") { "The bar did not render"; exit 1 }
 
       - name: Verify diagnostics doctor command
         run: node src/index.js doctor --markdown
