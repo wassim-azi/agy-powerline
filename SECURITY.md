@@ -30,14 +30,14 @@ The CLI itself (`npx agy-powerline ...`) additionally:
 
 - **Only your config can run commands.** `exec` widgets run only when the config comes from `~/.agy-powerline` or the folder in `AGY_POWERLINE_HOME`. A copy of the scripts anywhere else, such as one committed inside a repo, shows `[blocked]`.
 - **The current directory is never used for config.** Cloning or opening a repo cannot change what agy-powerline runs.
-- **Previews never execute.** `configure`, `theme`, `layout`, `preset`, `caps`, `render --demo` and the preview inside `doctor` show `[cmd]` instead of running the command. `doctor`'s live check is the one exception: it runs your configured statusline once, as Antigravity does (see above).
+- **Previews never execute.** `configure`, `theme`, `gradient`, `layout`, `preset`, `caps`, `render --demo` and the preview inside `doctor` show `[cmd]` instead of running the command. `doctor`'s live check is the one exception: it runs your configured statusline once, as Antigravity does (see above).
 - **Output is cleaned.** Escape sequences and control characters are stripped and output is capped at 80 characters.
 
 ## Files it writes
 
 | File                                                                     | Written by                                                                                                                                                                                                                                                                                                                      |
 | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `~/.agy-powerline/*` (scripts, `statusline.config.json`, `install.json`) | `init`, `configure` and the `theme`/`layout`/`preset`/`caps` commands                                                                                                                                                                                                                                                           |
+| `~/.agy-powerline/*` (scripts, `statusline.config.json`, `install.json`) | `init`, `configure` and the `theme`/`gradient`/`layout`/`preset`/`caps` commands                                                                                                                                                                                                                                                |
 | `~/.agy-powerline/.exec-cache.json`                                      | The runtime, only when you use `exec` widgets                                                                                                                                                                                                                                                                                   |
 | `~/.agy-powerline/.git-sync-cache.json`                                  | The runtime, when a branch is ahead of or behind its upstream: the last 20 pairs of commit IDs with their ahead/behind counts, so `git` runs only when a commit moves                                                                                                                                                           |
 | `~/.gemini/antigravity-cli/settings.json`                                | `init` and `uninstall`, which only change the `statusLine` key. A symlinked `settings.json` stays a link: the change goes into the file it points to                                                                                                                                                                            |
@@ -49,7 +49,7 @@ The CLI itself (`npx agy-powerline ...`) additionally:
 
 On macOS and Linux, `statusline.config.json`, `.exec-cache.json`, `.git-sync-cache.json`, the problem log and the payload dump are created readable by your account only (`0600`), since they can hold your commands and their output; `init` narrows them in installs made by older versions. `settings.json` keeps the permissions it had. On Windows, your profile folder is private already.
 
-`init` and `uninstall` refuse to rewrite a `settings.json` they cannot parse. Likewise, `configure` and the `theme`/`layout`/`preset`/`caps` commands refuse to save over a `statusline.config.json` they cannot parse, so a typo never costs you your widgets. `uninstall --delete` removes only the files listed above and never a whole directory tree.
+`init` and `uninstall` refuse to rewrite a `settings.json` they cannot parse. Likewise, `configure` and the `theme`/`gradient`/`layout`/`preset`/`caps` commands refuse to save over a `statusline.config.json` they cannot parse, so a typo never costs you your widgets. `uninstall --delete` removes only the files listed above and never a whole directory tree.
 
 ## Your email and session IDs
 

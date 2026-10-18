@@ -196,6 +196,122 @@ function parseColor(value, fallback = [200, 200, 200]) {
   return fallback;
 }
 
+function linear(c) {
+  const v = c / 255;
+  return v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+}
+
+function gamma(v) {
+  const c = v <= 0.0031308 ? 12.92 * v : 1.055 * v ** (1 / 2.4) - 0.055;
+  return Math.max(0, Math.min(255, Math.round(c * 255)));
+}
+
+// WCAG relative luminance and contrast ratio.
+function luminance([r, g, b]) {
+  return 0.2126 * linear(r) + 0.7152 * linear(g) + 0.0722 * linear(b);
+}
+
+function contrastRatio(a, b) {
+  const [hi, lo] = [luminance(a), luminance(b)].sort((x, y) => y - x);
+  return (hi + 0.05) / (lo + 0.05);
+}
+
+// OKLab (Björn Ottosson): mixing there keeps the middle of a gradient as
+// bright and saturated as its ends, where sRGB mixing turns it muddy.
+function toOklab([r, g, b]) {
+  const [lr, lg, lb] = [linear(r), linear(g), linear(b)];
+  const l = Math.cbrt(0.4122214708 * lr + 0.5363325363 * lg + 0.0514459929 * lb);
+  const m = Math.cbrt(0.2119034982 * lr + 0.6806995451 * lg + 0.1073969566 * lb);
+  const s = Math.cbrt(0.0883024619 * lr + 0.2817188376 * lg + 0.6299787005 * lb);
+  return [
+    0.2104542553 * l + 0.793617785 * m - 0.0040720468 * s,
+    1.9779984951 * l - 2.428592205 * m + 0.4505937099 * s,
+    0.0259040371 * l + 0.7827717662 * m - 0.808675766 * s,
+  ];
+}
+
+function fromOklab([L, a, b]) {
+  const l = (L + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (L - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (L - 0.0894841775 * a - 1.291485548 * b) ** 3;
+  return [
+    gamma(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s),
+    gamma(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s),
+    gamma(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s),
+  ];
+}
+
+const MAX_GRADIENT_STOPS = 6;
+const HEX_STOP = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i;
+
+// "#ff5f6d-#ffc371" (2 to 6 hex stops, "#" optional) to RGB stops, or null.
+function parseGradientStops(spec) {
+  if (typeof spec !== "string") {
+    return null;
+  }
+  const parts = spec.trim().split("-");
+  if (parts.length < 2 || parts.length > MAX_GRADIENT_STOPS) {
+    return null;
+  }
+  if (!parts.every((part) => HEX_STOP.test(part))) {
+    return null;
+  }
+  return parts.map((part) => parseColor(part));
+}
+
+// The color t (0 to 1) of the way along the stops; the ends are exact.
+function gradientAt(stops, t) {
+  const clamped = Math.max(0, Math.min(1, Number(t) || 0));
+  const span = clamped * (stops.length - 1);
+  const i = Math.min(stops.length - 2, Math.floor(span));
+  const local = span - i;
+  if (local === 0) {
+    return [...stops[i]];
+  }
+  if (local === 1) {
+    return [...stops[i + 1]];
+  }
+  const [a, b] = [toOklab(stops[i]), toOklab(stops[i + 1])];
+  return fromOklab(a.map((value, k) => value + (b[k] - value) * local));
+}
+
+// count evenly spaced colors from the first stop to the last.
+function gradientColors(stops, count) {
+  if (count <= 1) {
+    return count === 1 ? [[...stops[0]]] : [];
+  }
+  return Array.from({ length: count }, (_, i) => gradientAt(stops, i / (count - 1)));
+}
+
+const MIN_CONTRAST = 4.5;
+
+// The preferred text color if it reads on the background, else whichever of
+// the fallbacks contrasts most.
+function readableText(background, preferred, fallbacks) {
+  if (contrastRatio(preferred, background) >= MIN_CONTRAST) {
+    return preferred;
+  }
+  return fallbacks.reduce((best, color) =>
+    contrastRatio(color, background) > contrastRatio(best, background) ? color : best
+  );
+}
+
+// The color moved toward white (on a dark background) or black (on a light
+// one) just far enough to reach the minimum contrast.
+function withContrast(color, background, min = MIN_CONTRAST) {
+  if (contrastRatio(color, background) >= min) {
+    return color;
+  }
+  const target = luminance(background) < 0.5 ? [255, 255, 255] : [0, 0, 0];
+  for (let step = 1; step <= 20; step++) {
+    const moved = mix(color, target, step / 20);
+    if (contrastRatio(moved, background) >= min) {
+      return moved;
+    }
+  }
+  return target;
+}
+
 module.exports = {
   CSI,
   RESET,
@@ -221,4 +337,15 @@ module.exports = {
   shade,
   mix,
   parseColor,
+  luminance,
+  contrastRatio,
+  toOklab,
+  fromOklab,
+  MAX_GRADIENT_STOPS,
+  parseGradientStops,
+  gradientAt,
+  gradientColors,
+  MIN_CONTRAST,
+  readableText,
+  withContrast,
 };

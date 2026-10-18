@@ -120,6 +120,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 | `npx agy-powerline configure`             | 打开编辑器（别名 `config`）                        |
 | `npx agy-powerline preset <name>`         | 应用预设（`--list` 查看全部）                      |
 | `npx agy-powerline theme <name>`          | 切换主题（`--list`、`--gallery`）                  |
+| `npx agy-powerline gradient <name>`       | Color each row with a gradient (`--list`, `off`)   |
 | `npx agy-powerline layout <pills\|lines>` | 切换布局                                           |
 | `npx agy-powerline caps <style>`          | 切换胶囊形状：`round`、`angled`、`slanted`、`flat` |
 | `npx agy-powerline doctor`                | 检查安装并说明问题所在                             |

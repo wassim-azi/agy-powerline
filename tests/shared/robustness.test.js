@@ -250,9 +250,54 @@ async function testStdoutErrorIsLogged() {
   }
 }
 
+// A gradient of the wrong shape renders the plain theme, never an error.
+function testBadGradients() {
+  const bad = [
+    "",
+    "nope",
+    "#ff0000",
+    "#ff0000-#gggggg",
+    "#1-#2",
+    Array(8).fill("#fff").join("-"),
+    42,
+    true,
+    [],
+    ["#f00", "#00f"],
+    { stops: ["#f00", "#00f"] },
+  ];
+  const failures = [];
+  for (const layout of ["pills", "lines"]) {
+    const plain = renderStatusline(
+      sampleData(),
+      { ...defaultConfig(), layout },
+      { color: "truecolor" }
+    );
+    for (const gradient of bad) {
+      try {
+        const out = renderStatusline(
+          sampleData(),
+          { ...defaultConfig(), layout, gradient },
+          { color: "truecolor" }
+        );
+        if (out !== plain) {
+          failures.push(`${layout} ${JSON.stringify(gradient)}: differs from the theme`);
+        }
+      } catch (err) {
+        failures.push(`${layout} ${JSON.stringify(gradient)}: ${err.message}`);
+      }
+    }
+  }
+  record(
+    "an invalid gradient renders the plain theme in both layouts",
+    failures.length === 0,
+    failures.slice(0, 5).join("; ")
+  );
+}
+
 async function run() {
   testGitLookup();
   testWrongPayloadTypes();
+  testBadGradients();
   await testConcurrentExecCache();
   await testStdoutEpipe();
   await testStdoutErrorIsLogged();

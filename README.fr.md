@@ -120,6 +120,7 @@ Un widget qui n’a rien à afficher se masque automatiquement. Vous pouvez pers
 | `npx agy-powerline configure`             | Ouvrir l’éditeur (alias `config`)                                      |
 | `npx agy-powerline preset <name>`         | Appliquer un préréglage (`--list` pour afficher la liste)              |
 | `npx agy-powerline theme <name>`          | Changer de thème (`--list`, `--gallery`)                               |
+| `npx agy-powerline gradient <name>`       | Color each row with a gradient (`--list`, `off`)                       |
 | `npx agy-powerline layout <pills\|lines>` | Changer de disposition                                                 |
 | `npx agy-powerline caps <style>`          | Changer la forme des capsules : `round`, `angled`, `slanted`, `flat`   |
 | `npx agy-powerline doctor`                | Vérifier l’installation et expliquer les éventuels problèmes           |

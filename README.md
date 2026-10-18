@@ -69,7 +69,7 @@ Start from a preset, then adjust:
 | Color-blind safe    | `colorblind-dark`, `colorblind-light`                                                                                                                      |
 | Your own colors     | `custom` ([how](docs/configuration.md#custom-theme))                                                                                                       |
 
-Preview them all with `npx agy-powerline theme --gallery`.
+Preview them all with `npx agy-powerline theme --gallery`. For one color sweep across each row, add a gradient: `npx agy-powerline gradient <name>` with `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono` or your own colors ([how](docs/configuration.md#gradients)).
 
 ### Layouts
 
@@ -118,6 +118,7 @@ A widget with nothing to show hides itself. Widgets can be recolored, made label
 | `npx agy-powerline configure`             | Open the editor (alias `config`)                            |
 | `npx agy-powerline preset <name>`         | Apply a preset (`--list` to see them)                       |
 | `npx agy-powerline theme <name>`          | Switch theme (`--list`, `--gallery`)                        |
+| `npx agy-powerline gradient <name>`       | Color each row with a gradient (`--list`, `off`)            |
 | `npx agy-powerline layout <pills\|lines>` | Switch layout                                               |
 | `npx agy-powerline caps <style>`          | Switch the pill shape: `round`, `angled`, `slanted`, `flat` |
 | `npx agy-powerline doctor`                | Check the install and explain what's wrong                  |

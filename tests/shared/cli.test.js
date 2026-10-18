@@ -105,6 +105,51 @@ async function run() {
       `exit ${setInvalidPreset.code}`
     );
 
+    const listGradients = runCli(["gradient", "--list"], { env });
+    record(
+      "gradient --list lists the presets and off",
+      listGradients.code === 0 &&
+        /agy-powerline gradients/i.test(listGradients.stdout) &&
+        ["aurora", "sunset", "rainbow", "off"].every((id) => listGradients.stdout.includes(id)),
+      `exit ${listGradients.code}`
+    );
+
+    const setGradient = runCli(["gradient", "Sunset"], { env });
+    cfg = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, "utf8")) : {};
+    record(
+      "gradient <name> saves the preset",
+      setGradient.code === 0 &&
+        cfg.gradient === "sunset" &&
+        /Gradient set to.*Sunset/i.test(setGradient.stdout),
+      `exit ${setGradient.code}`
+    );
+
+    const setStops = runCli(["gradient", "#F00-00f"], { env });
+    cfg = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, "utf8")) : {};
+    record(
+      "gradient <hex stops> saves them normalized",
+      setStops.code === 0 && cfg.gradient === "#ff0000-#0000ff",
+      `exit ${setStops.code}, ${cfg.gradient}`
+    );
+
+    const setInvalidGradient = runCli(["gradient", "#ff0000"], { env });
+    cfg = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, "utf8")) : {};
+    record(
+      "gradient <invalid> rejects with exit 1 and keeps the saved gradient",
+      setInvalidGradient.code === 1 &&
+        /Unknown gradient/i.test(setInvalidGradient.stderr) &&
+        cfg.gradient === "#ff0000-#0000ff",
+      `exit ${setInvalidGradient.code}`
+    );
+
+    const gradientOff = runCli(["gradient", "off"], { env });
+    cfg = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, "utf8")) : {};
+    record(
+      "gradient off removes the setting",
+      gradientOff.code === 0 && !("gradient" in cfg),
+      `exit ${gradientOff.code}`
+    );
+
     record(
       "wrapCursor circles from last item to first item on down arrow",
       wrapCursor(3, 1, 4) === 0,

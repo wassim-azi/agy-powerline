@@ -10,6 +10,7 @@ const { themeCommand } = require("./cli/theme");
 const { layoutCommand } = require("./cli/layout");
 const { presetCommand } = require("./cli/preset");
 const { capsCommand } = require("./cli/caps");
+const { gradientCommand } = require("./cli/gradient");
 const { doctorCommand } = require("./cli/doctor");
 const { uninstallCommand } = require("./cli/uninstall");
 const { reportCommand } = require("./cli/report");
@@ -103,6 +104,16 @@ const COMMANDS = [
       list: { type: "boolean", short: "l", help: "list all available cap styles" },
     },
     run: (arg, opts) => capsCommand(arg, opts),
+  },
+  {
+    name: "gradient",
+    arg: "[name]",
+    description:
+      "View or set a gradient across each row (a preset, hex colors like #ff5f6d-#ffc371, or off)",
+    options: {
+      list: { type: "boolean", short: "l", help: "list all gradient presets with a preview" },
+    },
+    run: (arg, opts) => gradientCommand(arg, opts),
   },
   {
     name: "doctor",

@@ -1,6 +1,17 @@
 "use strict";
 
-const { rgb, fg, RESET, DIM, BOLD, NORMAL, BLINK } = require("../colors");
+const {
+  rgb,
+  fg,
+  RESET,
+  DIM,
+  BOLD,
+  NORMAL,
+  BLINK,
+  gradientColors,
+  withContrast,
+} = require("../colors");
+const { gradientStops, terminalBackground } = require("../themes");
 const {
   basenameOf,
   homePath,
@@ -530,10 +541,22 @@ function buildLinesRows(session, config, palette, emojis, ascii = false, colors 
   rowDefs.push(currentRowDef);
 
   const rows = [];
+  const gradient = colors ? gradientStops(config?.gradient) : null;
+  const background = terminalBackground(colors);
+
+  function renderItem(widget, widgetPal) {
+    const item = buildLinesSegment(widget.id, session, widgetPal, emojis, ascii, widget, config);
+    // Bold has to survive the resets inside the segment.
+    return item && widget.bold === true
+      ? BOLD + item.split(RESET).join(RESET + BOLD) + RESET
+      : item;
+  }
 
   for (const def of rowDefs) {
     const groups = [];
     let currentGroup = [];
+    // The widgets shown in this row, so a gradient spreads over exactly those.
+    const placed = [];
 
     function flushGroup() {
       if (currentGroup.length) {
@@ -552,25 +575,34 @@ function buildLinesRows(session, config, palette, emojis, ascii = false, colors 
         continue;
       }
 
-      const item = buildLinesSegment(
-        widget.id,
-        session,
-        widgetPalette(widget, palette, colors),
-        emojis,
-        ascii,
-        widget,
-        config
-      );
+      const item = renderItem(widget, widgetPalette(widget, palette, colors));
 
       if (item) {
-        // Bold has to survive the resets inside the segment.
-        currentGroup.push(
-          widget.bold === true ? BOLD + item.split(RESET).join(RESET + BOLD) + RESET : item
-        );
+        placed.push({ widget, group: currentGroup, index: currentGroup.length });
+        currentGroup.push(item);
       }
     }
 
     flushGroup();
+
+    // Each widget's text takes its step of the gradient, made readable on the
+    // terminal background; alert colors and a widget's own color stay.
+    if (gradient && placed.length) {
+      const shades = gradientColors(gradient, placed.length);
+      placed.forEach(({ widget, group, index }, i) => {
+        if (resolveColor(widget.color, colors)) {
+          return;
+        }
+        const shade = withContrast(shades[i], background);
+        const item = renderItem(
+          widget,
+          widgetPalette({ ...widget, color: shade }, palette, colors)
+        );
+        if (item) {
+          group[index] = item;
+        }
+      });
+    }
 
     if (groups.length) {
       rows.push(groups);

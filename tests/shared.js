@@ -8,6 +8,7 @@ registerSuite("renderer", "./shared/renderer.test");
 registerSuite("exec cache", "./shared/exec-cache.test");
 registerSuite("colors", "./shared/color.test");
 registerSuite("themes", "./shared/themes.test");
+registerSuite("gradients", "./shared/gradient.test");
 registerSuite("powerline", "./shared/powerline.test");
 registerSuite("quota and style", "./shared/quota-style.test");
 registerSuite("fit to terminal", "./shared/fit.test");

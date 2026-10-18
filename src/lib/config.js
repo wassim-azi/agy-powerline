@@ -3,7 +3,7 @@
 const fs = require("fs");
 const path = require("path");
 const { resolveColorModeId } = require("./colors");
-const { resolveThemeId } = require("./themes");
+const { resolveThemeId, normalizeGradient } = require("./themes");
 const { stripControl, normalizeClock } = require("./formatters");
 const { normalizePowerline } = require("./powerline");
 const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
@@ -173,6 +173,12 @@ function mergeConfig(raw) {
 
   if (raw && typeof raw.customTheme === "object" && raw.customTheme !== null) {
     result.customTheme = raw.customTheme;
+  }
+
+  // Only a valid gradient is kept; anything else renders the plain theme.
+  const gradient = normalizeGradient(raw?.gradient);
+  if (gradient) {
+    result.gradient = gradient;
   }
 
   return result;

@@ -120,6 +120,7 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 | `npx agy-powerline configure`             | エディターを開く（別名 `config`）                            |
 | `npx agy-powerline preset <name>`         | プリセットを適用（一覧は `--list`）                          |
 | `npx agy-powerline theme <name>`          | テーマを切り替え（`--list`、`--gallery`）                    |
+| `npx agy-powerline gradient <name>`       | Color each row with a gradient (`--list`, `off`)             |
 | `npx agy-powerline layout <pills\|lines>` | レイアウトを切り替え                                         |
 | `npx agy-powerline caps <style>`          | カプセルの形を切り替え：`round`、`angled`、`slanted`、`flat` |
 | `npx agy-powerline doctor`                | インストールを確認し、問題を説明                             |

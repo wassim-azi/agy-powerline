@@ -94,9 +94,9 @@ The codebase is organized into small, focused modules without heavy frameworks o
 agy-powerline/
 ├── src/
 │   ├── index.js              # CLI entry point (Node's built-in util.parseArgs)
-│   ├── cli/                  # One file per command (init, configure, theme, layout, preset, caps,
-│   │                         # doctor, report, uninstall), bundle.js (the one-file installed
-│   │                         # runtime), tui-style.js and config-guard.js
+│   ├── cli/                  # One file per command (init, configure, theme, gradient, layout,
+│   │                         # preset, caps, doctor, report, uninstall), bundle.js (the one-file
+│   │                         # installed runtime), tui-style.js and config-guard.js
 │   ├── lib/
 │   │   ├── shared.js         # renderStatusline(), the rendering entry point
 │   │   ├── session.js        # Extracts & normalizes fields from Antigravity's JSON payload

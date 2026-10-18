@@ -93,6 +93,21 @@ function cases() {
     { color: "none", ascii: true },
   ]);
   list.push(["lines · 256 colors", { ...base, layout: "lines" }, { color: "256" }]);
+  list.push([
+    "pills default · gradient sunset",
+    { ...base, layout: "pills", gradient: "sunset" },
+    { color: "truecolor" },
+  ]);
+  list.push([
+    "lines · gradient sunset",
+    { ...base, layout: "lines", gradient: "sunset" },
+    { color: "truecolor" },
+  ]);
+  list.push([
+    "lines · light-paper · gradient sunset",
+    { ...base, theme: "light-paper", layout: "lines", gradient: "sunset" },
+    { color: "truecolor" },
+  ]);
   return list;
 }
 

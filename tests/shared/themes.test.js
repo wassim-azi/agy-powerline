@@ -176,7 +176,64 @@ function checkCaps() {
   record("a custom theme can still pin the cap background", pinned.includes("48;2;16;32;48"));
 }
 
+// Every color pair the bar prints: pill text on its pill (bg then fg), and in
+// Lines every text color on the terminal background.
+function pillPairs(out) {
+  return [...out.matchAll(/\x1b\[48;2;(\d+);(\d+);(\d+)m\x1b\[38;2;(\d+);(\d+);(\d+)m/g)].map(
+    (m) => [m.slice(1, 4).map(Number), m.slice(4, 7).map(Number)]
+  );
+}
+
+function textColors(out) {
+  return [...out.matchAll(/\x1b\[38;2;(\d+);(\d+);(\d+)m/g)].map((m) => m.slice(1, 4).map(Number));
+}
+
+// Gradients replace the theme's widget colors, so each preset has to stay
+// readable with every theme kind, for any number of widgets in a row.
+function checkGradientReadability() {
+  const { GRADIENT_ORDER } = require("../../src/lib/themes");
+  const data = sampleData();
+  // Meters are left out: their fill isn't text.
+  const ids = ["model", "cwd", "project", "contextPct", "fiveHourPct", "totalTokens", "git"];
+  const failures = [];
+
+  for (const gradient of GRADIENT_ORDER) {
+    for (const themeId of ["dark-aurora", "light-paper", "colorblind-dark", "colorblind-light"]) {
+      for (let count = 2; count <= ids.length; count++) {
+        const widgets = ids.slice(0, count).flatMap((id) => [{ id }, { id: "separator" }]);
+        const config = { ...defaultConfig(), theme: themeId, gradient, widgets };
+        const overrides = { color: "truecolor", env: {} };
+
+        for (const [bg, fg] of pillPairs(renderStatusline(data, config, overrides))) {
+          if (contrast(bg, fg) < 4.5) {
+            failures.push(`${gradient} pills ${themeId} ×${count}: ${contrast(bg, fg).toFixed(2)}`);
+          }
+        }
+
+        const kind = THEMES[themeId].kind === "light" || themeId.endsWith("-light");
+        const terminal = TERMINAL_BG[kind ? "light" : "dark"];
+        const lines = renderStatusline(data, { ...config, layout: "lines" }, overrides);
+        for (const fg of textColors(lines)) {
+          if (contrast(terminal, fg) < 4.5) {
+            failures.push(
+              `${gradient} lines ${themeId} ×${count}: ${contrast(terminal, fg).toFixed(2)}`
+            );
+          }
+        }
+      }
+    }
+  }
+
+  record(
+    "gradient presets keep pill text and lines text at 4.5:1 with every theme kind",
+    failures.length === 0,
+    [...new Set(failures)].slice(0, 8).join("; ")
+  );
+}
+
 async function run() {
+  checkGradientReadability();
+
   const hex6 = parseColor("#ff00aa");
   const hex3 = parseColor("#f0a");
   const rgbArr = parseColor([10, 20, 30]);

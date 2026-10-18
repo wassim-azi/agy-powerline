@@ -42,7 +42,7 @@ Suite names are the `registerSuite()` calls in `tests/shared.js` (e.g. `renderer
 ## Code map
 
 - `src/index.js`: CLI entry; argument parsing with Node's `util.parseArgs` (`COMMANDS` table at the top). It also implements `render` itself (`renderFromStdin()`).
-- `src/cli/*.js`: one file per other command (`init`, `configure`, `theme`, `layout`, `preset`, `caps`, `doctor`, `report`, `uninstall`), plus `bundle.js` (builds the one-file installed runtime), `tui-style.js` (the configure TUI's panels, tabs and keycaps) and `config-guard.js` (refuses to save over a config with a JSON error).
+- `src/cli/*.js`: one file per other command (`init`, `configure`, `theme`, `gradient`, `layout`, `preset`, `caps`, `doctor`, `report`, `uninstall`), plus `bundle.js` (builds the one-file installed runtime), `tui-style.js` (the configure TUI's panels, tabs and keycaps) and `config-guard.js` (refuses to save over a config with a JSON error).
 - `src/runtime/statusline.js`: the script Antigravity runs on every refresh.
 - `src/lib/shared.js`: `renderStatusline()`, the rendering entry point.
 - `src/lib/session.js`: turns the Antigravity payload into a normalized `session` object; `git.js` reads branch, dirty state and ahead/behind.

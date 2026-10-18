@@ -11,7 +11,10 @@ const {
   BLINK,
   BLINK_OFF,
   getActiveDepth,
+  gradientColors,
+  readableText,
 } = require("../colors");
+const { gradientStops } = require("../themes");
 const { pickGlyph, glyphChar } = require("../powerline");
 const {
   quotaColor,
@@ -37,6 +40,7 @@ const {
 } = require("../formatters");
 const { execWidgetOutput } = require("../exec");
 const {
+  resolveColor,
   widgetColors,
   widgetTag,
   isRaw,
@@ -573,11 +577,55 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
   }
 }
 
+// Pill text on a gradient color that the theme's text doesn't read on.
+const READABLE_TEXT = [[22, 22, 28], WHITE, [0, 0, 0]];
+
 function buildRows(session, config, colors) {
   const rows = [];
   let groups = [];
   let current = [];
+  // The widgets shown in the current row, so a gradient can be spread over
+  // exactly those once the row is complete.
+  let placed = [];
   const splitEveryWidget = !config.powerline.enabled;
+  const gradient = gradientStops(config.gradient);
+
+  function styledSegment(widget, ownColors) {
+    const segment = buildSegment(
+      widget.id,
+      session,
+      ownColors,
+      config.emojis,
+      config.ascii === true,
+      widget,
+      config
+    );
+    if (segment) {
+      segment.textColor = ownColors.text;
+      segment.bold = widget.bold !== false;
+    }
+    return segment;
+  }
+
+  // Each widget takes its step of the gradient in place of its identity
+  // color; alert colors and a widget's own color stay as they are.
+  function applyGradient() {
+    const shades = gradientColors(gradient, placed.length);
+    placed.forEach(({ widget, group, index }, i) => {
+      if (resolveColor(widget.color, colors)) {
+        return;
+      }
+      const ownColors = widgetColors({ ...widget, color: shades[i] }, colors);
+      const segment = styledSegment(widget, ownColors);
+      if (!segment) {
+        return;
+      }
+      if (!resolveColor(widget.textColor, colors)) {
+        segment.textColor = readableText(segment.color, ownColors.text, READABLE_TEXT);
+      }
+      group[index] = segment;
+    });
+  }
 
   function flushGroup() {
     if (current.length) {
@@ -588,6 +636,11 @@ function buildRows(session, config, colors) {
 
   function flushRow() {
     flushGroup();
+
+    if (gradient && placed.length) {
+      applyGradient();
+    }
+    placed = [];
 
     if (groups.length) {
       rows.push(groups);
@@ -606,28 +659,18 @@ function buildRows(session, config, colors) {
       continue;
     }
 
-    const ownColors = widgetColors(widget, colors);
-    const segment = buildSegment(
-      widget.id,
-      session,
-      ownColors,
-      config.emojis,
-      config.ascii === true,
-      widget,
-      config
-    );
+    const segment = styledSegment(widget, widgetColors(widget, colors));
 
     if (!segment) {
       continue;
     }
 
-    segment.textColor = ownColors.text;
-    segment.bold = widget.bold !== false;
+    const group = splitEveryWidget ? [] : current;
+    placed.push({ widget, group, index: group.length });
+    group.push(segment);
 
     if (splitEveryWidget) {
-      groups.push([segment]);
-    } else {
-      current.push(segment);
+      groups.push(group);
     }
   }
 

@@ -177,7 +177,7 @@ Runs a shell command of your choice and shows the first line of its output:
 
 - The command runs on every refresh (subject to `interval`), in the session's working directory, with your user's permissions. Only add commands you would run in any repo.
 - Commands only run from a config you own: the global install (`~/.agy-powerline`) or `AGY_POWERLINE_HOME`. A copy of the scripts anywhere else (for example committed inside a repo) shows `[blocked]`.
-- CLI previews (`configure`, `theme`, `layout`, `preset`, `caps`, `render --demo` and the preview in `doctor`) never run commands; they show `[cmd]` instead. `doctor`'s live check runs your configured statusline once, as Antigravity does, so `exec` widgets run there.
+- CLI previews (`configure`, `theme`, `gradient`, `layout`, `preset`, `caps`, `render --demo` and the preview in `doctor`) never run commands; they show `[cmd]` instead. `doctor`'s live check runs your configured statusline once, as Antigravity does, so `exec` widgets run there.
 - Output is stripped of escape sequences and control characters and capped at 80 characters.
 
 ## Pills: powerline styles, glyphs and row gaps
@@ -248,6 +248,23 @@ Set `"theme": "custom"` (or run `npx agy-powerline theme custom`), and define a 
 - Pill caps use the terminal's own background. Set `terminal` to pin a cap background color instead.
 
 Every built-in theme is tested to keep text at WCAG AA contrast (4.5:1) on pills and on its terminal background, and to keep the three status colors (ok, caution, danger) clearly different. The color-blind themes also keep the status colors apart under simulated protanopia, deuteranopia and tritanopia.
+
+## Gradients
+
+A gradient gives each row one color sweep from left to right, on top of any theme:
+
+```json
+{ "gradient": "sunset" }
+{ "gradient": "#ff5f6d-#ffc371" }
+```
+
+Or from the command line: `npx agy-powerline gradient sunset`, `npx agy-powerline gradient "#ff5f6d-#ffc371"`, `npx agy-powerline gradient off`. `npx agy-powerline gradient --list` shows every preset in its colors.
+
+- **Value:** a preset (`aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono`) or 2 to 6 hex colors joined by `-` (`#` optional, 3 or 6 digits). Anything else is ignored and the bar keeps the theme's colors.
+- **Spacing:** the first widget of each row takes the first color, the last widget the last color, and the ones between evenly spaced colors, mixed in the OKLab color space so the steps look even. Widgets hidden for lack of data, or dropped to fit the terminal, don't count.
+- **Pills** take the colors; the text on each pill switches to near-black or white when the theme's text color wouldn't reach 4.5:1 contrast on it. **Lines** color the text, darkened or lightened just enough to reach 4.5:1 on the theme's terminal background, so the same gradient works on dark and light terminals.
+- **What stays:** caution and danger colors, the dirty-branch color, and a widget's own `color` or `textColor` ([widget options](#widget-options)) keep their colors.
+- Gradients follow the [color depth](#terminals-ascii-mode-colors-narrow-windows): exact colors in truecolor, the nearest ones in 256-color mode, none with `NO_COLOR`.
 
 ## Terminals: ASCII mode, colors, narrow windows
 

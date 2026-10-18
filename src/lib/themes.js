@@ -1,6 +1,6 @@
 "use strict";
 
-const { parseColor } = require("./colors");
+const { parseColor, parseGradientStops, luminance } = require("./colors");
 
 // Every theme targets one terminal background:
 //   dark-*        bright colors, dark pill text, for dark terminals
@@ -415,6 +415,57 @@ function themeColors(themeId, customThemeConfig) {
   return resolveTheme(themeId, customThemeConfig).colors;
 }
 
+// Row gradients. Pill text and Lines text are adjusted per color to stay
+// readable, so a preset works on dark and light terminals alike.
+const GRADIENTS = {
+  aurora: { name: "Aurora", stops: ["#00c9a7", "#4facfe", "#a18cd1"] },
+  sunset: { name: "Sunset", stops: ["#ffd166", "#ff8c61", "#e8457c"] },
+  ocean: { name: "Ocean", stops: ["#2af598", "#009efd"] },
+  forest: { name: "Forest", stops: ["#d4fc79", "#3fb68b", "#1d7a5f"] },
+  neon: { name: "Neon", stops: ["#f72585", "#7209b7", "#4cc9f0"] },
+  candy: { name: "Candy", stops: ["#ff9a9e", "#fbc2eb", "#a1c4fd"] },
+  rainbow: { name: "Rainbow", stops: ["#ff595e", "#ffca3a", "#8ac926", "#1982c4", "#6a4c93"] },
+  mono: { name: "Mono", stops: ["#e0e0e0", "#6e6e6e"] },
+};
+
+const GRADIENT_ORDER = Object.keys(GRADIENTS);
+
+const toHex = (rgb) => `#${rgb.map((n) => n.toString(16).padStart(2, "0")).join("")}`;
+
+// A preset name, or hex stops written as "#rrggbb-#rrggbb"; null when the
+// value is anything else (or "off").
+function normalizeGradient(value) {
+  if (typeof value !== "string") {
+    return null;
+  }
+  const key = value.trim().toLowerCase();
+  if (GRADIENTS[key]) {
+    return key;
+  }
+  const stops = parseGradientStops(key);
+  return stops ? stops.map(toHex).join("-") : null;
+}
+
+function gradientStops(value) {
+  const key = normalizeGradient(value);
+  if (!key) {
+    return null;
+  }
+  return GRADIENTS[key]
+    ? GRADIENTS[key].stops.map((stop) => parseColor(stop))
+    : parseGradientStops(key);
+}
+
+// Typical terminal backgrounds, a little toward the hard side. Themes for
+// light terminals have light pill text on deep colors; dark themes the reverse.
+const TERMINAL_BACKGROUNDS = { dark: [40, 42, 54], light: [245, 245, 240] };
+
+function terminalBackground(colors) {
+  return luminance(colors?.text ?? [0, 0, 0]) > 0.5
+    ? TERMINAL_BACKGROUNDS.light
+    : TERMINAL_BACKGROUNDS.dark;
+}
+
 module.exports = {
   THEMES,
   THEME_ORDER,
@@ -428,4 +479,10 @@ module.exports = {
   resolveThemeId,
   resolveTheme,
   themeColors,
+  GRADIENTS,
+  GRADIENT_ORDER,
+  normalizeGradient,
+  gradientStops,
+  TERMINAL_BACKGROUNDS,
+  terminalBackground,
 };
