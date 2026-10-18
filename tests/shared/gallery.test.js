@@ -44,12 +44,12 @@ async function run() {
       /http-equiv="Content-Security-Policy"/.test(html) && /default-src 'none'/.test(html)
     );
 
-    const external = [...html.matchAll(/\b(?:https?:)?\/\/[^\s"'<>)]+/g)]
-      .map((match) => match[0])
-      .filter((url) => !url.startsWith(REPO_URL));
+    // Every URL in the page, compared whole: the repo link is the only one allowed.
+    const urls = [...html.matchAll(/\b(?:https?:)?\/\/[^\s"'<>)]+/g)].map((match) => match[0]);
+    const external = urls.filter((url) => url !== REPO_URL);
     record(
       "the gallery loads nothing from other sites (only the repo link)",
-      external.length === 0 && html.includes(REPO_URL),
+      external.length === 0 && urls.includes(REPO_URL),
       external.slice(0, 5).join(", ")
     );
 
