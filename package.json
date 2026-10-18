@@ -35,6 +35,7 @@
     "test:update": "node tests/update-snapshots.js",
     "test:coverage": "node --test --experimental-test-coverage tests/shared.js",
     "gallery": "node scripts/gallery/build.js",
+    "screenshots": "node scripts/gallery/screenshots.js",
     "configurator": "node scripts/configurator/build.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

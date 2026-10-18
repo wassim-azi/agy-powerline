@@ -57,7 +57,10 @@ const GLYPH_MAP = {
   0xe0be: "slant-ur",
 };
 
-function ansiToHtml(text) {
+// Splits ANSI text into lines of styled runs: { text, fg, bg, bold, dim } for
+// text and { glyph, fg, bg } for powerline glyphs, which fonts often lack, so
+// the previews draw them as shapes. Colors are [r, g, b] or null.
+function ansiRuns(text) {
   const lines = String(text ?? "")
     .replace(/\x1b\[0m$/, "")
     .split("\n");
@@ -66,87 +69,101 @@ function ansiToHtml(text) {
   let bold = false;
   let dim = false;
 
-  return lines
-    .map((line) => {
-      let html = "";
-      let run = "";
+  return lines.map((line) => {
+    const runs = [];
+    let run = "";
 
-      const flush = () => {
-        if (!run) return;
-        const style = [];
-        if (fg) style.push(`color:${css(fg)}`);
-        if (bg) style.push(`background:${css(bg)}`);
-        if (bold) style.push("font-weight:700");
-        if (dim) style.push("opacity:0.65");
-        html += `<span class="r"${style.length ? ` style="${style.join(";")}"` : ""}>${esc(run)}</span>`;
-        run = "";
-      };
+    const flush = () => {
+      if (!run) return;
+      runs.push({ text: run, fg, bg, bold, dim });
+      run = "";
+    };
 
-      const glyph = (cls) => {
-        flush();
-        const vars = [`--c:${css(fg) || "currentColor"}`, `--b:${css(bg) || "transparent"}`];
-        html += `<span class="g ${cls}" style="${vars.join(";")}"></span>`;
-      };
+    const glyph = (cls) => {
+      flush();
+      runs.push({ glyph: cls, fg, bg });
+    };
 
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (ch === "\x1b" && line[i + 1] === "[") {
-          const end = line.indexOf("m", i);
-          if (end === -1) {
-            i += 1;
-            continue;
-          }
-          const codes = line
-            .slice(i + 2, end)
-            .split(";")
-            .map(Number);
-          flush();
-          for (let k = 0; k < codes.length; k++) {
-            const c = codes[k];
-            if (c === 0) {
-              fg = null;
-              bg = null;
-              bold = false;
-              dim = false;
-            } else if (c === 1) {
-              bold = true;
-            } else if (c === 2) {
-              dim = true;
-            } else if (c === 22) {
-              bold = false;
-              dim = false;
-            } else if (c === 39) {
-              fg = null;
-            } else if (c === 49) {
-              bg = null;
-            } else if (c === 38 || c === 48) {
-              if (codes[k + 1] === 2) {
-                const rgb = codes.slice(k + 2, k + 5);
-                if (c === 38) fg = rgb;
-                else bg = rgb;
-                k += 4;
-              } else if (codes[k + 1] === 5) {
-                const rgb = ansi256ToRgb(codes[k + 2]);
-                if (c === 38) fg = rgb;
-                else bg = rgb;
-                k += 2;
-              }
-            }
-          }
-          i = end;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === "\x1b" && line[i + 1] === "[") {
+        const end = line.indexOf("m", i);
+        if (end === -1) {
+          i += 1;
           continue;
         }
-
-        const cp = ch.codePointAt(0);
-        const cls = GLYPH_MAP[cp];
-        if (cls) {
-          glyph(cls);
-        } else {
-          run += ch;
+        const codes = line
+          .slice(i + 2, end)
+          .split(";")
+          .map(Number);
+        flush();
+        for (let k = 0; k < codes.length; k++) {
+          const c = codes[k];
+          if (c === 0) {
+            fg = null;
+            bg = null;
+            bold = false;
+            dim = false;
+          } else if (c === 1) {
+            bold = true;
+          } else if (c === 2) {
+            dim = true;
+          } else if (c === 22) {
+            bold = false;
+            dim = false;
+          } else if (c === 39) {
+            fg = null;
+          } else if (c === 49) {
+            bg = null;
+          } else if (c === 38 || c === 48) {
+            if (codes[k + 1] === 2) {
+              const rgb = codes.slice(k + 2, k + 5);
+              if (c === 38) fg = rgb;
+              else bg = rgb;
+              k += 4;
+            } else if (codes[k + 1] === 5) {
+              const rgb = ansi256ToRgb(codes[k + 2]);
+              if (c === 38) fg = rgb;
+              else bg = rgb;
+              k += 2;
+            }
+          }
         }
+        i = end;
+        continue;
       }
 
-      flush();
+      const cp = ch.codePointAt(0);
+      const cls = GLYPH_MAP[cp];
+      if (cls) {
+        glyph(cls);
+      } else {
+        run += ch;
+      }
+    }
+
+    flush();
+    return runs;
+  });
+}
+
+function ansiToHtml(text) {
+  return ansiRuns(text)
+    .map((runs) => {
+      let html = "";
+      for (const r of runs) {
+        if (r.glyph) {
+          const vars = [`--c:${css(r.fg) || "currentColor"}`, `--b:${css(r.bg) || "transparent"}`];
+          html += `<span class="g ${r.glyph}" style="${vars.join(";")}"></span>`;
+          continue;
+        }
+        const style = [];
+        if (r.fg) style.push(`color:${css(r.fg)}`);
+        if (r.bg) style.push(`background:${css(r.bg)}`);
+        if (r.bold) style.push("font-weight:700");
+        if (r.dim) style.push("opacity:0.65");
+        html += `<span class="r"${style.length ? ` style="${style.join(";")}"` : ""}>${esc(r.text)}</span>`;
+      }
       return `<div class="ln">${html || "&nbsp;"}</div>`;
     })
     .join("");
@@ -154,6 +171,7 @@ function ansiToHtml(text) {
 
 module.exports = {
   ansiToHtml,
+  ansiRuns,
   ansi256ToRgb,
   GLYPH_MAP,
 };

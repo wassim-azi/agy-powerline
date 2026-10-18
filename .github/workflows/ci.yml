@@ -77,6 +77,25 @@ jobs:
       - name: Run OS-specific native tests
         run: npm run test:platform
 
+      # Antigravity runs the bar with `cmd /c <statusLine.command>`. This runs
+      # the command init wrote from the runner's own cmd, not through Node, in
+      # a home path with a space in it. cmd only fails a step on its last
+      # command, so each line exits on its own failure.
+      - name: Smoke-test the cmd launcher
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: |
+          set "HOME=%RUNNER_TEMP%\agy home"
+          set "USERPROFILE=%RUNNER_TEMP%\agy home"
+          set "AGY_POWERLINE_HOME="
+          node src\index.js init --yes || exit /b 1
+          for /f "usebackq delims=" %%c in (`node -p "require(process.env.USERPROFILE + '/.gemini/antigravity-cli/settings.json').statusLine.command"`) do set "BAR=%%c"
+          echo statusLine.command: %BAR%
+          echo {"model":{"display_name":"Gemini"}} | cmd /c "%BAR%" > "%RUNNER_TEMP%\bar.txt" 2> "%RUNNER_TEMP%\bar.err" || (type "%RUNNER_TEMP%\bar.err" & exit /b 1)
+          type "%RUNNER_TEMP%\bar.txt"
+          findstr /c:"Gemini" "%RUNNER_TEMP%\bar.txt" > nul || (echo The bar did not render & exit /b 1)
+          for %%f in ("%RUNNER_TEMP%\bar.err") do if %%~zf gtr 0 (type "%RUNNER_TEMP%\bar.err" & exit /b 1)
+
       - name: Verify diagnostics doctor command
         run: node src/index.js doctor --markdown
 
@@ -118,11 +137,17 @@ jobs:
       - name: Build gallery.html
         run: npm run gallery
 
+      - name: Build theme screenshots
+        run: npm run screenshots
+
       # Reviewers download "theme-preview" from the run's Summary page and
-      # open gallery.html to see widget and theme changes without installing.
+      # open gallery.html, or one SVG per theme in screenshots/, to see widget
+      # and theme changes without installing.
       - name: Upload preview
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: theme-preview
-          path: gallery.html
+          path: |
+            gallery.html
+            screenshots/
           retention-days: 14

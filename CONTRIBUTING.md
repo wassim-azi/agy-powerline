@@ -132,7 +132,7 @@ agy-powerline/
 │   ├── shared/               # Cross-platform rendering & configuration tests
 │   └── platform/             # Windows / macOS / Linux launcher tests
 └── scripts/
-    ├── gallery/              # npm run gallery: HTML preview of every theme
+    ├── gallery/              # npm run gallery / screenshots: previews of every theme
     └── hooks/                # Git hooks: pre-commit (Prettier, ESLint), commit-msg
 ```
 
@@ -272,7 +272,8 @@ Every change must keep the bar cross-platform and fast:
 
 4. **Visual Check:**
    - `npm run gallery` writes `gallery.html` with every theme rendered on dark and light terminals, plus a color-blindness simulation. Open it in a browser.
-   - CI builds the same page for every pull request: open the run's Summary page and download the `theme-preview` artifact.
+   - `npm run screenshots` writes one SVG per theme to `screenshots/`, with the pills and lines layouts on the theme's terminal background.
+   - CI builds both for every pull request: open the run's Summary page and download the `theme-preview` artifact.
 
 5. **Zero Runtime Dependencies:**
    - The published package has no `dependencies` at all, and CI fails if one is added. Use Node.js built-ins (`util.parseArgs`, `readline`, `fs`, ...) instead of npm packages.
