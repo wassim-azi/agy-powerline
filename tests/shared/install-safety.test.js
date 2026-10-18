@@ -283,6 +283,99 @@ function testUninstallDeleteIsScoped() {
   }
 }
 
+function testUninstallNoTtyGuards() {
+  const box = sandbox("uninstall-no-tty");
+
+  try {
+    runCli(["init", "--yes"], { env: box.env });
+    const settingsBefore = readText(box.settingsPath);
+    const statusline = path.join(box.installDir, "statusline.js");
+    const refused = runCli(["uninstall"], { env: box.env });
+
+    record(
+      "uninstall without --yes and without a TTY leaves settings and installed files untouched",
+      refused.code === 1 &&
+        /No TTY/.test(refused.stderr) &&
+        readText(box.settingsPath) === settingsBefore &&
+        fs.existsSync(statusline),
+      `exit ${refused.code}`
+    );
+  } finally {
+    box.cleanup();
+  }
+
+  const foreign = sandbox("uninstall-foreign-statusline");
+
+  try {
+    const original = JSON.stringify(
+      {
+        theme: "dark",
+        statusLine: { type: "command", command: "other-statusline" },
+      },
+      null,
+      2
+    );
+    writeSettings(foreign, original);
+
+    const refused = runCli(["uninstall"], { env: foreign.env });
+    record(
+      "uninstall leaves a foreign statusLine and other settings untouched without --yes",
+      refused.code === 1 &&
+        /statusLine points elsewhere/.test(refused.stderr) &&
+        readText(foreign.settingsPath) === original,
+      `exit ${refused.code}`
+    );
+
+    const forced = runCli(["uninstall", "--yes"], { env: foreign.env });
+    const backup = readText(`${foreign.settingsPath}.agy-powerline.bak`);
+    const settings = readJson(foreign.settingsPath);
+    record(
+      "uninstall --yes removes a foreign statusLine and preserves other settings with a backup",
+      forced.code === 0 &&
+        settings?.theme === "dark" &&
+        !settings?.statusLine &&
+        backup === original,
+      `exit ${forced.code}`
+    );
+  } finally {
+    foreign.cleanup();
+  }
+
+  const absent = sandbox("uninstall-absent-install");
+
+  try {
+    const result = runCli(["uninstall", "--yes", "--delete"], { env: absent.env });
+    record(
+      "uninstall --delete reports a missing install directory without creating it",
+      result.code === 0 &&
+        /does not exist/.test(result.stdout) &&
+        !fs.existsSync(absent.installDir),
+      `exit ${result.code}`
+    );
+  } finally {
+    absent.cleanup();
+  }
+
+  const noYesDelete = sandbox("uninstall-delete-no-tty");
+
+  try {
+    stageInstall(noYesDelete.installDir);
+    const filesBefore = fs.readdirSync(noYesDelete.installDir).sort();
+    const result = runCli(["uninstall", "--delete"], { env: noYesDelete.env });
+    record(
+      "uninstall --delete without --yes and without a TTY keeps the install directory intact",
+      result.code === 1 &&
+        /No TTY/.test(result.stderr) &&
+        fs.existsSync(noYesDelete.installDir) &&
+        JSON.stringify(fs.readdirSync(noYesDelete.installDir).sort()) ===
+          JSON.stringify(filesBefore),
+      `exit ${result.code}`
+    );
+  } finally {
+    noYesDelete.cleanup();
+  }
+}
+
 function testCliParser() {
   const ver = runCli(["--version"]);
   record("--version prints the package version", ver.code === 0 && ver.stdout.trim() === version);
@@ -567,6 +660,7 @@ async function run() {
   testOriginalBackupIsKept();
   testSymlinkedFilesStayLinked();
   testUninstallDeleteIsScoped();
+  testUninstallNoTtyGuards();
   testCliParser();
   testUntrustedTextIsStripped();
 }
