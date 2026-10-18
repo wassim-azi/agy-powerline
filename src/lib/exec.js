@@ -5,7 +5,8 @@ const path = require("path");
 const os = require("os");
 const crypto = require("crypto");
 const { execSync } = require("child_process");
-const { stripControl } = require("./formatters");
+const { stripControl, sanitizeDeep } = require("./formatters");
+const { RESET, getActiveDepth } = require("./colors");
 const { logWarning } = require("./log");
 const { PRIVATE_FILE_MODE } = require("./paths");
 
@@ -92,16 +93,123 @@ function cacheKey(cmd, cwd = "") {
     .slice(0, 16);
 }
 
-// Command output is untrusted text: strip terminal control and cap length.
-function sanitizeExecOutput(text) {
-  const clean = stripControl(text).trim();
-  const chars = Array.from(clean);
+// The only escape sequence "colors": true keeps: SGR color and style. Colon
+// forms (38:2::r:g:b) are dropped with the rest, since not every terminal reads them.
+const SGR_SPLIT = /(\x1b\[[0-9;]*m)/;
+const SGR_ALL = /\x1b\[([0-9;]*)m/g;
 
-  if (chars.length <= MAX_OUTPUT_CHARS) {
-    return clean;
+// Command output is untrusted text: strip terminal control and cap length.
+// With colors, SGR sequences survive and the visible text alone is capped;
+// the output then ends with a reset so its colors can't leak past it.
+function sanitizeExecOutput(text, { colors = false } = {}) {
+  if (!colors) {
+    const clean = stripControl(text).trim();
+    const chars = Array.from(clean);
+
+    if (chars.length <= MAX_OUTPUT_CHARS) {
+      return clean;
+    }
+
+    return chars.slice(0, MAX_OUTPUT_CHARS - 1).join("") + "…";
   }
 
-  return chars.slice(0, MAX_OUTPUT_CHARS - 1).join("") + "…";
+  const parts = String(text ?? "")
+    .split(SGR_SPLIT)
+    .map((part, i) => (i % 2 ? part : stripControl(part)));
+  const visible = parts.filter((_, i) => i % 2 === 0).join("");
+  const lead = visible.length - visible.trimStart().length;
+  const chars = Array.from(visible.trim());
+  const cut = chars.length > MAX_OUTPUT_CHARS;
+  const budget = cut ? MAX_OUTPUT_CHARS - 1 : chars.length;
+  let skip = lead;
+  let used = 0;
+  let out = "";
+  let styled = false;
+
+  for (let i = 0; i < parts.length && used < budget; i++) {
+    if (i % 2) {
+      out += parts[i];
+      styled = true;
+      continue;
+    }
+    for (const char of Array.from(parts[i])) {
+      if (skip > 0) {
+        skip -= char.length;
+        continue;
+      }
+      if (used === budget) {
+        break;
+      }
+      out += char;
+      used++;
+    }
+  }
+
+  return out + (cut ? "…" : "") + (styled ? RESET : "");
+}
+
+// After a reset in colored output, the widget's own colors come back (the
+// pill's background and text in Pills), so the rest of the widget isn't left
+// in the terminal's default colors.
+function restoreAfterReset(text, restore) {
+  if (!restore) {
+    return text;
+  }
+  return String(text).replace(SGR_ALL, (seq, body) => {
+    const params = body === "" ? [0] : body.split(";").map((p) => (p === "" ? 0 : Number(p)));
+    let lastReset = -1;
+    for (let i = 0; i < params.length; i++) {
+      // 38/48/58 take a color as their next parameters; a 0 there isn't a reset.
+      if (params[i] === 38 || params[i] === 48 || params[i] === 58) {
+        i += params[i + 1] === 5 ? 2 : params[i + 1] === 2 ? 4 : 0;
+      } else if (params[i] === 0) {
+        lastReset = i;
+      }
+    }
+    if (lastReset < 0) {
+      return seq;
+    }
+    const rest = params.slice(lastReset + 1);
+    return `${RESET}${restore}${rest.length ? `\x1b[${rest.join(";")}m` : ""}`;
+  });
+}
+
+// Never handed to a command: agy-powerline doesn't read the account email or
+// the session and conversation IDs, so it doesn't pass them on either.
+const PRIVATE_KEYS = new Set(["email", "session_id", "conversation_id"]);
+
+function withoutPrivateKeys(value, depth = 0) {
+  if (value === null || typeof value !== "object") {
+    return value;
+  }
+  if (depth > 8) {
+    return undefined;
+  }
+  if (Array.isArray(value)) {
+    return value.map((item) => withoutPrivateKeys(item, depth + 1));
+  }
+  const out = {};
+  for (const [key, item] of Object.entries(value)) {
+    if (!PRIVATE_KEYS.has(key)) {
+      out[key] = withoutPrivateKeys(item, depth + 1);
+    }
+  }
+  return out;
+}
+
+// The session JSON an exec widget with "payload": true reads on stdin.
+function execPayloadJson(payload) {
+  try {
+    return JSON.stringify(sanitizeDeep(withoutPrivateKeys(payload ?? {}))) ?? "{}";
+  } catch {
+    return "{}";
+  }
+}
+
+// Widgets that share a command but not its options must not share its output.
+function widgetCacheKey(widget, cwd) {
+  const variant = `${widget.payload === true ? "\0payload" : ""}${widget.colors === true ? "\0colors" : ""}`;
+  return cacheKey(`${String(widget.cmd).trim()}${variant}`, cwd);
 }
 
 // session.execMode: "run" executes the command, "blocked" marks a config the
@@ -115,11 +223,12 @@ function execWidgetOutput(widget, session = {}) {
     // Fitting the bar to the terminal can draw a row several times; a command
     // still runs at most once per refresh, even with "interval": 0.
     const memo = session.execMemo;
-    const key = cacheKey(widget.cmd, session.cwd || process.cwd());
+    const key = widgetCacheKey(widget, session.cwd || process.cwd());
     if (memo?.has(key)) {
       return memo.get(key);
     }
-    const output = sanitizeExecOutput(runExecWidget(widget, session));
+    const colors = widget.colors === true && getActiveDepth() !== "none";
+    const output = sanitizeExecOutput(runExecWidget(widget, session), { colors });
     memo?.set(key, output);
     return output;
   }
@@ -134,8 +243,9 @@ function runExecWidget(widget, session = {}) {
   }
 
   const cwd = session.cwd || process.cwd();
-  const key = cacheKey(cmd, cwd);
+  const key = widgetCacheKey(widget, cwd);
   const now = Date.now();
+  const input = widget.payload === true ? `${session.execPayload || "{}"}\n` : undefined;
 
   let intervalMs = DEFAULT_INTERVAL_SEC * 1000;
   if (widget.interval != null) {
@@ -169,24 +279,30 @@ function runExecWidget(widget, session = {}) {
 
   // 3. Cache expired or missing: execute command with timeout
   let output = diskHit?.output || memHit?.output || "";
+  const firstLine = (stdout) =>
+    String(stdout || "")
+      .trim()
+      .split(/\r?\n/)[0]
+      ?.trim() || "";
   try {
     const stdout = execSync(cmd, {
       cwd,
       timeout: timeoutMs,
       encoding: "utf8",
-      stdio: ["ignore", "pipe", "ignore"],
+      input,
+      stdio: [input === undefined ? "ignore" : "pipe", "pipe", "ignore"],
       windowsHide: true,
     });
-    output =
-      String(stdout || "")
-        .trim()
-        .split(/\r?\n/)[0]
-        ?.trim() || "";
+    output = firstLine(stdout);
   } catch (err) {
-    // Keep the previous output. A non-zero exit is normal for many commands
-    // (grep with no match), so only timeouts and missing commands are logged,
-    // and never the command itself.
-    if (err.code === "ETIMEDOUT" || err.signal === "SIGTERM") {
+    // A command that exits without reading the whole payload closes the pipe
+    // under the write; it still succeeded, so its output counts. Otherwise the
+    // previous output stays. A non-zero exit is normal for many commands (grep
+    // with no match), so only timeouts and missing commands are logged, and
+    // never the command itself.
+    if (input !== undefined && err.status === 0 && !err.signal) {
+      output = firstLine(err.stdout);
+    } else if (err.code === "ETIMEDOUT" || err.signal === "SIGTERM") {
       logWarning("EXEC_TIMEOUT", { timeoutMs });
     } else if (err.status === 127 || err.code === "ENOENT") {
       logWarning("EXEC_COMMAND_NOT_FOUND");
@@ -223,6 +339,9 @@ module.exports = {
   runExecWidget,
   execWidgetOutput,
   sanitizeExecOutput,
+  restoreAfterReset,
+  execPayloadJson,
+  widgetCacheKey,
   cacheKey,
   clearExecCache,
   getCacheFilePath,

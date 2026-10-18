@@ -250,6 +250,50 @@ async function testStdoutErrorIsLogged() {
   }
 }
 
+// An exec command handed the payload may never read it, exit before reading
+// it, or hang: none of these may break or stall the bar.
+function testExecPayloadFailures() {
+  const { clearExecCache } = require("../../src/lib/shared");
+  // Bigger than a pipe buffer, so the write is still going when the command exits.
+  const data = { ...sampleData(), cwd: process.cwd(), filler: "x".repeat(200000) };
+  const cases = [
+    ["ignores its stdin", 'node -e "console.log(42)"', 5000, (out) => out.includes("42")],
+    ["exits without reading", "exit 0", 5000, (out) => typeof out === "string"],
+    [
+      "times out",
+      'node -e "setTimeout(() => console.log(1), 5000)"',
+      300,
+      (out, ms) => ms < 4000 && !out.includes("⚡ 1"),
+    ],
+  ];
+
+  for (const [label, cmd, timeout, ok] of cases) {
+    clearExecCache();
+    const started = Date.now();
+    let out = "";
+    let error = "";
+    try {
+      out = renderStatusline(
+        data,
+        {
+          ...defaultConfig(),
+          widgets: [{ id: "model" }, { id: "exec", cmd, payload: true, interval: 0, timeout }],
+        },
+        { exec: "run", color: "none" }
+      );
+    } catch (err) {
+      error = err.message;
+    }
+    const ms = Date.now() - started;
+    record(
+      `exec with "payload": true, a command that ${label}, still renders the bar`,
+      !error && /Gemini/.test(out) && ok(out, ms),
+      error || `${ms} ms: ${JSON.stringify(out)}`
+    );
+  }
+  clearExecCache();
+}
+
 // A gradient of the wrong shape renders the plain theme, never an error.
 function testBadGradients() {
   const bad = [
@@ -298,6 +342,7 @@ async function run() {
   testGitLookup();
   testWrongPayloadTypes();
   testBadGradients();
+  testExecPayloadFailures();
   await testConcurrentExecCache();
   await testStdoutEpipe();
   await testStdoutErrorIsLogged();

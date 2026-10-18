@@ -6,6 +6,7 @@ const { registerSuite } = require("./register");
 registerSuite("command shape", "./shared/command-shape.test");
 registerSuite("renderer", "./shared/renderer.test");
 registerSuite("exec cache", "./shared/exec-cache.test");
+registerSuite("exec options", "./shared/exec-options.test");
 registerSuite("colors", "./shared/color.test");
 registerSuite("themes", "./shared/themes.test");
 registerSuite("gradients", "./shared/gradient.test");

@@ -14,10 +14,10 @@ This page lists exactly what `agy-powerline` does on your machine, so you can ch
 
 The statusline script Antigravity calls on each refresh reads the session JSON on `stdin` and prints one bar. While doing that it may start these processes:
 
-| Process                                                    | When                                                                                                                                                                                                                | Why                                                                                                                                 |
-| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `git rev-list --left-right --count <branch>...@{upstream}` | The `git` widget is shown (default, and the `lines` layout) and the branch tracks an upstream (`.git/config`) whose commit differs from the local one, and that pair of commits isn't in `.git-sync-cache.json` yet | Ahead/behind counts. It runs without a shell, times out after 150 ms, and is skipped for branch names that git itself would reject. |
-| Your `exec` widget commands                                | Only if **you** add an `exec` widget                                                                                                                                                                                | Runs your command through the system shell, at most once per `interval` (default 10 s), with a timeout (default 500 ms, max 5 s).   |
+| Process                                                    | When                                                                                                                                                                                                                | Why                                                                                                                                                                                                                                                   |
+| ---------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `git rev-list --left-right --count <branch>...@{upstream}` | The `git` widget is shown (default, and the `lines` layout) and the branch tracks an upstream (`.git/config`) whose commit differs from the local one, and that pair of commits isn't in `.git-sync-cache.json` yet | Ahead/behind counts. It runs without a shell, times out after 150 ms, and is skipped for branch names that git itself would reject.                                                                                                                   |
+| Your `exec` widget commands                                | Only if **you** add an `exec` widget                                                                                                                                                                                | Runs your command through the system shell, at most once per `interval` (default 10 s), with a timeout (default 500 ms, max 5 s). Its stdin is empty, or with `"payload": true` the session JSON without your email and session and conversation IDs. |
 
 Everything else (branch name, dirty state, RAM, quotas, tokens) is read from files or Node.js APIs without starting a process.
 
@@ -31,7 +31,7 @@ The CLI itself (`npx agy-powerline ...`) additionally:
 - **Only your config can run commands.** `exec` widgets run only when the config comes from `~/.agy-powerline` or the folder in `AGY_POWERLINE_HOME`. A copy of the scripts anywhere else, such as one committed inside a repo, shows `[blocked]`.
 - **The current directory is never used for config.** Cloning or opening a repo cannot change what agy-powerline runs.
 - **Previews never execute.** `configure`, `theme`, `gradient`, `layout`, `preset`, `caps`, `render --demo` and the preview inside `doctor` show `[cmd]` instead of running the command. `doctor`'s live check is the one exception: it runs your configured statusline once, as Antigravity does (see above).
-- **Output is cleaned.** Escape sequences and control characters are stripped and output is capped at 80 characters.
+- **Output is cleaned.** Escape sequences and control characters are stripped and output is capped at 80 visible characters. With `"colors": true`, color and style sequences (SGR, `ESC [ … m`) are kept; titles, clipboard writes, hyperlinks, cursor movement and screen clearing are still removed.
 
 ## Files it writes
 
@@ -53,7 +53,7 @@ On macOS and Linux, `statusline.config.json`, `.exec-cache.json`, `.git-sync-cac
 
 ## Your email and session IDs
 
-Antigravity includes your account email and session and conversation IDs in the JSON it sends. agy-powerline never reads them: no widget shows them, and neither the debug dump nor the problem log writes them.
+Antigravity includes your account email and session and conversation IDs in the JSON it sends. agy-powerline never reads them: no widget shows them, neither the debug dump nor the problem log writes them, and they are removed from the session JSON before an `exec` widget with `"payload": true` gets it.
 
 ## The problem log
 
@@ -65,7 +65,7 @@ It never holds anything from the session payload except Antigravity's version nu
 
 ## Untrusted input
 
-Text that does not come from your own config (payload fields, branch names, command output) is stripped of terminal escape sequences before it is printed, so it cannot move the cursor, write to your clipboard (OSC 52) or insert hyperlinks.
+Text that does not come from your own config (payload fields, branch names, command output) is stripped of terminal escape sequences before it is printed, so it cannot move the cursor, write to your clipboard (OSC 52) or insert hyperlinks. The one exception you can opt into is color in the output of your own `exec` commands (`"colors": true`), which keeps only color and style sequences.
 
 ## Supply chain
 

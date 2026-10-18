@@ -171,14 +171,82 @@ Runs a shell command of your choice and shows the first line of its output:
 - **`label`** _(optional)_: Text label prefix (e.g. `Stash: 3` in lines layout, `📦 Stash: 3` in pills layout).
 - **`icon`** _(optional, default: `⚡`)_: Custom emoji/symbol. Set to `""` to hide the icon.
 - **`color`** _(optional)_: a theme color slot or color name (e.g. `git`, `model`, `warn`, `blue`, `green`, `orange`, `cyan`).
-- **Several at once**: unlike most widgets, `exec` can appear more than once (e.g. one for Git stashes, another for the Kubernetes context).
+- **`payload`** _(optional, default: `false`)_: `true` sends the session JSON Antigravity passed to the bar (model, folders, quotas, context, `terminal_width`...) to the command on stdin, as one line. Your account email and the session and conversation IDs are removed first, and control characters are stripped from its text. The output is still cached for `interval` seconds, so a command that follows the session may lag that much; use `"interval": 0` to run it on every refresh. Without `payload`, the command's stdin is empty.
+- **`colors`** _(optional, default: `false`)_: `true` keeps the colors and styles the command prints (SGR sequences such as `\x1b[31m`). Every other escape sequence is still removed, and after a reset in the output the widget gets its own colors back. With `NO_COLOR` or `--color none` the command's colors are dropped too.
+- **Several at once**: unlike most widgets, `exec` can appear more than once (e.g. one for Git stashes, another for the Kubernetes context). `configure` (Enter on the widget) toggles **Session JSON** and **Keep colors**.
 
 **Safety rules for `exec`:**
 
 - The command runs on every refresh (subject to `interval`), in the session's working directory, with your user's permissions. Only add commands you would run in any repo.
 - Commands only run from a config you own: the global install (`~/.agy-powerline`) or `AGY_POWERLINE_HOME`. A copy of the scripts anywhere else (for example committed inside a repo) shows `[blocked]`.
 - CLI previews (`configure`, `theme`, `gradient`, `layout`, `preset`, `caps`, `render --demo` and the preview in `doctor`) never run commands; they show `[cmd]` instead. `doctor`'s live check runs your configured statusline once, as Antigravity does, so `exec` widgets run there.
-- Output is stripped of escape sequences and control characters and capped at 80 characters.
+- Output is stripped of escape sequences and control characters (all but colors with `"colors": true`) and capped at 80 visible characters.
+
+### Recipes
+
+Each one is a widget to add to `widgets`. `node -e` commands work the same in Windows `cmd` and macOS/Linux shells; the others say when they differ.
+
+**A field of the session.** Any value in the session JSON, here the model id:
+
+```json
+{
+  "id": "exec",
+  "cmd": "node -e \"console.log(JSON.parse(require('fs').readFileSync(0,'utf8')).model.id)\"",
+  "payload": true,
+  "interval": 0,
+  "label": "Model id"
+}
+```
+
+**Git stash count.** macOS/Linux: `"cmd": "git stash list | wc -l"`. Windows: `"cmd": "git stash list | find /c /v \"\""`.
+
+**Node version.**
+
+```json
+{ "id": "exec", "cmd": "node -v", "label": "Node", "interval": 300 }
+```
+
+**Kubernetes context.** `kubectl` can be slow to start, so it gets a longer timeout and interval:
+
+```json
+{
+  "id": "exec",
+  "cmd": "kubectl config current-context",
+  "icon": "☸️",
+  "timeout": 2000,
+  "interval": 30
+}
+```
+
+**AWS profile.** The environment agy was started with:
+
+```json
+{ "id": "exec", "cmd": "node -e \"console.log(process.env.AWS_PROFILE || '')\"", "label": "AWS" }
+```
+
+**Days left until a date.**
+
+```json
+{
+  "id": "exec",
+  "cmd": "node -e \"console.log(Math.ceil((new Date('2026-12-31') - Date.now()) / 864e5) + ' days')\"",
+  "icon": "📆",
+  "interval": 3600
+}
+```
+
+**Another statusline script.** Any script that reads the session JSON on stdin and prints one line, colors included:
+
+```json
+{
+  "id": "exec",
+  "cmd": "node /path/to/my-statusline.js",
+  "payload": true,
+  "colors": true,
+  "interval": 0,
+  "timeout": 1000
+}
+```
 
 ## Pills: powerline styles, glyphs and row gaps
 

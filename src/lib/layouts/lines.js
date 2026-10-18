@@ -31,7 +31,7 @@ const {
   shouldBlink,
 } = require("../formatters");
 const { joinFlex } = require("./pills");
-const { execWidgetOutput } = require("../exec");
+const { execWidgetOutput, restoreAfterReset } = require("../exec");
 const {
   NAMED_COLORS,
   resolveColor,
@@ -502,7 +502,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       // buildLinesRows already swapped the widget's color into the palette.
       const col = palette.location;
       const iconPart = emojis && icon && !raw ? `${icon} ` : "";
-      return fg(col) + iconPart + named + output + RESET;
+      return fg(col) + iconPart + named + restoreAfterReset(output, fg(col)) + RESET;
     }
 
     default:

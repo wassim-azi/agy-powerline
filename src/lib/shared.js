@@ -54,6 +54,7 @@ const {
 } = require("./formatters");
 
 const { extractSession } = require("./session");
+const { execPayloadJson } = require("./exec");
 const { fitWidgets, truncateLines, widestLine } = require("./fit");
 
 const {
@@ -98,6 +99,13 @@ function renderBar(data, config, overrides) {
   session.execMode =
     overrides.exec === "run" || overrides.exec === "blocked" ? overrides.exec : "preview";
   session.execMemo = new Map();
+  // Built only when a command will run and asked for it.
+  if (
+    session.execMode === "run" &&
+    resolved.widgets.some((widget) => widget.id === "exec" && widget.payload === true)
+  ) {
+    session.execPayload = execPayloadJson(payload);
+  }
 
   const prevDepth = getActiveDepth();
 

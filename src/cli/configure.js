@@ -855,6 +855,22 @@ function editFields(widget) {
       show: (value) => value || "(none)",
       help: `The command runs only in agy, from your install folder. Edit it in ${getConfigPath()}.`,
     });
+    fields.push(
+      {
+        key: "payload",
+        label: "Session JSON",
+        values: [undefined, true],
+        show: (value) => onOff(value),
+        help: "Sends the session JSON to the command on stdin, without your email or session IDs.",
+      },
+      {
+        key: "colors",
+        label: "Keep colors",
+        values: [undefined, true],
+        show: (value) => onOff(value),
+        help: "Keeps the colors the command prints; other escape sequences are still removed.",
+      }
+    );
   }
   if (thresholds) {
     const what = quota ? "left" : "used";

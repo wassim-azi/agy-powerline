@@ -38,7 +38,7 @@ const {
   paceIndex,
   paceGlyph,
 } = require("../formatters");
-const { execWidgetOutput } = require("../exec");
+const { execWidgetOutput, restoreAfterReset } = require("../exec");
 const {
   resolveColor,
   widgetColors,
@@ -717,7 +717,9 @@ function segmentContent(text, color, textColor, blink = false, bold = true) {
   const blinkSeq = blink ? BLINK : "";
   const blinkOff = blink ? BLINK_OFF : "";
   // NORMAL clears bold left over from a previous widget.
-  return bg(color) + fg(textColor) + blinkSeq + (bold ? BOLD : NORMAL) + text + blinkOff;
+  const style = bg(color) + fg(textColor) + blinkSeq + (bold ? BOLD : NORMAL);
+  // Only exec output with "colors": true still holds escapes here.
+  return style + (text.includes("\x1b") ? restoreAfterReset(text, style) : text) + blinkOff;
 }
 
 function renderMeterSegment(segment, colors, ascii = false) {
