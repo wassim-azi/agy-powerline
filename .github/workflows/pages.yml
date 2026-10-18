@@ -5,7 +5,7 @@ name: Pages
 # builds but doesn't deploy.
 on:
   push:
-    branches: [main]
+    branches: [main, develop]
   workflow_dispatch:
 
 permissions: {}
@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build gallery
+    name: Build site
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -32,9 +32,12 @@ jobs:
         with:
           node-version: 24.x
 
-      # The gallery uses only the repo's own code, so nothing is installed.
+      # The pages use only the repo's own code, so nothing is installed.
       - name: Build the gallery
         run: node scripts/gallery/build.js _site/index.html
+
+      - name: Build the configurator
+        run: node scripts/configurator/build.js _site/configure/index.html
 
       - name: Upload the site
         uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
@@ -44,7 +47,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
     permissions:
       pages: write

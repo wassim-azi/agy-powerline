@@ -7,17 +7,10 @@ const {
   setConfigDir,
   getConfigPath,
   mergeConfig,
-  defaultConfig,
   renderStatusline,
   sampleData,
   detectStyle,
-  LAYOUTS,
-  canonicalThemeId,
 } = require("../lib/shared");
-const { THEMES, normalizeGradient } = require("../lib/themes");
-const { VALID_WIDGET_IDS } = require("../lib/config");
-const { COLOR_MODES } = require("../lib/colors");
-const { isMeterStyle } = require("../lib/widget-style");
 const { resolveInstallDir, writeFileAtomic, PRIVATE_FILE_MODE } = require("../lib/paths");
 const { createRl, confirm } = require("../lib/prompt");
 const { loadEditableConfig } = require("./config-guard");
@@ -34,22 +27,8 @@ const RESET = "\x1b[0m";
 // A config is a few KB; anything this big isn't one.
 const MAX_IMPORT_BYTES = 256 * 1024;
 const BACKUP_SUFFIX = ".bak";
-const KNOWN_KEYS = new Set([
-  ...Object.keys(defaultConfig()),
-  "customTheme",
-  "gradient",
-  "meterStyle",
-]);
+const { visible, droppedSettings } = require("../lib/config-check");
 const SETTINGS = ["emojis", "ascii", "color", "pacing", "minimalist", "rowGap", "log"];
-
-// Control characters shown as \uXXXX: the text is printed, never interpreted
-// by the terminal.
-function visible(text) {
-  return String(text).replace(
-    /[\x00-\x1f\x7f-\x9f\u2028\u2029\u202A-\u202E\u2066-\u2069]/g,
-    (char) => `\\u${char.charCodeAt(0).toString(16).padStart(4, "0")}`
-  );
-}
 
 function readImportFile(file) {
   const target = path.resolve(String(file));
@@ -86,46 +65,6 @@ function readImportFile(file) {
 function majorOf(value) {
   const major = parseInt(String(value ?? "").match(/^(\d+)\./)?.[1] ?? "", 10);
   return Number.isFinite(major) ? major : null;
-}
-
-// Settings the file had that the bar can't use, so they don't come over.
-function droppedSettings(raw) {
-  const dropped = [];
-  for (const key of Object.keys(raw)) {
-    if (!KNOWN_KEYS.has(key)) {
-      dropped.push(`unknown setting "${visible(key)}"`);
-    }
-  }
-  if (Array.isArray(raw.widgets)) {
-    for (const widget of raw.widgets) {
-      if (!widget || typeof widget !== "object" || !VALID_WIDGET_IDS.has(widget.id)) {
-        dropped.push(`unknown widget ${visible(JSON.stringify(widget?.id ?? widget) ?? "")}`);
-      }
-    }
-  } else if (raw.widgets !== undefined) {
-    dropped.push("widgets (not a list)");
-  }
-  if (raw.theme !== undefined && !THEMES[canonicalThemeId(raw.theme)]) {
-    dropped.push(`unknown theme ${visible(JSON.stringify(raw.theme))}`);
-  }
-  if (raw.layout !== undefined && !LAYOUTS[raw.layout]) {
-    dropped.push(`unknown layout ${visible(JSON.stringify(raw.layout))}`);
-  }
-  if (raw.color !== undefined && !COLOR_MODES.includes(raw.color)) {
-    dropped.push(`unknown color mode ${visible(JSON.stringify(raw.color))}`);
-  }
-  if (
-    raw.gradient !== undefined &&
-    raw.gradient !== null &&
-    raw.gradient !== "off" &&
-    !normalizeGradient(raw.gradient)
-  ) {
-    dropped.push(`invalid gradient ${visible(JSON.stringify(raw.gradient))}`);
-  }
-  if (raw.meterStyle !== undefined && !isMeterStyle(raw.meterStyle)) {
-    dropped.push(`unknown meter style ${visible(JSON.stringify(raw.meterStyle))}`);
-  }
-  return dropped;
 }
 
 // "model context git / fiveHourBar fiveHourReset ...", one row per line break.

@@ -2,7 +2,7 @@
 
 Everything about `statusline.config.json`, the file `npx agy-powerline configure` edits. It lives in the install folder (`~/.agy-powerline/`, or `AGY_POWERLINE_HOME`). The bar reads it on every refresh, so a running `agy` session picks up changes without a restart.
 
-Most people never edit it by hand: `configure` covers widgets, order, presets, themes, layout and powerline glyphs. This page is for everything else.
+Most people never edit it by hand: `configure` covers widgets, order, presets, themes, layout and powerline glyphs. You can also [build your bar in the browser](https://wassim-azi.github.io/agy-powerline/configure/) with live previews, then download or import it. This page is for everything else.
 
 - [Configurator keys](#configurator-keys)
 - [Widgets](#widgets)

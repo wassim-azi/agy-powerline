@@ -1,0 +1,1493 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Nothing loads from other sites: the page is its own inline style and script. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"
+    />
+    <meta
+      name="description"
+      content="Build and customize your agy-powerline statusline in the browser with live previews, themes, and instant config export."
+    />
+    <title>agy-powerline Configurator</title>
+    <style>
+      :root {
+        --bg: #f4f5f7;
+        --surface: #ffffff;
+        --fg: #1c1f26;
+        --muted: #5b6270;
+        --line: #dde0e6;
+        --accent: #3d5fc4;
+        --accent-fg: #ffffff;
+        --accent-soft: #edf2ff;
+        --danger: #cf222e;
+        --danger-soft: #ffebe9;
+        --warning: #9a6700;
+        --warning-soft: #fff8c5;
+        --success: #1a7f37;
+        --success-soft: #dafbe1;
+        --term-dark-bg: #1d1f27;
+        --term-dark-fg: #d4d6de;
+        --term-light-bg: #fbfbf8;
+        --term-light-fg: #2b2d34;
+        --term-edge: #c9ccd4;
+        --font-ui: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        --font-mono:
+          "Cascadia Mono", ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #13151b;
+          --surface: #1a1d25;
+          --fg: #e6e8ee;
+          --muted: #9aa1b0;
+          --line: #2c303b;
+          --accent: #8fa8ff;
+          --accent-fg: #10131a;
+          --accent-soft: #1d2538;
+          --danger: #ff7b72;
+          --danger-soft: #3c1e22;
+          --warning: #d29922;
+          --warning-soft: #382c16;
+          --success: #3fb950;
+          --success-soft: #14321d;
+          --term-edge: #3a3f4c;
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #13151b;
+        --surface: #1a1d25;
+        --fg: #e6e8ee;
+        --muted: #9aa1b0;
+        --line: #2c303b;
+        --accent: #8fa8ff;
+        --accent-fg: #10131a;
+        --accent-soft: #1d2538;
+        --danger: #ff7b72;
+        --danger-soft: #3c1e22;
+        --warning: #d29922;
+        --warning-soft: #382c16;
+        --success: #3fb950;
+        --success-soft: #14321d;
+        --term-edge: #3a3f4c;
+        color-scheme: dark;
+      }
+      :root[data-theme="light"] {
+        --bg: #f4f5f7;
+        --surface: #ffffff;
+        --fg: #1c1f26;
+        --muted: #5b6270;
+        --line: #dde0e6;
+        --accent: #3d5fc4;
+        --accent-fg: #ffffff;
+        --accent-soft: #edf2ff;
+        --danger: #cf222e;
+        --danger-soft: #ffebe9;
+        --warning: #9a6700;
+        --warning-soft: #fff8c5;
+        --success: #1a7f37;
+        --success-soft: #dafbe1;
+        --term-edge: #c9ccd4;
+        color-scheme: light;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-ui);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding-inline: 16px;
+        padding-block: 24px 64px;
+        display: grid;
+        gap: 24px;
+      }
+
+      /* Header */
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid var(--line);
+      }
+      .brand {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+      }
+      .brand h1 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+      }
+      .tag {
+        font-family: var(--font-mono);
+        font-size: 0.75rem;
+        padding: 2px 7px;
+        border-radius: 999px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        color: var(--muted);
+      }
+      .nav-links {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .nav-links a {
+        color: var(--accent);
+        text-decoration: none;
+        font-size: 0.9rem;
+      }
+      .nav-links a:hover {
+        text-decoration: underline;
+      }
+      .btn-theme-toggle {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        color: var(--fg);
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        cursor: pointer;
+      }
+
+      /* Sticky preview section */
+      .preview-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 16px;
+        display: grid;
+        gap: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      }
+      .preview-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .preview-tools {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 16px;
+      }
+      .tool-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.85rem;
+      }
+      .tool-label {
+        color: var(--muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+
+      /* Segmented radios */
+      .seg {
+        display: inline-flex;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        overflow: hidden;
+        background: var(--surface);
+      }
+      .seg input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .seg label {
+        padding: 4px 10px;
+        font-size: 0.82rem;
+        cursor: pointer;
+        color: var(--fg);
+        border-right: 1px solid var(--line);
+        user-select: none;
+      }
+      .seg label:last-of-type {
+        border-right: 0;
+      }
+      .seg input:checked + label {
+        background: var(--accent);
+        color: var(--accent-fg);
+      }
+      .seg input:focus-visible + label {
+        outline: 2px solid var(--accent);
+        outline-offset: -2px;
+      }
+
+      /* Terminal screen */
+      .term-wrap {
+        position: relative;
+      }
+      .term {
+        border: 1px solid var(--term-edge);
+        border-radius: 8px;
+        padding: 14px 16px;
+        overflow-x: auto;
+        min-height: 48px;
+        background: var(--term-dark-bg);
+        color: var(--term-dark-fg);
+      }
+      .term[data-bg="light"] {
+        background: var(--term-light-bg);
+        color: var(--term-light-fg);
+      }
+      .screen {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        white-space: pre;
+        width: max-content;
+      }
+      .ln {
+        height: 1.45em;
+        line-height: 1.45em;
+      }
+      .r,
+      .g {
+        display: inline-block;
+        height: 1.45em;
+        vertical-align: top;
+      }
+      .g {
+        width: 0.62em;
+        background: var(--b);
+        position: relative;
+      }
+      .g::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--c);
+      }
+      .cap-l::before {
+        border-radius: 999px 0 0 999px;
+      }
+      .cap-r::before {
+        border-radius: 0 999px 999px 0;
+      }
+      .tri::before {
+        clip-path: polygon(0 0, 100% 50%, 0 100%);
+      }
+      .tri-l::before {
+        clip-path: polygon(100% 0, 0 50%, 100% 100%);
+      }
+      .slant-ul::before {
+        clip-path: polygon(0 0, 100% 0, 0 100%);
+      }
+      .slant-lr::before {
+        clip-path: polygon(0 100%, 100% 0, 100% 100%);
+      }
+      .slant-ur::before {
+        clip-path: polygon(0 0, 100% 0, 100% 100%);
+      }
+      .slant-ll::before {
+        clip-path: polygon(0 0, 100% 100%, 0 100%);
+      }
+
+      /* Sections & Panels */
+      .panels {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 24px;
+      }
+      @media (min-width: 900px) {
+        .panels-2col {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 24px;
+        }
+      }
+
+      .card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 20px;
+        display: grid;
+        gap: 16px;
+      }
+      .card-title {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .card-subtitle {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin: -10px 0 0;
+      }
+
+      /* Widget Palette */
+      .palette-search {
+        width: 100%;
+        padding: 8px 12px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        font-family: inherit;
+        font-size: 0.9rem;
+        background: var(--bg);
+        color: var(--fg);
+      }
+      .palette-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 8px;
+        max-height: 320px;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+      .btn-palette-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 10px;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        cursor: pointer;
+        text-align: left;
+        color: var(--fg);
+        font-size: 0.85rem;
+        transition: border-color 0.15s;
+      }
+      .btn-palette-item:hover {
+        border-color: var(--accent);
+      }
+      .palette-icon {
+        font-size: 1.1em;
+        flex-shrink: 0;
+      }
+      .palette-name {
+        font-weight: 500;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .palette-special {
+        display: flex;
+        gap: 8px;
+        margin-top: 4px;
+      }
+      .btn-special {
+        flex: 1;
+        padding: 7px 12px;
+        background: var(--surface);
+        border: 1px dashed var(--accent);
+        border-radius: 6px;
+        color: var(--accent);
+        cursor: pointer;
+        font-size: 0.85rem;
+        font-weight: 500;
+      }
+      .btn-special:hover {
+        background: var(--accent-soft);
+      }
+
+      /* Active Widgets List */
+      .active-rows {
+        display: grid;
+        gap: 12px;
+      }
+      .row-box {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+        background: var(--bg);
+        display: grid;
+        gap: 8px;
+      }
+      .row-header {
+        font-size: 0.75rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--muted);
+        letter-spacing: 0.05em;
+        display: flex;
+        justify-content: space-between;
+      }
+      .widget-item {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px 12px;
+        display: grid;
+        gap: 8px;
+      }
+      .widget-main {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .widget-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+      .widget-label {
+        font-weight: 500;
+        font-size: 0.9rem;
+      }
+      .widget-extra {
+        font-size: 0.78rem;
+        color: var(--muted);
+        font-family: var(--font-mono);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .widget-actions {
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        flex-shrink: 0;
+      }
+      .btn-icon {
+        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        color: var(--fg);
+        cursor: pointer;
+        padding: 3px 7px;
+        font-size: 0.8rem;
+      }
+      .btn-icon:disabled {
+        opacity: 0.3;
+        cursor: not-allowed;
+      }
+      .btn-icon:not(:disabled):hover {
+        background: var(--bg);
+        border-color: var(--accent);
+      }
+      .btn-remove:hover {
+        border-color: var(--danger) !important;
+        color: var(--danger) !important;
+      }
+
+      /* Widget Options Drawer */
+      .widget-options-drawer {
+        border-top: 1px dashed var(--line);
+        padding-top: 8px;
+        display: grid;
+        gap: 8px;
+      }
+      .opt-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        font-size: 0.85rem;
+      }
+      .opt-label {
+        color: var(--muted);
+      }
+      .opt-input {
+        padding: 4px 8px;
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: inherit;
+        font-size: 0.85rem;
+      }
+
+      /* Alert banners */
+      .alert {
+        padding: 10px 14px;
+        border-radius: 6px;
+        font-size: 0.85rem;
+        line-height: 1.4;
+      }
+      .alert-warning {
+        background: var(--warning-soft);
+        color: var(--warning);
+        border: 1px solid var(--warning);
+      }
+      .alert-danger {
+        background: var(--danger-soft);
+        color: var(--danger);
+        border: 1px solid var(--danger);
+      }
+      .alert-success {
+        background: var(--success-soft);
+        color: var(--success);
+        border: 1px solid var(--success);
+      }
+
+      /* Look / Styling Controls */
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 14px;
+      }
+      .form-group {
+        display: grid;
+        gap: 4px;
+      }
+      .form-label {
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+      .form-select,
+      .form-input {
+        padding: 8px 10px;
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        background: var(--bg);
+        color: var(--fg);
+        font-family: inherit;
+        font-size: 0.9rem;
+      }
+      .form-select:focus,
+      .form-input:focus {
+        outline: 2px solid var(--accent);
+        outline-offset: -1px;
+      }
+      .toggles-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 4px;
+      }
+      .toggle-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        user-select: none;
+      }
+
+      /* Output card */
+      .output-box {
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 12px;
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        max-height: 220px;
+        overflow-y: auto;
+        white-space: pre-wrap;
+        word-break: break-all;
+      }
+      .action-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .btn {
+        padding: 8px 16px;
+        border-radius: 6px;
+        font-size: 0.88rem;
+        font-weight: 500;
+        cursor: pointer;
+        border: 1px solid transparent;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .btn-primary {
+        background: var(--accent);
+        color: var(--accent-fg);
+      }
+      .btn-primary:hover {
+        opacity: 0.92;
+      }
+      .btn-secondary {
+        background: var(--surface);
+        border-color: var(--line);
+        color: var(--fg);
+      }
+      .btn-secondary:hover {
+        background: var(--bg);
+      }
+
+      .cli-snippet {
+        display: flex;
+        align-items: center;
+        background: var(--bg);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 6px 10px;
+        font-family: var(--font-mono);
+        font-size: 0.82rem;
+        overflow-x: auto;
+      }
+      .cli-snippet code {
+        flex: 1;
+      }
+
+      /* Toast notification */
+      .toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--surface);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px 18px;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(8px);
+        transition: all 0.2s ease;
+        z-index: 100;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <!-- Header -->
+      <header class="header">
+        <div class="brand">
+          <h1>agy-powerline</h1>
+          <span class="tag">Configurator</span>
+        </div>
+        <nav class="nav-links">
+          <a href="../">Theme Gallery</a>
+          <a href="https://github.com/wassim-azi/agy-powerline" target="_blank" rel="noopener"
+            >GitHub</a
+          >
+          <button
+            type="button"
+            class="btn-theme-toggle"
+            id="themeToggleBtn"
+            aria-label="Toggle page theme"
+          >
+            🌓 Theme
+          </button>
+        </nav>
+      </header>
+
+      <!-- Live Preview Card -->
+      <section class="preview-card" aria-label="Live Preview">
+        <div class="preview-toolbar">
+          <div class="preview-tools">
+            <div class="tool-item">
+              <span class="tool-label">Width</span>
+              <input
+                type="range"
+                id="widthSlider"
+                min="60"
+                max="200"
+                value="96"
+                aria-label="Terminal width"
+              />
+              <span id="widthVal" style="font-family: var(--font-mono); font-size: 0.85rem"
+                >96 cols</span
+              >
+            </div>
+            <div class="tool-item">
+              <span class="tool-label">Sample</span>
+              <fieldset class="seg">
+                <input type="radio" name="sampleKind" id="sampleNormal" value="normal" checked />
+                <label for="sampleNormal">Normal</label>
+                <input type="radio" name="sampleKind" id="sampleCaution" value="caution" />
+                <label for="sampleCaution">Caution</label>
+                <input type="radio" name="sampleKind" id="sampleDanger" value="danger" />
+                <label for="sampleDanger">Danger</label>
+              </fieldset>
+            </div>
+          </div>
+          <div class="tool-item">
+            <span class="tool-label">Terminal</span>
+            <fieldset class="seg">
+              <input type="radio" name="termBg" id="termBgDark" value="dark" checked />
+              <label for="termBgDark">Dark</label>
+              <input type="radio" name="termBg" id="termBgLight" value="light" />
+              <label for="termBgLight">Light</label>
+            </fieldset>
+          </div>
+        </div>
+        <div class="term-wrap">
+          <div class="term" id="termScreen" data-bg="dark">
+            <div class="screen" id="previewOutput"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Exec warning banner if exec widget exists -->
+      <div id="execWarning" class="alert alert-warning" style="display: none">
+        ⚠ <strong>Shell commands:</strong> An <code>exec</code> widget runs on your machine on every
+        refresh. Previews show <code>[cmd]</code>. <code>npx agy-powerline import</code> will review
+        and confirm before running it.
+      </div>
+
+      <div class="panels panels-2col">
+        <!-- Left: Active Widgets -->
+        <section class="card" aria-label="Your Widgets">
+          <h2 class="card-title">
+            Your Widgets <span id="widgetCount" class="tag">0 widgets</span>
+          </h2>
+          <p class="card-subtitle">Click Up/Down to reorder, gear to configure, x to remove.</p>
+          <div class="active-rows" id="activeWidgetsList"></div>
+          <div class="palette-special">
+            <button type="button" class="btn-special" id="addSeparatorBtn">+ Flex Space</button>
+            <button type="button" class="btn-special" id="addLineBreakBtn">+ New Row</button>
+          </div>
+        </section>
+
+        <!-- Right: Widget Palette -->
+        <section class="card" aria-label="Widget Palette">
+          <h2 class="card-title">Widget Palette</h2>
+          <p class="card-subtitle">Click any widget to add it to your bar.</p>
+          <input
+            type="search"
+            class="palette-search"
+            id="paletteSearch"
+            placeholder="Filter widgets..."
+            aria-label="Filter widgets"
+          />
+          <div class="palette-list" id="paletteGrid"><!--PALETTE_ITEMS--></div>
+        </section>
+      </div>
+
+      <!-- Look & Feel -->
+      <section class="card" aria-label="Look and Style">
+        <h2 class="card-title">Look & Style</h2>
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label" for="presetSelect">Preset</label>
+            <select class="form-select" id="presetSelect">
+              <!--PRESET_OPTIONS-->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="themeSelect">Theme</label>
+            <select class="form-select" id="themeSelect">
+              <!--THEME_OPTIONS-->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="layoutSelect">Layout</label>
+            <select class="form-select" id="layoutSelect">
+              <option value="pills">Pills (powerline capsules)</option>
+              <option value="lines">Lines (minimalist stacked rows)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="capSelect">Powerline Caps</label>
+            <select class="form-select" id="capSelect">
+              <!--CAP_OPTIONS-->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="gradientSelect">Gradient</label>
+            <select class="form-select" id="gradientSelect">
+              <!--GRADIENT_OPTIONS-->
+            </select>
+          </div>
+          <div class="form-group" id="customGradientGroup" style="display: none">
+            <label class="form-label">Custom Gradient Stops</label>
+            <div style="display: flex; gap: 8px; align-items: center">
+              <input
+                type="color"
+                id="gradColor1"
+                value="#00c9a7"
+                aria-label="Gradient start color"
+              />
+              <span>to</span>
+              <input type="color" id="gradColor2" value="#a18cd1" aria-label="Gradient end color" />
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top: 8px">
+          <span class="form-label">Options & Flags</span>
+          <div class="toggles-list">
+            <label class="toggle-item"
+              ><input type="checkbox" id="toggleEmojis" checked /> Emojis</label
+            >
+            <label class="toggle-item"><input type="checkbox" id="toggleAscii" /> ASCII Mode</label>
+            <label class="toggle-item"
+              ><input type="checkbox" id="toggleMinimalist" /> Minimalist (values only)</label
+            >
+            <label class="toggle-item"
+              ><input type="checkbox" id="togglePacing" checked /> Pacing marker</label
+            >
+            <label class="toggle-item"><input type="checkbox" id="toggleRowGap" /> Row gap</label>
+          </div>
+        </div>
+
+        <div style="margin-top: 8px">
+          <span class="form-label">Color Depth</span>
+          <fieldset class="seg" style="margin-top: 4px">
+            <input type="radio" name="colorDepth" id="depthTruecolor" value="truecolor" checked />
+            <label for="depthTruecolor">Truecolor (24-bit)</label>
+            <input type="radio" name="colorDepth" id="depth256" value="256" />
+            <label for="depth256">256 colors</label>
+            <input type="radio" name="colorDepth" id="depthNone" value="none" />
+            <label for="depthNone">Plain / None</label>
+          </fieldset>
+        </div>
+      </section>
+
+      <!-- Output & Share -->
+      <section class="card" aria-label="Output & Apply">
+        <h2 class="card-title">Apply Your Config</h2>
+        <div class="output-box" id="configJson"></div>
+        <div class="action-row">
+          <button type="button" class="btn btn-primary" id="copyJsonBtn">Copy JSON</button>
+          <button type="button" class="btn btn-secondary" id="downloadBtn">
+            Download statusline.config.json
+          </button>
+        </div>
+
+        <div style="display: grid; gap: 6px">
+          <span class="form-label">Apply in your terminal</span>
+          <div class="cli-snippet">
+            <code>npx agy-powerline import statusline.config.json</code>
+            <button type="button" class="btn-icon" id="copyCmdBtn" aria-label="Copy command">
+              Copy
+            </button>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 6px">
+          <span class="form-label">Share link</span>
+          <div class="cli-snippet" id="shareUrlRow">
+            <input
+              type="text"
+              readonly
+              id="shareUrlInput"
+              class="form-input"
+              style="flex: 1; border: 0; background: transparent; padding: 0"
+              aria-label="Share URL"
+            />
+            <button type="button" class="btn-icon" id="copyShareBtn" aria-label="Copy share link">
+              Copy
+            </button>
+          </div>
+          <div id="shareTooLong" class="alert alert-warning" style="display: none">
+            Link exceeds 2000 characters. Download the file above to share this configuration.
+          </div>
+        </div>
+
+        <div
+          style="
+            display: grid;
+            gap: 6px;
+            margin-top: 12px;
+            border-top: 1px solid var(--line);
+            padding-top: 16px;
+          "
+        >
+          <span class="form-label">Paste a config to load</span>
+          <textarea
+            class="form-input"
+            id="pasteInput"
+            rows="3"
+            placeholder="Paste your statusline.config.json here..."
+            aria-label="Paste config JSON"
+          ></textarea>
+          <div>
+            <button type="button" class="btn btn-secondary" id="loadPastedBtn">Load Config</button>
+          </div>
+          <div id="pasteFeedback"></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="toast" id="toast"></div>
+
+    <!-- Scripts will be injected here during build -->
+    <script>
+      /* BUNDLE_PLACEHOLDER */
+    </script>
+    <script>
+      /* PAGE_LOGIC_PLACEHOLDER */
+    </script>
+    <script>
+      // Browser UI Controller
+      (function () {
+        const Agy = window.AgyConfigurator;
+        const Page = window.AgyPageLogic;
+
+        let state = {
+          config: Agy.defaultConfig(),
+          width: 96,
+          sample: "normal",
+          termBg: "dark",
+          depth: "truecolor",
+          openOptions: new Set(),
+        };
+
+        // DOM elements
+        const previewOutput = document.getElementById("previewOutput");
+        const termScreen = document.getElementById("termScreen");
+        const widthSlider = document.getElementById("widthSlider");
+        const widthVal = document.getElementById("widthVal");
+        const activeWidgetsList = document.getElementById("activeWidgetsList");
+        const widgetCount = document.getElementById("widgetCount");
+        const paletteGrid = document.getElementById("paletteGrid");
+        const paletteSearch = document.getElementById("paletteSearch");
+        const presetSelect = document.getElementById("presetSelect");
+        const themeSelect = document.getElementById("themeSelect");
+        const layoutSelect = document.getElementById("layoutSelect");
+        const capSelect = document.getElementById("capSelect");
+        const gradientSelect = document.getElementById("gradientSelect");
+        const customGradientGroup = document.getElementById("customGradientGroup");
+        const gradColor1 = document.getElementById("gradColor1");
+        const gradColor2 = document.getElementById("gradColor2");
+        const toggleEmojis = document.getElementById("toggleEmojis");
+        const toggleAscii = document.getElementById("toggleAscii");
+        const toggleMinimalist = document.getElementById("toggleMinimalist");
+        const togglePacing = document.getElementById("togglePacing");
+        const toggleRowGap = document.getElementById("toggleRowGap");
+        const configJson = document.getElementById("configJson");
+        const shareUrlInput = document.getElementById("shareUrlInput");
+        const shareUrlRow = document.getElementById("shareUrlRow");
+        const shareTooLong = document.getElementById("shareTooLong");
+        const execWarning = document.getElementById("execWarning");
+        const toast = document.getElementById("toast");
+        const themeToggleBtn = document.getElementById("themeToggleBtn");
+        const pasteInput = document.getElementById("pasteInput");
+        const pasteFeedback = document.getElementById("pasteFeedback");
+
+        function showToast(msg) {
+          toast.textContent = msg;
+          toast.classList.add("show");
+          setTimeout(() => toast.classList.remove("show"), 2500);
+        }
+
+        // Initialize selectors
+        function initSelectors() {
+          // Presets
+          presetSelect.innerHTML =
+            '<option value="">(Select a preset to apply)</option>' +
+            Agy.PRESET_ORDER.map(
+              (id) => `<option value="${id}">${Agy.PRESETS[id].name}</option>`
+            ).join("");
+
+          // Themes
+          themeSelect.innerHTML = Agy.THEME_KINDS.map((kind) => {
+            const list = Agy.THEME_ORDER.filter((id) => Agy.THEMES[id].kind === kind.id);
+            if (!list.length) return "";
+            const opts = list
+              .map((id) => `<option value="${id}">${Agy.THEMES[id].name}</option>`)
+              .join("");
+            return `<optgroup label="${kind.label}">${opts}</optgroup>`;
+          }).join("");
+
+          // Caps
+          capSelect.innerHTML = Agy.STYLE_ORDER.map(
+            (id) => `<option value="${id}">${Agy.STYLES[id].name}</option>`
+          ).join("");
+
+          // Gradients
+          gradientSelect.innerHTML =
+            '<option value="off">Off (theme colors)</option>' +
+            Agy.GRADIENT_ORDER.map(
+              (id) => `<option value="${id}">${Agy.GRADIENTS[id].name}</option>`
+            ).join("") +
+            '<option value="custom">Custom gradient</option>';
+        }
+
+        // Render preview
+        function updatePreview() {
+          const res = Page.renderPreview(state.config, {
+            sampleKind: state.sample,
+            terminalWidth: state.width,
+            colorDepth: state.depth,
+          });
+          previewOutput.innerHTML = res.html;
+        }
+
+        // Sync UI form controls from state.config
+        function syncControls() {
+          themeSelect.value = state.config.theme || "dark-aurora";
+          layoutSelect.value = state.config.layout || "pills";
+
+          const currentStyle = Agy.detectStyle(state.config.powerline);
+          capSelect.value = currentStyle || "round";
+
+          if (state.config.gradient && state.config.gradient !== "off") {
+            if (Agy.GRADIENTS[state.config.gradient]) {
+              gradientSelect.value = state.config.gradient;
+              customGradientGroup.style.display = "none";
+            } else {
+              gradientSelect.value = "custom";
+              customGradientGroup.style.display = "block";
+              const parts = String(state.config.gradient).split("-");
+              if (parts[0]) gradColor1.value = parts[0];
+              if (parts[1]) gradColor2.value = parts[1];
+            }
+          } else {
+            gradientSelect.value = "off";
+            customGradientGroup.style.display = "none";
+          }
+
+          toggleEmojis.checked = state.config.emojis !== false;
+          toggleAscii.checked = Boolean(state.config.ascii);
+          toggleMinimalist.checked = Boolean(state.config.minimalist);
+          togglePacing.checked = state.config.pacing !== false;
+          toggleRowGap.checked = Boolean(state.config.rowGap);
+
+          // Exec warning
+          execWarning.style.display = Page.hasExecWidgets(state.config.widgets) ? "block" : "none";
+
+          // Output JSON
+          const merged = Agy.mergeConfig(state.config);
+          configJson.textContent = JSON.stringify(merged, null, 2);
+
+          // Share link
+          const baseUrl = window.location.href.split("#")[0];
+          const share = Page.buildShareUrl(merged, baseUrl);
+          shareUrlInput.value = share.url;
+          if (share.tooLong) {
+            shareUrlRow.style.display = "none";
+            shareTooLong.style.display = "block";
+          } else {
+            shareUrlRow.style.display = "flex";
+            shareTooLong.style.display = "none";
+            // Update URL hash without polluting browser history
+            history.replaceState(null, "", "#" + share.hash);
+          }
+
+          // Active widgets
+          renderActiveWidgets();
+          updatePreview();
+        }
+
+        // Render Active Widgets list
+        function renderActiveWidgets() {
+          const widgets = state.config.widgets || [];
+          const count = widgets.filter((w) => w.id !== "separator" && w.id !== "lineBreak").length;
+          widgetCount.textContent = `${count} widget${count === 1 ? "" : "s"}`;
+
+          if (!widgets.length) {
+            activeWidgetsList.innerHTML =
+              '<div style="color: var(--muted); font-size: 0.9rem; padding: 12px; text-align: center;">No widgets on your bar yet. Click any widget from the palette below to add it.</div>';
+            return;
+          }
+
+          const rows = Page.widgetRows(widgets);
+          activeWidgetsList.innerHTML = rows
+            .map((row, rowIdx) => {
+              const itemsHtml = row
+                .map((w) => {
+                  const idx = w.index;
+                  const isExec = w.id === "exec";
+                  const tag = Agy.WIDGET_TAGS[w.id] || { icon: "•", label: w.id };
+                  const meta = Agy.WIDGET_CATALOG.find((item) => item.id === w.id);
+
+                  let extra = "";
+                  if (w.id === "separator") extra = "flex space";
+                  else if (w.id === "lineBreak") extra = "new row";
+                  else if (isExec && w.cmd) extra = w.cmd;
+                  else if (w.text) extra = w.text;
+                  else if (meta) extra = meta.summary;
+
+                  const isOpen = state.openOptions.has(idx);
+
+                  // Build options fields if open
+                  let drawerHtml = "";
+                  if (isOpen && w.id !== "separator" && w.id !== "lineBreak") {
+                    const fields = Agy.editFields(w, state.config, {
+                      editableCmd: true,
+                      cmdHelp: "Shell command to run on every refresh.",
+                    });
+                    drawerHtml = `<div class="widget-options-drawer">${fields
+                      .map((field) => {
+                        const val = w[field.key];
+                        if (field.values) {
+                          const opts = field.values
+                            .map((v) => {
+                              const sel = v === val || (v === undefined && val === undefined);
+                              const display = field.show(v);
+                              return `<option value="${v === undefined ? "" : v}" ${sel ? "selected" : ""}>${display}</option>`;
+                            })
+                            .join("");
+                          return `<div class="opt-row"><span class="opt-label">${field.label}</span><select class="opt-input field-select" data-idx="${idx}" data-key="${field.key}">${opts}</select></div>`;
+                        }
+                        if (field.number !== undefined) {
+                          const currentVal = val !== undefined ? val : field.number;
+                          return `<div class="opt-row"><span class="opt-label">${field.label}</span><input type="number" min="0" max="100" class="opt-input field-number" data-idx="${idx}" data-key="${field.key}" value="${currentVal}" style="width: 70px;" /></div>`;
+                        }
+                        if (field.text) {
+                          return `<div class="opt-row"><span class="opt-label">${field.label}</span><input type="text" class="opt-input field-text" data-idx="${idx}" data-key="${field.key}" value="${val || ""}" style="flex: 1;" /></div>`;
+                        }
+                        return "";
+                      })
+                      .join("")}</div>`;
+                  }
+
+                  return `
+                <div class="widget-item" data-index="${idx}">
+                  <div class="widget-main">
+                    <div class="widget-info">
+                      <span class="palette-icon">${tag.icon || ""}</span>
+                      <span class="widget-label">${tag.label || w.id}</span>
+                      <span class="widget-extra">${extra || ""}</span>
+                    </div>
+                    <div class="widget-actions">
+                      <button type="button" class="btn-icon btn-up" data-idx="${idx}" title="Move Up" ${idx === 0 ? "disabled" : ""}>↑</button>
+                      <button type="button" class="btn-icon btn-down" data-idx="${idx}" title="Move Down" ${idx === widgets.length - 1 ? "disabled" : ""}>↓</button>
+                      ${w.id !== "separator" && w.id !== "lineBreak" ? `<button type="button" class="btn-icon btn-opt" data-idx="${idx}" title="Options">${isOpen ? "▲" : "⚙"}</button>` : ""}
+                      <button type="button" class="btn-icon btn-remove" data-idx="${idx}" title="Remove">✕</button>
+                    </div>
+                  </div>
+                  ${drawerHtml}
+                </div>
+              `;
+                })
+                .join("");
+
+              return `
+              <div class="row-box">
+                <div class="row-header">
+                  <span>Row ${rowIdx + 1}</span>
+                  <span>${row.length} items</span>
+                </div>
+                ${itemsHtml}
+              </div>
+            `;
+            })
+            .join("");
+        }
+
+        // Render palette
+        function renderPalette(query = "") {
+          const q = query.toLowerCase().trim();
+          const items = Agy.WIDGET_CATALOG.filter((item) => {
+            if (!q) return true;
+            return (
+              item.label.toLowerCase().includes(q) ||
+              item.id.toLowerCase().includes(q) ||
+              (item.description && item.description.toLowerCase().includes(q))
+            );
+          });
+
+          paletteGrid.innerHTML = items
+            .map((item) => {
+              const tag = Agy.WIDGET_TAGS[item.id] || { icon: "•", label: item.label };
+              return `
+              <button type="button" class="btn-palette-item" data-id="${item.id}" title="${item.summary || item.label}">
+                <span class="palette-icon">${tag.icon || ""}</span>
+                <span class="palette-name">${item.label}</span>
+              </button>
+            `;
+            })
+            .join("");
+        }
+
+        // Event listeners
+        function setupEvents() {
+          // Palette click
+          paletteGrid.addEventListener("click", (e) => {
+            const btn = e.target.closest(".btn-palette-item");
+            if (!btn) return;
+            const id = btn.getAttribute("data-id");
+            state.config.widgets = Page.addWidget(state.config.widgets || [], id);
+            syncControls();
+            showToast(`Added ${id}`);
+          });
+
+          // Special buttons
+          document.getElementById("addSeparatorBtn").addEventListener("click", () => {
+            state.config.widgets = Page.addWidget(state.config.widgets || [], "separator");
+            syncControls();
+          });
+          document.getElementById("addLineBreakBtn").addEventListener("click", () => {
+            state.config.widgets = Page.addWidget(state.config.widgets || [], "lineBreak");
+            syncControls();
+          });
+
+          // Palette filter
+          paletteSearch.addEventListener("input", (e) => renderPalette(e.target.value));
+
+          // Active widgets actions (up, down, remove, options)
+          activeWidgetsList.addEventListener("click", (e) => {
+            const up = e.target.closest(".btn-up");
+            if (up) {
+              const idx = parseInt(up.getAttribute("data-idx"), 10);
+              state.config.widgets = Page.moveWidget(state.config.widgets, idx, idx - 1);
+              syncControls();
+              return;
+            }
+            const down = e.target.closest(".btn-down");
+            if (down) {
+              const idx = parseInt(down.getAttribute("data-idx"), 10);
+              state.config.widgets = Page.moveWidget(state.config.widgets, idx, idx + 1);
+              syncControls();
+              return;
+            }
+            const remove = e.target.closest(".btn-remove");
+            if (remove) {
+              const idx = parseInt(remove.getAttribute("data-idx"), 10);
+              state.openOptions.delete(idx);
+              state.config.widgets = Page.removeWidget(state.config.widgets, idx);
+              syncControls();
+              return;
+            }
+            const opt = e.target.closest(".btn-opt");
+            if (opt) {
+              const idx = parseInt(opt.getAttribute("data-idx"), 10);
+              if (state.openOptions.has(idx)) {
+                state.openOptions.delete(idx);
+              } else {
+                state.openOptions.add(idx);
+              }
+              renderActiveWidgets();
+              return;
+            }
+          });
+
+          // Active widgets options input change
+          activeWidgetsList.addEventListener("change", (e) => {
+            const input = e.target;
+            const idx = parseInt(input.getAttribute("data-idx"), 10);
+            const key = input.getAttribute("data-key");
+            if (isNaN(idx) || !key) return;
+
+            let val = input.value;
+            if (val === "" && input.tagName === "SELECT") val = undefined;
+            else if (val === "true") val = true;
+            else if (val === "false") val = false;
+            else if (input.type === "number") val = val ? Number(val) : undefined;
+
+            state.config.widgets = Page.updateWidget(state.config.widgets, idx, { [key]: val });
+            syncControls();
+          });
+
+          // Width slider
+          widthSlider.addEventListener("input", (e) => {
+            state.width = Number(e.target.value);
+            widthVal.textContent = `${state.width} cols`;
+            updatePreview();
+          });
+
+          // Sample radios
+          document.querySelectorAll('input[name="sampleKind"]').forEach((radio) => {
+            radio.addEventListener("change", (e) => {
+              if (e.target.checked) {
+                state.sample = e.target.value;
+                updatePreview();
+              }
+            });
+          });
+
+          // Terminal background radios
+          document.querySelectorAll('input[name="termBg"]').forEach((radio) => {
+            radio.addEventListener("change", (e) => {
+              if (e.target.checked) {
+                state.termBg = e.target.value;
+                termScreen.setAttribute("data-bg", state.termBg);
+              }
+            });
+          });
+
+          // Look controls
+          presetSelect.addEventListener("change", (e) => {
+            if (e.target.value) {
+              state.config = Agy.applyPreset(state.config, e.target.value);
+              presetSelect.value = "";
+              syncControls();
+              showToast("Preset applied");
+            }
+          });
+
+          themeSelect.addEventListener("change", (e) => {
+            state.config.theme = e.target.value;
+            // Also update term background to match target
+            const t = Agy.THEMES[e.target.value];
+            if (t && (t.kind === "light" || e.target.value.endsWith("-light"))) {
+              document.getElementById("termBgLight").checked = true;
+              state.termBg = "light";
+              termScreen.setAttribute("data-bg", "light");
+            } else {
+              document.getElementById("termBgDark").checked = true;
+              state.termBg = "dark";
+              termScreen.setAttribute("data-bg", "dark");
+            }
+            syncControls();
+          });
+
+          layoutSelect.addEventListener("change", (e) => {
+            state.config.layout = e.target.value;
+            syncControls();
+          });
+
+          capSelect.addEventListener("change", (e) => {
+            state.config.powerline = Agy.applyStyle(state.config.powerline, e.target.value);
+            syncControls();
+          });
+
+          gradientSelect.addEventListener("change", (e) => {
+            const val = e.target.value;
+            if (val === "off") {
+              delete state.config.gradient;
+              customGradientGroup.style.display = "none";
+            } else if (val === "custom") {
+              state.config.gradient = `${gradColor1.value}-${gradColor2.value}`;
+              customGradientGroup.style.display = "block";
+            } else {
+              state.config.gradient = val;
+              customGradientGroup.style.display = "none";
+            }
+            syncControls();
+          });
+
+          const updateCustomGrad = () => {
+            state.config.gradient = `${gradColor1.value}-${gradColor2.value}`;
+            syncControls();
+          };
+          gradColor1.addEventListener("input", updateCustomGrad);
+          gradColor2.addEventListener("input", updateCustomGrad);
+
+          // Toggles
+          toggleEmojis.addEventListener("change", (e) => {
+            state.config.emojis = e.target.checked;
+            syncControls();
+          });
+          toggleAscii.addEventListener("change", (e) => {
+            state.config.ascii = e.target.checked;
+            syncControls();
+          });
+          toggleMinimalist.addEventListener("change", (e) => {
+            state.config.minimalist = e.target.checked;
+            syncControls();
+          });
+          togglePacing.addEventListener("change", (e) => {
+            state.config.pacing = e.target.checked;
+            syncControls();
+          });
+          toggleRowGap.addEventListener("change", (e) => {
+            state.config.rowGap = e.target.checked;
+            syncControls();
+          });
+
+          // Color depth radios
+          document.querySelectorAll('input[name="colorDepth"]').forEach((radio) => {
+            radio.addEventListener("change", (e) => {
+              if (e.target.checked) {
+                state.depth = e.target.value;
+                state.config.color = state.depth;
+                updatePreview();
+              }
+            });
+          });
+
+          // Copy JSON
+          document.getElementById("copyJsonBtn").addEventListener("click", () => {
+            navigator.clipboard
+              .writeText(configJson.textContent)
+              .then(() => showToast("Copied JSON!"));
+          });
+
+          // Download JSON
+          document.getElementById("downloadBtn").addEventListener("click", () => {
+            const blob = new Blob([configJson.textContent + "\n"], { type: "application/json" });
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = "statusline.config.json";
+            a.click();
+            URL.revokeObjectURL(a.href);
+            showToast("Downloaded statusline.config.json");
+          });
+
+          // Copy Command
+          document.getElementById("copyCmdBtn").addEventListener("click", () => {
+            navigator.clipboard
+              .writeText("npx agy-powerline import statusline.config.json")
+              .then(() => showToast("Copied command!"));
+          });
+
+          // Copy Share Link
+          document.getElementById("copyShareBtn").addEventListener("click", () => {
+            navigator.clipboard
+              .writeText(shareUrlInput.value)
+              .then(() => showToast("Copied share link!"));
+          });
+
+          // Page Theme Toggle
+          themeToggleBtn.addEventListener("click", () => {
+            const current =
+              document.documentElement.getAttribute("data-theme") ||
+              (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+            const next = current === "dark" ? "light" : "dark";
+            document.documentElement.setAttribute("data-theme", next);
+          });
+
+          // Load Pasted Config
+          document.getElementById("loadPastedBtn").addEventListener("click", () => {
+            const text = pasteInput.value;
+            const res = Page.loadPastedConfig(text, state.config);
+            if (!res.ok) {
+              pasteFeedback.innerHTML = `<div class="alert alert-danger" style="margin-top: 6px;">${res.error}</div>`;
+              return;
+            }
+
+            state.config = res.config;
+            let msg =
+              '<div class="alert alert-success" style="margin-top: 6px;">Config loaded successfully!</div>';
+            if (res.dropped && res.dropped.length) {
+              msg += `<div class="alert alert-warning" style="margin-top: 6px;"><strong>Left out</strong> (unsupported settings):<br>${res.dropped.join("<br>")}</div>`;
+            }
+            pasteFeedback.innerHTML = msg;
+            syncControls();
+            showToast("Loaded config!");
+          });
+        }
+
+        // Initialize from URL hash or default
+        function init() {
+          initSelectors();
+          renderPalette();
+          setupEvents();
+
+          if (window.location.hash) {
+            try {
+              const decoded = Page.decodeConfig(window.location.hash);
+              if (decoded) {
+                state.config = decoded;
+              }
+            } catch {
+              // Ignore invalid hash
+            }
+          }
+
+          syncControls();
+        }
+
+        init();
+      })();
+    </script>
+  </body>
+</html>

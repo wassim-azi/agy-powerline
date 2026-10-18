@@ -34,71 +34,7 @@ function withFiveHour(fraction) {
 
 // --- ANSI → HTML -----------------------------------------------------------
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-const css = (c) => (c ? `rgb(${c.join(",")})` : null);
-
-function ansiToHtml(text) {
-  const lines = text.replace(/\x1b\[0m$/, "").split("\n");
-  let fg = null,
-    bg = null,
-    bold = false;
-  return lines
-    .map((line) => {
-      let html = "";
-      let run = "";
-      const flush = () => {
-        if (!run) return;
-        const style = [];
-        if (fg) style.push(`color:${css(fg)}`);
-        if (bg) style.push(`background:${css(bg)}`);
-        if (bold) style.push("font-weight:700");
-        html += `<span class="r"${style.length ? ` style="${style.join(";")}"` : ""}>${esc(run)}</span>`;
-        run = "";
-      };
-      const glyph = (cls) => {
-        flush();
-        const vars = [`--c:${css(fg) || "currentColor"}`, `--b:${css(bg) || "transparent"}`];
-        html += `<span class="g ${cls}" style="${vars.join(";")}"></span>`;
-      };
-      for (let i = 0; i < line.length; i++) {
-        const ch = line[i];
-        if (ch === "\x1b" && line[i + 1] === "[") {
-          const end = line.indexOf("m", i);
-          const codes = line
-            .slice(i + 2, end)
-            .split(";")
-            .map(Number);
-          flush();
-          for (let k = 0; k < codes.length; k++) {
-            const c = codes[k];
-            if (c === 0) {
-              fg = null;
-              bg = null;
-              bold = false;
-            } else if (c === 1) bold = true;
-            else if (c === 22) bold = false;
-            else if (c === 39) fg = null;
-            else if (c === 49) bg = null;
-            else if ((c === 38 || c === 48) && codes[k + 1] === 2) {
-              const rgb = codes.slice(k + 2, k + 5);
-              if (c === 38) fg = rgb;
-              else bg = rgb;
-              k += 4;
-            }
-          }
-          i = end;
-          continue;
-        }
-        const cp = ch.codePointAt(0);
-        if (cp === 0xe0b6) glyph("cap-l");
-        else if (cp === 0xe0b4) glyph("cap-r");
-        else if (cp === 0xe0b0) glyph("tri");
-        else run += ch;
-      }
-      flush();
-      return `<div class="ln">${html || "&nbsp;"}</div>`;
-    })
-    .join("");
-}
+const { ansiToHtml } = require("../site/ansi");
 
 // --- Contrast numbers shown on each card -----------------------------------
 const lin = (c) => ((c /= 255) <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
