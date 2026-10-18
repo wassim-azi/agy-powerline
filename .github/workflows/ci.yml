@@ -79,10 +79,12 @@ jobs:
 
       # Antigravity starts the bar as `cmd /c <statusLine.command>`. This starts
       # the command init wrote the same way, from the runner's shell rather
-      # than through Node, in a home path with a space in it. The step keeps
-      # the default pwsh: zizmor flags `shell: cmd`, which ignores failures.
+      # than through Node, in a home path with a space in it. It runs in pwsh:
+      # zizmor flags `shell: cmd`, which ignores failures, and actionlint needs
+      # the shell named, since a matrix runner could be bash.
       - name: Smoke-test the cmd launcher
         if: runner.os == 'Windows'
+        shell: pwsh
         run: |
           $env:HOME = $env:USERPROFILE = Join-Path $env:RUNNER_TEMP "agy home"
           Remove-Item Env:AGY_POWERLINE_HOME -ErrorAction Ignore
