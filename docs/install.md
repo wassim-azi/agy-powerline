@@ -3,6 +3,7 @@
 What `npx agy-powerline init` does, where files go, and how to set things up by hand. For the quick version, see the [README](../README.md#install).
 
 - [What `init` does](#what-init-does)
+- [Install from inside agy (plugin)](#install-from-inside-agy-plugin)
 - [Where files live](#where-files-live)
 - [Upgrading](#upgrading)
 - [Uninstalling](#uninstalling)
@@ -47,6 +48,25 @@ npx agy-powerline init --yes --preset compact --layout lines --theme light
 Options: `--stack` renders below the built-in statusline, `--padding <n>` inserts blank lines.
 
 On Windows, `init` refuses an install folder whose path contains `&`, `(`, `^`, `,`, `;` or `=`: Antigravity starts the bar through `cmd /c`, which splits the command at those characters. Set `AGY_POWERLINE_HOME` permanently to a folder without them (for example `setx AGY_POWERLINE_HOME C:\agy-powerline`), open a new terminal and run `init` again.
+
+## Install from inside agy (plugin)
+
+The repository is also an agy plugin with two skills:
+
+```sh
+agy plugin install https://github.com/wassim-azi/agy-powerline   # or /plugin install … inside agy
+```
+
+- **`agy-powerline-setup`** checks that Node.js is 20 or newer, runs `npx -y agy-powerline@latest init --yes`, then `npx agy-powerline doctor`, sums up the result and asks you to restart agy once. Run it with `/agy-powerline-setup`, or just ask agy to set up agy-powerline.
+- **`agy-powerline-customize`** maps requests such as "make it light", "show only one line" or "add a gradient" to the `theme`, `preset`, `layout`, `caps`, `gradient`, `export` and `import` commands: it lists the choices first, then applies one and shows the preview.
+
+The skills run commands through agy's shell tool, so agy asks you before each one, as for any command. They never edit `settings.json` by hand, never start `configure` (an interactive editor) and never pass `--allow-exec` to `import` without your yes to the commands shown.
+
+agy copies the plugin to `~/.gemini/config/plugins/agy-powerline/`. The bar itself still runs from `~/.agy-powerline`, where `init` installs it.
+
+- **Update:** run the setup skill again, or `npx agy-powerline@latest init --yes`. Reinstall the plugin to get newer skills.
+- **Remove:** `agy plugin uninstall agy-powerline` removes the skills only; the bar stays. `npx agy-powerline uninstall` removes the bar from agy's settings (add `--delete` to remove its files).
+- **macOS:** if installing from the GitHub URL fails with `unsupported extension format` (google-antigravity/antigravity-cli#327, closed upstream), update agy, or clone the repository and run `agy plugin install <path to the clone>`.
 
 ## Where files live
 

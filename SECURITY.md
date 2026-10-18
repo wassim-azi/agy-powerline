@@ -23,6 +23,8 @@ The statusline script Antigravity calls on each refresh reads the session JSON o
 
 Everything else (branch name, dirty state, a rebase or merge in progress, commit ID, stashes, worktree, RAM, quotas, tokens) is read from files or Node.js APIs without starting a process; with `gitFiles` on the bar, the dirty state also uses its `git status` result.
 
+The agy plugin's skills (`agy plugin install https://github.com/wassim-azi/agy-powerline`) are instructions for agy's agent, not code: they run `node -v` and `npx agy-powerline …` commands through agy's shell tool, which asks you first. `npx` downloads agy-powerline from npm, the same as the install in the README; agy-powerline itself still makes no network calls.
+
 The CLI itself (`npx agy-powerline ...`) additionally:
 
 - runs your configured `statusLine` command once in `doctor`, to check it works. It runs exactly as Antigravity would run it on a refresh, so your `exec` widgets run once too;

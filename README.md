@@ -32,7 +32,18 @@ agy                           # start Antigravity
 
 On a first install `init` asks for a preset, a layout and a theme, with a preview of each; add `--yes` to skip the questions. It asks before replacing anything and backs up Antigravity's `settings.json` first. Restart `agy` once after `init`. Details: [what `init` does](docs/install.md).
 
-Or let agy install it: paste this into an `agy` session.
+### Install from inside agy
+
+agy-powerline is also an agy plugin. Add it, then run its setup skill in an `agy` session; it runs `init` and `doctor` for you:
+
+```text
+agy plugin install https://github.com/wassim-azi/agy-powerline
+/agy-powerline-setup
+```
+
+Restart `agy` once afterwards. Details: [the plugin route](docs/install.md#install-from-inside-agy-plugin).
+
+Or paste this into an `agy` session.
 
 ```text
 Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then tell me to restart agy.
