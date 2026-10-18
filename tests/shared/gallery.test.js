@@ -49,7 +49,7 @@ async function run() {
     const external = urls.filter((url) => url !== REPO_URL);
     record(
       "the gallery loads nothing from other sites (only the repo link)",
-      external.length === 0 && urls.includes(REPO_URL),
+      external.length === 0 && urls.some((url) => url === REPO_URL),
       external.slice(0, 5).join(", ")
     );
 
