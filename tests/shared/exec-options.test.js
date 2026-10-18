@@ -193,11 +193,72 @@ function checkRecipe() {
   );
 }
 
+// The ccusage recipe's parsing half (after the pipe), run through the shell
+// the way exec runs it, on JSON shaped like `ccusage antigravity daily --json`.
+// CI has no ccusage, so the ccusage half is checked by hand.
+function checkCcusageRecipe() {
+  const fs = require("fs");
+  const path = require("path");
+  const { execSync } = require("child_process");
+  const docs = fs.readFileSync(
+    path.join(__dirname, "..", "..", "docs", "configuration.md"),
+    "utf8"
+  );
+  const block = [...docs.matchAll(/```json\n([\s\S]*?)```/g)]
+    .map((m) => m[1])
+    .find((json) => json.includes("ccusage antigravity daily"));
+  let parser = "";
+  try {
+    const { cmd } = JSON.parse(block);
+    parser = cmd.slice(cmd.indexOf("| ") + 2);
+  } catch {
+    // reported below
+  }
+  const daily = (totalTokens) =>
+    JSON.stringify({
+      daily: [{ date: "2026-10-18", inputTokens: 1, outputTokens: 1, totalTokens }],
+      totals: {
+        inputTokens: 1,
+        outputTokens: 1,
+        cacheCreationTokens: 0,
+        cacheReadTokens: 0,
+        totalTokens,
+      },
+    });
+  const parse = (input) => {
+    try {
+      return execSync(parser, {
+        input,
+        encoding: "utf8",
+        windowsHide: true,
+        timeout: 10000,
+      }).trim();
+    } catch (err) {
+      return `error: ${err.message}`;
+    }
+  };
+  const outputs = [
+    parse(daily(1234567)),
+    parse(daily(845321)),
+    parse(daily(512)),
+    parse(daily(0)),
+    parse("not json"),
+  ];
+  record(
+    "the ccusage recipe formats today's total like the bar, and prints nothing without one",
+    parser.startsWith("node -e") &&
+      JSON.stringify(outputs) ===
+        JSON.stringify(["1.2M today", "845.3K today", "512 today", "", ""]),
+    JSON.stringify(outputs)
+  );
+}
+
 async function run() {
   try {
     checkPayload();
     checkColors();
     checkRecipe();
+    checkCcusageRecipe();
   } finally {
     clearExecCache();
   }

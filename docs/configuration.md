@@ -271,6 +271,23 @@ Each one is a widget to add to `widgets`. `node -e` commands work the same in Wi
 }
 ```
 
+**Today's agy tokens (ccusage).** [ccusage](https://github.com/ccusage/ccusage) reads agy's local conversation data too; `ccusage antigravity daily` prints the tokens per day. This shows today's total, formatted like the bar (`📈 agy: 1.2M today`), and hides when there's none:
+
+```json
+{
+  "id": "exec",
+  "cmd": "ccusage antigravity daily --last 1 --json --offline | node -e \"let s='';process.stdin.on('data',c=>s+=c).on('end',()=>{let n=0;try{n=Number(JSON.parse(s).totals.totalTokens)||0}catch{}if(n)console.log((n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':n)+' today')})\"",
+  "icon": "📈",
+  "label": "agy",
+  "interval": 300,
+  "timeout": 5000
+}
+```
+
+- This runs ccusage, a separate tool, every 5 minutes. Install it once with `npm i -g ccusage`: through `npx` it would check the npm registry on each run, which is slower and needs the network. `--offline` keeps ccusage from downloading model prices. agy-powerline itself still makes no network calls.
+- ccusage's total counts cached tokens too, so it can be higher than the bar's own [`tokensToday`](#widgets) widget, which counts input and output tokens without ccusage.
+- The refresh that runs ccusage waits for it, up to `timeout` (5000 ms at most). If ccusage takes longer, the widget keeps its last value (hidden before the first one) and the problem log notes `EXEC_TIMEOUT`.
+
 **Another statusline script.** Any script that reads the session JSON on stdin and prints one line, colors included:
 
 ```json
