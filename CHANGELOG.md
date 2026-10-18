@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `dark-macchiato` theme: Catppuccin Macchiato palette (#33, thanks @yatharth2soni)
+- The README in French (`README.fr.md`) (#51)
 
 ### Changed
 
