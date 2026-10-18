@@ -1,424 +1,459 @@
-<title>agy-powerline Theme Gallery</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link
-  rel="stylesheet"
-  href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;700&display=swap"
-/>
-<style>
-  /* Layout: one column of theme cards, each a terminal window; a sticky bar of
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Nothing loads from other sites: the page is its own inline style and script. -->
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src data:; base-uri 'none'; form-action 'none'"
+    />
+    <meta
+      name="description"
+      content="Every agy-powerline theme, rendered by the real statusline code on dark and light terminals."
+    />
+    <title>agy-powerline Theme Gallery</title>
+    <style>
+      /* Layout: one column of theme cards, each a terminal window; a sticky bar of
      three segmented controls (theme kind, terminal background, color vision). */
-  :root {
-    --bg: #f4f5f7;
-    --surface: #ffffff;
-    --fg: #1c1f26;
-    --muted: #5b6270;
-    --line: #dde0e6;
-    --accent: #3d5fc4;
-    --accent-fg: #ffffff;
-    /* Terminal grounds are content, identical in both page themes. */
-    --term-dark-bg: #1d1f27;
-    --term-dark-fg: #d4d6de;
-    --term-light-bg: #fbfbf8;
-    --term-light-fg: #2b2d34;
-    --term-edge: #c9ccd4;
-    --font-ui: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
-    --font-mono: "JetBrains Mono", "Cascadia Mono", Consolas, "DejaVu Sans Mono", monospace;
-  }
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      --bg: #13151b;
-      --surface: #1a1d25;
-      --fg: #e6e8ee;
-      --muted: #9aa1b0;
-      --line: #2c303b;
-      --accent: #8fa8ff;
-      --accent-fg: #10131a;
-      --term-edge: #3a3f4c;
-      color-scheme: dark;
-    }
-  }
-  :root[data-theme="dark"] {
-    --bg: #13151b;
-    --surface: #1a1d25;
-    --fg: #e6e8ee;
-    --muted: #9aa1b0;
-    --line: #2c303b;
-    --accent: #8fa8ff;
-    --accent-fg: #10131a;
-    --term-edge: #3a3f4c;
-    color-scheme: dark;
-  }
-
-  body {
-    background: var(--bg);
-    color: var(--fg);
-    font-family: var(--font-ui);
-    font-size: 15px;
-    line-height: 1.5;
-  }
-  .wrap {
-    max-width: 1000px;
-    margin: 0 auto;
-    padding-inline: 16px;
-    padding-block: 32px 64px;
-    display: grid;
-    gap: 24px;
-  }
-  .intro h1 {
-    font-size: 1.75rem;
-    font-weight: 600;
-    letter-spacing: -0.01em;
-    margin: 0 0 6px;
-    text-wrap: balance;
-  }
-  .intro p {
-    margin: 0;
-    color: var(--muted);
-    max-width: 65ch;
-  }
-
-  .controls {
-    position: sticky;
-    top: env(safe-area-inset-top, 0px);
-    z-index: 2;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px 20px;
-    padding: 12px 16px;
-    margin-inline: -16px;
-    background: var(--bg);
-    border-bottom: 1px solid var(--line);
-  }
-  .control {
-    display: grid;
-    gap: 4px;
-    border: 0;
-    margin: 0;
-    padding: 0;
-    min-width: 0;
-  }
-  .control legend {
-    font-size: 0.72rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--muted);
-    padding: 0;
-    margin-bottom: 4px;
-  }
-  .seg {
-    display: flex;
-    flex-wrap: wrap;
-    border: 1px solid var(--line);
-    border-radius: 8px;
-    overflow: hidden;
-    background: var(--surface);
-  }
-  .seg input {
-    position: absolute;
-    opacity: 0;
-    pointer-events: none;
-  }
-  .seg label {
-    padding: 5px 11px;
-    font-size: 0.85rem;
-    cursor: pointer;
-    color: var(--fg);
-    border-right: 1px solid var(--line);
-  }
-  .seg label:last-of-type {
-    border-right: 0;
-  }
-  .seg input:checked + label {
-    background: var(--accent);
-    color: var(--accent-fg);
-  }
-  .seg input:focus-visible + label {
-    outline: 2px solid var(--accent);
-    outline-offset: -3px;
-  }
-
-  .list {
-    display: grid;
-    gap: 28px;
-  }
-  .theme {
-    display: grid;
-    gap: 10px;
-    min-width: 0;
-  }
-  .theme[hidden] {
-    display: none;
-  }
-  .theme-head {
-    display: grid;
-    grid-template-columns: 1fr auto;
-    gap: 2px 24px;
-    align-items: end;
-  }
-  .theme-name {
-    display: flex;
-    align-items: baseline;
-    gap: 10px;
-    flex-wrap: wrap;
-  }
-  .theme-name h2 {
-    margin: 0;
-    font-size: 1.15rem;
-    font-weight: 600;
-  }
-  .theme-id {
-    font-family: var(--font-mono);
-    font-size: 0.8rem;
-    color: var(--muted);
-  }
-  .theme-desc {
-    margin: 0;
-    color: var(--muted);
-    grid-column: 1;
-  }
-  .metrics {
-    grid-column: 2;
-    grid-row: 1 / span 2;
-    display: flex;
-    gap: 18px;
-    margin: 0;
-  }
-  .metrics div {
-    display: grid;
-    gap: 1px;
-  }
-  .metrics dt {
-    font-size: 0.7rem;
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
-    color: var(--muted);
-  }
-  .metrics dd {
-    margin: 0;
-    font-family: var(--font-mono);
-    font-size: 0.9rem;
-    font-variant-numeric: tabular-nums;
-  }
-  .metrics .states dd {
-    display: flex;
-    gap: 5px;
-    padding-top: 3px;
-  }
-  .dot {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-    border: 1px solid var(--line);
-  }
-
-  .term {
-    border: 1px solid var(--term-edge);
-    border-radius: 10px;
-    padding: 12px 14px 14px;
-    overflow-x: auto;
-    display: grid;
-    gap: 4px;
-  }
-  .term[data-bg="dark"] {
-    background: var(--term-dark-bg);
-    color: var(--term-dark-fg);
-  }
-  .term[data-bg="light"] {
-    background: var(--term-light-bg);
-    color: var(--term-light-fg);
-  }
-  .term-label {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    opacity: 0.55;
-    margin-top: 6px;
-  }
-  .term-label:first-child {
-    margin-top: 0;
-  }
-  .screen {
-    font-family: var(--font-mono);
-    font-size: 13px;
-    white-space: pre;
-    width: max-content;
-  }
-  .ln {
-    height: 1.45em;
-    line-height: 1.45em;
-  }
-  .r,
-  .g {
-    display: inline-block;
-    height: 1.45em;
-    vertical-align: top;
-  }
-  .g {
-    width: 0.62em;
-    background: var(--b);
-    position: relative;
-  }
-  .g::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: var(--c);
-  }
-  .cap-l::before {
-    border-radius: 999px 0 0 999px;
-  }
-  .cap-r::before {
-    border-radius: 0 999px 999px 0;
-  }
-  .tri::before {
-    clip-path: polygon(0 0, 100% 50%, 0 100%);
-  }
-
-  .cvd-protan .term {
-    filter: url(#protan);
-  }
-  .cvd-deutan .term {
-    filter: url(#deutan);
-  }
-  .cvd-tritan .term {
-    filter: url(#tritan);
-  }
-
-  .note {
-    color: var(--muted);
-    font-size: 0.85rem;
-    margin: 0;
-    max-width: 70ch;
-  }
-
-  @media (max-width: 640px) {
-    .theme-head {
-      grid-template-columns: 1fr;
-    }
-    .metrics {
-      grid-column: 1;
-      grid-row: auto;
-      margin-top: 8px;
-    }
-  }
-</style>
-
-<svg width="0" height="0" style="position: absolute" aria-hidden="true">
-  <!-- Machado et al. (2009) full-severity simulation, applied in linear RGB. -->
-  <filter id="protan" color-interpolation-filters="linearRGB">
-    <feColorMatrix
-      type="matrix"
-      values="0.152286 1.052583 -0.204868 0 0  0.114503 0.786281 0.099216 0 0  -0.003882 -0.048116 1.051998 0 0  0 0 0 1 0"
-    />
-  </filter>
-  <filter id="deutan" color-interpolation-filters="linearRGB">
-    <feColorMatrix
-      type="matrix"
-      values="0.367322 0.860646 -0.227968 0 0  0.280085 0.672501 0.047413 0 0  -0.01182 0.04294 0.968881 0 0  0 0 0 1 0"
-    />
-  </filter>
-  <filter id="tritan" color-interpolation-filters="linearRGB">
-    <feColorMatrix
-      type="matrix"
-      values="1.255528 -0.076749 -0.178779 0 0  -0.078411 0.930809 0.147602 0 0  0.004733 0.691367 0.3039 0 0  0 0 0 1 0"
-    />
-  </filter>
-</svg>
-
-<main class="wrap" id="page">
-  <section class="intro">
-    <h1>agy-powerline themes</h1>
-    <p>
-      <!--COUNT-->
-      themes, each rendered by the real statusline code with sample session data. Each one is built
-      for one terminal background; switch the background to see how it holds up on the other, or
-      simulate color blindness to check the status colors.
-    </p>
-  </section>
-
-  <div class="controls" role="group" aria-label="Display options">
-    <fieldset class="control">
-      <legend>Themes</legend>
-      <div class="seg">
-        <input type="radio" name="kind" id="kind-all" value="all" checked /><label for="kind-all"
-          >All</label
-        >
-        <input type="radio" name="kind" id="kind-dark" value="dark" /><label for="kind-dark"
-          >Dark</label
-        >
-        <input type="radio" name="kind" id="kind-light" value="light" /><label for="kind-light"
-          >Light</label
-        >
-        <input type="radio" name="kind" id="kind-cb" value="colorblind" /><label for="kind-cb"
-          >Color-blind</label
-        >
-      </div>
-    </fieldset>
-    <fieldset class="control">
-      <legend>Terminal background</legend>
-      <div class="seg">
-        <input type="radio" name="bg" id="bg-match" value="match" checked /><label for="bg-match"
-          >Intended</label
-        >
-        <input type="radio" name="bg" id="bg-dark" value="dark" /><label for="bg-dark">Dark</label>
-        <input type="radio" name="bg" id="bg-light" value="light" /><label for="bg-light"
-          >Light</label
-        >
-      </div>
-    </fieldset>
-    <fieldset class="control">
-      <legend>Color vision</legend>
-      <div class="seg">
-        <input type="radio" name="cvd" id="cvd-none" value="none" checked /><label for="cvd-none"
-          >Typical</label
-        >
-        <input type="radio" name="cvd" id="cvd-protan" value="protan" /><label for="cvd-protan"
-          >Protanopia</label
-        >
-        <input type="radio" name="cvd" id="cvd-deutan" value="deutan" /><label for="cvd-deutan"
-          >Deuteranopia</label
-        >
-        <input type="radio" name="cvd" id="cvd-tritan" value="tritan" /><label for="cvd-tritan"
-          >Tritanopia</label
-        >
-      </div>
-    </fieldset>
-  </div>
-
-  <div class="list">
-    <!--CARDS-->
-  </div>
-
-  <p class="note">
-    Contrast figures are the lowest across all widget colors: "Pill text" is text on a pill, "On
-    terminal" is the lines layout text on the intended terminal background. 4.5:1 is the WCAG AA
-    minimum for body text. Pill caps take the terminal's own background, so they blend into any
-    terminal. Browsers can't draw Nerd Font glyphs, so the round caps and arrows are drawn with CSS
-    in the same colors.
-  </p>
-</main>
-
-<script>
-  (function () {
-    const page = document.getElementById("page");
-    const cards = Array.from(document.querySelectorAll(".theme"));
-
-    function apply() {
-      const kind = document.querySelector('input[name="kind"]:checked').value;
-      const bg = document.querySelector('input[name="bg"]:checked').value;
-      const cvd = document.querySelector('input[name="cvd"]:checked').value;
-      for (const card of cards) {
-        card.hidden = kind !== "all" && card.dataset.kind !== kind;
-        card.querySelector(".term").dataset.bg = bg === "match" ? card.dataset.target : bg;
+      :root {
+        --bg: #f4f5f7;
+        --surface: #ffffff;
+        --fg: #1c1f26;
+        --muted: #5b6270;
+        --line: #dde0e6;
+        --accent: #3d5fc4;
+        --accent-fg: #ffffff;
+        /* Terminal grounds are content, identical in both page themes. */
+        --term-dark-bg: #1d1f27;
+        --term-dark-fg: #d4d6de;
+        --term-light-bg: #fbfbf8;
+        --term-light-fg: #2b2d34;
+        --term-edge: #c9ccd4;
+        /* System fonts only: a web font would be a request to another site. */
+        --font-ui: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        --font-mono:
+          "Cascadia Mono", ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
       }
-      page.classList.remove("cvd-protan", "cvd-deutan", "cvd-tritan");
-      if (cvd !== "none") page.classList.add("cvd-" + cvd);
-    }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) {
+          --bg: #13151b;
+          --surface: #1a1d25;
+          --fg: #e6e8ee;
+          --muted: #9aa1b0;
+          --line: #2c303b;
+          --accent: #8fa8ff;
+          --accent-fg: #10131a;
+          --term-edge: #3a3f4c;
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme="dark"] {
+        --bg: #13151b;
+        --surface: #1a1d25;
+        --fg: #e6e8ee;
+        --muted: #9aa1b0;
+        --line: #2c303b;
+        --accent: #8fa8ff;
+        --accent-fg: #10131a;
+        --term-edge: #3a3f4c;
+        color-scheme: dark;
+      }
 
-    document
-      .querySelectorAll(".controls input")
-      .forEach((input) => input.addEventListener("change", apply));
-    apply();
-  })();
-</script>
+      body {
+        background: var(--bg);
+        color: var(--fg);
+        font-family: var(--font-ui);
+        font-size: 15px;
+        line-height: 1.5;
+      }
+      .wrap {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding-inline: 16px;
+        padding-block: 32px 64px;
+        display: grid;
+        gap: 24px;
+      }
+      .intro h1 {
+        font-size: 1.75rem;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 0 0 6px;
+        text-wrap: balance;
+      }
+      .intro p {
+        margin: 0;
+        color: var(--muted);
+        max-width: 65ch;
+      }
+      .intro p + p {
+        margin-top: 8px;
+      }
+      .intro code {
+        font-family: var(--font-mono);
+        font-size: 0.9em;
+        color: var(--fg);
+      }
+      .intro a {
+        color: var(--accent);
+        text-underline-offset: 2px;
+      }
+
+      .controls {
+        position: sticky;
+        top: env(safe-area-inset-top, 0px);
+        z-index: 2;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 20px;
+        padding: 12px 16px;
+        margin-inline: -16px;
+        background: var(--bg);
+        border-bottom: 1px solid var(--line);
+      }
+      .control {
+        display: grid;
+        gap: 4px;
+        border: 0;
+        margin: 0;
+        padding: 0;
+        min-width: 0;
+      }
+      .control legend {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        padding: 0;
+        margin-bottom: 4px;
+      }
+      .seg {
+        display: flex;
+        flex-wrap: wrap;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        background: var(--surface);
+      }
+      .seg input {
+        position: absolute;
+        opacity: 0;
+        pointer-events: none;
+      }
+      .seg label {
+        padding: 5px 11px;
+        font-size: 0.85rem;
+        cursor: pointer;
+        color: var(--fg);
+        border-right: 1px solid var(--line);
+      }
+      .seg label:last-of-type {
+        border-right: 0;
+      }
+      .seg input:checked + label {
+        background: var(--accent);
+        color: var(--accent-fg);
+      }
+      .seg input:focus-visible + label {
+        outline: 2px solid var(--accent);
+        outline-offset: -3px;
+      }
+
+      .list {
+        display: grid;
+        gap: 28px;
+      }
+      .theme {
+        display: grid;
+        gap: 10px;
+        min-width: 0;
+      }
+      .theme[hidden] {
+        display: none;
+      }
+      .theme-head {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 2px 24px;
+        align-items: end;
+      }
+      .theme-name {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .theme-name h2 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 600;
+      }
+      .theme-id {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .theme-desc {
+        margin: 0;
+        color: var(--muted);
+        grid-column: 1;
+      }
+      .metrics {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        display: flex;
+        gap: 18px;
+        margin: 0;
+      }
+      .metrics div {
+        display: grid;
+        gap: 1px;
+      }
+      .metrics dt {
+        font-size: 0.7rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+      }
+      .metrics dd {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        font-variant-numeric: tabular-nums;
+      }
+      .metrics .states dd {
+        display: flex;
+        gap: 5px;
+        padding-top: 3px;
+      }
+      .dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 1px solid var(--line);
+      }
+
+      .term {
+        border: 1px solid var(--term-edge);
+        border-radius: 10px;
+        padding: 12px 14px 14px;
+        overflow-x: auto;
+        display: grid;
+        gap: 4px;
+      }
+      .term[data-bg="dark"] {
+        background: var(--term-dark-bg);
+        color: var(--term-dark-fg);
+      }
+      .term[data-bg="light"] {
+        background: var(--term-light-bg);
+        color: var(--term-light-fg);
+      }
+      .term-label {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.55;
+        margin-top: 6px;
+      }
+      .term-label:first-child {
+        margin-top: 0;
+      }
+      .screen {
+        font-family: var(--font-mono);
+        font-size: 13px;
+        white-space: pre;
+        width: max-content;
+      }
+      .ln {
+        height: 1.45em;
+        line-height: 1.45em;
+      }
+      .r,
+      .g {
+        display: inline-block;
+        height: 1.45em;
+        vertical-align: top;
+      }
+      .g {
+        width: 0.62em;
+        background: var(--b);
+        position: relative;
+      }
+      .g::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: var(--c);
+      }
+      .cap-l::before {
+        border-radius: 999px 0 0 999px;
+      }
+      .cap-r::before {
+        border-radius: 0 999px 999px 0;
+      }
+      .tri::before {
+        clip-path: polygon(0 0, 100% 50%, 0 100%);
+      }
+
+      .cvd-protan .term {
+        filter: url(#protan);
+      }
+      .cvd-deutan .term {
+        filter: url(#deutan);
+      }
+      .cvd-tritan .term {
+        filter: url(#tritan);
+      }
+
+      .note {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin: 0;
+        max-width: 70ch;
+      }
+
+      @media (max-width: 640px) {
+        .theme-head {
+          grid-template-columns: 1fr;
+        }
+        .metrics {
+          grid-column: 1;
+          grid-row: auto;
+          margin-top: 8px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <!-- Machado et al. (2009) full-severity simulation, applied in linear RGB. -->
+      <filter id="protan" color-interpolation-filters="linearRGB">
+        <feColorMatrix
+          type="matrix"
+          values="0.152286 1.052583 -0.204868 0 0  0.114503 0.786281 0.099216 0 0  -0.003882 -0.048116 1.051998 0 0  0 0 0 1 0"
+        />
+      </filter>
+      <filter id="deutan" color-interpolation-filters="linearRGB">
+        <feColorMatrix
+          type="matrix"
+          values="0.367322 0.860646 -0.227968 0 0  0.280085 0.672501 0.047413 0 0  -0.01182 0.04294 0.968881 0 0  0 0 0 1 0"
+        />
+      </filter>
+      <filter id="tritan" color-interpolation-filters="linearRGB">
+        <feColorMatrix
+          type="matrix"
+          values="1.255528 -0.076749 -0.178779 0 0  -0.078411 0.930809 0.147602 0 0  0.004733 0.691367 0.3039 0 0  0 0 0 1 0"
+        />
+      </filter>
+    </svg>
+
+    <main class="wrap" id="page">
+      <section class="intro">
+        <h1>agy-powerline themes</h1>
+        <p>
+          <!--COUNT-->
+          themes, each rendered by the real statusline code with sample session data. Each one is
+          built for one terminal background; switch the background to see how it holds up on the
+          other, or simulate color blindness to check the status colors.
+        </p>
+        <p>
+          Install with <code>npx agy-powerline init</code>, then
+          <code>npx agy-powerline theme &lt;id&gt;</code> to switch.
+          <a href="https://github.com/wassim-azi/agy-powerline">agy-powerline on GitHub</a>
+        </p>
+      </section>
+
+      <div class="controls" role="group" aria-label="Display options">
+        <fieldset class="control">
+          <legend>Themes</legend>
+          <div class="seg">
+            <input type="radio" name="kind" id="kind-all" value="all" checked /><label
+              for="kind-all"
+              >All</label
+            >
+            <input type="radio" name="kind" id="kind-dark" value="dark" /><label for="kind-dark"
+              >Dark</label
+            >
+            <input type="radio" name="kind" id="kind-light" value="light" /><label for="kind-light"
+              >Light</label
+            >
+            <input type="radio" name="kind" id="kind-cb" value="colorblind" /><label for="kind-cb"
+              >Color-blind</label
+            >
+          </div>
+        </fieldset>
+        <fieldset class="control">
+          <legend>Terminal background</legend>
+          <div class="seg">
+            <input type="radio" name="bg" id="bg-match" value="match" checked /><label
+              for="bg-match"
+              >Intended</label
+            >
+            <input type="radio" name="bg" id="bg-dark" value="dark" /><label for="bg-dark"
+              >Dark</label
+            >
+            <input type="radio" name="bg" id="bg-light" value="light" /><label for="bg-light"
+              >Light</label
+            >
+          </div>
+        </fieldset>
+        <fieldset class="control">
+          <legend>Color vision</legend>
+          <div class="seg">
+            <input type="radio" name="cvd" id="cvd-none" value="none" checked /><label
+              for="cvd-none"
+              >Typical</label
+            >
+            <input type="radio" name="cvd" id="cvd-protan" value="protan" /><label for="cvd-protan"
+              >Protanopia</label
+            >
+            <input type="radio" name="cvd" id="cvd-deutan" value="deutan" /><label for="cvd-deutan"
+              >Deuteranopia</label
+            >
+            <input type="radio" name="cvd" id="cvd-tritan" value="tritan" /><label for="cvd-tritan"
+              >Tritanopia</label
+            >
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="list">
+        <!--CARDS-->
+      </div>
+
+      <p class="note">
+        Contrast figures are the lowest across all widget colors: "Pill text" is text on a pill, "On
+        terminal" is the lines layout text on the intended terminal background. 4.5:1 is the WCAG AA
+        minimum for body text. Pill caps take the terminal's own background, so they blend into any
+        terminal. Browsers can't draw Nerd Font glyphs, so the round caps and arrows are drawn with
+        CSS in the same colors.
+      </p>
+    </main>
+
+    <script>
+      (function () {
+        const page = document.getElementById("page");
+        const cards = Array.from(document.querySelectorAll(".theme"));
+
+        function apply() {
+          const kind = document.querySelector('input[name="kind"]:checked').value;
+          const bg = document.querySelector('input[name="bg"]:checked').value;
+          const cvd = document.querySelector('input[name="cvd"]:checked').value;
+          for (const card of cards) {
+            card.hidden = kind !== "all" && card.dataset.kind !== kind;
+            card.querySelector(".term").dataset.bg = bg === "match" ? card.dataset.target : bg;
+          }
+          page.classList.remove("cvd-protan", "cvd-deutan", "cvd-tritan");
+          if (cvd !== "none") page.classList.add("cvd-" + cvd);
+        }
+
+        document
+          .querySelectorAll(".controls input")
+          .forEach((input) => input.addEventListener("change", apply));
+        apply();
+      })();
+    </script>
+  </body>
+</html>

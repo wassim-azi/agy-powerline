@@ -178,6 +178,8 @@ const cards = themes
   )
   .join("\n");
 
+// The Pages workflow writes into a fresh _site/ folder.
+fs.mkdirSync(path.dirname(out), { recursive: true });
 fs.writeFileSync(
   out,
   template.replace("<!--CARDS-->", cards).replace("<!--COUNT-->", String(themes.length)),

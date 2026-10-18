@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `tokensToday` and `tokensWeek` widgets: tokens used today and over the last 7 days in all your agy conversations, read from agy's own local data (no network), with `"split"` and an optional `"budget"` that alerts like the context widgets; they need Node 22.13 or newer (#94)
 - Meter styles: `"meterStyle": "blocks"` (or `"meter"` on one meter widget, also in `configure`) draws the quota and context meters as `blocks`, `shade`, `line`, `geometric`, `squares`, `braille`, `bars` or `dots` instead of each layout's own; ASCII mode keeps `#` and `-` (#93)
 - The `git` widget shows a rebase (with its step, `REBASE 2/5`), `git am`, merge, cherry-pick, revert or bisect in progress, and the branch being rebased instead of a commit ID; `"operation": false` hides it (#92)
+- Theme gallery online at https://wassim-azi.github.io/agy-powerline/: every theme rendered by the real statusline code on dark and light terminals, with a color-blindness simulation (#110)
 
 ### Changed
 

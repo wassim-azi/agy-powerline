@@ -21,6 +21,7 @@ registerSuite("usage", "./shared/usage.test");
 registerSuite("problem log", "./shared/log.test");
 registerSuite("cli", "./shared/cli.test");
 registerSuite("readme", "./shared/readme.test");
+registerSuite("gallery", "./shared/gallery.test");
 registerSuite("plugin", "./shared/plugin.test");
 registerSuite("robustness", "./shared/robustness.test");
 registerSuite("security", "./shared/security.test");
