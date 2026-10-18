@@ -5,7 +5,7 @@ name: Pages
 # builds but doesn't deploy.
 on:
   push:
-    branches: [main, develop]
+    branches: [main]
   workflow_dispatch:
 
 permissions: {}
@@ -47,7 +47,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     needs: build
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       pages: write
