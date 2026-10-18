@@ -7,6 +7,7 @@ const { resolveThemeId, normalizeGradient } = require("./themes");
 const { stripControl, normalizeClock } = require("./formatters");
 const { normalizePowerline } = require("./powerline");
 const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
+const { isMeterStyle } = require("./widget-style");
 
 // Display text in widget configs is printed as-is, so strip terminal control
 // from it. cmd/command are left alone: they are executed, not printed.
@@ -178,6 +179,11 @@ function mergeConfig(raw) {
 
   if (raw && typeof raw.customTheme === "object" && raw.customTheme !== null) {
     result.customTheme = raw.customTheme;
+  }
+
+  // An unknown meter style is left out: each layout then draws its own.
+  if (isMeterStyle(raw?.meterStyle)) {
+    result.meterStyle = raw.meterStyle;
   }
 
   // Only a valid gradient is kept; anything else renders the plain theme.

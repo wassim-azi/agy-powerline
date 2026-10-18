@@ -104,6 +104,16 @@ function cases() {
     { color: "truecolor" },
   ]);
   list.push([
+    "pills default · meter blocks",
+    { ...base, layout: "pills", meterStyle: "blocks" },
+    { color: "truecolor" },
+  ]);
+  list.push([
+    "lines · meter geometric",
+    { ...base, layout: "lines", meterStyle: "geometric" },
+    { color: "truecolor" },
+  ]);
+  list.push([
     "lines · light-paper · gradient sunset",
     { ...base, theme: "light-paper", layout: "lines", gradient: "sunset" },
     { color: "truecolor" },

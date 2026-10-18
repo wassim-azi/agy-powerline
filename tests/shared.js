@@ -13,6 +13,7 @@ registerSuite("gradients", "./shared/gradient.test");
 registerSuite("powerline", "./shared/powerline.test");
 registerSuite("quota and style", "./shared/quota-style.test");
 registerSuite("fit to terminal", "./shared/fit.test");
+registerSuite("meters", "./shared/meters.test");
 registerSuite("widgets", "./shared/widgets.test");
 registerSuite("configurator screens", "./shared/tui.test");
 registerSuite("git", "./shared/git.test");

@@ -8,6 +8,7 @@ Most people never edit it by hand: `configure` covers widgets, order, presets, t
 - [Widgets](#widgets)
 - [Widget options: colors, labels, minimalist mode](#widget-options)
 - [Quota pace marker](#quota-pace-marker)
+- [Meter styles](#meter-styles)
 - [Reset times and clock](#reset-times-and-clock)
 - [Alerts and thresholds](#alerts-and-thresholds)
 - [Shell command widget (`exec`)](#shell-command-widget-exec)
@@ -21,7 +22,7 @@ Tabs at the top lead to Widgets (`w`), Presets (`o`), Themes (`t`), Layout (`l`)
 
 The editor fits your window. It fills the full width, so the preview has the room your bar gets in agy. From 80 columns the descriptions line up in a column; from 140 columns the list and a details panel share the width evenly, and the details show the selected item: a widget drawn on its own with its options and presets, a preset's rows, a theme's colors, or what a Powerline setting does. In a short window the tagline, blank lines, notes and preview chips make way first, then long lists scroll inside their panel, with the rows out of view counted in its border (`↑ 4 more`, `↓ 12 more`). Resizing the window redraws it.
 
-Enter on a widget opens its options: color, label (shown or value only), and what that widget takes, such as the short model name, the reset timers' format, the custom badge's text, the caution and danger levels, blink and the pace marker. `↑` `↓` pick an option, `←` `→` or Enter change it, `x` sets it back to its default, and Esc returns to the list. Each change is saved right away and shows in the preview. A Shell Command's `cmd` is shown but edited only in the config file. The preview title says when it shows a theme, preset or layout you haven't applied yet, and the preset that matches your widgets is marked `current`.
+Enter on a widget opens its options: color, label (shown or value only), and what that widget takes, such as the short model name, the reset timers' format, the custom badge's text, the caution and danger levels, blink, the pace marker and the meter style. `↑` `↓` pick an option, `←` `→` or Enter change it, `x` sets it back to its default, and Esc returns to the list. Each change is saved right away and shows in the preview. A Shell Command's `cmd` is shown but edited only in the config file. The preview title says when it shows a theme, preset or layout you haven't applied yet, and the preset that matches your widgets is marked `current`.
 
 | Key                    | Action                                                                            |
 | ---------------------- | --------------------------------------------------------------------------------- |
@@ -109,6 +110,31 @@ Every 5h, 7d, third-party and Argon quota meter carries a marker, `┃` (`|` in 
 ```
 
 The marker needs no extra data: it comes from the reset time Antigravity already sends and the fixed 5-hour and 7-day window lengths. It's hidden when the reset is further away than the window itself. Turn it off with `"pacing": false` (or `r` in `configure`), or per widget with `"pace": false`.
+
+## Meter styles
+
+Pills draw meters as colored cells and Lines as dots. `"meterStyle"` picks another look for every meter, and `"meter"` on a meter widget (`fiveHourBar`, `weeklyBar`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`, `context`) for that one; the widget's value wins. `configure` sets the per-widget one (Enter on a meter widget, then **Meter**).
+
+```json
+{ "meterStyle": "geometric", "widgets": [{ "id": "fiveHourBar", "meter": "blocks" }] }
+```
+
+| Id                   | Filled           | Empty                | Example (50%)           |
+| -------------------- | ---------------- | -------------------- | ----------------------- |
+| `cells` (Pills' own) | background color | darker background    | the default Pills meter |
+| `dots` (Lines' own)  | `●`              | `●` in a track color | the default Lines meter |
+| `blocks`             | `█`              | `░`                  | `█████░░░░░`            |
+| `shade`              | `▓`              | `░`                  | `▓▓▓▓▓░░░░░`            |
+| `line`               | `━`              | `─`                  | `━━━━━─────`            |
+| `geometric`          | `▰`              | `▱`                  | `▰▰▰▰▰▱▱▱▱▱`            |
+| `squares`            | `■`              | `□`                  | `■■■■■□□□□□`            |
+| `braille`            | `⣿`              | `⣀`                  | `⣿⣿⣿⣿⣿⣀⣀⣀⣀⣀`            |
+| `bars`               | `▮`              | `▯`                  | `▮▮▮▮▮▯▯▯▯▯`            |
+
+- `cells` exists only in Pills; in Lines it draws `dots`. An unknown id is ignored and each layout draws its own.
+- In Pills a glyph style draws on the pill's color: filled glyphs in the pill's text color, empty ones dimmed. In Lines the filled part keeps its ok, caution or danger color and the empty part the track color.
+- Meters keep their width (12 columns in Pills, 25 in Lines, 12 when fitted to a narrow terminal) and the pace marker stays where it is.
+- ASCII mode always draws `#` and `-` (and `|` for the pace marker), whatever the style.
 
 ## Reset times and clock
 

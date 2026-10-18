@@ -137,6 +137,34 @@ function widgetTag(id, { emojis = true, raw = false, icon } = {}) {
   return `${icon ?? tag.icon} ${tag.iconOnly ? "" : named}`;
 }
 
+// Meter styles: [filled, empty] glyphs. cells has none: Pills draws it with
+// background colors. Every glyph is one column wide for visibleWidth(); a
+// two-column glyph would overflow the meter and throw fitting off.
+const METER_STYLES = {
+  cells: null,
+  dots: ["●", "●"],
+  blocks: ["█", "░"],
+  shade: ["▓", "░"],
+  line: ["━", "─"],
+  geometric: ["▰", "▱"],
+  squares: ["■", "□"],
+  braille: ["⣿", "⣀"],
+  bars: ["▮", "▯"],
+};
+const METER_STYLE_IDS = Object.keys(METER_STYLES);
+
+function isMeterStyle(value) {
+  return typeof value === "string" && Object.hasOwn(METER_STYLES, value);
+}
+
+// The widget's "meter", else the global "meterStyle", else the layout's own;
+// cells exists only in Pills, so Lines draws dots instead.
+function meterStyle(widget, config, layout) {
+  const own = layout === "lines" ? "dots" : "cells";
+  const id = [widget?.meter, config?.meterStyle].find(isMeterStyle) ?? own;
+  return id === "cells" ? own : id;
+}
+
 // Longest conversation title shown, in terminal columns.
 const TITLE_MAX = 30;
 
@@ -164,6 +192,10 @@ module.exports = {
   widgetTag,
   isRaw,
   isPaced,
+  METER_STYLES,
+  METER_STYLE_IDS,
+  isMeterStyle,
+  meterStyle,
   hasNoData,
   RAM_CAUTION,
   RAM_DANGER,

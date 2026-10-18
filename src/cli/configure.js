@@ -25,7 +25,7 @@ const {
   resolveContextThresholds,
 } = require("../lib/shared");
 const { resolveInstallDir } = require("../lib/paths");
-const { WIDGET_TAGS } = require("../lib/widget-style");
+const { WIDGET_TAGS, METER_STYLE_IDS } = require("../lib/widget-style");
 const { loadEditableConfig } = require("./config-guard");
 const {
   parseColor,
@@ -770,6 +770,7 @@ const PACED_WIDGETS = new Set([
   "argonWeekly",
 ]);
 const CONTEXT_WIDGETS = new Set(["context", "contextPct", "contextTokens"]);
+const METER_WIDGETS = new Set([...PACED_WIDGETS, "context"]);
 const RESET_WIDGETS = new Set(["fiveHourReset", "weeklyReset", "argonReset"]);
 const COLOR_SLOTS = ["model", "context", "git", "weekly", "thirdParty", "fiveHour", "meta"];
 // Longest custom badge text; the badge is meant to be a word or two.
@@ -900,6 +901,15 @@ function editFields(widget) {
         help: "Makes the widget blink when it reaches the danger (or caution) level. ASCII mode never blinks.",
       }
     );
+  }
+  if (METER_WIDGETS.has(widget.id)) {
+    fields.push({
+      key: "meter",
+      label: "Meter",
+      values: [undefined, ...METER_STYLE_IDS],
+      show: (value) => value ?? "theme default",
+      help: "Meter style; ASCII mode always uses # and -",
+    });
   }
   if (PACED_WIDGETS.has(widget.id)) {
     fields.push({

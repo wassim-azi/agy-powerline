@@ -8,6 +8,7 @@ const {
   resolveColorDepth,
   rgbToAnsi256,
 } = require("../../src/lib/shared");
+const { METER_STYLE_IDS } = require("../../src/lib/widget-style");
 
 async function run() {
   const base = {
@@ -25,6 +26,22 @@ async function run() {
       `ascii ${layout} layout is pure ASCII`,
       nonAscii.length === 0,
       nonAscii.length ? [...new Set(nonAscii)].join(" ") : "no caps/joins/dots outside ASCII"
+    );
+
+    const styled = METER_STYLE_IDS.filter((meterStyle) => {
+      const text = stripAnsi(
+        renderStatusline(
+          base,
+          { ...defaultConfig(), layout, ascii: true, meterStyle },
+          { env: emptyEnv }
+        )
+      );
+      return [...text].some((c) => c.codePointAt(0) > 127);
+    });
+    record(
+      `ascii ${layout} layout stays pure ASCII with every meter style`,
+      !styled.length,
+      styled
     );
   }
 

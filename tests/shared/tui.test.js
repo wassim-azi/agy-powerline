@@ -113,6 +113,7 @@ function testWidgetEditor() {
       /Caution at.? +25%/.test(bar) &&
       /Danger at.? +default \(10%\)/.test(bar) &&
       /Pace marker/.test(bar) &&
+      /Meter.? +theme default/.test(bar) &&
       /Format.? +countdown/.test(edit(2)) &&
       /Text.? +Prod/.test(edit(3)) &&
       /Command.? +echo hi/.test(edit(4))

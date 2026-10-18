@@ -17,6 +17,7 @@ const {
 const { THEMES, normalizeGradient } = require("../lib/themes");
 const { VALID_WIDGET_IDS } = require("../lib/config");
 const { COLOR_MODES } = require("../lib/colors");
+const { isMeterStyle } = require("../lib/widget-style");
 const { resolveInstallDir, writeFileAtomic, PRIVATE_FILE_MODE } = require("../lib/paths");
 const { createRl, confirm } = require("../lib/prompt");
 const { loadEditableConfig } = require("./config-guard");
@@ -33,7 +34,12 @@ const RESET = "\x1b[0m";
 // A config is a few KB; anything this big isn't one.
 const MAX_IMPORT_BYTES = 256 * 1024;
 const BACKUP_SUFFIX = ".bak";
-const KNOWN_KEYS = new Set([...Object.keys(defaultConfig()), "customTheme", "gradient"]);
+const KNOWN_KEYS = new Set([
+  ...Object.keys(defaultConfig()),
+  "customTheme",
+  "gradient",
+  "meterStyle",
+]);
 const SETTINGS = ["emojis", "ascii", "color", "pacing", "minimalist", "rowGap", "log"];
 
 // Control characters shown as \uXXXX: the text is printed, never interpreted
@@ -116,6 +122,9 @@ function droppedSettings(raw) {
   ) {
     dropped.push(`invalid gradient ${visible(JSON.stringify(raw.gradient))}`);
   }
+  if (raw.meterStyle !== undefined && !isMeterStyle(raw.meterStyle)) {
+    dropped.push(`unknown meter style ${visible(JSON.stringify(raw.meterStyle))}`);
+  }
   return dropped;
 }
 
@@ -149,6 +158,7 @@ function changes(before, after) {
     detectStyle(after.powerline) ?? "custom"
   );
   compare("gradient", before.gradient, after.gradient);
+  compare("meterStyle", before.meterStyle, after.meterStyle);
   for (const key of SETTINGS) {
     compare(key, before[key], after[key]);
   }

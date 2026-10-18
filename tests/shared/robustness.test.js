@@ -68,6 +68,21 @@ function testWrongPayloadTypes() {
     failures.slice(0, 5).join("; ")
   );
 
+  // Meter styles of the wrong type or unknown fall back to the default meter.
+  const meters = ["pills", "lines"].every((layout) => {
+    try {
+      const bad = mergeConfig({
+        layout,
+        meterStyle: { x: 1 },
+        widgets: widgets.map((widget) => ({ ...widget, meter: ["blocks"] })),
+      });
+      return !renderStatusline(base, bad, { color: "none" }).includes("[object Object]");
+    } catch {
+      return false;
+    }
+  });
+  record("meter styles of the wrong type don't break the bar", meters);
+
   // The flex separator pads to terminal_width; a huge value must not allocate it.
   const widths = [1e12, "Infinity", -1, "wide"].map((width) => {
     try {

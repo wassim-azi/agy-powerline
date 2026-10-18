@@ -7,6 +7,7 @@ const {
   bgDefault,
   fg,
   BOLD,
+  DIM,
   NORMAL,
   BLINK,
   BLINK_OFF,
@@ -48,6 +49,8 @@ const {
   widgetTag,
   isRaw,
   isPaced,
+  METER_STYLES,
+  meterStyle,
   hasNoData,
   RAM_CAUTION,
   RAM_DANGER,
@@ -63,6 +66,9 @@ function fillMeter(pct, width, fillColor, emptyColor, segmentColor, pace = {}) {
   const ratio = Math.max(0, Math.min(100, Number(pct))) / 100;
   const used = Math.round(ratio * width);
   const marker = paceIndex(pace.elapsedPct, width);
+  if (METER_STYLES[pace.style]) {
+    return glyphMeter(used, marker, width, METER_STYLES[pace.style], pace);
+  }
   // The fill is a background color; without color it is drawn with glyphs.
   const plain = getActiveDepth() === "none";
   const glyph = (filled) => (!plain ? " " : pace.ascii ? (filled ? "#" : "-") : filled ? "█" : "░");
@@ -78,6 +84,31 @@ function fillMeter(pct, width, fillColor, emptyColor, segmentColor, pace = {}) {
   }
 
   return meter + bg(segmentColor);
+}
+
+// A glyph style draws on the pill's own color, with no cells: filled glyphs in
+// the pill's text color (readable on the pill, gradients included), empty
+// ones in the same color dimmed. ASCII mode keeps # and -.
+function glyphMeter(used, marker, width, [full, empty], { ascii, textColor }) {
+  let meter = fg(textColor);
+  let dim = false;
+
+  for (let i = 0; i < width; i++) {
+    const blank = i !== marker && i >= used;
+    if (blank !== dim) {
+      meter += blank ? DIM : NORMAL;
+      dim = blank;
+    }
+    if (i === marker) {
+      meter += paceGlyph(ascii);
+    } else if (ascii) {
+      meter += blank ? "-" : "#";
+    } else {
+      meter += blank ? empty : full;
+    }
+  }
+
+  return dim ? meter + NORMAL : meter;
 }
 
 function meterSegment(
@@ -644,6 +675,9 @@ function buildRows(session, config, colors) {
     if (segment) {
       segment.textColor = ownColors.text;
       segment.bold = widget.bold !== false;
+      if (segment.meter) {
+        segment.style = meterStyle(widget, config, "pills");
+      }
     }
     return segment;
   }
@@ -771,6 +805,8 @@ function renderMeterSegment(segment, colors, ascii = false) {
   const meter = fillMeter(displayPct, 12, segment.fill, segment.empty, segment.color, {
     elapsedPct: segment.elapsedPct,
     ascii,
+    style: segment.style,
+    textColor,
   });
   const bold = segment.bold !== false;
 

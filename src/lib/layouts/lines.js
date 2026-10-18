@@ -42,6 +42,8 @@ const {
   widgetTag,
   isRaw,
   isPaced,
+  METER_STYLES,
+  meterStyle,
   hasNoData,
   RAM_CAUTION,
   RAM_DANGER,
@@ -140,13 +142,14 @@ function renderDotMeter(
       : colorForUsedPct(pct, palette, options));
 
   const marker = paceIndex(options.elapsedPct, width);
+  const [full, blank] = METER_STYLES[options.style] || METER_STYLES.dots;
 
   if (marker < 0) {
     if (ascii) {
       return fg(color) + "#".repeat(filled) + DIM + "-".repeat(empty) + RESET;
     }
     const trackColor = palette.track || rgb(60, 65, 75);
-    return fg(color) + "●".repeat(filled) + fg(trackColor) + "●".repeat(empty) + RESET;
+    return fg(color) + full.repeat(filled) + fg(trackColor) + blank.repeat(empty) + RESET;
   }
 
   // The marker replaces the dot where the quota window currently is.
@@ -159,9 +162,9 @@ function renderDotMeter(
     if (i === marker) {
       out += undim + fg(markerColor) + paceGlyph(ascii);
     } else if (i < filled) {
-      out += undim + fg(color) + (ascii ? "#" : "●");
+      out += undim + fg(color) + (ascii ? "#" : full);
     } else {
-      out += ascii ? DIM + "-" : fg(trackColor) + "●";
+      out += ascii ? DIM + "-" : fg(trackColor) + blank;
     }
   }
   return out + RESET;
@@ -173,8 +176,10 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
   const tag = (icon) => widgetTag(id, { emojis, raw, icon });
   // Meters: 25 dots, or 12 when the bar is fitted to a narrow terminal.
   const dots = widget?.compact ? 12 : 25;
+  const style = meterStyle(widget, config, "lines");
   const pace = (quota, thresh) => ({
     ...thresh,
+    style,
     elapsedPct: isPaced(widget, config) ? quota.elapsedPct : null,
   });
   const over200k = session.exceeds200k ? " >200k" : "";
@@ -318,7 +323,11 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         blinkSeq +
         fg(palette.text) +
         tag() +
-        renderDotMeter(session.contextPct, dots, ascii, palette, false, { ...thresh, color }) +
+        renderDotMeter(session.contextPct, dots, ascii, palette, false, {
+          ...thresh,
+          color,
+          style,
+        }) +
         " " +
         fg(color) +
         `${formatContextTokens(session.usedTokens, session.contextSize)} ` +
