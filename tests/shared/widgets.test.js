@@ -90,6 +90,94 @@ async function run() {
   testWidgetWidthAndDepth();
   testOsWidget();
   testHost();
+  testCustomLabelAndIcon();
+}
+
+function testCustomLabelAndIcon() {
+  const real = fixture("antigravity-1.3.0.json");
+  const count = (text, part) => text.split(part).length - 1;
+
+  for (const layout of LAYOUT_ORDER) {
+    const custom = render(real, [{ id: "fiveHourPct", label: "Quota", icon: "🔋" }], { layout });
+    record(
+      `${layout} a widget shows its own label and icon`,
+      /🔋 Quota: \d/.test(custom) && !/⏳|5h:/.test(custom),
+      custom
+    );
+    const ascii = render(real, [{ id: "fiveHourPct", label: "Quota", icon: "🔋" }], {
+      layout,
+      ascii: true,
+    });
+    record(
+      `${layout} ASCII mode keeps the label and drops the icon`,
+      /Quota: \d/.test(ascii) && !/[^\x00-\x7f]/.test(ascii),
+      ascii
+    );
+    const noName = render(real, [{ id: "fiveHourPct", label: "" }], { layout });
+    const noIcon = render(real, [{ id: "fiveHourPct", icon: "" }], { layout });
+    record(
+      `${layout} an empty label or icon removes it`,
+      /⏳ \d/.test(noName) && !/5h:/.test(noName) && /^\W*5h: \d/.test(noIcon.trim()),
+      `${noName} | ${noIcon}`
+    );
+    const iconOnly = render(real, [{ id: "model", label: "Brain" }], { layout });
+    record(
+      `${layout} an icon-only widget shows a custom label`,
+      /🤖 Brain: Gemini/.test(iconOnly),
+      iconOnly
+    );
+    const raw = render(real, [{ id: "fiveHourPct", label: "Quota", icon: "🔋", raw: true }], {
+      layout,
+    });
+    record(
+      `${layout} raw mode hides a custom label and icon`,
+      !/Quota|🔋/.test(raw) && /\d/.test(raw),
+      raw
+    );
+  }
+
+  const dirty = render(real, [{ id: "fiveHourPct", label: "Qu\u001b[31mota\u0007" }]);
+  record(
+    "control characters in a label are stripped",
+    /Quota: /.test(dirty) && !dirty.includes("\u0007"),
+    JSON.stringify(dirty)
+  );
+  const long = render(real, [{ id: "fiveHourPct", label: "x".repeat(40) }]);
+  const longAscii = render(real, [{ id: "fiveHourPct", label: "x".repeat(40) }], { ascii: true });
+  record(
+    "a 40-character label is cut to 20 columns",
+    long.includes(`${"x".repeat(19)}…: `) &&
+      !long.includes("x".repeat(20)) &&
+      longAscii.includes(`${"x".repeat(17)}...: `),
+    `${long} | ${longAscii}`
+  );
+  const wide = render(real, [{ id: "fiveHourPct", icon: "🔋🔋" }]);
+  record(
+    "an icon wider than 2 columns is ignored",
+    /⏳ 5h: /.test(wide) && !wide.includes("🔋"),
+    wide
+  );
+  // os passes its own icon per system, like the state icons do.
+  const state = withPlatform("darwin", false, () => render(real, [{ id: "os", icon: "🧪" }]));
+  record(
+    "a custom icon wins over a per-state icon",
+    /🧪 macOS/.test(state) && !/🍎/.test(state),
+    state
+  );
+
+  // exec and customText keep their own options and draw them once.
+  for (const layout of LAYOUT_ORDER) {
+    const exec = render(real, [{ id: "exec", cmd: "echo hi", label: "Node", icon: "⚙" }], {
+      layout,
+    });
+    record(
+      `${layout} exec draws its own label and icon once`,
+      count(exec, "Node") === 1 && count(exec, "⚙") === 1 && /⚙ Node: \[cmd\]/.test(exec),
+      exec
+    );
+    const badge = render(real, [{ id: "customText", text: "Prod" }], { layout });
+    record(`${layout} customText renders as before`, /🏷️ Prod/.test(badge), badge);
+  }
 }
 
 function testOsWidget() {

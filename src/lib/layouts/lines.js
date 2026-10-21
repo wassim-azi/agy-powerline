@@ -201,7 +201,7 @@ function rampColor(at, palette) {
 function buildLinesSegment(id, session, palette, emojis, ascii = false, widget = {}, config = {}) {
   // Raw widgets keep only their value: no icon, no label.
   const raw = isRaw(widget, config);
-  const tag = (icon) => widgetTag(id, { emojis, raw, icon });
+  const tag = (icon) => widgetTag(id, { emojis, raw, icon, widget, ascii });
   // Meters: 25 cells, or 12 when the bar is fitted to a narrow terminal;
   // Classic draws the same cells as blocks.
   const classic = config.layout === "classic";

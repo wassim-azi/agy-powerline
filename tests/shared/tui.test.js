@@ -127,13 +127,17 @@ function testWidgetEditor() {
 
   // A selected label sits between the pill's round ends, hence the `.?`.
   const model = edit(0);
-  const bar = edit(1, { cursor: 2 });
+  // Color, Label, Label text and Icon come first on every widget.
+  const bar = edit(1, { cursor: 4 });
+  const labelText = edit(0, { cursor: 2 });
+  const icon = edit(0, { cursor: 3 });
+  const typedIcon = edit(0, { cursor: 3, textInput: "🔋" });
   const cwd = strip(
     renderFrame({
       config: { ...defaultConfig(), widgets: [{ id: "cwd" }] },
       screen: "edit",
       editIndex: 0,
-      cursor: 2,
+      cursor: 4,
       columns: 160,
     })
   );
@@ -142,17 +146,17 @@ function testWidgetEditor() {
       config: { ...defaultConfig(), widgets: [{ id: "model" }] },
       screen: "edit",
       editIndex: 0,
-      cursor: 3,
+      cursor: 5,
       columns: 160,
     })
   );
-  const showBelow = edit(1, { cursor: 5 });
+  const showBelow = edit(1, { cursor: 7 });
   const context = strip(
     renderFrame({
       config: { ...defaultConfig(), widgets: [{ id: "contextPct" }] },
       screen: "edit",
       editIndex: 0,
-      cursor: 5,
+      cursor: 7,
       columns: 160,
     })
   );
@@ -168,6 +172,16 @@ function testWidgetEditor() {
       /Format.? +countdown/.test(edit(2)) &&
       /Text.? +Prod/.test(edit(3)) &&
       /Command.? +echo hi/.test(edit(4))
+  );
+  record(
+    "configure offers a label text and an icon after Label, with their defaults",
+    /Label text.? +default \(Model\)/.test(labelText) &&
+      /Icon.? +default \(🤖\)/.test(labelText) &&
+      /up to 20 columns/.test(labelText) &&
+      /one emoji or up to two characters/.test(icon) &&
+      /Icon.? +🔋/.test(typedIcon) &&
+      !/Label text/.test(edit(3)) &&
+      !/Label text/.test(edit(4))
   );
   record(
     "configure shows the quota and context visibility options and help",

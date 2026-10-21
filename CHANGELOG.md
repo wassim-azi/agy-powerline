@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `clock` widget shows the current local time, in the 12/24-hour format set under `clock` (#46)
 - Optional `os` widget shows Windows, macOS, Linux or WSL (#63)
 - Opt-in `host` widget shows the current user and short hostname (#62)
+- Every widget takes its own `label` and `icon`, in the config file and in `configure` (Label text, Icon) (#97)
 
 ### Fixed
 

@@ -173,7 +173,7 @@ Preview them all in the [theme gallery](https://agy-powerline.com/) or with `npx
 | `host`                                                        | Current user and short hostname from the OS (`alex@devbox`)                                              |
 | `customText`, `exec`                                          | Your own text, or the output of a [shell command](docs/configuration.md#shell-command-widget-exec)       |
 
-A widget with nothing to show hides itself. Widgets can be recolored, made label-free or given their own alert thresholds: see [Configuration](docs/configuration.md).
+A widget with nothing to show hides itself. Widgets can be recolored, renamed, given another icon, made label-free or given their own alert thresholds: see [Configuration](docs/configuration.md).
 
 ## Commands
 

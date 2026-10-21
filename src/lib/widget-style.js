@@ -1,6 +1,7 @@
 "use strict";
 
 const { parseColor } = require("./colors");
+const { clipText, stripControl, visibleWidth } = require("./formatters");
 
 // Basic names the exec widget's color option always accepted; the Lines
 // layout also uses them as its fallback palette.
@@ -128,19 +129,46 @@ const WIDGET_TAGS = {
   customText: { icon: "🏷️", name: "" },
 };
 
+const LABEL_MAX = 20;
+const ICON_MAX = 2;
+
+// A widget's own "label": cleaned and cut to LABEL_MAX columns. "" means no
+// name; anything that isn't a string leaves the built-in one.
+function customLabel(widget, ascii) {
+  if (typeof widget?.label !== "string") {
+    return undefined;
+  }
+  return clipText(stripControl(widget.label).trim(), LABEL_MAX, ascii);
+}
+
+// A widget's own "icon": "" means none; one wider than ICON_MAX columns is
+// ignored, like any other invalid value.
+function customIcon(widget) {
+  if (typeof widget?.icon !== "string") {
+    return undefined;
+  }
+  const icon = stripControl(widget.icon).trim();
+  return visibleWidth(icon) <= ICON_MAX ? icon : undefined;
+}
+
 // The text before a widget's value: "🔄 Reset: ", "Reset: ", or nothing for
 // raw widgets. icon overrides the table's for state icons (idle agent,
-// sandbox with network).
-function widgetTag(id, { emojis = true, raw = false, icon } = {}) {
+// sandbox with network); the user's own label and icon win over both.
+function widgetTag(id, { emojis = true, raw = false, icon, widget, ascii = false } = {}) {
   const tag = WIDGET_TAGS[id];
   if (raw || !tag) {
     return "";
   }
-  const named = tag.name ? `${tag.name}: ` : "";
+  const label = customLabel(widget, ascii);
+  const name = label ?? tag.name;
+  const named = name ? `${name}: ` : "";
   if (!emojis) {
     return named;
   }
-  return `${icon ?? tag.icon} ${tag.iconOnly ? "" : named}`;
+  const shown = customIcon(widget) ?? icon ?? tag.icon;
+  // Icon-only widgets hide their built-in name, never one the user chose.
+  const after = tag.iconOnly && label === undefined ? "" : named;
+  return shown ? `${shown} ${after}` : after;
 }
 
 // Meter styles: [filled, empty] glyphs, and a pace marker for a style that
@@ -260,6 +288,7 @@ module.exports = {
   OS_ICONS,
   WIDGET_TAGS,
   widgetTag,
+  LABEL_MAX,
   isRaw,
   isPaced,
   METER_STYLES,

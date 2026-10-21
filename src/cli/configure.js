@@ -875,11 +875,12 @@ function onEdit(key) {
       setOption(field.key, text || undefined);
       textInput = null;
     } else if (key.name === "backspace" || key.name === "delete") {
-      textInput = textInput.slice(0, -1);
-    } else if (key.sequence && key.sequence.length === 1 && !key.ctrl && !key.meta) {
-      const char = key.sequence;
-      if (char >= " " && char !== "\x7f" && textInput.length < TEXT_MAX) {
-        textInput += char;
+      textInput = Array.from(textInput).slice(0, -1).join("");
+    } else if (key.sequence && !key.ctrl && !key.meta && !/[\x00-\x1f\x7f]/.test(key.sequence)) {
+      // An emoji arrives as one key with two UTF-16 units, so count code points.
+      const max = field?.maxLength ?? TEXT_MAX;
+      if (Array.from(textInput + key.sequence).length <= max) {
+        textInput += key.sequence;
       }
     }
     return;

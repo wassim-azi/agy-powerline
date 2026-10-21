@@ -12,6 +12,8 @@ const {
   CONTEXT_WIDGETS,
   RESET_WIDGETS,
   isVisibilityThreshold,
+  WIDGET_TAGS,
+  LABEL_MAX,
 } = require("./widget-style");
 
 // Widgets that take each option, as the layouts read them.
@@ -75,6 +77,36 @@ function editFields(widget, config = {}, options = {}) {
       help: "Shows or hides the icon and label before the value. Default follows minimalist mode (m).",
     },
   ];
+
+  // exec and customText have their own text options.
+  const tag = WIDGET_TAGS[widget.id];
+  if (tag && widget.id !== "exec" && widget.id !== "customText") {
+    fields.push(
+      {
+        key: "label",
+        label: "Label text",
+        text: true,
+        maxLength: LABEL_MAX,
+        show: (value) =>
+          typeof value === "string" ? value || "(none)" : `default (${tag.name || "none"})`,
+        help: `Your own name before the value, up to ${LABEL_MAX} columns. Enter to type, Enter again to keep it; empty or x goes back to the default.`,
+      },
+      {
+        key: "icon",
+        label: "Icon",
+        text: true,
+        maxLength: 4,
+        // ASCII mode and emojis off draw no icons, so none is shown here.
+        show: (value) =>
+          config.ascii || config.emojis === false
+            ? "(icons are off)"
+            : typeof value === "string"
+              ? value || "(none)"
+              : `default (${tag.icon})`,
+        help: "Your own icon: one emoji or up to two characters. Enter to type, Enter again to keep it; empty or x goes back to the default.",
+      }
+    );
+  }
 
   if (widget.id === "model") {
     fields.push({

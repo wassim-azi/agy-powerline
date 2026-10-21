@@ -92,15 +92,20 @@ function testWrongPayloadTypes() {
           { id: "cwd", depth: { x: 1 }, maxWidth: [8] },
           { id: "git", maxWidth: "5" },
           { id: "title", maxWidth: 1e9 },
+          { id: "model", label: { x: 1 }, icon: ["🔋"] },
+          { id: "fiveHourPct", label: 5, icon: null },
         ],
       });
       const out = renderStatusline(base, bad, { color: "none" });
-      return !out.includes("[object Object]");
+      return !/\[object Object\]|undefined|null|🔋/.test(out);
     } catch {
       return false;
     }
   });
-  record("wrong-typed depth and maxWidth options don't break the bar", badWidgetOptions);
+  record(
+    "wrong-typed depth, maxWidth, label and icon options don't break the bar",
+    badWidgetOptions
+  );
 
   // The flex separator pads to terminal_width; a huge value must not allocate it.
   const widths = [1e12, "Infinity", -1, "wide"].map((width) => {

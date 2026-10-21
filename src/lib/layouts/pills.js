@@ -173,7 +173,7 @@ function pill(color, text, blink = false) {
 function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, config = {}) {
   // Raw widgets keep only their value: no icon, no label.
   const raw = isRaw(widget, config);
-  const tag = (icon) => widgetTag(id, { emojis, raw, icon });
+  const tag = (icon) => widgetTag(id, { emojis, raw, icon, widget, ascii });
   const lbl = (value, icon) => ` ${tag(icon)}${value} `;
   // The pill frames a colored meter; plain-text meters (ASCII) get brackets.
   const open = ascii ? "[" : "";
