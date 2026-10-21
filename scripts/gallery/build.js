@@ -12,7 +12,13 @@ const out = path.resolve(process.argv[2] || path.join(repo, "gallery.html"));
 const { renderStatusline, sampleData, defaultConfig } = require(path.join(repo, "src/lib/shared"));
 const { THEMES, THEME_ORDER } = require(path.join(repo, "src/lib/themes"));
 const { ansiToHtml } = require("../site/ansi");
-const { injectSiteChrome, build404 } = require("../site/layout");
+const {
+  injectSiteChrome,
+  build404,
+  buildSearchFiles,
+  REPO_URL,
+  SITE_URL,
+} = require("../site/layout");
 const { encodeConfig } = require("../configurator/page");
 
 const FAKE_DIR = "/home/you/projects/agy-powerline";
@@ -91,12 +97,27 @@ const themes = THEME_ORDER.filter((id) => id !== "custom").map((id) => {
 });
 
 const rawTemplate = fs.readFileSync(path.join(__dirname, "template.html"), "utf8");
+// People search for "agy statusline", so the title and description lead with it.
+const description =
+  "agy-powerline is an agy statusline for Google Antigravity CLI: Gemini, Claude/GPT and Argon quotas, context and git in agy's status bar. Preview every theme.";
 const template = injectSiteChrome(rawTemplate, {
-  title: "agy-powerline — Theme Gallery & Statusline for Google Antigravity CLI",
-  description:
-    "A powerline statusline for Google Antigravity's CLI (agy). Preview every built-in theme on dark and light terminals, or customize your bar in the browser.",
+  title: "agy statusline for Google Antigravity CLI · agy-powerline",
+  description,
   currentPage: "themes",
   rootPrefix: "./",
+  pagePath: "",
+  structuredData: {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    name: "agy-powerline",
+    description,
+    url: SITE_URL,
+    sameAs: [REPO_URL],
+    applicationCategory: "DeveloperApplication",
+    operatingSystem: "Windows, macOS, Linux",
+    softwareRequirements: "Node.js 20+, Antigravity CLI (agy)",
+    offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+  },
 });
 
 const cards = themes
@@ -166,9 +187,11 @@ fs.writeFileSync(
   "utf8"
 );
 
-// When building a site root (index.html), also write 404.html beside it.
+// When building a site root (index.html), also write 404.html, sitemap.xml and
+// robots.txt beside it.
 if (path.basename(out) === "index.html") {
   build404(path.join(path.dirname(out), "404.html"));
+  buildSearchFiles(path.dirname(out));
 }
 
 console.log(

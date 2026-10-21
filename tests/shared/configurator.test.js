@@ -50,7 +50,19 @@ async function run() {
       /http-equiv="Content-Security-Policy"/.test(html) && /default-src 'none'/.test(html)
     );
 
-    const urls = [...html.matchAll(/\b(?:https?:)?\/\/[^\s"'<>)]+/g)].map((match) => match[0]);
+    // The canonical URL names the page without loading it: checked on its own and
+    // left out of the scan for URLs the page loads.
+    const pageUrl = "https://agy-powerline.com/configure/";
+    const urlTags = [
+      `<link rel="canonical" href="${pageUrl}" />`,
+      `<meta property="og:url" content="${pageUrl}" />`,
+    ];
+    record(
+      "the configurator names its canonical URL",
+      urlTags.every((tag) => html.includes(tag))
+    );
+    const scanned = urlTags.reduce((text, tag) => text.replace(tag, ""), html);
+    const urls = [...scanned.matchAll(/\b(?:https?:)?\/\/[^\s"'<>)]+/g)].map((match) => match[0]);
     const external = urls.filter((url) => url !== REPO_URL);
     record(
       "the configurator loads nothing from other sites (only the repo link)",

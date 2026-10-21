@@ -9,6 +9,10 @@ const fs = require("fs");
 const path = require("path");
 
 const REPO_URL = "https://github.com/wassim-azi/agy-powerline";
+// The custom domain the Pages site is served on (set in the repo's Pages settings).
+const SITE_URL = "https://agy-powerline.com/";
+// Every page search engines should index, relative to SITE_URL.
+const SITE_PAGES = ["", "configure/"];
 const FAVICON_PATH = path.join(__dirname, "favicon.svg");
 const THEME_TOGGLE_PATH = path.join(__dirname, "theme-toggle.js");
 
@@ -579,13 +583,27 @@ const SHARED_CSS = `
       }
 `;
 
-function buildHead({ title, description, noindex = false }) {
+// pagePath (relative to SITE_URL) gives an indexed page its canonical URL, so
+// search engines merge the github.io and custom-domain copies into one result.
+function buildHead({ title, description, noindex = false, pagePath, structuredData }) {
   const safeTitle = esc(title);
   const safeDesc = esc(description);
   const iconHref = faviconDataUri();
   const robots = noindex
     ? "noindex, follow"
     : "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1";
+  const pageUrl = !noindex && typeof pagePath === "string" ? esc(SITE_URL + pagePath) : "";
+  const urlTags = pageUrl
+    ? `
+    <link rel="canonical" href="${pageUrl}" />
+    <meta property="og:url" content="${pageUrl}" />`
+    : "";
+  // JSON-LD is data, not script, so the CSP doesn't block it; "<" is escaped so
+  // a value can never close the tag.
+  const ldJson = structuredData
+    ? `
+    <script type="application/ld+json">${JSON.stringify(structuredData).replace(/</g, "\\u003c")}</script>`
+    : "";
   return `<meta
       name="description"
       content="${safeDesc}"
@@ -595,8 +613,8 @@ function buildHead({ title, description, noindex = false }) {
     <meta name="application-name" content="agy-powerline" />
     <meta
       name="keywords"
-      content="agy-powerline, antigravity cli, google antigravity, agy statusline, powerline statusline, gemini cli, terminal statusline, quota pacing, nerd fonts"
-    />
+      content="agy statusline, antigravity cli statusline, agy-powerline, google antigravity, agy, gemini quota, powerline statusline, terminal statusline, nerd fonts"
+    />${urlTags}
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f4f5f8" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#111319" media="(prefers-color-scheme: dark)" />
@@ -609,7 +627,7 @@ function buildHead({ title, description, noindex = false }) {
     <meta name="twitter:title" content="${safeTitle}" />
     <meta name="twitter:description" content="${safeDesc}" />
     <link rel="icon" type="image/svg+xml" href="${iconHref}" />
-    <title>${safeTitle}</title>
+    <title>${safeTitle}</title>${ldJson}
     <script>
       (function () {
         try {
@@ -671,9 +689,15 @@ function themeToggleScript() {
   return `${code}\n(function () {\n  if (typeof document !== "undefined" && window.AgySiteTheme) {\n    window.AgySiteTheme.initThemeToggle(document, window.localStorage);\n  }\n})();`;
 }
 
-function injectSiteChrome(html, { title, description, currentPage, rootPrefix, noindex = false }) {
+function injectSiteChrome(
+  html,
+  { title, description, currentPage, rootPrefix, noindex = false, pagePath, structuredData }
+) {
   return html
-    .replace("<!--SITE_HEAD-->", buildHead({ title, description, noindex }))
+    .replace(
+      "<!--SITE_HEAD-->",
+      buildHead({ title, description, noindex, pagePath, structuredData })
+    )
     .replace("/* SITE_CSS */", SHARED_CSS)
     .replace("<!--SITE_HEADER-->", buildHeader({ currentPage, rootPrefix }))
     .replace("<!--SITE_FOOTER-->", buildFooter())
@@ -770,8 +794,35 @@ function build404(dest) {
   return dest;
 }
 
+// No <lastmod>: the build date would change on every deploy without the pages
+// changing, and search engines learn to ignore a lastmod that isn't accurate.
+function buildSitemapXml() {
+  const urls = SITE_PAGES.map((p) => `  <url><loc>${esc(SITE_URL + p)}</loc></url>`).join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${urls}
+</urlset>
+`;
+}
+
+function buildRobotsTxt() {
+  return `User-agent: *
+Allow: /
+
+Sitemap: ${SITE_URL}sitemap.xml
+`;
+}
+
+function buildSearchFiles(dir) {
+  fs.mkdirSync(dir, { recursive: true });
+  fs.writeFileSync(path.join(dir, "sitemap.xml"), buildSitemapXml(), "utf8");
+  fs.writeFileSync(path.join(dir, "robots.txt"), buildRobotsTxt(), "utf8");
+}
+
 module.exports = {
   REPO_URL,
+  SITE_URL,
+  SITE_PAGES,
   SHARED_CSS,
   readFaviconSvg,
   faviconDataUri,
@@ -783,4 +834,7 @@ module.exports = {
   injectSiteChrome,
   build404Html,
   build404,
+  buildSitemapXml,
+  buildRobotsTxt,
+  buildSearchFiles,
 };

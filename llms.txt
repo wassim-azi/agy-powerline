@@ -1,6 +1,6 @@
 # agy-powerline
 
-> A fast, configurable statusline for Google Antigravity CLI (`agy`). Requires Node.js 20+; has no runtime dependencies or network calls.
+> A fast, configurable agy statusline for Google Antigravity CLI (`agy`). Requires Node.js 20+; has no runtime dependencies or network calls.
 
 ## Install
 - `npx agy-powerline init` installs the statusline and wires it into Antigravity settings.

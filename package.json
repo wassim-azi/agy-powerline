@@ -1,7 +1,7 @@
 {
   "name": "agy-powerline",
   "version": "1.4.0",
-  "description": "Fast, configurable statusline for Google Antigravity CLI (agy): live Gemini, Claude/GPT and Argon quota pacing, git, and an interactive TUI configurator",
+  "description": "agy statusline for Google Antigravity CLI: live Gemini, Claude/GPT and Argon quota pacing, git, themes and an interactive TUI configurator",
   "bin": {
     "agy-powerline": "src/index.js"
   },
@@ -10,7 +10,7 @@
     "type": "git",
     "url": "https://github.com/wassim-azi/agy-powerline.git"
   },
-  "homepage": "https://github.com/wassim-azi/agy-powerline#readme",
+  "homepage": "https://agy-powerline.com/",
   "bugs": {
     "url": "https://github.com/wassim-azi/agy-powerline/issues"
   },
@@ -52,6 +52,8 @@
     "agy",
     "agy-cli",
     "agy-powerline",
+    "agy-statusline",
+    "antigravity-statusline",
     "statusline",
     "status-line",
     "powerline",

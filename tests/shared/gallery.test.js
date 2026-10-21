@@ -12,6 +12,11 @@ const { THEME_ORDER } = require("../../src/lib/themes");
 const themeToggle = require("../../scripts/site/theme-toggle");
 
 const REPO_URL = "https://github.com/wassim-azi/agy-powerline";
+const SITE_URL = "https://agy-powerline.com/";
+// Search metadata names URLs without loading them: it's checked on its own and
+// left out of the scan for URLs the page loads.
+const SEARCH_META =
+  /<link rel="canonical"[^>]*>|<meta property="og:url"[^>]*>|<script type="application\/ld\+json">[\s\S]*?<\/script>/g;
 
 function checkFavicon(html) {
   const match = html.match(
@@ -56,12 +61,38 @@ async function run() {
     );
 
     // Every URL in the page, compared whole: the repo link is the only one allowed.
-    const urls = [...html.matchAll(/\b(?:https?:)?\/\/[^\s"'<>)]+/g)].map((match) => match[0]);
+    const scanned = html.replace(SEARCH_META, "");
+    const urls = [...scanned.matchAll(/\b(?:https?:)?\/\/[^\s"'<>)]+/g)].map((match) => match[0]);
     const external = urls.filter((url) => url !== REPO_URL);
     record(
       "the gallery loads nothing from other sites (only the repo link)",
       external.length === 0 && urls.some((url) => url === REPO_URL),
       external.slice(0, 5).join(", ")
+    );
+
+    // The search metadata is exactly these three tags, so the scan above skips nothing else.
+    const meta = html.match(SEARCH_META) || [];
+    const ld = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
+    let app = null;
+    try {
+      app = ld && JSON.parse(ld[1]);
+    } catch {
+      app = null;
+    }
+    record(
+      "the gallery names its canonical URL and describes the app in JSON-LD",
+      meta.length === 3 &&
+        html.includes(`<link rel="canonical" href="${SITE_URL}" />`) &&
+        html.includes(`<meta property="og:url" content="${SITE_URL}" />`) &&
+        app !== null &&
+        app["@type"] === "SoftwareApplication" &&
+        app.url === SITE_URL &&
+        /agy statusline/.test(app.description)
+    );
+    record(
+      'the gallery title and heading say "agy statusline", the phrase people search for',
+      /<title>[^<]*agy statusline[^<]*<\/title>/.test(html) &&
+        /<h1>[^\n]*<code>agy<\/code> statusline/.test(html)
     );
 
     // "custom" has no colors of its own, so the gallery leaves it out.
@@ -103,6 +134,21 @@ async function run() {
           html404.includes('href="./configure/"')
       );
     }
+
+    const siteDir = path.dirname(out);
+    const sitemapPath = path.join(siteDir, "sitemap.xml");
+    const robotsPath = path.join(siteDir, "robots.txt");
+    const sitemap = fs.existsSync(sitemapPath) ? fs.readFileSync(sitemapPath, "utf8") : "";
+    const robots = fs.existsSync(robotsPath) ? fs.readFileSync(robotsPath, "utf8") : "";
+    const locs = [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1]);
+    record(
+      "sitemap.xml lists the gallery and the configurator, robots.txt points to it",
+      sitemap.startsWith('<?xml version="1.0" encoding="UTF-8"?>') &&
+        locs.join(" ") === `${SITE_URL} ${SITE_URL}configure/` &&
+        /^User-agent: \*$/m.test(robots) &&
+        robots.includes(`Sitemap: ${SITE_URL}sitemap.xml`),
+      locs.join(", ")
+    );
 
     // Theme toggle unit test in Node
     const storeMap = new Map();

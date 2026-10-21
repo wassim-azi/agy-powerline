@@ -71,11 +71,12 @@ function buildConfiguratorHtml() {
 
   const rawTemplate = fs.readFileSync(templatePath, "utf8");
   const template = injectSiteChrome(rawTemplate, {
-    title: "agy-powerline Configurator — Build Your Statusline in the Browser",
+    title: "Build your agy statusline in the browser · agy-powerline",
     description:
-      "Build and customize your agy-powerline statusline in the browser with live previews, themes, and instant config export.",
+      "Build your agy statusline in the browser: pick widgets, a theme and a layout with a live preview, then download the config or import it with npx agy-powerline.",
     currentPage: "configurator",
     rootPrefix: "../",
+    pagePath: "configure/",
   });
   const bundleCode = buildBrowserBundle();
   const pageLogicCode = fs.readFileSync(pageLogicPath, "utf8");
