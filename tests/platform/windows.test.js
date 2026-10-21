@@ -53,6 +53,15 @@ async function testWindowsAgy() {
     space.code !== 0 ? space.stderr.trim() : `exit ${space.code}`
   );
 
+  // This is the job's first start of Windows PowerShell, which on a fresh CI
+  // runner sometimes takes more than the 15 s the check allows (usual: ~1 s).
+  // Start it once, untimed, so the check below times the launcher.
+  await spawnCapture(
+    "powershell.exe",
+    ["-NoProfile", "-NonInteractive", "-Command", "exit 0"],
+    "",
+    120000
+  );
   const ps = await spawnCapture(
     "powershell.exe",
     ["-NoProfile", "-NonInteractive", "-Command", `& '${command.replace(/'/g, "''")}'`],
