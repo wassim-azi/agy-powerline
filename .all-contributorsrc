@@ -3,7 +3,7 @@
   "projectOwner": "wassim-azi",
   "repoType": "github",
   "repoHost": "https://github.com",
-  "files": ["README.md", "README.zh-CN.md", "README.ja.md", "README.fr.md"],
+  "files": ["README.md", "README.zh-CN.md", "README.ja.md", "README.fr.md", "README.es.md"],
   "imageSize": 80,
   "commit": false,
   "commitConvention": "angular",

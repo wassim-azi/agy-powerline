@@ -1,6 +1,6 @@
 # agy-powerline
 
-[English](README.md) | [简体中文](README.zh-CN.md) | **日本語** | [Français](README.fr.md)
+[English](README.md) | [简体中文](README.zh-CN.md) | **日本語** | [Français](README.fr.md) | [Español](README.es.md)
 
 [![Version](https://img.shields.io/npm/v/agy-powerline.svg)](https://www.npmjs.com/package/agy-powerline)
 [![Downloads](https://img.shields.io/npm/d18m/agy-powerline.svg?cacheSeconds=86400)](https://www.npmjs.com/package/agy-powerline)
