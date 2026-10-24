@@ -240,6 +240,10 @@ Gracias a todas las personas que han contribuido:
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/dharamdan01"><img src="https://avatars.githubusercontent.com/u/188893946?v=4&s=160" width="80" height="80" alt="dharamdan01"/><br /><sub><b>dharamdan01</b></sub></a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Ashuge11"><img src="https://avatars.githubusercontent.com/u/210247942?v=4&s=160" width="80" height="80" alt="Ashvini Sundge"/><br /><sub><b>Ashvini Sundge</b></sub></a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://www.unkletayo.dev/"><img src="https://avatars.githubusercontent.com/u/48031746?v=4&s=160" width="80" height="80" alt="Adetayo Akinsanya"/><br /><sub><b>Adetayo Akinsanya</b></sub></a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/rahul05ranjan"><img src="https://avatars.githubusercontent.com/u/11793455?v=4&s=160" width="80" height="80" alt="Rahul"/><br /><sub><b>Rahul</b></sub></a></td>
+    </tr>
   </tbody>
 </table>
 
