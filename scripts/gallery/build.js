@@ -17,6 +17,7 @@ const { THEMES, THEME_ORDER } = require(path.join(repo, "src/lib/themes"));
 const { WIDGET_CATALOG } = require(path.join(repo, "src/lib/catalog"));
 const { version } = require(path.join(repo, "package.json"));
 const { ansiToHtml } = require("../site/ansi");
+const { decodePng, resizePng, encodePng } = require("../site/png");
 const {
   injectSiteChrome,
   commandBox,
@@ -38,7 +39,40 @@ const FAKE_DIR = "/home/you/projects/agy-powerline";
 const TERM = { dark: [29, 31, 39], light: [251, 251, 248] };
 // Screenshots from assets/screenshots/, served under descriptive names.
 const SCREENSHOTS = ["windows", "pills-dark", "lines-light", "classic-dark"];
-const screenshotUrl = (name) => `/img/agy-statusline-${name}.png`;
+const screenshotUrl = (name, width) => `/img/agy-statusline-${name}${width ? `-${width}` : ""}.png`;
+// Smaller copies of each screenshot for srcset, so a browser fetches one near
+// the size it shows. A copy is kept only when it is also lighter than the
+// original: shrunk text can compress worse than the sharp original.
+const SHOT_WIDTHS = [640, 1000, 1600];
+const shotCopies = new Map();
+
+// [{ url, width, png }] from the smallest copy to the original; png is the
+// copy's bytes (null for the original).
+function screenshotCopies(name) {
+  if (!shotCopies.has(name)) {
+    const original = fs.readFileSync(path.join(repo, "assets", "screenshots", `${name}.png`));
+    const image = decodePng(original);
+    const copies = SHOT_WIDTHS.filter((width) => width < image.width)
+      .map((width) => ({
+        url: screenshotUrl(name, width),
+        width,
+        png: encodePng(resizePng(image, width)),
+      }))
+      .filter((copy) => copy.png.length < original.length);
+    copies.push({ url: screenshotUrl(name), width: image.width, png: null });
+    shotCopies.set(name, copies);
+  }
+  return shotCopies.get(name);
+}
+
+// src, srcset and sizes for a screenshot shown at most maxWidth CSS pixels
+// wide; src is the copy closest above that width, for browsers without srcset.
+function screenshotAttrs(name, maxWidth) {
+  const copies = screenshotCopies(name);
+  const src = copies.find((copy) => copy.width >= maxWidth) || copies[copies.length - 1];
+  const srcset = copies.map((copy) => `${copy.url} ${copy.width}w`).join(", ");
+  return `src="${src.url}" srcset="${srcset}" sizes="(max-width: ${maxWidth}px) 100vw, ${maxWidth}px"`;
+}
 // The themes the home page's demo switches between.
 const DEMO_THEMES = [
   "dark-aurora",
@@ -336,7 +370,7 @@ function featuresHtml(text) {
     .features(counts())
     .map(
       ([art, title, body, href]) =>
-        `<li><a class="tile feature" href="${href}"><img class="tile-icon" src="/img/icon-${art}.webp" alt="" width="56" height="56" loading="lazy" decoding="async" /><h3>${title}</h3><p>${body}</p></a></li>`
+        `<li><a class="tile feature" href="${href}"><img class="tile-icon" src="/img/icon-${art}-56.webp" srcset="/img/icon-${art}-56.webp 1x, /img/icon-${art}.webp 2x" alt="" width="56" height="56" loading="lazy" decoding="async" /><h3>${title}</h3><p>${body}</p></a></li>`
     )
     .join("\n            ");
 }
@@ -349,7 +383,7 @@ function shotsHtml(text) {
   const panels = SCREENSHOTS.map((name, i) => {
     const { width, height } = pngSize(path.join(repo, "assets", "screenshots", `${name}.png`));
     return `<figure class="shot" role="tabpanel" id="shot-${name}" aria-labelledby="tab-${name}"${i === 0 ? "" : " hidden"}>
-              <img src="${screenshotUrl(name)}" alt="${attr(text.shots[name][1])}" width="${width}" height="${height}" loading="lazy" decoding="async" />
+              <img ${screenshotAttrs(name, 1000)} alt="${attr(text.shots[name][1])}" width="${width}" height="${height}" loading="lazy" decoding="async" />
             </figure>`;
   }).join("\n            ");
   return `<div class="tabs shot-tabs" role="tablist" aria-label="${text.shotsTitle}">${tabs}</div>
@@ -496,5 +530,7 @@ module.exports = {
   THEMES_PAGE,
   SCREENSHOTS,
   screenshotUrl,
+  screenshotCopies,
+  screenshotAttrs,
   pngSize,
 };

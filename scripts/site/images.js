@@ -13,7 +13,8 @@
 // The artwork in assets/site/art/ (hero backdrops, card background, feature
 // icons) was drawn once with agy's image generator, from the prompts in
 // ART_PROMPTS below. To redo it, save agy's PNGs under those names in a folder
-// and pass it with --art: they are cropped, resized and saved as WebP.
+// and pass it with --art: they are cropped, resized and saved as WebP. Every
+// run redraws the 56 px copies of the feature icons from the 128 px ones.
 //
 // Needs Chrome or Chromium (CHROME=<path> to pick one).
 // Usage: npm run site:images [-- --art <folder of agy PNGs>]
@@ -88,6 +89,9 @@ const ART_PROMPTS = {
     prompt: `${ICON_STYLE} The glyph: a terminal window outline with a prompt chevron and an underscore cursor. ${STYLE}`,
   },
 };
+
+// The size the home page shows the feature icons at.
+const SMALL_ICON = 56;
 
 const fileUrl = (file) => `file:///${file.replace(/\\/g, "/").replace(/^\//, "")}`;
 
@@ -213,6 +217,33 @@ body { background: url("${fileUrl(file)}") ${position} / ${bgSize} no-repeat; }
 </style></head><body></body></html>`;
 }
 
+// Chrome tags every WebP with a 456-byte sRGB color profile, a third of a
+// small icon; untagged images are shown as sRGB anyway. Drops the ICCP, EXIF
+// and XMP chunks, and the VP8X header when nothing else needs it.
+function stripWebpMetadata(buf) {
+  if (buf.toString("latin1", 0, 4) !== "RIFF" || buf.toString("latin1", 8, 12) !== "WEBP") {
+    return buf;
+  }
+  const chunks = [];
+  for (let o = 12; o + 8 <= buf.length;) {
+    const type = buf.toString("latin1", o, o + 4);
+    const end = o + 8 + buf.readUInt32LE(o + 4);
+    chunks.push({ type, data: Buffer.from(buf.subarray(o, end + (end & 1))) });
+    o = end + (end & 1);
+  }
+  const kept = chunks.filter(({ type }) => !["ICCP", "EXIF", "XMP "].includes(type));
+  const vp8x = kept.find(({ type }) => type === "VP8X");
+  if (vp8x) {
+    // Flags: 0x20 ICC, 0x08 EXIF, 0x04 XMP.
+    vp8x.data[8] &= ~(0x20 | 0x08 | 0x04);
+    if (vp8x.data[8] === 0) kept.splice(kept.indexOf(vp8x), 1);
+  }
+  const body = Buffer.concat([Buffer.from("WEBP", "latin1"), ...kept.map(({ data }) => data)]);
+  const head = Buffer.from("RIFF\0\0\0\0", "latin1");
+  head.writeUInt32LE(body.length, 4);
+  return Buffer.concat([head, body]);
+}
+
 // Chrome picks the screenshot's format from the file extension: .png, .jpg
 // or .webp.
 function shoot(chrome, html, file, width, height, transparent) {
@@ -246,6 +277,9 @@ function shoot(chrome, html, file, width, height, transparent) {
       throw new Error(`Chrome wrote no screenshot for ${path.basename(file)}`);
     }
     Atomics.wait(pause, 0, 0, 500);
+    if (file.endsWith(".webp")) {
+      fs.writeFileSync(file, stripWebpMetadata(fs.readFileSync(file)));
+    }
   } finally {
     // Chrome's helper processes can hold the profile for a moment after exit.
     try {
@@ -286,6 +320,22 @@ function convertArt(chrome, sourceDir) {
   }
 }
 
+// The feature icons show at 56 px: icon-<name>-56.webp is the 1x image, the
+// 128 px one the 2x. Always drawn from the 128 px icon, never from itself.
+function drawSmallIcons(chrome) {
+  for (const name of Object.keys(ART_PROMPTS).filter((n) => n.startsWith("icon-"))) {
+    const source = path.join(artDir, `${name}.webp`);
+    const file = path.join(artDir, `${name}-${SMALL_ICON}.webp`);
+    shoot(
+      chrome,
+      artHtml(source, { size: [SMALL_ICON, SMALL_ICON] }),
+      file,
+      SMALL_ICON,
+      SMALL_ICON
+    );
+  }
+}
+
 function drawCards(chrome) {
   // Required here, not at the top: the site build reads this file's exports.
   const { cardPages } = require("./build");
@@ -318,6 +368,7 @@ function main() {
   if (artFlag !== -1) {
     convertArt(chrome, path.resolve(process.argv[artFlag + 1] || "."));
   }
+  drawSmallIcons(chrome);
 
   drawCards(chrome);
   shoot(
@@ -369,7 +420,10 @@ module.exports = {
   iconHtml,
   pngToIco,
   convertArt,
+  drawSmallIcons,
+  stripWebpMetadata,
   findChrome,
   ART_PROMPTS,
+  SMALL_ICON,
   CARD_VERSION,
 };

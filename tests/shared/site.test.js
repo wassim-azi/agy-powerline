@@ -13,7 +13,9 @@ const { record, ROOT, NODE } = require("../helpers");
 const { KNOWN_KEYS } = require("../../src/lib/config-check");
 const { VALID_WIDGET_IDS, defaultConfig, mergeConfig } = require("../../src/lib/config");
 const { INDEXNOW_KEY, cardPages } = require("../../scripts/site/build");
-const { cardHash } = require("../../scripts/site/images");
+const { cardHash, stripWebpMetadata, ART_PROMPTS } = require("../../scripts/site/images");
+const { SCREENSHOTS, screenshotCopies } = require("../../scripts/gallery/build");
+const { decodePng, resizePng, encodePng } = require("../../scripts/site/png");
 const { cardSlug } = require("../../scripts/site/layout");
 const { quotaPace, formatDuration } = require("../../scripts/site/quota-pace");
 const { renderMarkdown } = require("../../scripts/site/markdown");
@@ -354,6 +356,98 @@ async function run() {
       "the site has its 404 page, manifest, icons, font and share card",
       missingFiles.length === 0,
       missingFiles.join(", ")
+    );
+
+    // Every image a page names in src or srcset is in the build.
+    const missingImages = files.flatMap((file) =>
+      [...pages[file].matchAll(/<img\b[^>]*>/g)].flatMap(([tag]) => {
+        const src = (tag.match(/\bsrc="([^"]+)"/) || [])[1] || "";
+        const srcset = (tag.match(/\bsrcset="([^"]+)"/) || [])[1] || "";
+        const urls = [src, ...srcset.split(",").map((c) => c.trim().split(/\s+/)[0])];
+        return urls
+          .filter((url) => url.startsWith("/") && !fs.existsSync(path.join(out, url)))
+          .map((url) => `${file}: ${url}`);
+      })
+    );
+    record(
+      "every image a page loads, srcset copies included, is in the build",
+      missingImages.length === 0,
+      missingImages.join(", ")
+    );
+
+    // Screenshots come with smaller copies, each lighter than the original,
+    // and the feature icons with a 56 px copy for 1x screens.
+    const shotTags = [...home.matchAll(/<img\b[^>]*agy-statusline-[^>]*>/g)].map(([t]) => t);
+    const heavy = SCREENSHOTS.flatMap((name) =>
+      screenshotCopies(name)
+        .filter(({ png }) => png)
+        .filter(({ png }) => {
+          const original = path.join(ROOT, "assets", "screenshots", `${name}.png`);
+          return png.length >= fs.statSync(original).size;
+        })
+        .map(({ url }) => url)
+    );
+    record(
+      "home page screenshots have a srcset of copies lighter than the original",
+      shotTags.length === SCREENSHOTS.length &&
+        shotTags.every((tag) => /\bsrcset="[^"]*-1000\.png 1000w/.test(tag)) &&
+        heavy.length === 0,
+      heavy.join(", ")
+    );
+    const icons = Object.keys(ART_PROMPTS).filter((name) => name.startsWith("icon-"));
+    record(
+      "every feature icon has a 56 px copy, used as the 1x image",
+      icons.every(
+        (name) =>
+          fs.existsSync(path.join(out, "img", `${name}-56.webp`)) &&
+          home.includes(`src="/img/${name}-56.webp" srcset="/img/${name}-56.webp 1x`)
+      )
+    );
+
+    // Chrome tags its WebPs with a color profile; images.js drops it.
+    const webpChunks = (buf) => {
+      const types = [];
+      for (let o = 12; o + 8 <= buf.length;) {
+        const length = buf.readUInt32LE(o + 4);
+        types.push(buf.toString("latin1", o, o + 4));
+        o += 8 + length + (length & 1);
+      }
+      return types;
+    };
+    const tagged = fs
+      .readdirSync(path.join(out, "img"))
+      .filter((file) => file.endsWith(".webp"))
+      .filter((file) =>
+        webpChunks(fs.readFileSync(path.join(out, "img", file))).some((t) =>
+          ["ICCP", "EXIF", "XMP "].includes(t)
+        )
+      );
+    record("no WebP on the site carries metadata", tagged.length === 0, tagged.join(", "));
+    const iccWebp = Buffer.from(
+      "RIFF\x2a\0\0\0WEBPVP8X\x0a\0\0\0\x20\0\0\0\0\0\0\0\0\0ICCP\x02\0\0\0abVP8 \x02\0\0\0xy",
+      "latin1"
+    );
+    const stripped = stripWebpMetadata(iccWebp);
+    record(
+      "stripWebpMetadata drops the profile and a VP8X header left with no flags",
+      webpChunks(stripped).join() === "VP8 " && stripped.readUInt32LE(4) === stripped.length - 8,
+      webpChunks(stripped).join()
+    );
+
+    const sample = { width: 3, height: 2, data: Buffer.alloc(3 * 2 * 4, 0) };
+    sample.data.set([255, 0, 0, 255, 255, 0, 0, 255, 0, 0, 0, 0], 0);
+    sample.data.set([0, 0, 255, 255, 0, 0, 255, 255, 0, 0, 255, 255], 12);
+    const half = decodePng(encodePng(resizePng(sample, 1)));
+    record(
+      "the PNG resizer averages by area and ignores transparent pixels' color",
+      decodePng(encodePng(sample)).data.equals(sample.data) &&
+        half.width === 1 &&
+        half.height === 1 &&
+        // 2 red + 3 blue opaque pixels out of 6, the transparent one adds no color.
+        half.data[0] === 102 &&
+        half.data[2] === 153 &&
+        Math.abs(half.data[3] - 212.5) < 1,
+      [...half.data].join(",")
     );
 
     // The widget previews are drawn on the build machine: none may show its

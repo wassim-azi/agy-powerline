@@ -39,6 +39,8 @@ const {
   THEMES_PAGE,
   SCREENSHOTS,
   screenshotUrl,
+  screenshotCopies,
+  screenshotAttrs,
 } = require("../gallery/build");
 const { HOME_TEXT } = require("./home-text");
 const { buildConfiguratorHtml } = require("../configurator/build");
@@ -302,10 +304,15 @@ function resolveLinkFrom(fromSource) {
   };
 }
 
-function imageUrl(fromSource, src) {
+// The screenshot's name when src points into assets/screenshots/.
+function screenshotName(fromSource, src) {
   const target = path.posix.normalize(path.posix.join(path.posix.dirname(fromSource), src));
-  const shot = target.match(/^assets\/screenshots\/([\w-]+)\.png$/);
-  return shot ? `/img/agy-statusline-${shot[1]}.png` : resolveLinkFrom(fromSource)(src);
+  return (target.match(/^assets\/screenshots\/([\w-]+)\.png$/) || [])[1];
+}
+
+function imageUrl(fromSource, src) {
+  const shot = screenshotName(fromSource, src);
+  return shot ? screenshotUrl(shot) : resolveLinkFrom(fromSource)(src);
 }
 
 function renderSource(source, extra = {}) {
@@ -313,10 +320,17 @@ function renderSource(source, extra = {}) {
   return renderMarkdown(md, {
     resolveLink: resolveLinkFrom(source),
     resolveImage: (src) => imageUrl(source, src),
+    // A screenshot with a width gets its smaller copies, sized to that width.
     resolveHtml: (html) =>
-      html.replace(/(<img\b[^>]*\bsrc=")([^"]+)"/g, (_m, before, src) => {
-        return `${before}${esc(imageUrl(source, src))}" loading="lazy" decoding="async"`;
-      }),
+      html.replace(/<img\b[^>]*>/g, (tag) =>
+        tag.replace(/\bsrc="([^"]+)"/, (_m, src) => {
+          const shot = screenshotName(source, src);
+          const width = Number((tag.match(/\bwidth="(\d+)"/) || [])[1]);
+          const attrs =
+            shot && width ? screenshotAttrs(shot, width) : `src="${esc(imageUrl(source, src))}"`;
+          return `${attrs} loading="lazy" decoding="async"`;
+        })
+      ),
     ...extra,
   });
 }
@@ -964,6 +978,9 @@ function buildSite(outDir) {
   }
   for (const file of fs.readdirSync(path.join(repo, "assets", "screenshots"))) {
     if (file.endsWith(".png")) {
+      for (const { url, png } of screenshotCopies(file.slice(0, -4))) {
+        if (png) write(url.slice(1), png);
+      }
       copy(path.join("assets", "screenshots", file), path.join("img", `agy-statusline-${file}`));
     }
   }
