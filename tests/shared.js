@@ -17,6 +17,7 @@ registerSuite("fit to terminal", "./shared/fit.test");
 registerSuite("meters", "./shared/meters.test");
 registerSuite("widgets", "./shared/widgets.test");
 registerSuite("configurator screens", "./shared/tui.test");
+registerSuite("i18n", "./shared/i18n.test");
 registerSuite("git", "./shared/git.test");
 registerSuite("usage", "./shared/usage.test");
 registerSuite("session time", "./shared/session-time.test");

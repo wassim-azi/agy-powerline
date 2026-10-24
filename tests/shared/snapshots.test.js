@@ -11,6 +11,7 @@ const os = require("os");
 const path = require("path");
 const { record, PAYLOAD } = require("../helpers");
 const { LAYOUT_ORDER } = require("../../src/lib/config");
+const { SUPPORTED_LANGUAGES, DEFAULT_LANGUAGE } = require("../../src/lib/i18n");
 const {
   renderStatusline,
   defaultConfig,
@@ -86,6 +87,17 @@ function cases() {
       { color: "truecolor" },
     ]);
     list.push([`lines · ${theme}`, { ...base, theme, layout: "lines" }, { color: "truecolor" }]);
+  }
+
+  // Each language gets its own cases, so adding one adds its snapshots.
+  for (const language of SUPPORTED_LANGUAGES.filter((id) => id !== DEFAULT_LANGUAGE)) {
+    list.push([`pills default · ${language}`, { ...base, language }, { color: "truecolor" }]);
+    list.push([`pills full · ${language}`, { ...full, language }, { color: "truecolor" }]);
+    list.push([
+      `lines · ${language}`,
+      { ...base, language, layout: "lines" },
+      { color: "truecolor" },
+    ]);
   }
 
   list.push([

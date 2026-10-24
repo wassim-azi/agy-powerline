@@ -24,6 +24,7 @@ const {
 } = require("../lib/shared");
 const { resolveInstallDir } = require("../lib/paths");
 const { WIDGET_TAGS } = require("../lib/widget-style");
+const { SUPPORTED_LANGUAGES, resolveLanguage } = require("../lib/i18n");
 const { editFields: getEditFields, stepNumberField } = require("../lib/widget-options");
 const { loadEditableConfig } = require("./config-guard");
 const {
@@ -426,6 +427,10 @@ function previewParts(width) {
   ];
   if (preview.layout === "pills") {
     chips.unshift(ui.chip("joins", preview.powerline.enabled, key("j")));
+  }
+  // Only worth a chip once there is a language to switch to.
+  if (SUPPORTED_LANGUAGES.length > 1) {
+    chips.push(ui.chip(`lang ${resolveLanguage(preview.language)}`, true, key("u")));
   }
 
   return { title, bar: String(rendered).split("\n"), chips: chips.join("   ") };
@@ -1628,6 +1633,15 @@ function onMain(key) {
     config.pacing = !config.pacing;
     if (persist()) {
       flashMessage = `Pace marker: ${config.pacing ? "on" : "off"}`;
+    }
+    return;
+  }
+
+  if (key.name === "u" && SUPPORTED_LANGUAGES.length > 1) {
+    const next = SUPPORTED_LANGUAGES.indexOf(resolveLanguage(config.language)) + 1;
+    config.language = SUPPORTED_LANGUAGES[next % SUPPORTED_LANGUAGES.length];
+    if (persist()) {
+      flashMessage = `Bar language: ${config.language}`;
     }
   }
 }

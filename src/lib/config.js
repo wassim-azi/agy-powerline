@@ -8,6 +8,7 @@ const { stripControl, normalizeClock } = require("./formatters");
 const { normalizePowerline, applyStyle, STYLES } = require("./powerline");
 const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
 const { isMeterStyle } = require("./widget-style");
+const { resolveLanguage, matchLanguage } = require("./i18n");
 
 // Display text in widget configs is printed as-is, so strip terminal control
 // from it. cmd/command are left alone: they are executed, not printed.
@@ -126,6 +127,7 @@ function defaultConfig() {
     ascii: false,
     color: "auto",
     layout: "pills",
+    language: "en",
     pacing: true,
     minimalist: false,
     rowGap: false,
@@ -185,6 +187,8 @@ function mergeConfig(raw) {
     ascii: raw?.ascii === true,
     color: resolveColorModeId(raw?.color ?? fallback.color),
     layout: resolveLayoutId(raw?.layout ?? fallback.layout),
+    // A language without messages shows English (fr-FR uses fr when there is one).
+    language: resolveLanguage(raw?.language),
     pacing: raw?.pacing !== false,
     minimalist: raw?.minimalist === true,
     rowGap: raw?.rowGap === true,
@@ -237,7 +241,7 @@ function readConfigFile() {
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
       return { exists: true, config: defaultConfig(), error: "top-level value is not an object" };
     }
-    return { exists: true, config: mergeConfig(raw) };
+    return { exists: true, config: mergeConfig(raw), raw };
   } catch (err) {
     // Newer Node quotes part of the file in the message; it may hold anything.
     return { exists: true, config: defaultConfig(), error: stripControl(err.message) };
@@ -472,6 +476,15 @@ function applyRenderOverrides(baseConfig, overrides = {}) {
       } else {
         invalid.push("gradient");
       }
+    }
+  }
+
+  if (overrides.language !== undefined) {
+    const language = matchLanguage(overrides.language);
+    if (language) {
+      config = mergeConfig({ ...config, language });
+    } else {
+      invalid.push("language");
     }
   }
 

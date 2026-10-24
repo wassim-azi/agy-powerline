@@ -19,6 +19,7 @@ const {
   THEME_ORDER,
   canonicalThemeId,
 } = require("../lib/shared");
+const { matchLanguage, SUPPORTED_LANGUAGES } = require("../lib/i18n");
 const {
   AGY_SETTINGS,
   RUNTIME_FILES,
@@ -89,7 +90,7 @@ function unknownChoice(kind, value, ids) {
   return null;
 }
 
-// --preset, --layout and --theme, checked before anything is written. Returns
+// --preset, --layout, --theme and --language, checked before anything is written. Returns
 // the ids given ({} for none), or null after printing what's wrong.
 function readChoiceFlags(options) {
   const choices = {};
@@ -113,6 +114,16 @@ function readChoiceFlags(options) {
     }
     choices.theme = theme;
   }
+  if (options.language !== undefined) {
+    const language = matchLanguage(options.language);
+    if (!language) {
+      console.error(`${RED}error${RESET} Unknown language "${options.language}".`);
+      console.error(` Available languages: ${SUPPORTED_LANGUAGES.join(", ")}`);
+      process.exitCode = 1;
+      return null;
+    }
+    choices.language = language;
+  }
   return choices;
 }
 
@@ -123,6 +134,9 @@ function applyChoices(config, choices) {
   }
   if (choices.theme) {
     next.theme = choices.theme;
+  }
+  if (choices.language) {
+    next.language = choices.language;
   }
   return next;
 }

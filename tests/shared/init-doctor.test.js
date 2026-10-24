@@ -122,6 +122,35 @@ function testChoiceFlags() {
     );
   });
 
+  withBox("choice-language", (box) => {
+    const unknown = runCli(["init", "--yes", "--language", "xx"], { env: box.env });
+    record(
+      "an unknown --language exits 1 with the available languages and writes nothing",
+      unknown.code === 1 &&
+        /Unknown language "xx"/.test(stripAnsi(unknown.stderr)) &&
+        /Available languages: en/.test(unknown.stderr) &&
+        !fs.existsSync(box.installDir),
+      unknown.stderr
+    );
+    const res = runCli(["init", "--yes", "--language", "en-GB"], { env: box.env });
+    const config = readJson(path.join(box.installDir, "statusline.config.json"));
+    record(
+      "init --language saves the language it resolves to",
+      res.code === 0 && config?.language === "en",
+      res.stderr || JSON.stringify(config)
+    );
+
+    const file = path.join(box.installDir, "statusline.config.json");
+    fs.writeFileSync(file, JSON.stringify({ ...config, language: "xx" }, null, 2));
+    const doctor = stripAnsi(runCli(["doctor"], { env: box.env }).stdout);
+    record(
+      "doctor says when the configured language isn't available",
+      /language "xx" isn't available, so the bar shows English/.test(doctor) &&
+        /Available: en/.test(doctor),
+      doctor.slice(-400)
+    );
+  });
+
   withBox("choice-no-tty", (box) => {
     const res = runCli(["init"], { env: box.env });
     const config = readJson(path.join(box.installDir, "statusline.config.json"));

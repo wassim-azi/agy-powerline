@@ -28,6 +28,7 @@ const {
 } = require("./lib/shared");
 const { STYLE_ORDER } = require("./lib/powerline");
 const { GRADIENT_ORDER } = require("./lib/themes");
+const { SUPPORTED_LANGUAGES } = require("./lib/i18n");
 const { stripControl } = require("./lib/formatters");
 const { resolveInstallDir, isTrustedInstallDir } = require("./lib/paths");
 const { isLogEnabled, setLogDir, logError, jsonErrorMessage } = require("./lib/log");
@@ -74,6 +75,11 @@ const COMMANDS = [
         type: "string",
         value: "<id>",
         help: "use this theme, or dark, light, colorblind (skips the question)",
+      },
+      language: {
+        type: "string",
+        value: "<code>",
+        help: `show the bar in this language (${SUPPORTED_LANGUAGES.join(", ")})`,
       },
     },
     run: (_arg, opts) =>
@@ -232,6 +238,11 @@ const COMMANDS = [
         value: "<name|colors>",
         help: "use a gradient preset, hex stops, or off",
       },
+      language: {
+        type: "string",
+        value: "<code>",
+        help: `use a language for this render (${SUPPORTED_LANGUAGES.join(", ")})`,
+      },
       "dump-payload": {
         type: "string",
         value: "<path>",
@@ -384,6 +395,7 @@ function renderOverrideError(name, value) {
     preset: ["preset", `Available presets: ${PRESET_ORDER.join(", ")}`],
     caps: ["cap style", `Available styles: ${STYLE_ORDER.join(", ")}`],
     gradient: ["gradient", `Available gradients: ${GRADIENT_ORDER.join(", ")}, off`],
+    language: ["language", `Available languages: ${SUPPORTED_LANGUAGES.join(", ")}`],
   }[name];
   console.error(`${RED}error${RESET} Unknown ${what} "${stripControl(String(value))}".`);
   console.error(` ${list}`);

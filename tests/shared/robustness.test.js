@@ -528,6 +528,8 @@ function testRuntimeRenderOverrides() {
         "sunset",
         "--preset",
         "compact",
+        "--language",
+        "en",
       ],
       { input: PAYLOAD, encoding: "utf8", env }
     );
@@ -545,7 +547,7 @@ function testRuntimeRenderOverrides() {
     const hostile = "not-a-theme\u001b[2Jprivate-value";
     const invalid = spawnSync(
       NODE,
-      [statuslinePath, "--theme", hostile, "--unknown-private-value"],
+      [statuslinePath, "--theme", hostile, "--language", hostile, "--unknown-private-value"],
       { input: PAYLOAD, encoding: "utf8", env }
     );
     const log = readLog(path.join(installDir, LOG_NAME));
@@ -556,6 +558,7 @@ function testRuntimeRenderOverrides() {
         invalid.stdout === baseline.stdout &&
         invalid.stderr.trim().split(/\r?\n/).length === 1 &&
         invalid.stderr.includes("--theme") &&
+        invalid.stderr.includes("--language") &&
         invalid.stderr.includes("unknown option") &&
         !invalid.stderr.includes("private-value") &&
         !invalid.stderr.includes("\u001b") &&

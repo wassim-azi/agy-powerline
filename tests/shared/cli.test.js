@@ -219,6 +219,7 @@ function testRenderOverrides() {
       theme: "light",
       caps: "flat",
       gradient: "sunset",
+      language: "en-GB",
     });
     record(
       "render overrides compose in the documented order and change only the returned config",
@@ -226,6 +227,7 @@ function testRenderOverrides() {
         all.config.layout === "lines" &&
         all.config.theme === "light-paper" &&
         all.config.gradient === "sunset" &&
+        all.config.language === "en" &&
         detectStyle(all.config.powerline) === "flat" &&
         JSON.stringify(all.config.widgets.map((widget) => widget.id)) ===
           JSON.stringify(["model", "quota", "contextPct", "git"])
@@ -257,6 +259,8 @@ function testRenderOverrides() {
         "flat",
         "--gradient",
         "sunset",
+        "--language",
+        "en-GB",
       ],
       { env }
     );
@@ -288,6 +292,7 @@ function testRenderOverrides() {
           "--theme <id>",
           "--caps <style>",
           "--gradient <name|colors>",
+          "--language <code>",
         ].every((option) => help.stdout.includes(option)),
       help.stdout
     );
@@ -326,6 +331,7 @@ function testRenderOverrides() {
       ["--theme", "unknown-theme"],
       ["--caps", "unknown-style"],
       ["--gradient", "unknown-gradient"],
+      ["--language", "xx"],
     ];
     const invalidResults = invalidOptions.map(([flag, value]) => {
       const dump = path.join(root, `must-not-write-${flag.slice(2)}.json`);

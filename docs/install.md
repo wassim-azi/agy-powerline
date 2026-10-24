@@ -24,7 +24,7 @@ On a first install in a terminal (no `statusline.config.json` yet, no `--yes`), 
 
 Answer with the number of a choice. `npx agy-powerline preset`, `layout`, `theme` and `configure` change your choice later. Without a terminal, or with `--yes`, nothing is asked and you get the default bar. Running `init` again never replaces your config.
 
-For scripted installs, `--preset <id>`, `--layout <id>` and `--theme <id>` set those choices and skip their question, with or without `--yes`. The theme also takes `dark`, `light` and `colorblind`. Each value is checked before anything is written: an unknown one stops `init` with the list of valid ids. With an existing config, the flags change only those settings in it, and `init` says so.
+For scripted installs, `--preset <id>`, `--layout <id>` and `--theme <id>` set those choices and skip their question, with or without `--yes`. The theme also takes `dark`, `light` and `colorblind`. `--language <code>` sets the [language](configuration.md#language) of the bar's own words. Each value is checked before anything is written: an unknown one stops `init` with the list of valid ids. With an existing config, the flags change only those settings in it, and `init` says so.
 
 ```sh
 npx agy-powerline init --yes --preset compact --layout lines --theme light
@@ -51,7 +51,7 @@ To try a different look without changing `statusline.config.json`, append render
 C:/Users/you/.agy-powerline/statusline.cmd --theme light-paper --layout lines
 ```
 
-The same `--preset`, `--layout`, `--theme`, `--caps` and `--gradient` options work on both platforms. The Windows launcher forwards them to `statusline.js`; an install made before these flags existed needs one `npx agy-powerline init --yes` to get that launcher. A later `init` keeps the flags you appended, as long as the command before them is still the one it writes. `doctor` lists them under `overrides`.
+The same `--preset`, `--layout`, `--theme`, `--caps`, `--gradient` and `--language` options work on both platforms. The Windows launcher forwards them to `statusline.js`; an install made before these flags existed needs one `npx agy-powerline init --yes` to get that launcher. A later `init` keeps the flags you appended, as long as the command before them is still the one it writes. `doctor` lists them under `overrides`.
 
 `init` also writes `install.json` (installed CLI version, Node path, platform, timestamp) and a default `statusline.config.json` (only when none exists).
 

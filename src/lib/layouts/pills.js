@@ -62,6 +62,7 @@ const {
   RAM_DANGER,
   TITLE_MAX,
 } = require("../widget-style");
+const { t } = require("../i18n");
 
 const WHITE = [255, 255, 255];
 
@@ -174,14 +175,15 @@ function pill(color, text, blink = false) {
 function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, config = {}) {
   // Raw widgets keep only their value: no icon, no label.
   const raw = isRaw(widget, config);
-  const tag = (icon) => widgetTag(id, { emojis, raw, icon, widget, ascii });
+  const tag = (icon) => widgetTag(id, { emojis, raw, icon, widget, ascii, lang: session.lang });
   const lbl = (value, icon) => ` ${tag(icon)}${value} `;
   // The pill frames a colored meter; plain-text meters (ASCII) get brackets.
   const open = ascii ? "[" : "";
   const close = ascii ? "]" : "";
   const meterLabel = () => ` ${tag()}${open}`;
   const pace = (quota) => (isPaced(widget, config) ? quota.elapsedPct : null);
-  const over200k = session.exceeds200k ? " >200k" : "";
+  const over200k = session.exceeds200k ? ` ${t("over_200k", session.lang)}` : "";
+  const remWord = t("rem", session.lang);
 
   if (hasNoData(id, session) || hiddenByThreshold(id, widget, session)) {
     return null;
@@ -222,7 +224,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         warnColor: colors.caution,
       });
       const reset = quota.reset ? `${ascii ? ", " : " · "}${quota.reset}` : "";
-      return pill(color, lbl(`${quota.label} ${rem.toFixed(1)}% rem${reset}`), blink);
+      return pill(color, lbl(`${quota.label} ${rem.toFixed(1)}% ${remWord}${reset}`), blink);
     }
 
     case "fiveHourBar": {
@@ -243,7 +245,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         color,
         rem,
         meterLabel(),
-        `${close} ${rem.toFixed(1)}% rem `,
+        `${close} ${rem.toFixed(1)}% ${remWord} `,
         true,
         blink,
         pace(session.fiveHour)
@@ -264,7 +266,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         critColor: colors.warn,
         warnColor: colors.caution,
       });
-      return pill(color, lbl(`${rem.toFixed(1)}% rem`), blink);
+      return pill(color, lbl(`${rem.toFixed(1)}% ${remWord}`), blink);
     }
 
     case "fiveHourReset": {
@@ -300,7 +302,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         color,
         rem,
         meterLabel(),
-        `${close} ${rem.toFixed(1)}% rem `,
+        `${close} ${rem.toFixed(1)}% ${remWord} `,
         true,
         blink,
         pace(session.weekly)
@@ -321,7 +323,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         critColor: colors.warn,
         warnColor: colors.caution,
       });
-      return pill(color, lbl(`${rem.toFixed(1)}% rem`), blink);
+      return pill(color, lbl(`${rem.toFixed(1)}% ${remWord}`), blink);
     }
 
     case "weeklyReset": {
@@ -358,7 +360,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         color,
         rem,
         meterLabel(),
-        `${close} ${rem.toFixed(1)}% rem `,
+        `${close} ${rem.toFixed(1)}% ${remWord} `,
         true,
         blink,
         pace(session.thirdPartyFiveHour)
@@ -383,7 +385,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         color,
         rem,
         meterLabel(),
-        `${close} ${rem.toFixed(1)}% rem `,
+        `${close} ${rem.toFixed(1)}% ${remWord} `,
         true,
         blink,
         pace(session.thirdPartyWeekly)
@@ -410,7 +412,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         color,
         rem,
         meterLabel(),
-        `${close} ${rem.toFixed(1)}% rem `,
+        `${close} ${rem.toFixed(1)}% ${remWord} `,
         true,
         blink,
         pace(session.argonWeekly)
@@ -497,7 +499,8 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       const name = limitWidth(
         shortenPath(homePath(session.cwd), widget?.depth, ascii),
         widget,
-        ascii
+        ascii,
+        session.lang
       );
       if (!name) {
         return null;
@@ -603,7 +606,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       return pill(colors.meta, lbl(String(session.artifacts)));
 
     case "tasks": {
-      const text = formatTasks(session.subagents, session.tasks);
+      const text = formatTasks(session.subagents, session.tasks, session.lang);
       if (!text) {
         return null;
       }
@@ -627,7 +630,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       return pill(colors.meta, lbl(limitWidth(session.title, widget, ascii, TITLE_MAX)));
 
     case "sessionTime": {
-      const text = formatSessionTime(session.sessionStartMs);
+      const text = formatSessionTime(session.sessionStartMs, Date.now(), session.lang);
       return text ? pill(colors.meta, lbl(text)) : null;
     }
 
@@ -653,7 +656,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return null;
       }
       const net = session.sandboxNet;
-      const text = net ? "sandbox (net)" : "sandbox (isolated)";
+      const text = t(net ? "sandbox_net" : "sandbox_isolated", session.lang);
       const color = net ? colors.warn : colors.git;
       return pill(color, lbl(text, net ? "🌐" : undefined));
     }
@@ -683,7 +686,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         colors.meta,
         lbl(
           widget?.split
-            ? formatTokenSplit(session.inputTokens, session.outputTokens, ascii)
+            ? formatTokenSplit(session.inputTokens, session.outputTokens, ascii, session.lang)
             : formatTokens(session.totalTokens)
         )
       );
@@ -693,7 +696,8 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       const usage = formatUsage(
         session.usage?.[id === "tokensToday" ? "today" : "week"],
         widget,
-        ascii
+        ascii,
+        session.lang
       );
       if (!usage) {
         return null;

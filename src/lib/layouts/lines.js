@@ -56,6 +56,7 @@ const {
   RAM_DANGER,
   TITLE_MAX,
 } = require("../widget-style");
+const { t } = require("../i18n");
 
 const LINES = NAMED_COLORS;
 
@@ -202,7 +203,7 @@ function rampColor(at, palette) {
 function buildLinesSegment(id, session, palette, emojis, ascii = false, widget = {}, config = {}) {
   // Raw widgets keep only their value: no icon, no label.
   const raw = isRaw(widget, config);
-  const tag = (icon) => widgetTag(id, { emojis, raw, icon, widget, ascii });
+  const tag = (icon) => widgetTag(id, { emojis, raw, icon, widget, ascii, lang: session.lang });
   // Meters: 25 cells, or 12 when the bar is fitted to a narrow terminal;
   // Classic draws the same cells as blocks.
   const classic = config.layout === "classic";
@@ -214,7 +215,8 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
     classic,
     elapsedPct: isPaced(widget, config) ? quota.elapsedPct : null,
   });
-  const over200k = session.exceeds200k ? " >200k" : "";
+  const over200k = session.exceeds200k ? ` ${t("over_200k", session.lang)}` : "";
+  const remWord = t("rem", session.lang);
 
   function quotaState(quota) {
     const thresh = resolveQuotaThresholds(widget, config);
@@ -235,14 +237,16 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       renderDotMeter(rem, dots, ascii, palette, true, pace(quota, thresh)) +
       " " +
       fg(color) +
-      `${rem.toFixed(1)}% rem` +
+      `${rem.toFixed(1)}% ${remWord}` +
       RESET
     );
   }
 
   function quotaPct(quota) {
     const { rem, blinkSeq, color } = quotaState(quota);
-    return blinkSeq + fg(palette.text) + tag() + fg(color) + `${rem.toFixed(1)}% rem` + RESET;
+    return (
+      blinkSeq + fg(palette.text) + tag() + fg(color) + `${rem.toFixed(1)}% ${remWord}` + RESET
+    );
   }
 
   function quotaReset(quota, weekly) {
@@ -307,7 +311,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         tag() +
         `${quota.label} ` +
         fg(color) +
-        `${rem.toFixed(1)}% rem` +
+        `${rem.toFixed(1)}% ${remWord}` +
         fg(palette.text) +
         reset +
         RESET
@@ -404,7 +408,8 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       const dirname = limitWidth(
         shortenPath(homePath(session.cwd), widget?.depth, ascii),
         widget,
-        ascii
+        ascii,
+        session.lang
       );
       if (!dirname) {
         return null;
@@ -518,7 +523,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       return fg(palette.text) + tag() + String(session.artifacts) + RESET;
 
     case "tasks": {
-      const text = formatTasks(session.subagents, session.tasks);
+      const text = formatTasks(session.subagents, session.tasks, session.lang);
       if (!text) {
         return null;
       }
@@ -543,7 +548,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       return fg(palette.text) + tag() + limitWidth(session.title, widget, ascii, TITLE_MAX) + RESET;
 
     case "sessionTime": {
-      const text = formatSessionTime(session.sessionStartMs);
+      const text = formatSessionTime(session.sessionStartMs, Date.now(), session.lang);
       return text ? fg(palette.text) + tag() + text + RESET : null;
     }
 
@@ -553,7 +558,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       }
       const net = session.sandboxNet;
       const color = net ? palette.quotaMed || palette.orange || LINES.orange : palette.git;
-      const text = net ? "sandbox (net)" : "sandbox (isolated)";
+      const text = t(net ? "sandbox_net" : "sandbox_isolated", session.lang);
       return fg(color) + tag(net ? "🌐" : undefined) + text + RESET;
     }
 
@@ -607,7 +612,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         fg(palette.text) +
         tag() +
         (widget?.split
-          ? formatTokenSplit(session.inputTokens, session.outputTokens, ascii)
+          ? formatTokenSplit(session.inputTokens, session.outputTokens, ascii, session.lang)
           : formatTokens(session.totalTokens)) +
         RESET
       );
@@ -617,7 +622,8 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       const usage = formatUsage(
         session.usage?.[id === "tokensToday" ? "today" : "week"],
         widget,
-        ascii
+        ascii,
+        session.lang
       );
       if (!usage) {
         return null;
