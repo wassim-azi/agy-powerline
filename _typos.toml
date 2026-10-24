@@ -1,7 +1,7 @@
 # typos (https://github.com/crate-ci/typos) checks English only, so it skips
-# the translated READMEs and French site text, where every French word looks like a typo.
+# the translated READMEs and site scripts, where French site text looks like typos.
 [files]
-extend-exclude = ["README.*.md", "scripts/site/home-text.js"]
+extend-exclude = ["README.*.md", "scripts/site/**"]
 
 [default.extend-identifiers]
 # The Nerd Font code point of a Powerline cap, which typos would read as "BA".
@@ -13,5 +13,3 @@ e0ba = "e0ba"
 unparseable = "unparseable"
 # A test cuts "middleware" short on purpose.
 middlewar = "middlewar"
-# A French label in scripts/site/layout.js
-Projet = "Projet"

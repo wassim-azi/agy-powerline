@@ -3,7 +3,7 @@
 // Draws the site's images into assets/site/: the 1200×630 link preview card
 // (og.png), the 1280×640 GitHub social preview, and the PNG and ICO icons made
 // from scripts/site/favicon.svg. The card shows a bar rendered by the real
-// statusline code. The PNG files are committed, so the Pages build needs no
+// statusline code. The PNGs are committed, so the Pages build needs no
 // browser; rerun this after changing the card, the logo or the default bar.
 // Needs Chrome or Chromium (CHROME=<path> to pick one).
 // Usage: npm run site:images
