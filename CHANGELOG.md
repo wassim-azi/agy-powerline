@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - `"language"` setting for the bar's own words (labels, `rem`, units), set with `init --language` or tried with `render --language`; a code without messages shows English (#102)
+- The bar in French with `"language": "fr"`, and agy-powerline.com/fr/ shows its bars in French (#148)
 
 ## [1.6.0] - 2026-10-24
 

@@ -199,7 +199,7 @@ The bar's own words follow `"language"`: widget labels (`Reset`, `Context`), `re
 { "language": "en" }
 ```
 
-- **Codes:** `en`, the default, is the only one in this version.
+- **Codes:** `en` (English, the default) and `fr` (French).
 - **Fallback:** a region code uses its language (`en-GB` gives `en`). A code without messages shows English, and `doctor` says so.
 - **What stays as it is:** model names, branches, folders and everything else agy sends, git operation names (`REBASE`), and numbers (`72.0%`). Dates and times follow `clock.locale` (above). A widget's own `label` is shown as you wrote it. The CLI, `configure` and `doctor` stay in English.
 - **Setting it:** `init --language <code>`, or `render --language <code>` to [try one without saving it](#try-a-look-without-saving-it). In `configure`, `u` switches between languages when there is more than one.

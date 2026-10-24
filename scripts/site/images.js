@@ -109,13 +109,13 @@ function findChrome() {
   return found;
 }
 
-function bar(width) {
+function bar(width, language) {
   const data = sampleData();
   data.cwd = FAKE_DIR;
   data.workspace = { current_dir: FAKE_DIR, project_dir: FAKE_DIR };
   data.terminal_width = width;
   // A blank line between the rows, so each one reads on its own at card size.
-  const config = { ...defaultConfig(), rowGap: true };
+  const config = { ...defaultConfig(), rowGap: true, language };
   return ansiToHtml(renderStatusline(data, config, { color: "truecolor" }));
 }
 
@@ -127,6 +127,9 @@ function cardInput(card) {
     label: card.label,
     lang: card.lang || "en",
     themes: THEME_ORDER.length - 1,
+    // A page in another language shows the bar in it (left out for English,
+    // so those cards keep their hash).
+    ...(card.lang && card.lang !== "en" ? { barLanguage: card.lang } : {}),
   };
 }
 
@@ -180,7 +183,7 @@ h1 { margin: 0; align-self: center; font-size: ${size}px; font-weight: 750; line
 <div class="card">
   <div class="top">${logo}<span class="brand">agy-powerline</span><span class="label">${esc(label)}</span></div>
   <h1>${esc(title)}</h1>
-  <div class="term-frame" data-bg="dark"><div class="term" data-bg="dark"><div class="screen">${bar(78)}</div></div></div>
+  <div class="term-frame" data-bg="dark"><div class="term" data-bg="dark"><div class="screen">${bar(78, lang)}</div></div></div>
   <div class="foot"><span class="cmd"><code><span class="prompt">$ </span>npx agy-powerline init</code></span><span class="facts">${facts}</span></div>
 </div>
 </body>
