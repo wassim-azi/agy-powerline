@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Per-render `preset`, `layout`, `theme`, `caps` and `gradient` overrides for CLI previews and the installed statusline (#100)
 - `sessionTime` shows how long the active conversation has been running (#96)
 - `light-tokyo-night` theme with the Tokyo Night Light palette, deepened where the contrast checks need it (#65)
 - The README in Spanish (README.es.md) (#52)

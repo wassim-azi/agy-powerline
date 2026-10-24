@@ -44,6 +44,15 @@ npx agy-powerline init --yes --preset compact --layout lines --theme light
 - Starting `agy` from cmd, PowerShell, bash, zsh, or fish does not change this. Antigravity spawns the statusline itself.
 - A refresh never calls `npx`: the statusline command is a local Node script. `npx agy-powerline render` reads Antigravity's JSON on stdin and prints the bar; piped JSON with no subcommand renders too.
 
+To try a different look without changing `statusline.config.json`, append render flags to the command. For example:
+
+```text
+'/usr/bin/node' '/home/you/.agy-powerline/statusline.js' --theme light-paper --layout lines
+C:/Users/you/.agy-powerline/statusline.cmd --theme light-paper --layout lines
+```
+
+The same `--preset`, `--layout`, `--theme`, `--caps` and `--gradient` options work on both platforms. The Windows launcher forwards them to `statusline.js`; an install made before these flags existed needs one `npx agy-powerline init --yes` to get that launcher. A later `init` keeps the flags you appended, as long as the command before them is still the one it writes. `doctor` lists them under `overrides`.
+
 `init` also writes `install.json` (installed CLI version, Node path, platform, timestamp) and a default `statusline.config.json` (only when none exists).
 
 Options: `--stack` renders below the built-in statusline, `--padding <n>` inserts blank lines.

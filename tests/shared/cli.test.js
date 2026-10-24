@@ -3,7 +3,8 @@
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const { record, runCli } = require("../helpers");
+const { record, runCli, PAYLOAD } = require("../helpers");
+const { applyRenderOverrides, detectStyle } = require("../../src/lib/shared");
 const { isQuitKey, wrapCursor, openUrl, REPO_URL } = require("../../src/cli/configure");
 
 async function run() {
@@ -193,6 +194,164 @@ async function run() {
   }
 
   testExportImport();
+  testRenderOverrides();
+}
+
+function testRenderOverrides() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "agy-verify-render-overrides-"));
+  const installDir = path.join(root, ".agy-powerline");
+  const env = { ...process.env, HOME: root, USERPROFILE: root, AGY_POWERLINE_HOME: installDir };
+  fs.mkdirSync(installDir, { recursive: true });
+  const configPath = path.join(installDir, "statusline.config.json");
+  const config = {
+    theme: "dark-aurora",
+    layout: "pills",
+    gradient: "aurora",
+    widgets: [{ id: "model" }],
+  };
+  fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+  const before = fs.readFileSync(configPath, "utf8");
+
+  try {
+    const all = applyRenderOverrides(config, {
+      preset: "compact",
+      layout: "lines",
+      theme: "light",
+      caps: "flat",
+      gradient: "sunset",
+    });
+    record(
+      "render overrides compose in the documented order and change only the returned config",
+      all.invalid.length === 0 &&
+        all.config.layout === "lines" &&
+        all.config.theme === "light-paper" &&
+        all.config.gradient === "sunset" &&
+        detectStyle(all.config.powerline) === "flat" &&
+        JSON.stringify(all.config.widgets.map((widget) => widget.id)) ===
+          JSON.stringify(["model", "quota", "contextPct", "git"])
+    );
+
+    const presetThenLayout = applyRenderOverrides(config, {
+      preset: "compact",
+      layout: "pills",
+    });
+    const noGradient = applyRenderOverrides(config, { gradient: "off" });
+    record(
+      "the explicit layout follows the preset and gradient off clears only the render value",
+      presetThenLayout.config.layout === "pills" &&
+        !Object.hasOwn(noGradient.config, "gradient") &&
+        config.gradient === "aurora"
+    );
+
+    const rendered = runCli(
+      [
+        "render",
+        "--demo",
+        "--preset",
+        "compact",
+        "--layout",
+        "lines",
+        "--theme",
+        "light",
+        "--caps",
+        "flat",
+        "--gradient",
+        "sunset",
+      ],
+      { env }
+    );
+    const expectedDir = path.join(root, "expected-config");
+    fs.mkdirSync(expectedDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(expectedDir, "statusline.config.json"),
+      JSON.stringify(all.config, null, 2)
+    );
+    const expected = runCli(["render", "--demo"], {
+      env: { ...env, AGY_POWERLINE_HOME: expectedDir },
+    });
+    record(
+      "render overrides match the equivalent saved config without saving them",
+      rendered.code === 0 &&
+        expected.code === 0 &&
+        rendered.stdout === expected.stdout &&
+        fs.readFileSync(configPath, "utf8") === before,
+      `exit ${rendered.code}: ${rendered.stderr}`
+    );
+
+    const help = runCli(["render", "--help"], { env });
+    record(
+      "render --help documents each per-render override",
+      help.code === 0 &&
+        [
+          "--preset <id>",
+          "--layout <id>",
+          "--theme <id>",
+          "--caps <style>",
+          "--gradient <name|colors>",
+        ].every((option) => help.stdout.includes(option)),
+      help.stdout
+    );
+
+    const plain = runCli(
+      [
+        "render",
+        "--demo",
+        "--preset",
+        "compact",
+        "--layout",
+        "pills",
+        "--theme",
+        "light",
+        "--caps",
+        "angled",
+        "--gradient",
+        "sunset",
+        "--ascii",
+        "--color",
+        "none",
+      ],
+      { env }
+    );
+    const hasColorCodes = /\u001b\[(?:\d+;)*(?:38|48);/.test(plain.stdout);
+    const hasNonAscii = [...plain.stdout].some((character) => character.codePointAt(0) > 127);
+    record(
+      "per-render overrides preserve ASCII and no-color rendering",
+      plain.code === 0 && !hasNonAscii && !hasColorCodes,
+      JSON.stringify(plain.stdout)
+    );
+
+    const invalidOptions = [
+      ["--preset", "unknown-preset"],
+      ["--layout", "grid"],
+      ["--theme", "unknown-theme"],
+      ["--caps", "unknown-style"],
+      ["--gradient", "unknown-gradient"],
+    ];
+    const invalidResults = invalidOptions.map(([flag, value]) => {
+      const dump = path.join(root, `must-not-write-${flag.slice(2)}.json`);
+      const result = runCli(["render", flag, value, "--dump-payload", dump], {
+        env,
+        input: PAYLOAD,
+      });
+      return { flag, value, result, dump };
+    });
+    // The same wording as the theme, layout, preset, caps and gradient commands.
+    record(
+      "each invalid render override exits before output or a requested payload dump",
+      invalidResults.every(
+        ({ value, result, dump }) =>
+          result.code === 1 &&
+          result.stdout === "" &&
+          new RegExp(`Unknown [a-z ]+ "${value}"\\.\\n Available [a-z ]+: [a-z]`).test(
+            result.stderr
+          ) &&
+          !fs.existsSync(dump)
+      ) && fs.readFileSync(configPath, "utf8") === before,
+      invalidResults.map(({ flag, result }) => `${flag}: ${result.stderr.trim()}`).join("; ")
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 }
 
 // export and import in a home of their own: round trip, merge, refusals, the

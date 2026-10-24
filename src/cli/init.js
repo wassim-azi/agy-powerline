@@ -24,6 +24,7 @@ const {
   RUNTIME_FILES,
   resolveInstallDir,
   statuslineCommand,
+  appendedRenderFlags,
   writeWindowsLauncher,
   writeInstallMeta,
   readSettingsForUpdate,
@@ -357,6 +358,12 @@ async function initCommand(options = {}) {
 
 async function updateAgySettings(command, { exists, settings }, { yes, rl, stack, padding }) {
   const current = settings.statusLine?.command;
+  // Render flags the user added to our command (--theme light-paper) survive an update.
+  const flags = appendedRenderFlags(current, command);
+  if (flags) {
+    command = `${command} ${flags}`;
+    console.log(`${DIM}  kept  render flags ${flags}${RESET}`);
+  }
 
   if (current && current !== command && !yes) {
     if (!rl) {

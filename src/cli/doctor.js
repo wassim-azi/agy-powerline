@@ -7,6 +7,7 @@ const {
   resolveInstallDir,
   AGY_SETTINGS,
   statuslineCommand,
+  appendedRenderFlags,
   readInstallMeta,
   readAgySettings,
   isWsl,
@@ -74,6 +75,20 @@ function stripAnsi(text) {
   return String(text).replace(/\x1b\[[0-9;]*m/g, "");
 }
 
+function renderOverridesInCommand(command) {
+  const names = [];
+  const pattern =
+    /(?:^|\s)--(preset|layout|theme|caps|gradient)(?:(?:\s*=\s*|\s+)(?:"([^"]*)"|'([^']*)'|([^\s-][^\s]*)))?/g;
+
+  for (const match of String(command).matchAll(pattern)) {
+    const value = match[2] ?? match[3] ?? match[4] ?? "(missing)";
+    const safeValue = value.replace(/[^A-Za-z0-9_.#-]/g, "?").slice(0, 64);
+    names.push(`--${match[1]} ${safeValue}`);
+  }
+
+  return names.join(", ");
+}
+
 async function doctorCommand(options = {}) {
   const installDir = resolveInstallDir();
   const meta = readInstallMeta(installDir);
@@ -82,6 +97,7 @@ async function doctorCommand(options = {}) {
     ? statuslineCommand(installDir)
     : "";
   const configured = settings?.statusLine?.command || "";
+  const configuredOverrides = renderOverridesInCommand(configured);
   const wsl = isWsl();
   const windowsNode = isWindowsNodeOnWsl();
   const colorDepth = detectColorDepth(process.env);
@@ -103,6 +119,9 @@ async function doctorCommand(options = {}) {
     console.log(
       `| **Statusline Command** | \`${configured ? tildify(configured) : "(missing)"}\` |`
     );
+    if (configuredOverrides) {
+      console.log(`| **Render Overrides** | \`${configuredOverrides}\` |`);
+    }
     console.log(
       `| **Stack with Default** | \`${settings?.statusLine?.stack_with_default ? "true" : "false"}\` |`
     );
@@ -129,6 +148,9 @@ async function doctorCommand(options = {}) {
   line("config", path.join(installDir, "statusline.config.json"));
   line("settings", AGY_SETTINGS);
   line("command", configured || `${DIM}(missing)${RESET}`);
+  if (configuredOverrides) {
+    line("overrides", configuredOverrides);
+  }
   const logEntries = readLog(getLogPath(installDir)).length;
   line(
     "problem log",
@@ -201,7 +223,7 @@ async function doctorCommand(options = {}) {
     console.log();
     console.log(`${RED} No statusline.js in the install dir.${RESET}`);
     console.log("  Run: npx agy-powerline init --yes");
-  } else if (configured && expected && configured !== expected) {
+  } else if (configured && expected && appendedRenderFlags(configured, expected) === null) {
     console.log();
     console.log(`${YELLOW} settings.json command does not match this install.${RESET}`);
     console.log(`  expected  ${expected}`);

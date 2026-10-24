@@ -40,6 +40,7 @@ const {
   PRESETS,
   PRESET_ORDER,
   applyPreset,
+  applyRenderOverrides,
 } = require("./config");
 
 const {
@@ -172,6 +173,7 @@ module.exports = {
   PRESETS,
   PRESET_ORDER,
   applyPreset,
+  applyRenderOverrides,
   applyStyle,
   detectStyle,
 

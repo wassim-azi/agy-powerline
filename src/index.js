@@ -16,12 +16,26 @@ const { importCommand } = require("./cli/import");
 const { doctorCommand } = require("./cli/doctor");
 const { uninstallCommand } = require("./cli/uninstall");
 const { reportCommand } = require("./cli/report");
-const { setConfigDir, readConfigFile, renderStatusline, sampleData } = require("./lib/shared");
+const {
+  setConfigDir,
+  readConfigFile,
+  renderStatusline,
+  sampleData,
+  applyRenderOverrides,
+  THEME_ORDER,
+  LAYOUT_ORDER,
+  PRESET_ORDER,
+} = require("./lib/shared");
+const { STYLE_ORDER } = require("./lib/powerline");
+const { GRADIENT_ORDER } = require("./lib/themes");
+const { stripControl } = require("./lib/formatters");
 const { resolveInstallDir, isTrustedInstallDir } = require("./lib/paths");
 const { isLogEnabled, setLogDir, logError, jsonErrorMessage } = require("./lib/log");
 const { dumpTarget, writePayloadDump } = require("./lib/payload-dump");
 const { version: VERSION, homepage: SITE_URL } = require("../package.json");
 
+const RED = "\x1b[31m";
+const RESET = "\x1b[0m";
 const NAME = "agy-powerline";
 const DESCRIPTION = "Interactive statusline for Google Antigravity";
 
@@ -205,6 +219,19 @@ const COMMANDS = [
         value: "<mode>",
         help: "truecolor, 256, or none (overrides config and env)",
       },
+      preset: { type: "string", value: "<id>", help: "use preset widgets for this render only" },
+      layout: {
+        type: "string",
+        value: "<id>",
+        help: "use pills, lines, or classic for this render",
+      },
+      theme: { type: "string", value: "<id>", help: "use a theme id or dark, light, colorblind" },
+      caps: { type: "string", value: "<style>", help: "use round, angled, slanted, or flat" },
+      gradient: {
+        type: "string",
+        value: "<name|colors>",
+        help: "use a gradient preset, hex stops, or off",
+      },
       "dump-payload": {
         type: "string",
         value: "<path>",
@@ -349,10 +376,34 @@ function dumpPayloadIfRequested(rawInput, dumpOption, installDir) {
   }
 }
 
+// The same two lines as the theme, layout, preset, caps and gradient commands.
+function renderOverrideError(name, value) {
+  const [what, list] = {
+    theme: ["theme", `Available themes: ${THEME_ORDER.join(", ")}`],
+    layout: ["layout", `Available layouts: ${LAYOUT_ORDER.join(", ")}`],
+    preset: ["preset", `Available presets: ${PRESET_ORDER.join(", ")}`],
+    caps: ["cap style", `Available styles: ${STYLE_ORDER.join(", ")}`],
+    gradient: ["gradient", `Available gradients: ${GRADIENT_ORDER.join(", ")}, off`],
+  }[name];
+  console.error(`${RED}error${RESET} Unknown ${what} "${stripControl(String(value))}".`);
+  console.error(` ${list}`);
+  if (name === "gradient") {
+    console.error(" Or 2 to 6 hex colors joined by dashes, e.g. #ff5f6d-#ffc371");
+  }
+  process.exitCode = 1;
+}
+
 function renderFromStdin(options = {}) {
   const installDir = resolveInstallDir();
   setConfigDir(installDir);
-  const { config, error: configError } = readConfigFile();
+  const { config: savedConfig, error: configError } = readConfigFile();
+  const { config, invalid } = applyRenderOverrides(savedConfig, options);
+
+  if (invalid.length) {
+    renderOverrideError(invalid[0], options[invalid[0]]);
+    return;
+  }
+
   const overrides = { ...renderOverrides(options), configError };
 
   if (configError) {

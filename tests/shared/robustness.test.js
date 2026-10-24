@@ -6,7 +6,7 @@ const os = require("os");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
 const { record, ROOT, NODE, PAYLOAD, stageInstall } = require("../helpers");
-const { LOG_NAME } = require("../../src/lib/log");
+const { LOG_NAME, readLog } = require("../../src/lib/log");
 const { getGitInfo } = require("../../src/lib/git");
 const {
   renderStatusline,
@@ -429,6 +429,7 @@ async function run() {
   await testConcurrentExecCache();
   await testStdoutEpipe();
   await testStdoutErrorIsLogged();
+  testRuntimeRenderOverrides();
 
   const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "agy-verify-bad-json-"));
   stageInstall(sandbox);
@@ -492,6 +493,78 @@ async function run() {
     await testOpenStdin(statuslinePath);
   } finally {
     fs.rmSync(sandbox, { recursive: true, force: true });
+  }
+}
+
+function testRuntimeRenderOverrides() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "agy-verify-runtime-overrides-"));
+  const home = path.join(root, "home");
+  const installDir = path.join(home, ".agy-powerline");
+  const env = { ...process.env, HOME: home, USERPROFILE: home };
+  delete env.AGY_POWERLINE_HOME;
+  delete env.AGY_POWERLINE_LOG;
+  stageInstall(installDir);
+  const statuslinePath = path.join(installDir, "statusline.js");
+  const configPath = path.join(installDir, "statusline.config.json");
+  const savedConfig = fs.readFileSync(configPath, "utf8");
+
+  try {
+    const baseline = spawnSync(NODE, [statuslinePath], {
+      input: PAYLOAD,
+      encoding: "utf8",
+      env,
+    });
+    const valid = spawnSync(
+      NODE,
+      [
+        statuslinePath,
+        "--theme",
+        "light",
+        "--layout",
+        "pills",
+        "--caps",
+        "angled",
+        "--gradient",
+        "sunset",
+        "--preset",
+        "compact",
+      ],
+      { input: PAYLOAD, encoding: "utf8", env }
+    );
+    record(
+      "installed runtime applies valid flags and leaves its saved config unchanged",
+      baseline.status === 0 &&
+        valid.status === 0 &&
+        valid.stdout.includes("Flash") &&
+        valid.stdout !== baseline.stdout &&
+        valid.stderr === "" &&
+        fs.readFileSync(configPath, "utf8") === savedConfig,
+      `exit ${valid.status}: ${valid.stderr}`
+    );
+
+    const hostile = "not-a-theme\u001b[2Jprivate-value";
+    const invalid = spawnSync(
+      NODE,
+      [statuslinePath, "--theme", hostile, "--unknown-private-value"],
+      { input: PAYLOAD, encoding: "utf8", env }
+    );
+    const log = readLog(path.join(installDir, LOG_NAME));
+    const invalidEntries = log.filter((entry) => entry.code === "BAD_RUNTIME_FLAG");
+    record(
+      "runtime ignores invalid and unknown flags, logs names only, and prints one safe line",
+      invalid.status === 0 &&
+        invalid.stdout === baseline.stdout &&
+        invalid.stderr.trim().split(/\r?\n/).length === 1 &&
+        invalid.stderr.includes("--theme") &&
+        invalid.stderr.includes("unknown option") &&
+        !invalid.stderr.includes("private-value") &&
+        !invalid.stderr.includes("\u001b") &&
+        invalidEntries.length === 1 &&
+        !JSON.stringify(invalidEntries).includes("private-value"),
+      `exit ${invalid.status}: ${JSON.stringify(invalid.stderr)}`
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
   }
 }
 

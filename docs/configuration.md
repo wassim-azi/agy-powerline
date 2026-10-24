@@ -454,3 +454,26 @@ The README's three-row Pills bar in a 74-column window: values only, the short m
 </p>
 
 **Limited color support?** Color depth resolves per refresh, strongest hint first: `render --color <truecolor|256|none>`, then `NO_COLOR` (disables color), then `AGY_POWERLINE_COLOR`, then `"color"` in the config (`"auto"` default), then terminal heuristics (`COLORTERM=truecolor`/`24bit` → truecolor, `*256color*` `TERM` → 256-color `38;5`/`48;5` codes, `dumb` → no color). Bold/dim are kept; only fg/bg color is dropped in `none` mode, and Pills meters draw their fill with `█`/`░` (`#`/`-` in ASCII mode) instead of color.
+
+## Try a look without saving it
+
+`render` can override the saved preset, layout, theme, pill caps and gradient for one preview. The preset is applied first (it sets the widgets), then layout, theme, caps and gradient. These flags never write to `statusline.config.json`:
+
+```sh
+cat payload.json | npx agy-powerline render --preset compact --layout lines --theme light-paper --caps flat --gradient sunset
+npx agy-powerline render --demo --theme light --layout pills --caps angled --gradient off
+```
+
+The same flags can follow the installed script in `statusLine.command`, so agy uses that look on each refresh without changing the saved config:
+
+```sh
+'/usr/bin/node' '/home/you/.agy-powerline/statusline.js' --theme light-paper --layout lines
+```
+
+On Windows, append them to `statusline.cmd`; the launcher forwards its arguments to the runtime:
+
+```text
+C:/Users/you/.agy-powerline/statusline.cmd --theme light-paper --layout lines
+```
+
+`--theme` accepts a theme id or the `dark`, `light` and `colorblind` aliases. `--layout` accepts `pills`, `lines` or `classic`; `--caps` accepts `round`, `angled`, `slanted` or `flat`; `--gradient` accepts a preset, 2 to 6 hex stops joined by `-`, or `off`. The CLI exits with an error before rendering if a value is invalid. In the installed runtime, an invalid or unknown flag is ignored so the bar still renders; valid overrides still apply, and one diagnostic is written without logging the supplied value.

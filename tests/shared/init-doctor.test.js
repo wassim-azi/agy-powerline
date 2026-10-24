@@ -272,6 +272,20 @@ function testRerunKeepsOptions() {
         second?.padding === 2,
       JSON.stringify(second)
     );
+
+    // Render flags appended to our command survive a re-run, without a prompt.
+    const flagged = readJson(box.settingsPath);
+    flagged.statusLine.command += " --theme light-paper --layout lines";
+    writeSettings(box, flagged);
+    const rerun = runCli(["init", "--yes"], { env: box.env });
+    const third = readJson(box.settingsPath)?.statusLine;
+    record(
+      "a later init keeps render flags appended to the command",
+      rerun.code === 0 &&
+        third?.command === flagged.statusLine.command &&
+        /kept\s+render flags --theme light-paper --layout lines/.test(stripAnsi(rerun.stdout)),
+      `exit ${rerun.code}: ${JSON.stringify(third)}`
+    );
   });
 }
 
@@ -358,10 +372,36 @@ function testDoctor() {
       `exit ${res.code}: ${out.slice(-300)}`
     );
 
+    const settings = readJson(box.settingsPath);
+    settings.statusLine.command += " --theme light-paper --layout lines";
+    writeSettings(box, settings);
+    const overrideDoctor = stripAnsi(runCli(["doctor"], { env: box.env }).stdout);
+    record(
+      "doctor lists the configured per-render overrides",
+      /overrides\s+--theme light-paper, --layout lines/.test(overrideDoctor),
+      overrideDoctor.slice(0, 500)
+    );
+    record(
+      "doctor accepts render flags after the installed command",
+      !overrideDoctor.includes("does not match this install"),
+      overrideDoctor.slice(-500)
+    );
+    const foreign = readJson(box.settingsPath);
+    foreign.statusLine.command += " && other-tool";
+    writeSettings(box, foreign);
+    record(
+      "doctor still warns about a command that only starts like the installed one",
+      stripAnsi(runCli(["doctor"], { env: box.env }).stdout).includes("does not match this install")
+    );
+    writeSettings(box, settings);
+
     const markdown = runCli(["doctor", "--markdown"], { env: box.env });
     record(
-      "doctor --markdown shows the home folder as ~",
-      !markdown.stdout.includes(box.home) && /~[\\/]\.agy-powerline/.test(markdown.stdout),
+      "doctor --markdown shows the home folder as ~ and lists render overrides",
+      !markdown.stdout.includes(box.home) &&
+        /~[\\/]\.agy-powerline/.test(markdown.stdout) &&
+        markdown.stdout.includes("**Render Overrides**") &&
+        markdown.stdout.includes("--theme light-paper, --layout lines"),
       markdown.stdout.slice(0, 300)
     );
 

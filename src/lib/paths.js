@@ -159,7 +159,7 @@ function windowsLauncherBody(nodePath = process.execPath) {
   return [
     "@echo off",
     "setlocal DisableDelayedExpansion",
-    `"${node}" "%~dp0statusline.js"`,
+    `"${node}" "%~dp0statusline.js" %*`,
     "",
   ].join("\r\n");
 }
@@ -407,6 +407,20 @@ function statuslineCommand(installDir, options = {}) {
   return `${quoteForSh(execPath)} ${quoteForSh(script)}`;
 }
 
+// The render flags (`--theme light-paper`, see docs/configuration.md) a user
+// appended to the command init writes: "" when there are none, null when the
+// command is something else.
+const RENDER_FLAGS =
+  /^(?:\s+--(?:preset|layout|theme|caps|gradient)(?:=|\s+)(?:"[^"]*"|'[^']*'|[^\s"'-]\S*))*\s*$/;
+
+function appendedRenderFlags(command, expected) {
+  if (typeof command !== "string" || !expected || !command.startsWith(expected)) {
+    return null;
+  }
+  const rest = command.slice(expected.length);
+  return RENDER_FLAGS.test(rest) ? rest.trim() : null;
+}
+
 module.exports = {
   LOCAL_DIR_NAME,
   GLOBAL_DIR,
@@ -420,6 +434,7 @@ module.exports = {
   resolveInstallDir,
   isTrustedInstallDir,
   statuslineCommand,
+  appendedRenderFlags,
   cmdBreakingChars,
   cmdBreakingMessage,
   windowsLauncherPath,

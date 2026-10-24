@@ -2,7 +2,8 @@
 "use strict";
 
 const path = require("path");
-const { readConfigFile, renderStatusline } = require("./shared");
+const { parseArgs } = require("util");
+const { readConfigFile, renderStatusline, applyRenderOverrides } = require("./shared");
 const { isTrustedInstallDir } = require("./paths");
 const { dumpTarget, writePayloadDump } = require("./payload-dump");
 const {
@@ -23,6 +24,14 @@ const SLOW_RENDER_MS = 750;
 // Antigravity kills the script, and a few kills in a row turn the custom
 // statusline off, so the read gives up after this long.
 const STDIN_TIMEOUT_MS = 1000;
+
+const RENDER_OPTIONS = {
+  preset: { type: "string" },
+  layout: { type: "string" },
+  theme: { type: "string" },
+  caps: { type: "string" },
+  gradient: { type: "string" },
+};
 
 // The config decides whether problems are logged, so it is read first. A
 // broken config can't say, so logging stays on (AGY_POWERLINE_LOG=0 still
@@ -126,7 +135,19 @@ function render(input, complete) {
   }
 
   const started = Date.now();
-  const output = renderStatusline(data, config, { exec, configError, usage: "read" });
+  const parsed = parseRenderOptions(process.argv.slice(2));
+  const applied = applyRenderOverrides(config, parsed.values);
+  const invalid = [...new Set([...parsed.invalid, ...applied.invalid])];
+
+  if (invalid.length) {
+    const labels = invalid.map((name) => (name === "unknown" ? "unknown option" : `--${name}`));
+    logWarning("BAD_RUNTIME_FLAG", { options: invalid });
+    process.stderr.write(
+      `[agy-powerline] ignored invalid render override(s): ${labels.join(", ")}\n`
+    );
+  }
+
+  const output = renderStatusline(data, applied.config, { exec, configError, usage: "read" });
   const elapsed = Date.now() - started;
 
   if (elapsed > SLOW_RENDER_MS) {
@@ -134,4 +155,23 @@ function render(input, complete) {
   }
 
   process.stdout.write(output);
+}
+
+function parseRenderOptions(args) {
+  try {
+    const parsed = parseArgs({
+      args,
+      options: RENDER_OPTIONS,
+      strict: false,
+      allowPositionals: true,
+      tokens: true,
+    });
+    const known = new Set(Object.keys(RENDER_OPTIONS));
+    const unknown = parsed.tokens.some(
+      (token) => token.kind === "option" && !known.has(token.name)
+    );
+    return { values: parsed.values, invalid: unknown ? ["unknown"] : [] };
+  } catch {
+    return { values: {}, invalid: ["unknown"] };
+  }
 }

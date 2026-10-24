@@ -125,6 +125,10 @@ async function run() {
       writes === 0 && fs.readFileSync(launcher, "utf8") === before,
       `writes: ${writes}`
     );
+    record(
+      "Windows launcher forwards statusline arguments",
+      before.includes('"%~dp0statusline.js" %*')
+    );
   });
 
   withTempDir("settings", (root) => {

@@ -35,6 +35,17 @@ async function testWindowsAgy() {
     agy.code !== 0 ? agy.stderr.trim() : `exit ${agy.code}`
   );
 
+  const overridden = await spawnCapture(
+    "cmd.exe",
+    ["/c", `${command} --layout pills --caps angled`],
+    PAYLOAD
+  );
+  record(
+    "Windows statusline.cmd forwards per-render layout and caps flags",
+    overridden.code === 0 && looksRendered(overridden.stdout) && overridden.stdout !== agy.stdout,
+    overridden.code !== 0 ? overridden.stderr.trim() : `exit ${overridden.code}`
+  );
+
   const old = `"${toPosixPath(NODE)}" "${toPosixPath(path.join(dir, "statusline.js"))}"`;
   const broken = await spawnCapture("cmd.exe", ["/c", old], PAYLOAD);
   record(
