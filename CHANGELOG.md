@@ -9,12 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Per-render `preset`, `layout`, `theme`, `caps` and `gradient` overrides for CLI previews and the installed statusline (#100)
-- `sessionTime` shows how long the active conversation has been running (#96)
-- `light-tokyo-night` theme with the Tokyo Night Light palette, deepened where the contrast checks need it (#65)
-- The README in Spanish (README.es.md) (#52)
-- The README in Korean (README.ko.md) (#53)
-- `light-gruvbox` theme: the light mode of Gruvbox, deepened where the contrast checks need it (#66)
+- Per-render `preset`, `layout`, `theme`, `caps` and `gradient` overrides for CLI previews and the installed statusline (#100, thanks @dannyward630)
+- `sessionTime` shows how long the active conversation has been running (#96, thanks @dannyward630)
+- `light-tokyo-night` theme with the Tokyo Night Light palette, deepened where the contrast checks need it (#65, thanks @dannyward630)
+- The README in Spanish (README.es.md) (#52, thanks @unkletayo)
+- The README in Korean (README.ko.md) (#53, thanks @rahul05ranjan)
+- `light-gruvbox` theme: the light mode of Gruvbox, deepened where the contrast checks need it (#66, thanks @rahul05ranjan)
 - agy-powerline.com has the docs, guides, every widget with a preview, a quota pace calculator, an FAQ and a French home page, all built from the repo
 - A JSON Schema for `statusline.config.json` (https://agy-powerline.com/schema/v1.json): `init`, `export` and the browser configurator write its `$schema` line, so editors such as VS Code complete and check the file
 - Two dark themes with the Nord and Rosé Pine palettes: `dark-nord` and `dark-rose-pine`

@@ -11,12 +11,12 @@
     "README.es.md",
     "README.ko.md"
   ],
-  "imageSize": 80,
+  "imageSize": 64,
   "commit": false,
   "commitConvention": "angular",
-  "contributorsPerLine": 7,
+  "contributorsPerLine": 5,
   "linkToUsage": false,
-  "contributorTemplate": "<a href=\"<%= contributor.profile %>\"><img src=\"<%= contributor.avatar_url %>&s=160\" width=\"80\" height=\"80\" alt=\"<%= contributor.name %>\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
+  "contributorTemplate": "<a href=\"<%= contributor.profile %>\"><img src=\"<%= contributor.avatar_url %>&s=128\" width=\"64\" height=\"64\" alt=\"<%= contributor.name %>\"/><br /><sub><b><%= contributor.name.replace(/ /g, \"&nbsp;\") %></b></sub></a>",
   "contributors": [
     {
       "login": "yatharth2soni",
@@ -30,7 +30,7 @@
       "name": "Danny Ward",
       "avatar_url": "https://avatars.githubusercontent.com/u/71604164?v=4",
       "profile": "https://github.com/dannyward630",
-      "contributions": ["code", "test", "doc", "infra"]
+      "contributions": ["code", "test", "doc", "infra", "design"]
     },
     {
       "login": "yoreva-01",
@@ -66,6 +66,20 @@
       "avatar_url": "https://avatars.githubusercontent.com/u/210247942?v=4",
       "profile": "https://github.com/Ashuge11",
       "contributions": ["code"]
+    },
+    {
+      "login": "unkletayo",
+      "name": "Adetayo Akinsanya",
+      "avatar_url": "https://avatars.githubusercontent.com/u/48031746?v=4",
+      "profile": "https://www.unkletayo.dev/",
+      "contributions": ["translation"]
+    },
+    {
+      "login": "rahul05ranjan",
+      "name": "Rahul",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11793455?v=4",
+      "profile": "https://github.com/rahul05ranjan",
+      "contributions": ["translation", "design"]
     }
   ]
 }
