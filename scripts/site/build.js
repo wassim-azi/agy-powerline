@@ -27,6 +27,7 @@ const {
   build404Html,
   buildSitemapXml,
   buildRobotsTxt,
+  buildSecurityTxt,
   readFaviconSvg,
   cardPath,
   AUTHOR_URL,
@@ -955,6 +956,7 @@ function buildSite(outDir) {
   }));
   write("sitemap.xml", buildSitemapXml(sitemap));
   write("robots.txt", buildRobotsTxt());
+  write(".well-known/security.txt", buildSecurityTxt());
   write("changelog.xml", changelogFeed());
   write("llms.txt", fs.readFileSync(path.join(repo, "llms.txt")));
   write("llms-full.txt", llmsFull(markdownPages));

@@ -1536,6 +1536,20 @@ Sitemap: ${SITE_URL}changelog.xml
 `;
 }
 
+// RFC 9116: where to report a vulnerability, the same private GitHub reporting
+// SECURITY.md asks for. The RFC wants an Expires under a year away; each
+// deploy moves it, and a site left unreleased for a year should look stale.
+function buildSecurityTxt(now = new Date()) {
+  const expires = new Date(now.getTime() + 365 * 86400 * 1000);
+  expires.setUTCHours(0, 0, 0, 0);
+  return `Contact: ${REPO_URL}/security/advisories/new
+Expires: ${expires.toISOString().replace(".000Z", "Z")}
+Policy: ${REPO_URL}/blob/main/SECURITY.md
+Preferred-Languages: en
+Canonical: ${SITE_URL}.well-known/security.txt
+`;
+}
+
 module.exports = {
   REPO_URL,
   NPM_URL,
@@ -1568,4 +1582,5 @@ module.exports = {
   build404Html,
   buildSitemapXml,
   buildRobotsTxt,
+  buildSecurityTxt,
 };

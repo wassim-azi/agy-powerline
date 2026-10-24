@@ -450,6 +450,25 @@ async function run() {
       [...half.data].join(",")
     );
 
+    // RFC 9116: a contact (GitHub's private reporting, never an email
+    // address) and an Expires under a year away.
+    const securityTxt = fs.existsSync(path.join(out, ".well-known", "security.txt"))
+      ? fs.readFileSync(path.join(out, ".well-known", "security.txt"), "utf8")
+      : "";
+    const expires = Date.parse((securityTxt.match(/^Expires: (\S+)$/m) || [])[1]);
+    record(
+      "security.txt points to private vulnerability reporting and expires within a year",
+      securityTxt.includes(
+        "Contact: https://github.com/wassim-azi/agy-powerline/security/advisories/new\n"
+      ) &&
+        securityTxt.includes(`Canonical: ${SITE_URL}.well-known/security.txt\n`) &&
+        !/@|mailto:/i.test(securityTxt) &&
+        expires > Date.now() &&
+        expires <= Date.now() + 366 * 86400 * 1000 &&
+        /include-hidden-files: true/.test(workflow),
+      securityTxt
+    );
+
     // The widget previews are drawn on the build machine: none may show its
     // host name or home folder.
     const widgetsPage = pages["widgets/index.html"] || "";
