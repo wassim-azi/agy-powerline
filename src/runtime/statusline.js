@@ -31,6 +31,7 @@ const RENDER_OPTIONS = {
   theme: { type: "string" },
   caps: { type: "string" },
   gradient: { type: "string" },
+  language: { type: "string" },
 };
 
 // The config decides whether problems are logged, so it is read first. A

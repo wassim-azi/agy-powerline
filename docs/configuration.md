@@ -18,6 +18,7 @@ Editors that read JSON Schema, such as VS Code and JetBrains IDEs, complete sett
 - [Quota pace marker](#quota-pace-marker)
 - [Meter styles](#meter-styles)
 - [Reset times and clock](#reset-times-and-clock)
+- [Language](#language)
 - [Alerts and thresholds](#alerts-and-thresholds)
 - [Shell command widget (`exec`)](#shell-command-widget-exec)
 - [Pills: powerline styles, glyphs and row gaps](#pills-powerline-styles-glyphs-and-row-gaps)
@@ -54,6 +55,7 @@ Enter on a widget opens its options: color, label (shown or value only), and wha
 | `r`                    | Toggle the quota pace marker                                                      |
 | `b`                    | Toggle alert blink (flash on critical quota/context breaches)                     |
 | `i`                    | Toggle ASCII mode (plain-text caps/joins, no emojis)                              |
+| `u`                    | Switch the bar's language (when more than one is available)                       |
 | `d`                    | Reset configuration to defaults                                                   |
 | `g`                    | Open GitHub repository in browser (⭐ Repo)                                       |
 | Enter                  | Confirm selection in Add/Themes/Presets/Layout/Powerline lists                    |
@@ -188,6 +190,19 @@ How times look is set once for every widget under `"clock"`:
 - **`locale`**: a language tag (`de-DE`, `ja-JP`) for localized month names and time formats (`10. Okt., 14:50`). Default: the compact built-in English style.
 
 Unknown zones and locales are ignored. Everything comes from Node's built-in `Intl`; nothing is downloaded.
+
+## Language
+
+The bar's own words follow `"language"`: widget labels (`Reset`, `Context`), `rem` after a quota, the units in `2hr 47m`, `1 subagent`, `[cmd]`.
+
+```json
+{ "language": "en" }
+```
+
+- **Codes:** `en`, the default, is the only one in this version.
+- **Fallback:** a region code uses its language (`en-GB` gives `en`). A code without messages shows English, and `doctor` says so.
+- **What stays as it is:** model names, branches, folders and everything else agy sends, git operation names (`REBASE`), and numbers (`72.0%`). Dates and times follow `clock.locale` (above). A widget's own `label` is shown as you wrote it. The CLI, `configure` and `doctor` stay in English.
+- **Setting it:** `init --language <code>`, or `render --language <code>` to [try one without saving it](#try-a-look-without-saving-it). In `configure`, `u` switches between languages when there is more than one.
 
 ## Alerts and thresholds
 
@@ -457,7 +472,7 @@ The README's three-row Pills bar in a 74-column window: values only, the short m
 
 ## Try a look without saving it
 
-`render` can override the saved preset, layout, theme, pill caps and gradient for one preview. The preset is applied first (it sets the widgets), then layout, theme, caps and gradient. These flags never write to `statusline.config.json`:
+`render` can override the saved preset, layout, theme, pill caps, gradient and language for one preview. The preset is applied first (it sets the widgets), then layout, theme, caps, gradient and language. These flags never write to `statusline.config.json`:
 
 ```sh
 cat payload.json | npx agy-powerline render --preset compact --layout lines --theme light-paper --caps flat --gradient sunset
@@ -476,4 +491,4 @@ On Windows, append them to `statusline.cmd`; the launcher forwards its arguments
 C:/Users/you/.agy-powerline/statusline.cmd --theme light-paper --layout lines
 ```
 
-`--theme` accepts a theme id or the `dark`, `light` and `colorblind` aliases. `--layout` accepts `pills`, `lines` or `classic`; `--caps` accepts `round`, `angled`, `slanted` or `flat`; `--gradient` accepts a preset, 2 to 6 hex stops joined by `-`, or `off`. The CLI exits with an error before rendering if a value is invalid. In the installed runtime, an invalid or unknown flag is ignored so the bar still renders; valid overrides still apply, and one diagnostic is written without logging the supplied value.
+`--theme` accepts a theme id or the `dark`, `light` and `colorblind` aliases. `--layout` accepts `pills`, `lines` or `classic`; `--caps` accepts `round`, `angled`, `slanted` or `flat`; `--gradient` accepts a preset, 2 to 6 hex stops joined by `-`, or `off`; `--language` accepts a [language code](#language). The CLI exits with an error before rendering if a value is invalid. In the installed runtime, an invalid or unknown flag is ignored so the bar still renders; valid overrides still apply, and one diagnostic is written without logging the supplied value.

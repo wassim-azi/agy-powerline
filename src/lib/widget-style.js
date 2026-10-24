@@ -2,6 +2,7 @@
 
 const { parseColor } = require("./colors");
 const { clipText, stripControl, visibleWidth } = require("./formatters");
+const { DEFAULT_LANGUAGE, t } = require("./i18n");
 
 // Basic names the exec widget's color option always accepted; the Lines
 // layout also uses them as its fallback palette.
@@ -82,51 +83,52 @@ function isPaced(widget, config) {
 }
 
 // Each widget's icon and label, shared by both layouts so Pills and Lines
-// read the same. iconOnly: with emojis on, the icon stands in for the label
+// read the same. name is the English label (configure shows it), key its
+// message in i18n.js. iconOnly: with emojis on, the icon stands in for the label
 // (a meter or the model name already says what it is).
 const WIDGET_TAGS = {
-  model: { icon: "🤖", name: "Model", iconOnly: true },
-  quota: { icon: "⏳", name: "Quota" },
-  fiveHourBar: { icon: "⏳", name: "5h", iconOnly: true },
-  fiveHourPct: { icon: "⏳", name: "5h" },
-  fiveHourReset: { icon: "🔄", name: "Reset" },
-  weeklyBar: { icon: "📅", name: "7d", iconOnly: true },
-  weeklyPct: { icon: "📅", name: "7d" },
-  weeklyReset: { icon: "🔄", name: "Reset" },
-  thirdPartyFiveHour: { icon: "🧪", name: "3P 5h" },
-  thirdPartyWeekly: { icon: "🧪", name: "3P 7d" },
-  argonWeekly: { icon: "🔮", name: "Argon 7d" },
-  argonReset: { icon: "🔄", name: "Argon reset" },
-  context: { icon: "💾", name: "Context", iconOnly: true },
-  contextPct: { icon: "💾", name: "Context" },
-  contextTokens: { icon: "💾", name: "Context" },
-  cwd: { icon: "📂", name: "Dir" },
-  project: { icon: "📦", name: "Project" },
+  model: { icon: "🤖", name: "Model", key: "tag_model", iconOnly: true },
+  quota: { icon: "⏳", name: "Quota", key: "tag_quota" },
+  fiveHourBar: { icon: "⏳", name: "5h", key: "tag_5h", iconOnly: true },
+  fiveHourPct: { icon: "⏳", name: "5h", key: "tag_5h" },
+  fiveHourReset: { icon: "🔄", name: "Reset", key: "tag_reset" },
+  weeklyBar: { icon: "📅", name: "7d", key: "tag_7d", iconOnly: true },
+  weeklyPct: { icon: "📅", name: "7d", key: "tag_7d" },
+  weeklyReset: { icon: "🔄", name: "Reset", key: "tag_reset" },
+  thirdPartyFiveHour: { icon: "🧪", name: "3P 5h", key: "tag_3p_5h" },
+  thirdPartyWeekly: { icon: "🧪", name: "3P 7d", key: "tag_3p_7d" },
+  argonWeekly: { icon: "🔮", name: "Argon 7d", key: "tag_argon_7d" },
+  argonReset: { icon: "🔄", name: "Argon reset", key: "tag_argon_reset" },
+  context: { icon: "💾", name: "Context", key: "tag_context", iconOnly: true },
+  contextPct: { icon: "💾", name: "Context", key: "tag_context" },
+  contextTokens: { icon: "💾", name: "Context", key: "tag_context" },
+  cwd: { icon: "📂", name: "Dir", key: "tag_dir" },
+  project: { icon: "📦", name: "Project", key: "tag_project" },
   os: { icon: "💻", name: "" },
-  host: { icon: "👤", name: "Host", iconOnly: true },
+  host: { icon: "👤", name: "Host", key: "tag_host", iconOnly: true },
   git: { icon: "🌿", name: "" },
-  gitChanges: { icon: "📝", name: "Lines" },
-  gitFiles: { icon: "📄", name: "Files" },
-  gitSha: { icon: "📌", name: "Commit" },
-  gitStash: { icon: "💼", name: "Stash" },
-  gitWorktree: { icon: "🌳", name: "Worktree" },
-  plan: { icon: "⭐", name: "Plan" },
-  agentState: { icon: "🟣", name: "Agent" },
-  artifacts: { icon: "📎", name: "Artifacts" },
+  gitChanges: { icon: "📝", name: "Lines", key: "tag_lines" },
+  gitFiles: { icon: "📄", name: "Files", key: "tag_files" },
+  gitSha: { icon: "📌", name: "Commit", key: "tag_commit" },
+  gitStash: { icon: "💼", name: "Stash", key: "tag_stash" },
+  gitWorktree: { icon: "🌳", name: "Worktree", key: "tag_worktree" },
+  plan: { icon: "⭐", name: "Plan", key: "tag_plan" },
+  agentState: { icon: "🟣", name: "Agent", key: "tag_agent" },
+  artifacts: { icon: "📎", name: "Artifacts", key: "tag_artifacts" },
   tasks: { icon: "👥", name: "" },
   mode: { icon: "🧭", name: "" },
   title: { icon: "💬", name: "" },
-  sessionTime: { icon: "⏱️", name: "Session" },
-  ram: { icon: "💻", name: "RAM" },
+  sessionTime: { icon: "⏱️", name: "Session", key: "tag_session" },
+  ram: { icon: "💻", name: "RAM", key: "tag_ram" },
   version: { icon: "🔖", name: "" },
   sandbox: { icon: "🔒", name: "" },
-  cacheRead: { icon: "📥", name: "Cache read" },
-  cacheCreate: { icon: "📤", name: "Cache create" },
-  cacheHit: { icon: "⚡", name: "Cache hit" },
-  totalTokens: { icon: "🪙", name: "Tokens" },
-  clock: { icon: "🕒", name: "Clock", iconOnly: true },
-  tokensToday: { icon: "📈", name: "Today" },
-  tokensWeek: { icon: "📊", name: "7d" },
+  cacheRead: { icon: "📥", name: "Cache read", key: "tag_cache_read" },
+  cacheCreate: { icon: "📤", name: "Cache create", key: "tag_cache_create" },
+  cacheHit: { icon: "⚡", name: "Cache hit", key: "tag_cache_hit" },
+  totalTokens: { icon: "🪙", name: "Tokens", key: "tag_tokens" },
+  clock: { icon: "🕒", name: "Clock", key: "tag_clock", iconOnly: true },
+  tokensToday: { icon: "📈", name: "Today", key: "tag_today" },
+  tokensWeek: { icon: "📊", name: "7d", key: "tag_7d" },
   customText: { icon: "🏷️", name: "" },
 };
 
@@ -155,13 +157,16 @@ function customIcon(widget) {
 // The text before a widget's value: "🔄 Reset: ", "Reset: ", or nothing for
 // raw widgets. icon overrides the table's for state icons (idle agent,
 // sandbox with network); the user's own label and icon win over both.
-function widgetTag(id, { emojis = true, raw = false, icon, widget, ascii = false } = {}) {
+function widgetTag(
+  id,
+  { emojis = true, raw = false, icon, widget, ascii = false, lang = DEFAULT_LANGUAGE } = {}
+) {
   const tag = WIDGET_TAGS[id];
   if (raw || !tag) {
     return "";
   }
   const label = customLabel(widget, ascii);
-  const name = label ?? tag.name;
+  const name = label ?? (tag.key ? t(tag.key, lang) : tag.name);
   const named = name ? `${name}: ` : "";
   if (!emojis) {
     return named;

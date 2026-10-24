@@ -3,12 +3,13 @@
 const os = require("os");
 const path = require("path");
 const { rgb } = require("./colors");
+const { t } = require("./i18n");
 
-function formatReset(seconds) {
+function formatReset(seconds, lang) {
   seconds = Number(seconds);
 
   if (!Number.isFinite(seconds) || seconds <= 0) {
-    return "now";
+    return t("now", lang);
   }
 
   const totalMinutes = Math.floor(seconds / 60);
@@ -17,23 +18,23 @@ function formatReset(seconds) {
   const minutes = totalMinutes % 60;
 
   if (days > 0) {
-    return `${days}d ${hours}h`;
+    return `${days}${t("unit_d", lang)} ${hours}${t("unit_h", lang)}`;
   }
 
   if (hours > 0) {
-    return `${hours}hr ${minutes}m`;
+    return `${hours}${t("unit_hr", lang)} ${minutes}${t("unit_m", lang)}`;
   }
 
-  return `${Math.max(1, minutes)}m`;
+  return `${Math.max(1, minutes)}${t("unit_m", lang)}`;
 }
 
-function formatSessionTime(startMs, nowMs = Date.now()) {
+function formatSessionTime(startMs, nowMs = Date.now(), lang) {
   const start = Number(startMs);
   const now = Number(nowMs);
   if (!Number.isFinite(start) || start <= 0 || !Number.isFinite(now) || now - start < 60000) {
     return "";
   }
-  return formatReset((now - start) / 1000);
+  return formatReset((now - start) / 1000, lang);
 }
 
 const MONTHS_SHORT = [
@@ -274,22 +275,22 @@ function shortModelName(name, ascii = false) {
 }
 
 // Session input and output tokens: "88.2K↑ 61.1K↓", or "88.2K in 61.1K out".
-function formatTokenSplit(input, output, ascii = false) {
+function formatTokenSplit(input, output, ascii = false, lang) {
   return ascii
-    ? `${formatTokens(input)} in ${formatTokens(output)} out`
+    ? `${formatTokens(input)} ${t("tokens_in", lang)} ${formatTokens(output)} ${t("tokens_out", lang)}`
     : `${formatTokens(input)}↑ ${formatTokens(output)}↓`;
 }
 
 // The usage widgets' text: "1.2M", or "1.0M↑ 245.3K↓" with "split", plus the
 // share of a "budget" when one is set ("1.2M (60%)"). null with no tokens.
-function formatUsage(tokens, widget = {}, ascii = false) {
+function formatUsage(tokens, widget = {}, ascii = false, lang) {
   const input = Number(tokens?.input) || 0;
   const output = Number(tokens?.output) || 0;
   const total = input + output;
   if (!(total > 0)) {
     return null;
   }
-  const value = widget?.split ? formatTokenSplit(input, output, ascii) : formatTokens(total);
+  const value = widget?.split ? formatTokenSplit(input, output, ascii, lang) : formatTokens(total);
   const budget = widget?.budget;
   const pct =
     typeof budget === "number" && Number.isFinite(budget) && budget > 0
@@ -620,9 +621,11 @@ function formatGitOperation(op) {
 }
 
 // "2 subagents, 1 task", or "" when nothing runs.
-function formatTasks(subagents, tasks) {
-  const part = (n, word) => (n > 0 ? `${n} ${word}${n === 1 ? "" : "s"}` : "");
-  return [part(subagents, "subagent"), part(tasks, "task")].filter(Boolean).join(", ");
+function formatTasks(subagents, tasks, lang) {
+  const part = (n, one, many) => (n > 0 ? `${n} ${t(n === 1 ? one : many, lang)}` : "");
+  return [part(subagents, "subagent", "subagents"), part(tasks, "task", "tasks")]
+    .filter(Boolean)
+    .join(", ");
 }
 
 // "accept-edits, NORMAL", or "" in the default mode with Vim editing off.

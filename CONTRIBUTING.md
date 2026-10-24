@@ -112,6 +112,7 @@ agy-powerline/
 │   │   ├── themes.js         # Built-in themes (dark-*, light-*, colorblind-*)
 │   │   ├── powerline.js      # Caps, separators and powerline styles
 │   │   ├── formatters.js     # Text helpers, sanitizing (stripControl, sanitizeDeep)
+│   │   ├── i18n.js           # The bar's own words in each language (MESSAGES, t())
 │   │   ├── git.js            # Branch, dirty state and ahead/behind, with a timeout
 │   │   ├── exec.js           # The exec (shell command) widget
 │   │   ├── log.js            # Local problem log
@@ -246,6 +247,20 @@ Themes live in **one file** (`src/lib/themes.js`).
 2. Run `npm test`. The theme tests check that every color reaches 4.5:1 contrast against the pill text and the terminal background, and that `fiveHour` (ok), `caution` and `warn` (danger) are clearly different. Color-blind themes must also pass simulated protanopia, deuteranopia and tritanopia.
 3. Look at it with `node src/index.js theme --gallery` on a terminal of the matching background.
 4. Add it to the themes table in `README.md` and in every translation (`README.<lang>.md`); the `readme` test suite fails if one misses it.
+
+---
+
+## 🌍 How to Add a Language
+
+The bar's own words (labels, `rem`, units) live in **one file** (`src/lib/i18n.js`). Each language has its own issue; take it there first.
+
+1. Add `MESSAGES["<code>"]` with exactly the keys of `MESSAGES.en` (the code is a language like `fr`, or with a region like `zh-CN`).
+2. Keep it short: the bar is tight. Run `npm test`: the `i18n` suite fails on a missing or extra key, and the `fit to terminal` suite renders every preset in every language at 80 columns and fails if a widget has to go.
+3. Run `npm run test:update`: it adds the language's snapshots. Check that the diff only adds those.
+4. Look at it: `node src/index.js render --demo --language <code>`, also with `--layout lines`.
+5. A native or fluent speaker reviews every line (drafting with AI is fine) and says so in the PR. Mention `"language"` in the matching `README.<lang>.md` and add a `CHANGELOG.md` entry.
+
+Only the bar is translated: payload text, numbers and dates (those follow `clock.locale`) stay as they are, and the CLI stays in English.
 
 ---
 

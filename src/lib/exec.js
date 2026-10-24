@@ -8,16 +8,13 @@ const { execSync } = require("child_process");
 const { stripControl, sanitizeDeep } = require("./formatters");
 const { RESET, getActiveDepth } = require("./colors");
 const { logWarning } = require("./log");
+const { t } = require("./i18n");
 const { PRIVATE_FILE_MODE } = require("./paths");
 
 const DEFAULT_TIMEOUT_MS = 500;
 const DEFAULT_INTERVAL_SEC = 10;
 const MAX_CACHE_AGE_SEC = 3600;
 const MAX_OUTPUT_CHARS = 80;
-
-// Placeholders shown instead of running the command.
-const EXEC_PREVIEW_TEXT = "[cmd]";
-const EXEC_BLOCKED_TEXT = "[blocked]";
 
 const memoryCache = new Map();
 
@@ -233,7 +230,8 @@ function execWidgetOutput(widget, session = {}) {
     return output;
   }
 
-  return session.execMode === "blocked" ? EXEC_BLOCKED_TEXT : EXEC_PREVIEW_TEXT;
+  // Placeholders shown instead of running the command.
+  return t(session.execMode === "blocked" ? "cmd_blocked" : "cmd_preview", session.lang);
 }
 
 function runExecWidget(widget, session = {}) {
@@ -349,6 +347,4 @@ module.exports = {
   saveDiskCache,
   DEFAULT_TIMEOUT_MS,
   DEFAULT_INTERVAL_SEC,
-  EXEC_PREVIEW_TEXT,
-  EXEC_BLOCKED_TEXT,
 };

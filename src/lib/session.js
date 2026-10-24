@@ -8,20 +8,21 @@ const { resolveGit, resolveGitDetails } = require("./git");
 const { resolveUsage, conversationsDir } = require("./usage");
 const { isWsl, resolveInstallDir, writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
 const { logWarning } = require("./log");
+const { resolveLanguage, t } = require("./i18n");
 
 const FIVE_HOURS = 5 * 3600;
 const SEVEN_DAYS = 7 * 86400;
 const ARGON_BUCKET = "gemini-argon-wtu-weekly";
-// The buckets Antigravity sends, with the short names the bar shows.
+// The buckets Antigravity sends, with the message key of the short name the bar shows.
 const QUOTA_BUCKETS = {
-  "gemini-5h": { label: "5h", window: FIVE_HOURS },
-  "gemini-weekly": { label: "7d", window: SEVEN_DAYS },
+  "gemini-5h": { key: "tag_5h", window: FIVE_HOURS },
+  "gemini-weekly": { key: "tag_7d", window: SEVEN_DAYS },
   // Gemini 4 Argon on Google AI Pro: a weekly quota of its own, with no 5-hour
   // window, sent whatever model is in use. On Ultra Argon counts toward the
   // Gemini buckets and this one isn't sent.
-  [ARGON_BUCKET]: { label: "Argon 7d", window: SEVEN_DAYS },
-  "3p-5h": { label: "3P 5h", window: FIVE_HOURS },
-  "3p-weekly": { label: "3P 7d", window: SEVEN_DAYS },
+  [ARGON_BUCKET]: { key: "tag_argon_7d", window: SEVEN_DAYS },
+  "3p-5h": { key: "tag_3p_5h", window: FIVE_HOURS },
+  "3p-weekly": { key: "tag_3p_7d", window: SEVEN_DAYS },
 };
 // No quota window lasts a year: a reset further out is a broken value.
 const MAX_RESET_SECONDS = 366 * 86400;
@@ -189,7 +190,7 @@ function percent(value) {
   return Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0;
 }
 
-function readQuota(data, key, windowSeconds) {
+function readQuota(data, key, windowSeconds, lang) {
   const quota = data?.quota?.[key];
 
   if (!quota || typeof quota !== "object") {
@@ -221,7 +222,7 @@ function readQuota(data, key, windowSeconds) {
 
   return {
     remaining,
-    reset: hasReset ? formatReset(resetSeconds) : "",
+    reset: hasReset ? formatReset(resetSeconds, lang) : "",
     resetSeconds,
     elapsedPct,
     resetTime: resetValid && quota.reset_time ? String(quota.reset_time) : "",
@@ -245,15 +246,15 @@ function bucketGroup(key) {
 // (third-party) buckets for the others. Argon falls back to the Gemini
 // buckets, where its usage counts when there is no Argon bucket. Without a
 // matching bucket every bucket counts. Disabled buckets never do.
-function tightestQuota(data) {
+function tightestQuota(data, lang) {
   const buckets = data?.quota && typeof data.quota === "object" ? data.quota : {};
   const usable = [];
 
   for (const key of Object.keys(buckets)) {
     const known = QUOTA_BUCKETS[key];
-    const quota = readQuota(data, key, known ? known.window : 0);
+    const quota = readQuota(data, key, known ? known.window : 0, lang);
     if (quota && !quota.disabled) {
-      usable.push({ ...quota, key, label: known ? known.label : key.slice(0, 20) });
+      usable.push({ ...quota, key, label: known ? t(known.key, lang) : key.slice(0, 20) });
     }
   }
 
@@ -303,6 +304,8 @@ function contextUsedPercent(data) {
 // options.readUsage: the live statusline may read conversation metadata and
 // databases; previews use the usage cache and a synthetic sample start time.
 function extractSession(data, config, options = {}) {
+  // The bar's own words follow config.language; payload text never changes.
+  const lang = resolveLanguage(config?.language);
   const git = resolveGit(data, config);
   const gitDetails = resolveGitDetails(data, config);
   // Once git status has been read for gitFiles, the branch's dirty marker can
@@ -361,6 +364,7 @@ function extractSession(data, config, options = {}) {
   }
 
   return {
+    lang,
     os: osName,
     ramPct,
     username: username || "",
@@ -380,12 +384,12 @@ function extractSession(data, config, options = {}) {
     exceeds200k: data.exceeds_200k_tokens === true,
     cacheRead: count(data.context_window?.current_usage?.cache_read_input_tokens),
     cacheCreate: count(data.context_window?.current_usage?.cache_creation_input_tokens),
-    fiveHour: readQuota(data, "gemini-5h", FIVE_HOURS),
-    weekly: readQuota(data, "gemini-weekly", SEVEN_DAYS),
-    thirdPartyFiveHour: readQuota(data, "3p-5h", FIVE_HOURS),
-    thirdPartyWeekly: readQuota(data, "3p-weekly", SEVEN_DAYS),
-    argonWeekly: readQuota(data, ARGON_BUCKET, SEVEN_DAYS),
-    tightestQuota: tightestQuota(data),
+    fiveHour: readQuota(data, "gemini-5h", FIVE_HOURS, lang),
+    weekly: readQuota(data, "gemini-weekly", SEVEN_DAYS, lang),
+    thirdPartyFiveHour: readQuota(data, "3p-5h", FIVE_HOURS, lang),
+    thirdPartyWeekly: readQuota(data, "3p-weekly", SEVEN_DAYS, lang),
+    argonWeekly: readQuota(data, ARGON_BUCKET, SEVEN_DAYS, lang),
+    tightestQuota: tightestQuota(data, lang),
     cwd: firstText(data.cwd, data.workspace?.current_dir),
     project: firstText(data.workspace?.project_dir),
     plan: firstText(data.plan_tier),

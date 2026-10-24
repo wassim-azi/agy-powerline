@@ -28,6 +28,7 @@ const RUNTIME_FILES = [
   "log.js",
   "payload-dump.js",
   "usage.js",
+  "i18n.js",
   path.join("layouts", "lines.js"),
   path.join("layouts", "pills.js"),
 ];

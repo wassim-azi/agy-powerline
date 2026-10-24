@@ -17,6 +17,7 @@ const { THEME_ORDER, THEME_ALIASES, GRADIENT_ORDER, COLOR_KEYS } = require(
 );
 const { COLOR_MODES } = require(path.join(repo, "src/lib/colors"));
 const { METER_STYLE_IDS } = require(path.join(repo, "src/lib/widget-style"));
+const { SUPPORTED_LANGUAGES } = require(path.join(repo, "src/lib/i18n"));
 
 const DOCS = "https://agy-powerline.com/docs/configuration/";
 
@@ -52,6 +53,11 @@ function buildConfigSchema() {
         enum: [...THEME_ORDER, ...Object.keys(THEME_ALIASES)],
       },
       layout: { description: "pills, lines or classic.", enum: [...LAYOUT_ORDER] },
+      language: {
+        description:
+          "Language of the bar's own labels and units (default en). Dates follow clock.locale.",
+        enum: [...SUPPORTED_LANGUAGES],
+      },
       emojis: { type: "boolean", description: "Show emoji icons (default true)." },
       ascii: {
         type: "boolean",

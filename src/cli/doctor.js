@@ -28,6 +28,7 @@ const { runStatuslineCommand } = require("../lib/run");
 const { detectColorDepth } = require("../lib/colors");
 const { readLog, getLogPath } = require("../lib/log");
 const { USAGE_PERIODS, usageAvailable } = require("../lib/usage");
+const { matchLanguage, SUPPORTED_LANGUAGES } = require("../lib/i18n");
 const { version } = require("../../package.json");
 
 const DIM = "\x1b[2m";
@@ -78,7 +79,7 @@ function stripAnsi(text) {
 function renderOverridesInCommand(command) {
   const names = [];
   const pattern =
-    /(?:^|\s)--(preset|layout|theme|caps|gradient)(?:(?:\s*=\s*|\s+)(?:"([^"]*)"|'([^']*)'|([^\s-][^\s]*)))?/g;
+    /(?:^|\s)--(preset|layout|theme|caps|gradient|language)(?:(?:\s*=\s*|\s+)(?:"([^"]*)"|'([^']*)'|([^\s-][^\s]*)))?/g;
 
   for (const match of String(command).matchAll(pattern)) {
     const value = match[2] ?? match[3] ?? match[4] ?? "(missing)";
@@ -191,6 +192,17 @@ async function doctorCommand(options = {}) {
       `${YELLOW} usage widgets need Node 22.13 or newer${RESET} (this is ${process.version}).`
     );
     console.log("  tokensToday and tokensWeek stay hidden until Node is updated.");
+  }
+
+  // Not a failure either: the bar shows English.
+  const language = configState.raw?.language;
+  if (language !== undefined && !matchLanguage(language)) {
+    const shown = String(language)
+      .replace(/[^A-Za-z0-9_-]/g, "?")
+      .slice(0, 32);
+    console.log();
+    console.log(`${YELLOW} language "${shown}" isn't available${RESET}, so the bar shows English.`);
+    console.log(`  Available: ${SUPPORTED_LANGUAGES.join(", ")}`);
   }
 
   const breaking = cmdBreakingChars(installDir);
