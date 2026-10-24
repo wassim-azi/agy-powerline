@@ -1,9 +1,11 @@
 "use strict";
 
-// Builds the theme gallery, the site's home page: every theme rendered by the
-// real statusline code, on dark and light terminals, with a color-blindness
-// simulation toggle. The whole site (scripts/site/build.js) uses it for / and
-// /fr/; on its own it writes one English page for a quick look.
+// Builds the site's home page (/ and /fr/) and the theme gallery (/themes/):
+// every bar on them is rendered by the real statusline code. The home page
+// shows the bar in an agy window with a few themes and the three layouts to
+// switch between; the gallery shows every theme on dark and light terminals,
+// with a color-blindness simulation. The whole site (scripts/site/build.js)
+// uses both; on its own this writes the gallery for a quick look.
 // Usage: npm run gallery [-- <out.html>]   (default: ./gallery.html)
 const fs = require("fs");
 const path = require("path");
@@ -12,9 +14,23 @@ const repo = path.join(__dirname, "..", "..");
 
 const { renderStatusline, sampleData, defaultConfig } = require(path.join(repo, "src/lib/shared"));
 const { THEMES, THEME_ORDER } = require(path.join(repo, "src/lib/themes"));
+const { WIDGET_CATALOG } = require(path.join(repo, "src/lib/catalog"));
 const { version } = require(path.join(repo, "package.json"));
 const { ansiToHtml } = require("../site/ansi");
-const { injectSiteChrome, REPO_URL, NPM_URL, SITE_URL, OG_IMAGE } = require("../site/layout");
+const {
+  injectSiteChrome,
+  commandBox,
+  icon,
+  REPO_URL,
+  NPM_URL,
+  SITE_URL,
+  X_URL,
+  LINKEDIN_URL,
+  AUTHOR_URL,
+  absoluteUrl,
+  cardPath,
+} = require("../site/layout");
+const { breadcrumbData } = require("../site/doc-page");
 const { HOME_TEXT } = require("../site/home-text");
 const { encodeConfig } = require("../configurator/page");
 
@@ -23,16 +39,27 @@ const TERM = { dark: [29, 31, 39], light: [251, 251, 248] };
 // Screenshots from assets/screenshots/, served under descriptive names.
 const SCREENSHOTS = ["windows", "pills-dark", "lines-light", "classic-dark"];
 const screenshotUrl = (name) => `/img/agy-statusline-${name}.png`;
+// The themes the home page's demo switches between.
+const DEMO_THEMES = [
+  "dark-aurora",
+  "dark-nord",
+  "dark-rose-pine",
+  "light-paper",
+  "light-tokyo-night",
+  "colorblind-dark",
+];
+const LAYOUTS = ["pills", "lines", "classic"];
 
 // The page's bars: a blank line between rows, and gaps that stretch to the box.
 const PREVIEW = { config: { rowGap: true }, render: { color: "truecolor", flexGaps: true } };
 
-function payload(overrides = {}) {
+// 80 columns, the width of a default terminal window.
+function payload(width = 80) {
   const data = sampleData();
   data.cwd = FAKE_DIR;
   data.workspace = { current_dir: FAKE_DIR, project_dir: FAKE_DIR };
-  data.terminal_width = 96;
-  return { ...data, ...overrides };
+  data.terminal_width = width;
+  return data;
 }
 
 function withFiveHour(fraction) {
@@ -42,6 +69,12 @@ function withFiveHour(fraction) {
     "gemini-5h": { ...data.quota["gemini-5h"], remaining_fraction: fraction },
   };
   return data;
+}
+
+function renderBar(data, config) {
+  return ansiToHtml(
+    renderStatusline(data, { ...defaultConfig(), ...PREVIEW.config, ...config }, PREVIEW.render)
+  );
 }
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -68,6 +101,11 @@ const KEYS = [
 ];
 
 const hexOf = (c) => "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("");
+const targetOf = (id) => (THEMES[id].kind === "light" || id.endsWith("-light") ? "light" : "dark");
+const swatch = (id) =>
+  `<span class="swatch" aria-hidden="true">${["model", "git", "weekly"]
+    .map((k) => `<i style="background:${hexOf(THEMES[id].colors[k])}"></i>`)
+    .join("")}</span>`;
 
 // Width and height from a PNG's header, so images reserve their space.
 function pngSize(file) {
@@ -75,20 +113,20 @@ function pngSize(file) {
   return { width: buf.readUInt32BE(16), height: buf.readUInt32BE(20) };
 }
 
+const galleryThemes = () => THEME_ORDER.filter((id) => id !== "custom");
+const counts = () => ({
+  themes: galleryThemes().length,
+  widgets: WIDGET_CATALOG.filter((w) => w.id !== "separator" && w.id !== "lineBreak").length,
+});
+
 function buildThemes() {
-  return THEME_ORDER.filter((id) => id !== "custom").map((id) => {
+  return galleryThemes().map((id) => {
     const t = THEMES[id];
-    const target = t.kind === "light" || id.endsWith("-light") ? "light" : "dark";
-    const render = (data, config) =>
-      ansiToHtml(
-        renderStatusline(
-          data,
-          { ...defaultConfig(), ...PREVIEW.config, theme: id, ...config },
-          PREVIEW.render
-        )
-      );
+    const target = targetOf(id);
     const status = [0.8, 0.22, 0.06]
-      .map((f) => render(withFiveHour(f), { layout: "pills", widgets: [{ id: "fiveHourBar" }] }))
+      .map((f) =>
+        renderBar(withFiveHour(f), { theme: id, layout: "pills", widgets: [{ id: "fiveHourBar" }] })
+      )
       .join("");
     return {
       id,
@@ -96,9 +134,9 @@ function buildThemes() {
       kind: t.kind,
       description: t.description,
       target,
-      pills: render(payload(), { layout: "pills" }),
-      lines: render(payload(), { layout: "lines" }),
-      classic: render(payload(), { layout: "classic" }),
+      pills: renderBar(payload(), { theme: id, layout: "pills" }),
+      lines: renderBar(payload(), { theme: id, layout: "lines" }),
+      classic: renderBar(payload(), { theme: id, layout: "classic" }),
       status,
       configHash: encodeConfig({ ...defaultConfig(), theme: id }),
       states: ["fiveHour", "caution", "warn"].map((k) => hexOf(t.colors[k])),
@@ -108,12 +146,24 @@ function buildThemes() {
   });
 }
 
-function card(t, text) {
+const GALLERY_TEXT = {
+  pillText: "Pill text",
+  onTerminal: "On terminal",
+  states: "OK · caution · danger",
+  termDark: "dark terminal",
+  termLight: "light terminal",
+  quotaRow: "5h quota at 80% · 22% · 6% left",
+  useTheme: "Use this theme →",
+  copy: "Copy",
+};
+
+function card(t) {
+  const text = GALLERY_TEXT;
   return `
 <article class="theme" data-kind="${t.kind}" data-target="${t.target}" id="${t.id}">
   <header class="theme-head">
     <div class="theme-name">
-      <h3><a class="theme-anchor" href="#${t.id}">${esc(t.name)}</a></h3>
+      <h2><a class="theme-anchor" href="#${t.id}">${esc(t.name)}</a></h2>
       <code class="theme-id">${t.id}</code>
     </div>
     <p class="theme-desc">${esc(t.description)}</p>
@@ -145,70 +195,14 @@ function card(t, text) {
       <div class="screen">${t.status}</div>
     </div>
   </div>
-  <footer class="theme-actions" aria-label="${text.useLabel} ${attr(t.name)}">
-    <div class="cli-pill">
-      <code>npx agy-powerline theme ${t.id}</code>
-      <button
-        type="button"
-        class="btn-copy"
-        data-copy="npx agy-powerline theme ${t.id}"
-        aria-label="${text.copyCommandFor} ${attr(t.name)}"
-      >
-        <span class="copy-label">${text.copy}</span>
-      </button>
-    </div>
-    <a class="btn-use-theme" href="/configure/#${t.configHash}">${text.useTheme}</a>
+  <footer class="theme-actions">
+    ${commandBox(`npx agy-powerline theme ${t.id}`, { label: `Copy the command for ${t.name}` })}
+    <a class="btn btn-secondary btn-sm" href="/configure/#${t.configHash}">${text.useTheme}</a>
   </footer>
 </article>`;
 }
 
-function introHtml(text) {
-  const shots = SCREENSHOTS.map((name) => {
-    const { width, height } = pngSize(path.join(repo, "assets", "screenshots", `${name}.png`));
-    return `<li><figure>
-            <img src="${screenshotUrl(name)}" alt="${attr(text.shots[name])}" width="${width}" height="${height}" loading="lazy" decoding="async" />
-            <figcaption>${text.shotCaptions[name]}</figcaption>
-          </figure></li>`;
-  }).join("\n          ");
-  return `<div class="intro">
-        <section class="panel" aria-labelledby="what">
-          <h2 id="what">${text.whatTitle}</h2>
-          ${text.whatBody.map((p) => `<p>${p}</p>`).join("\n          ")}
-        </section>
-        <section class="panel" id="install" aria-labelledby="install-title">
-          <h2 id="install-title">${text.installTitle}</h2>
-          <ol class="steps">
-            ${text.installSteps.map((s) => `<li>${s}</li>`).join("\n            ")}
-          </ol>
-          <p style="margin-top: 12px">${text.installMore}</p>
-        </section>
-      </div>
-
-      <section aria-labelledby="shots">
-        <h2 class="section-title" id="shots" style="margin-bottom: 14px">${text.shotsTitle}</h2>
-        <ul class="shots">
-          ${shots}
-        </ul>
-      </section>
-
-      <div class="intro">
-        <section class="panel" aria-labelledby="learn">
-          <h2 id="learn">${text.learnTitle}</h2>
-          <ul class="steps" style="padding-left: 18px">
-            ${text.learnLinks.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("\n            ")}
-          </ul>
-        </section>
-        <section class="panel" aria-labelledby="trust">
-          <h2 id="trust">${text.trustTitle}</h2>
-          <p>${text.trustBody}</p>
-          <ul class="trust">
-            ${text.trust.map(([href, label]) => `<li><a href="${href}">${label}</a></li>`).join("\n            ")}
-          </ul>
-        </section>
-      </div>`;
-}
-
-// The home page's structured data: the site (for the site name in search
+// The site's structured data: the site (for the site name in search
 // results), its author and the app. No rating: Google wants real reviews for
 // software rich results, and invented ones break its rules.
 function homeStructuredData(description) {
@@ -228,7 +222,8 @@ function homeStructuredData(description) {
         "@type": "Person",
         "@id": `${SITE_URL}#author`,
         name: "Wassim AZI",
-        url: "https://github.com/wassim-azi",
+        url: AUTHOR_URL,
+        sameAs: [AUTHOR_URL, X_URL, LINKEDIN_URL],
       },
       {
         "@type": "SoftwareApplication",
@@ -236,7 +231,8 @@ function homeStructuredData(description) {
         name: "agy-powerline",
         description,
         url: SITE_URL,
-        image: SITE_URL + OG_IMAGE.path,
+        image: absoluteUrl(cardPath("")),
+        screenshot: SCREENSHOTS.map((name) => absoluteUrl(screenshotUrl(name))),
         applicationCategory: "DeveloperApplication",
         applicationSubCategory: "Terminal statusline",
         operatingSystem: "Windows, macOS, Linux",
@@ -254,27 +250,168 @@ function homeStructuredData(description) {
   };
 }
 
+// --- Home page ----------------------------------------------------------------
+
+function demoHtml(text) {
+  const n = counts();
+  const [first] = DEMO_THEMES;
+  // Every theme × layout pair waits in a <template>, outside the page's DOM
+  // until a button asks for it.
+  const variants = DEMO_THEMES.flatMap((id) =>
+    LAYOUTS.map(
+      (layout) =>
+        `<template data-variant="${id}:${layout}" data-bg="${targetOf(id)}">${renderBar(payload(), { theme: id, layout })}</template>`
+    )
+  ).join("\n        ");
+  const chips = DEMO_THEMES.map(
+    (id) =>
+      `<button type="button" class="chip" data-demo-theme="${id}" aria-pressed="${id === first}">${swatch(id)}${esc(THEMES[id].name)}</button>`
+  ).join("\n            ");
+  const tabs = LAYOUTS.map(
+    (layout) =>
+      `<button type="button" class="tab" data-demo-layout="${layout}" aria-pressed="${layout === "pills"}">${layout[0].toUpperCase()}${layout.slice(1)}</button>`
+  ).join("");
+  return `<figure class="term-frame agy-window" id="demo" data-bg="dark">
+          <figcaption class="sr-only">${text.heroBarCaption}</figcaption>
+          <div class="term-titlebar">
+            <div class="term-dots" aria-hidden="true">
+              <span class="term-dot"></span>
+              <span class="term-dot"></span>
+              <span class="term-dot"></span>
+            </div>
+            <span class="term-title">agy · <span class="demo-label">${first} · pills</span></span>
+          </div>
+          <div class="term agy-body" data-bg="dark" aria-hidden="true">
+            <p class="agy-msg"><span class="agy-ok">✓</span> Updated 3 files. All 128 tests pass.</p>
+            <div class="agy-input"><span class="agy-prompt">&gt;</span> ${text.askAgy}<span class="caret"></span></div>
+            <div class="screen" id="demoBar">${renderBar(payload(), { theme: first, layout: "pills" })}</div>
+          </div>
+        </figure>
+        <div class="demo-controls">
+          <div class="chips" role="group" aria-label="${text.demoThemes}">
+            ${chips}
+            <a class="chip chip-more" href="/themes/">${text.allThemes(n.themes)}</a>
+          </div>
+          <div class="tabs" role="group" aria-label="${text.demoLayouts}">${tabs}</div>
+        </div>
+        ${variants}`;
+}
+
+function anatomyHtml(text) {
+  const colors = THEMES["dark-aurora"].colors;
+  const items = text.anatomy
+    .map(
+      ([key, title, body], i) =>
+        `<li class="legend-item"><span class="legend-num" style="--c:${key === "pace" ? "#ffffff" : hexOf(colors[key])}">${i + 1}</span><div><h3>${title}</h3><p>${body}</p></div></li>`
+    )
+    .join("\n            ");
+  return `<figure class="term-frame anatomy-bar" data-bg="dark">
+            <figcaption class="sr-only">${text.anatomyLead}</figcaption>
+            <div class="term-titlebar">
+              <div class="term-dots" aria-hidden="true">
+                <span class="term-dot"></span>
+                <span class="term-dot"></span>
+                <span class="term-dot"></span>
+              </div>
+              <span class="term-title">dark-aurora · default preset</span>
+            </div>
+            <div class="term" data-bg="dark"><div class="screen">${renderBar(payload(), {})}</div></div>
+          </figure>
+          <ol class="legend">
+            ${items}
+          </ol>`;
+}
+
+function stepsHtml(text) {
+  return text.steps
+    .map(
+      ([title, body, command], i) =>
+        `<li class="tile step"><span class="step-num" aria-hidden="true">${i + 1}</span><h3>${title}</h3><p>${body}</p>${commandBox(command, { label: `${text.copyCommand} ${command}`, copy: text.copy })}</li>`
+    )
+    .join("\n            ");
+}
+
+function featuresHtml(text) {
+  return text
+    .features(counts())
+    .map(
+      ([art, title, body, href]) =>
+        `<li><a class="tile feature" href="${href}"><img class="tile-icon" src="/img/icon-${art}.webp" alt="" width="56" height="56" loading="lazy" decoding="async" /><h3>${title}</h3><p>${body}</p></a></li>`
+    )
+    .join("\n            ");
+}
+
+function shotsHtml(text) {
+  const tabs = SCREENSHOTS.map(
+    (name, i) =>
+      `<button type="button" class="tab" role="tab" id="tab-${name}" aria-controls="shot-${name}" aria-selected="${i === 0}"${i === 0 ? "" : ' tabindex="-1"'}>${text.shots[name][0]}</button>`
+  ).join("");
+  const panels = SCREENSHOTS.map((name, i) => {
+    const { width, height } = pngSize(path.join(repo, "assets", "screenshots", `${name}.png`));
+    return `<figure class="shot" role="tabpanel" id="shot-${name}" aria-labelledby="tab-${name}"${i === 0 ? "" : " hidden"}>
+              <img src="${screenshotUrl(name)}" alt="${attr(text.shots[name][1])}" width="${width}" height="${height}" loading="lazy" decoding="async" />
+            </figure>`;
+  }).join("\n            ");
+  return `<div class="tabs shot-tabs" role="tablist" aria-label="${text.shotsTitle}">${tabs}</div>
+          <div class="shot-stage">
+            ${panels}
+          </div>`;
+}
+
+function themeStripHtml() {
+  return galleryThemes()
+    .map(
+      (id) =>
+        `<li><a class="chip" href="/themes/#${id}">${swatch(id)}${esc(THEMES[id].name)}</a></li>`
+    )
+    .join("\n            ");
+}
+
+function faqHtml(text) {
+  return text.faq
+    .map(([q, a]) => `<details class="faq-item"><summary>${q}</summary><p>${a}</p></details>`)
+    .join("\n          ");
+}
+
+function trustHtml(text) {
+  return text.trust
+    .map(([href, label]) => `<li><a class="chip" href="${href}">${label}</a></li>`)
+    .join("\n            ");
+}
+
 // lang: "en" for /, "fr" for /fr/.
-function buildGalleryHtml({ lang = "en" } = {}) {
+function buildHomeHtml({ lang = "en" } = {}) {
   const text = HOME_TEXT[lang];
-  const themes = buildThemes();
-  const heroBar = ansiToHtml(
-    renderStatusline(payload(), { ...defaultConfig(), ...PREVIEW.config }, PREVIEW.render)
+  const n = counts();
+  const sections = {
+    INSTALL_CMD: commandBox("npx agy-powerline init", {
+      label: text.copyInstall,
+      copy: text.copy,
+      large: true,
+    }),
+    DEMO: demoHtml(text),
+    ANATOMY: anatomyHtml(text),
+    STEPS: stepsHtml(text),
+    FEATURES: featuresHtml(text),
+    SHOTS: shotsHtml(text),
+    THEME_STRIP: themeStripHtml(),
+    TRUST: trustHtml(text),
+    FAQ: faqHtml(text),
+  };
+  const values = {
+    heroFacts: text.heroFacts.map((f) => `<li>${f}</li>`).join(""),
+    themesTitle: text.themesTitle(n.themes),
+    seeAllThemes: text.seeAllThemes(n.themes),
+    arrow: icon("arrow", 18),
+  };
+  const template = fs.readFileSync(path.join(__dirname, "home.html"), "utf8");
+  const filled = template.replace(/\{\{(\w+)\}\}/g, (match, key) =>
+    key in values ? values[key] : typeof text[key] === "string" ? text[key] : match
   );
-  const rawTemplate = fs.readFileSync(path.join(__dirname, "template.html"), "utf8");
-  const filled = rawTemplate.replace(/\{\{(\w+)\}\}/g, (match, key) => {
-    if (key === "facts") {
-      return text
-        .facts(themes.length)
-        .map((f) => `<li>${f}</li>`)
-        .join("\n          ");
-    }
-    return typeof text[key] === "string" ? text[key] : match;
-  });
   const page = injectSiteChrome(filled, {
     title: text.title,
     description: text.description,
-    currentPage: "themes",
+    currentPage: "home",
     pagePath: lang === "en" ? "" : `${lang}/`,
     lang,
     alternates: [
@@ -282,19 +419,81 @@ function buildGalleryHtml({ lang = "en" } = {}) {
       { hreflang: "fr", path: "fr/" },
       { hreflang: "x-default", path: "" },
     ],
+    imageAlt:
+      lang === "fr"
+        ? "agy-powerline : la statusline agy qui vous dit si votre quota va tenir, avec la barre par défaut"
+        : "agy-powerline: the agy statusline that tells you if your quota will last, with the default bar",
     structuredData: lang === "en" ? homeStructuredData(text.description) : undefined,
   });
-  return page
-    .replace("<!--HERO_BAR-->", heroBar)
-    .replace("<!--INTRO-->", introHtml(text))
-    .replace("<!--CARDS-->", themes.map((t) => card(t, text)).join("\n"));
+  return page.replace(/<!--([A-Z_]+)-->/g, (match, key) =>
+    key in sections ? sections[key] : match
+  );
+}
+
+// --- Theme gallery --------------------------------------------------------------
+
+const THEMES_PAGE = {
+  path: "themes/",
+  title: "agy statusline themes - 20 themes for Antigravity CLI",
+  description:
+    "Every agy-powerline theme for the agy statusline, drawn by the real code on dark and light terminals, with contrast figures and a color-blindness simulation.",
+};
+
+function themesStructuredData(themes) {
+  return [
+    breadcrumbData([
+      { name: "agy-powerline", path: "" },
+      { name: "Themes", path: THEMES_PAGE.path },
+    ]),
+    {
+      "@context": "https://schema.org",
+      "@type": "CollectionPage",
+      name: "agy statusline themes",
+      description: THEMES_PAGE.description,
+      url: absoluteUrl(THEMES_PAGE.path),
+      isPartOf: { "@id": `${SITE_URL}#website` },
+      about: { "@id": `${SITE_URL}#app` },
+      mainEntity: {
+        "@type": "ItemList",
+        numberOfItems: themes.length,
+        itemListElement: themes.map((t, i) => ({
+          "@type": "ListItem",
+          position: i + 1,
+          name: t.name,
+          url: absoluteUrl(`${THEMES_PAGE.path}#${t.id}`),
+        })),
+      },
+    },
+  ];
+}
+
+function buildThemesHtml() {
+  const themes = buildThemes();
+  const template = fs.readFileSync(path.join(__dirname, "themes.html"), "utf8");
+  const title = THEMES_PAGE.title.replace("20", String(themes.length));
+  const page = injectSiteChrome(template.replace(/\{\{count\}\}/g, String(themes.length)), {
+    title,
+    description: THEMES_PAGE.description,
+    currentPage: "themes",
+    pagePath: THEMES_PAGE.path,
+    structuredData: themesStructuredData(themes),
+  });
+  return page.replace("<!--CARDS-->", themes.map((t) => card(t)).join("\n"));
 }
 
 if (require.main === module) {
   const out = path.resolve(process.argv[2] || path.join(repo, "gallery.html"));
   fs.mkdirSync(path.dirname(out), { recursive: true });
-  fs.writeFileSync(out, buildGalleryHtml(), "utf8");
+  fs.writeFileSync(out, buildThemesHtml(), "utf8");
   console.log(`wrote ${out} (${(fs.statSync(out).size / 1024).toFixed(0)} KB)`);
 }
 
-module.exports = { buildGalleryHtml, homeStructuredData, SCREENSHOTS, screenshotUrl, pngSize };
+module.exports = {
+  buildHomeHtml,
+  buildThemesHtml,
+  homeStructuredData,
+  THEMES_PAGE,
+  SCREENSHOTS,
+  screenshotUrl,
+  pngSize,
+};

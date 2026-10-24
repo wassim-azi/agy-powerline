@@ -4,73 +4,140 @@
 // theme names and descriptions, widget ids and commands stay in English
 // (AGENTS.md): only the page around them is translated. A translation is
 // reviewed line by line by a fluent speaker before it ships.
-// Values are HTML: escape <, > and & in plain text.
+// Values are HTML: escape <, > and & in plain text. Functions take the counts
+// the page reads from the code ({ themes, widgets }).
 
 const HOME_TEXT = {
   en: {
     lang: "en",
     title: "agy statusline for Google Antigravity CLI - agy-powerline",
     description:
-      "agy-powerline is an agy statusline for Google Antigravity CLI: Gemini, Claude/GPT and Argon quotas with pace markers, context and git in agy's status bar. Preview every theme.",
-    introLabel: "Introduction",
-    heroTitle: "A powerline-style <code>agy</code> statusline for Google Antigravity CLI",
-    heroSub:
-      "See whether you'll run out of quota before it resets: your Gemini 5h/7d, Claude/GPT and Argon quotas with pace markers, the active model, context window and git status, at a glance. Every preview on this page is rendered by the real statusline code.",
-    heroBarCaption:
-      "The default agy-powerline bar with the dark-aurora theme: model, context window and git branch on the first row; the Gemini 5-hour and 7-day quotas with pace markers and reset timers on the second.",
+      "agy-powerline is an agy statusline for Google Antigravity CLI: Gemini, Claude/GPT and Argon quotas with pace markers, context and git in agy's status bar.",
+    eyebrow: "Statusline for Google Antigravity CLI",
+    heroTitle:
+      'The <code>agy</code> statusline that tells you <span class="grad-text">if your quota will last</span>',
+    heroLead:
+      "Your model, context window, git and every Antigravity quota with a pace marker, in a powerline bar under agy's input box. One command to set up.",
     copy: "Copy",
-    copied: "Copied",
-    copiedStatus: "Copied %s to clipboard",
-    copyInstall: "Copy install command",
-    buildInBrowser: "Build your bar in the browser →",
-    viewOnGithub: "View on GitHub",
-    keyFacts: "Key facts",
-    facts: (count) => [
-      `<strong>${count} themes</strong> for dark, light &amp; color-blind terminals`,
-      "<strong>3 layouts</strong> (pills, lines &amp; classic)",
-      "<strong>Zero runtime dependencies</strong>",
-      "<strong>Windows, macOS, Linux and WSL</strong>",
+    copyCommand: "Copy:",
+    copyInstall: "Copy the install command",
+    buildInBrowser: "Build your bar in the browser",
+    heroFacts: ["Node.js 20+", "0 dependencies", "No telemetry", "MIT license"],
+    askAgy: "Ask agy anything…",
+    heroBarCaption:
+      "A live preview of agy-powerline under agy's input box. Pick a theme and a layout to change it; every bar on this page is drawn by the real statusline code.",
+    demoThemes: "Theme",
+    demoLayouts: "Layout",
+    allThemes: (n) => `All ${n} →`,
+    anatomyEyebrow: "At a glance",
+    anatomyTitle: "Read the bar in ten seconds",
+    anatomyLead:
+      "The default bar has two rows: what you are working with on top, how much quota you have left below.",
+    anatomy: [
+      ["model", "Model", "The model agy is using right now."],
+      ["context", "Context window", "How full the conversation is, before agy has to compact it."],
+      ["git", "Git", "Branch, uncommitted changes, and commits ahead of or behind upstream."],
+      ["fiveHour", "5-hour quota", "What's left of your Gemini 5-hour quota, and when it resets."],
+      [
+        "pace",
+        "Pace marker",
+        "Where you are in the quota's window. Fill past the marker means you're using quota faster than time passes, and it runs out before the reset.",
+      ],
+      ["weekly", "7-day quota", "Your weekly quota, with its own pace marker and reset time."],
     ],
-    whatTitle: "What is agy-powerline?",
-    whatBody: [
-      "agy-powerline is a status line for Antigravity CLI (<code>agy</code>), Google's coding agent for the terminal. agy runs it on every refresh and it draws the bar under the input box: the model, the context window, git, and your quotas with how fast you are using them.",
-      "Pick widgets, a theme and a layout in an editor with a live preview, from presets or one by one. It makes no network calls, has no telemetry and needs only Node.js 20 or newer.",
+    paceGuide: "How the pace marker works →",
+    stepsEyebrow: "Get started",
+    stepsTitle: "Up and running in a minute",
+    steps: [
+      [
+        "Install",
+        "Needs Node.js 20 or newer and Antigravity CLI. <code>init</code> backs up agy's <code>settings.json</code> before changing it.",
+        "npx agy-powerline init",
+      ],
+      [
+        "Pick a look",
+        "Choose a preset, a layout and a theme when <code>init</code> asks, with a preview of each. Change them any time.",
+        "npx agy-powerline configure",
+      ],
+      [
+        "Restart agy once",
+        "The bar appears under the input box and refreshes with agy. Later changes show without a restart.",
+        "agy",
+      ],
     ],
-    installTitle: "Install in 30 seconds",
-    installSteps: [
-      'Check that you have Node.js 20 or newer and <a href="https://antigravity.google/docs/cli/overview">Antigravity CLI</a>.',
-      "Run <code>npx agy-powerline init</code> and pick a preset, a layout and a theme.",
-      "Restart <code>agy</code> once. Change anything later with <code>npx agy-powerline configure</code>.",
+    installGuide: "Installation details →",
+    featuresEyebrow: "Features",
+    featuresTitle: "Everything you want to see while agy works",
+    featuresLead:
+      "Built for Antigravity CLI from its real status line data, and safe to leave running all day.",
+    features: (n) => [
+      [
+        "pace",
+        "Quota pace markers",
+        "Every quota meter shows where you are in its window, so you see a quota running out before it does. Caution at 30% left, danger at 10%.",
+        "/guides/antigravity-quota/",
+      ],
+      [
+        "themes",
+        `${n.themes} themes`,
+        "Dark, light and color-blind safe palettes, each checked for WCAG AA contrast on its terminal.",
+        "/themes/",
+      ],
+      [
+        "layouts",
+        "3 layouts",
+        "Pills, Lines and Classic, on as many rows as you like. Rows shrink to fit the terminal's width.",
+        "/docs/configuration/",
+      ],
+      [
+        "widgets",
+        `${n.widgets} widgets`,
+        "Model, context, git, quotas, tokens, session time, agent state, your own shell commands and more.",
+        "/widgets/",
+      ],
+      [
+        "configure",
+        "Configure your way",
+        "A terminal editor with a live preview, a browser configurator, presets, or plain JSON with a schema.",
+        "/configure/",
+      ],
+      [
+        "platforms",
+        "Windows, macOS, Linux, WSL",
+        "Zero runtime dependencies, Node.js 20 or newer. No network calls and no telemetry.",
+        "/install/",
+      ],
     ],
-    installMore:
-      'Details: <a href="/install/">installation</a>, <a href="/guides/add-statusline-to-antigravity-cli/">how agy runs a status line</a> and <a href="/troubleshooting/">troubleshooting</a>.',
+    shotsEyebrow: "Real screenshots",
     shotsTitle: "In a real terminal",
+    shotsLead: "Taken in agy sessions, not mock-ups.",
     shots: {
-      windows:
+      windows: [
+        "agy session",
         "agy-powerline under agy's input box in Windows Terminal: a short conversation above, the three-row Pills bar below",
-      "pills-dark":
+      ],
+      "pills-dark": [
+        "Pills",
         "agy-powerline Pills layout with the dark-aurora theme: model, context, project and git; Gemini 5h and 7d quotas with pace markers and resets; Claude/GPT and Argon weekly quotas",
-      "lines-light": "agy-powerline Lines layout with the light-paper theme on a light terminal",
-      "classic-dark":
+      ],
+      "lines-light": [
+        "Lines",
+        "agy-powerline Lines layout with the light-paper theme on a light terminal",
+      ],
+      "classic-dark": [
+        "Classic",
         "agy-powerline Classic layout with the dark-aurora theme on a dark terminal, with block meters",
+      ],
     },
-    shotCaptions: {
-      windows: "In agy, in Windows Terminal",
-      "pills-dark": "Pills layout, dark-aurora",
-      "lines-light": "Lines layout, light-paper",
-      "classic-dark": "Classic layout, dark-aurora",
-    },
-    learnTitle: "Learn more",
-    learnLinks: [
-      ["/guides/antigravity-quota/", "See your Antigravity quota while you work"],
-      ["/quota-calculator/", "Quota pace calculator"],
-      ["/widgets/", "Every widget, with a preview"],
-      ["/docs/payload/", "What agy sends to your status line"],
-      ["/guides/", "All guides"],
-    ],
-    trustTitle: "Safe to run",
+    themesEyebrow: "Themes",
+    themesTitle: (n) => `${n} themes for dark, light and color-blind terminals`,
+    themesLead:
+      "Every theme is drawn on its intended terminal background, with a color-vision simulation, on the themes page.",
+    seeAllThemes: (n) => `See all ${n} themes`,
+    trustEyebrow: "Safe to run",
+    trustTitle: "It runs on every refresh, so it stays small",
     trustBody:
-      'Zero runtime dependencies, no network calls, and a config read only from your own install folder. <a href="/security/">What it does on your machine</a>.',
+      'No runtime dependencies, no network calls, and a config read only from your own install folder: a repository you clone can\'t change your bar or run commands. <a href="/security/">What it does on your machine</a>.',
     trust: [
       [
         "https://scorecard.dev/viewer/?uri=github.com/wassim-azi/agy-powerline",
@@ -82,93 +149,177 @@ const HOME_TEXT = {
       ["/privacy/", "No telemetry"],
       ["https://github.com/wassim-azi/agy-powerline/blob/main/LICENSE", "MIT license"],
     ],
-    themesTitle: "Themes",
-    displayOptions: "Display options",
-    themesLegend: "Themes",
-    all: "All",
-    dark: "Dark",
-    light: "Light",
-    colorblind: "Color-blind",
-    bgLegend: "Terminal background",
-    intended: "Intended",
-    colorVision: "Color vision",
-    typical: "Typical",
-    note: 'Contrast figures are the lowest across all widget colors: "Pill text" is text on a pill, "On terminal" is the lines layout text on the intended terminal background. 4.5:1 is the WCAG AA minimum for body text. Pill caps take the terminal\'s own background, so they blend into any terminal. Browsers can\'t draw Nerd Font glyphs, so the round caps and arrows are drawn with CSS in the same colors.',
-    pillText: "Pill text",
-    onTerminal: "On terminal",
-    states: "OK · caution · danger",
-    termDark: "dark terminal",
-    termLight: "light terminal",
-    quotaRow: "5h quota at 80% · 22% · 6% left",
-    useTheme: "Use this theme →",
-    useLabel: "Use",
-    copyCommandFor: "Copy command for",
+    faqEyebrow: "FAQ",
+    faqTitle: "Questions people ask first",
+    faq: [
+      [
+        "Does it work on Windows?",
+        'Yes: Windows, macOS, Linux and WSL. On Windows agy runs the bar through <code>cmd /c</code>, which <code>init</code> sets up for you. For WSL, install it with a Linux Node.js inside WSL (<a href="/install/#wsl">WSL notes</a>).',
+      ],
+      [
+        "Does it send any data anywhere?",
+        'No. agy-powerline makes no network requests and has no telemetry or analytics. Problems go to a local log you can read, clear or turn off. <a href="/security/">Security &amp; Privacy</a> lists every file it reads and writes.',
+      ],
+      [
+        "Does it slow agy down?",
+        "A refresh takes about 0.1 s of agy-powerline's own work on a Windows 11 laptop. On Windows, starting <code>cmd</code> and Node adds about 0.1–0.25 s, as for any status line command.",
+      ],
+      [
+        "Which quotas does it show?",
+        'The Gemini 5-hour and 7-day quotas, the third-party (Claude and GPT) 5-hour and 7-day quotas, and Gemini 4 Argon\'s weekly quota on Google AI Pro, each with its reset time. The <a href="/guides/antigravity-quota/">quota guide</a> explains the meters.',
+      ],
+    ],
+    allQuestions: "All questions →",
+    ctaTitle: "Know before you run out",
+    ctaLead: "Install it in one command, or build your bar in the browser first.",
+    viewOnGithub: "View on GitHub",
   },
   fr: {
     lang: "fr",
     title: "Statusline agy pour Google Antigravity CLI - agy-powerline",
     description:
-      "agy-powerline est une statusline pour Google Antigravity CLI (agy) : quotas Gemini, Claude/GPT et Argon avec repère de rythme, contexte et git dans la barre d'agy. Tous les thèmes en aperçu.",
-    introLabel: "Présentation",
-    heroTitle: "Une statusline <code>agy</code> façon powerline pour Google Antigravity CLI",
-    heroSub:
-      "Voyez si votre quota tiendra jusqu'à sa remise à zéro : vos quotas Gemini 5 h / 7 j, Claude/GPT et Argon avec un repère de rythme, le modèle, la fenêtre de contexte et l'état git, d'un coup d'œil. Chaque aperçu de cette page est rendu par le vrai code de la statusline.",
-    heroBarCaption:
-      "La barre agy-powerline par défaut avec le thème dark-aurora : modèle, fenêtre de contexte et branche git sur la première ligne ; quotas Gemini 5 heures et 7 jours avec repères de rythme et délais de remise à zéro sur la seconde.",
+      "agy-powerline, la statusline de Google Antigravity CLI (agy) : quotas Gemini, Claude/GPT et Argon avec repère de rythme, contexte et git dans la barre d'agy.",
+    eyebrow: "Statusline pour Google Antigravity CLI",
+    heroTitle:
+      'La statusline <code>agy</code> qui vous dit <span class="grad-text">si votre quota va tenir</span>',
+    heroLead:
+      "Votre modèle, la fenêtre de contexte, git et chaque quota Antigravity avec un repère de rythme, dans une barre powerline sous la zone de saisie d'agy. Une seule commande pour l'installer.",
     copy: "Copier",
-    copied: "Copié",
-    copiedStatus: "%s copié dans le presse-papiers",
+    copyCommand: "Copier :",
     copyInstall: "Copier la commande d'installation",
-    buildInBrowser: "Composer votre barre dans le navigateur →",
-    viewOnGithub: "Voir sur GitHub",
-    keyFacts: "En bref",
-    facts: (count) => [
-      `<strong>${count} thèmes</strong> pour terminaux sombres, clairs et daltoniens`,
-      "<strong>3 dispositions</strong> (pills, lines et classic)",
-      "<strong>Aucune dépendance</strong> à l'exécution",
-      "<strong>Windows, macOS, Linux et WSL</strong>",
+    buildInBrowser: "Composer votre barre dans le navigateur",
+    heroFacts: ["Node.js 20+", "0 dépendance", "Aucune télémétrie", "Licence MIT"],
+    askAgy: "Demandez à agy…",
+    heroBarCaption:
+      "Un aperçu en direct d'agy-powerline sous la zone de saisie d'agy. Choisissez un thème et une disposition pour le modifier ; chaque barre de cette page est dessinée par le vrai code de la statusline.",
+    demoThemes: "Thème",
+    demoLayouts: "Disposition",
+    allThemes: (n) => `Les ${n} →`,
+    anatomyEyebrow: "En un coup d'œil",
+    anatomyTitle: "Lire la barre en dix secondes",
+    anatomyLead:
+      "La barre par défaut a deux lignes : ce avec quoi vous travaillez en haut, le quota qu'il vous reste en bas.",
+    anatomy: [
+      ["model", "Modèle", "Le modèle qu'agy utilise en ce moment."],
+      [
+        "context",
+        "Fenêtre de contexte",
+        "Le remplissage de la conversation, avant qu'agy doive la compacter.",
+      ],
+      [
+        "git",
+        "Git",
+        "La branche, les modifications non commitées et les commits d'avance ou de retard.",
+      ],
+      [
+        "fiveHour",
+        "Quota 5 heures",
+        "Ce qu'il reste de votre quota Gemini sur 5 heures, et quand il se remet à zéro.",
+      ],
+      [
+        "pace",
+        "Repère de rythme",
+        "Où vous en êtes dans la fenêtre du quota. Si le remplissage dépasse le repère, vous consommez plus vite que le temps ne passe et le quota s'épuisera avant sa remise à zéro.",
+      ],
+      [
+        "weekly",
+        "Quota 7 jours",
+        "Votre quota hebdomadaire, avec son propre repère de rythme et sa remise à zéro.",
+      ],
     ],
-    whatTitle: "Qu'est-ce qu'agy-powerline ?",
-    whatBody: [
-      "agy-powerline est une statusline pour Antigravity CLI (<code>agy</code>), l'agent de code de Google pour le terminal. agy l'exécute à chaque rafraîchissement et elle dessine la barre sous la zone de saisie : le modèle, la fenêtre de contexte, git, et vos quotas avec le rythme auquel vous les consommez.",
-      "Choisissez les widgets, un thème et une disposition dans un éditeur avec aperçu en direct, à partir de préréglages ou un par un. Elle ne fait aucun appel réseau, n'a aucune télémétrie et ne demande que Node.js 20 ou plus récent.",
+    paceGuide: "Comment fonctionne le repère de rythme (en anglais) →",
+    stepsEyebrow: "Démarrer",
+    stepsTitle: "Prête en une minute",
+    steps: [
+      [
+        "Installer",
+        "Il faut Node.js 20 ou plus récent et Antigravity CLI. <code>init</code> sauvegarde le <code>settings.json</code> d'agy avant de le modifier.",
+        "npx agy-powerline init",
+      ],
+      [
+        "Choisir un style",
+        "Choisissez un préréglage, une disposition et un thème quand <code>init</code> le demande, avec un aperçu de chacun. Modifiables à tout moment.",
+        "npx agy-powerline configure",
+      ],
+      [
+        "Redémarrer agy une fois",
+        "La barre apparaît sous la zone de saisie et se rafraîchit avec agy. Les modifications suivantes s'affichent sans redémarrage.",
+        "agy",
+      ],
     ],
-    installTitle: "Installation en 30 secondes",
-    installSteps: [
-      'Vérifiez que vous avez Node.js 20 ou plus récent et <a href="https://antigravity.google/docs/cli/overview">Antigravity CLI</a>.',
-      "Lancez <code>npx agy-powerline init</code> et choisissez un préréglage, une disposition et un thème.",
-      "Redémarrez <code>agy</code> une fois. Modifiez tout plus tard avec <code>npx agy-powerline configure</code>.",
+    installGuide: "Détails de l'installation (en anglais) →",
+    featuresEyebrow: "Fonctionnalités",
+    featuresTitle: "Tout ce que vous voulez voir pendant qu'agy travaille",
+    featuresLead:
+      "Conçue pour Antigravity CLI à partir de ses vraies données de statusline, et sûre à laisser tourner toute la journée.",
+    features: (n) => [
+      [
+        "pace",
+        "Repères de rythme",
+        "Chaque jauge de quota montre où vous en êtes dans sa fenêtre : vous voyez un quota s'épuiser avant qu'il ne soit vide. Attention à 30 % restants, danger à 10 %.",
+        "/guides/antigravity-quota/",
+      ],
+      [
+        "themes",
+        `${n.themes} thèmes`,
+        "Des palettes sombres, claires et adaptées au daltonisme, chacune vérifiée pour le contraste WCAG AA sur son terminal.",
+        "/themes/",
+      ],
+      [
+        "layouts",
+        "3 dispositions",
+        "Pills, Lines et Classic, sur autant de lignes que vous voulez. Les lignes se resserrent pour tenir dans la largeur du terminal.",
+        "/docs/configuration/",
+      ],
+      [
+        "widgets",
+        `${n.widgets} widgets`,
+        "Modèle, contexte, git, quotas, tokens, durée de session, état de l'agent, vos propres commandes shell et plus encore.",
+        "/widgets/",
+      ],
+      [
+        "configure",
+        "Configurez à votre façon",
+        "Un éditeur dans le terminal avec aperçu en direct, un configurateur dans le navigateur, des préréglages, ou du JSON avec un schéma.",
+        "/configure/",
+      ],
+      [
+        "platforms",
+        "Windows, macOS, Linux, WSL",
+        "Aucune dépendance à l'exécution, Node.js 20 ou plus récent. Aucun appel réseau et aucune télémétrie.",
+        "/install/",
+      ],
     ],
-    installMore:
-      'En détail (en anglais) : <a href="/install/">installation</a>, <a href="/guides/add-statusline-to-antigravity-cli/">comment agy exécute une statusline</a> et <a href="/troubleshooting/">dépannage</a>.',
+    shotsEyebrow: "Vraies captures",
     shotsTitle: "Dans un vrai terminal",
+    shotsLead: "Prises dans de vraies sessions agy, pas des maquettes.",
     shots: {
-      windows:
+      windows: [
+        "Session agy",
         "agy-powerline sous la zone de saisie d'agy dans Windows Terminal : une courte conversation au-dessus, la barre Pills sur trois lignes en dessous",
-      "pills-dark":
+      ],
+      "pills-dark": [
+        "Pills",
         "Disposition Pills d'agy-powerline avec le thème dark-aurora : modèle, contexte, projet et git ; quotas Gemini 5 h et 7 j avec repères de rythme et remises à zéro ; quotas hebdomadaires Claude/GPT et Argon",
-      "lines-light":
+      ],
+      "lines-light": [
+        "Lines",
         "Disposition Lines d'agy-powerline avec le thème light-paper sur un terminal clair",
-      "classic-dark":
+      ],
+      "classic-dark": [
+        "Classic",
         "Disposition Classic d'agy-powerline avec le thème dark-aurora sur un terminal sombre, avec des jauges en blocs",
+      ],
     },
-    shotCaptions: {
-      windows: "Dans agy, sous Windows Terminal",
-      "pills-dark": "Disposition Pills, dark-aurora",
-      "lines-light": "Disposition Lines, light-paper",
-      "classic-dark": "Disposition Classic, dark-aurora",
-    },
-    learnTitle: "Pour aller plus loin (en anglais)",
-    learnLinks: [
-      ["/guides/antigravity-quota/", "Suivre son quota Antigravity en travaillant"],
-      ["/quota-calculator/", "Calculateur de rythme de quota"],
-      ["/widgets/", "Tous les widgets, avec aperçu"],
-      ["/docs/payload/", "Ce qu'agy envoie à votre statusline"],
-      ["/guides/", "Tous les guides"],
-    ],
-    trustTitle: "Sûre à exécuter",
+    themesEyebrow: "Thèmes",
+    themesTitle: (n) => `${n} thèmes pour terminaux sombres, clairs et daltoniens`,
+    themesLead:
+      "Chaque thème est dessiné sur le fond de terminal prévu, avec une simulation de la vision des couleurs, sur la page des thèmes (en anglais).",
+    seeAllThemes: (n) => `Voir les ${n} thèmes`,
+    trustEyebrow: "Sûre à exécuter",
+    trustTitle: "Elle tourne à chaque rafraîchissement, alors elle reste légère",
     trustBody:
-      "Aucune dépendance à l'exécution, aucun appel réseau, et une configuration lue uniquement dans votre propre dossier d'installation. <a href=\"/security/\">Ce qu'elle fait sur votre machine</a> (en anglais).",
+      "Aucune dépendance à l'exécution, aucun appel réseau, et une configuration lue uniquement dans votre propre dossier d'installation : un dépôt que vous clonez ne peut ni changer votre barre ni lancer de commandes. <a href=\"/security/\">Ce qu'elle fait sur votre machine</a> (en anglais).",
     trust: [
       [
         "https://scorecard.dev/viewer/?uri=github.com/wassim-azi/agy-powerline",
@@ -180,27 +331,30 @@ const HOME_TEXT = {
       ["/privacy/", "Aucune télémétrie"],
       ["https://github.com/wassim-azi/agy-powerline/blob/main/LICENSE", "Licence MIT"],
     ],
-    themesTitle: "Thèmes",
-    displayOptions: "Options d'affichage",
-    themesLegend: "Thèmes",
-    all: "Tous",
-    dark: "Sombres",
-    light: "Clairs",
-    colorblind: "Daltoniens",
-    bgLegend: "Fond du terminal",
-    intended: "Prévu",
-    colorVision: "Vision des couleurs",
-    typical: "Typique",
-    note: "Les contrastes indiqués sont les plus faibles parmi toutes les couleurs de widgets : « Texte des pills » est le texte sur une pill, « Sur le terminal » est le texte de la disposition lines sur le fond de terminal prévu. 4,5:1 est le minimum WCAG AA pour le texte courant. Les extrémités des pills prennent le fond du terminal et s'y fondent. Les navigateurs ne savent pas dessiner les glyphes Nerd Font : les extrémités arrondies et les flèches sont dessinées en CSS, dans les mêmes couleurs.",
-    pillText: "Texte des pills",
-    onTerminal: "Sur le terminal",
-    states: "OK · attention · danger",
-    termDark: "terminal sombre",
-    termLight: "terminal clair",
-    quotaRow: "Quota 5 h à 80 % · 22 % · 6 % restants",
-    useTheme: "Utiliser ce thème →",
-    useLabel: "Utiliser",
-    copyCommandFor: "Copier la commande pour",
+    faqEyebrow: "FAQ",
+    faqTitle: "Les premières questions",
+    faq: [
+      [
+        "Fonctionne-t-elle sous Windows ?",
+        'Oui : Windows, macOS, Linux et WSL. Sous Windows, agy lance la barre via <code>cmd /c</code>, ce que <code>init</code> configure pour vous. Pour WSL, installez-la avec un Node.js Linux dans WSL (<a href="/install/#wsl">notes WSL</a>, en anglais).',
+      ],
+      [
+        "Envoie-t-elle des données quelque part ?",
+        'Non. agy-powerline ne fait aucune requête réseau et n\'a ni télémétrie ni analytics. Les problèmes vont dans un journal local que vous pouvez lire, vider ou désactiver. <a href="/security/">Sécurité et confidentialité</a> (en anglais) liste chaque fichier lu et écrit.',
+      ],
+      [
+        "Ralentit-elle agy ?",
+        "Un rafraîchissement demande environ 0,1 s de travail à agy-powerline sur un portable Windows 11. Sous Windows, le démarrage de <code>cmd</code> et de Node ajoute environ 0,1 à 0,25 s, comme pour toute commande de statusline.",
+      ],
+      [
+        "Quels quotas affiche-t-elle ?",
+        'Les quotas Gemini sur 5 heures et 7 jours, les quotas tiers (Claude et GPT) sur 5 heures et 7 jours, et le quota hebdomadaire de Gemini 4 Argon sur Google AI Pro, chacun avec sa remise à zéro. Le <a href="/guides/antigravity-quota/">guide des quotas</a> (en anglais) explique les jauges.',
+      ],
+    ],
+    allQuestions: "Toutes les questions (en anglais) →",
+    ctaTitle: "Sachez-le avant d'être à court",
+    ctaLead: "Installez-la en une commande, ou composez d'abord votre barre dans le navigateur.",
+    viewOnGithub: "Voir sur GitHub",
   },
 };
 

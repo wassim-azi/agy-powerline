@@ -32,7 +32,7 @@ The CLI itself (`npx agy-powerline ...`) additionally:
 
 ## The website
 
-[agy-powerline.com](https://agy-powerline.com/) is a static site built from this repo (`scripts/site/`) and served by GitHub Pages. Its pages load nothing from other sites (a Content Security Policy allows only their own inline styles and scripts and images from the site), set no cookies and run no analytics. The browser configurator and the quota calculator work in your browser and send nothing; the only thing a page stores is your System / Light / Dark choice, in your browser's local storage. Details: [Privacy](https://agy-powerline.com/privacy/).
+[agy-powerline.com](https://agy-powerline.com/) is a static site built from this repo (`scripts/site/`) and served by GitHub Pages. Its pages load nothing from other sites (a Content Security Policy allows only their own inline styles and scripts, and images and the Inter font served from the site itself), set no cookies and run no analytics. The browser configurator and the quota calculator work in your browser and send nothing; the only thing a page stores is your System / Light / Dark choice, in your browser's local storage. Details: [Privacy](https://agy-powerline.com/privacy/).
 
 After each deploy, the Pages workflow (`.github/workflows/pages.yml`) sends the site's page addresses to IndexNow (`api.indexnow.org`), so search engines that use it see changed pages sooner. That runs in GitHub Actions, sends only those public addresses, and is not part of the package.
 

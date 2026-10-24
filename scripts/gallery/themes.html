@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Nothing loads from other sites: the page is its own inline style and script. -->
+    <!--SITE_CSP-->
+    <!--SITE_HEAD-->
+    <style>
+      /* SITE_CSS */
+      .wrap {
+        max-width: 1240px;
+        width: 100%;
+        margin: 0 auto;
+        padding-inline: 20px;
+        padding-block: 40px 72px;
+        display: grid;
+        gap: 28px;
+      }
+      .page-head {
+        display: grid;
+        gap: 14px;
+        max-width: 760px;
+      }
+      .breadcrumb ol {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .breadcrumb li + li::before {
+        content: "›";
+        margin-right: 4px;
+      }
+      .breadcrumb a {
+        color: var(--muted);
+      }
+      .page-head h1 {
+        margin: 0;
+        font-size: clamp(2rem, 4.4vw, 3rem);
+        letter-spacing: -0.035em;
+        line-height: 1.08;
+        text-wrap: balance;
+      }
+      .page-head p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.08rem;
+      }
+
+      /* Sticky filter bar */
+      .controls {
+        position: sticky;
+        top: calc(var(--header-h) + 8px);
+        z-index: 10;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px 20px;
+        padding: 12px 16px;
+        background: var(--surface-glass);
+        backdrop-filter: blur(14px);
+        -webkit-backdrop-filter: blur(14px);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+      }
+      .control {
+        display: grid;
+        gap: 4px;
+        border: 0;
+        margin: 0;
+        padding: 0;
+        min-width: 0;
+      }
+      .control legend {
+        font-size: 0.72rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        padding: 0;
+        margin-bottom: 4px;
+      }
+
+      /* Responsive theme cards grid */
+      .list {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 24px;
+      }
+      /* Two columns once a card is wide enough for an 80-column bar at 10px. */
+      @media (min-width: 1200px) {
+        .list {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+
+      .theme {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        padding: 20px;
+        box-shadow: var(--shadow-sm);
+        display: grid;
+        gap: 14px;
+        min-width: 0;
+        scroll-margin-top: calc(var(--header-h) + 96px);
+      }
+      .theme[hidden] {
+        display: none;
+      }
+      .theme:target {
+        border-color: var(--accent);
+        box-shadow:
+          0 0 0 3px var(--accent-soft),
+          var(--shadow-md);
+      }
+      .theme-head {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        gap: 4px 20px;
+        align-items: end;
+      }
+      .theme-name {
+        display: flex;
+        align-items: baseline;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      .theme-name h2 {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+      }
+      .theme-anchor {
+        color: inherit;
+        text-decoration: none;
+      }
+      .theme-anchor:hover {
+        color: var(--accent);
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+      .theme-id {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .theme-desc {
+        margin: 0;
+        color: var(--muted);
+        grid-column: 1;
+        font-size: 0.9rem;
+      }
+      .metrics {
+        grid-column: 2;
+        grid-row: 1 / span 2;
+        display: flex;
+        gap: 16px;
+        margin: 0;
+      }
+      .metrics div {
+        display: grid;
+        gap: 1px;
+      }
+      .metrics dt {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+      }
+      .metrics dd {
+        margin: 0;
+        font-family: var(--font-mono);
+        font-size: 0.88rem;
+        font-variant-numeric: tabular-nums;
+      }
+      .metrics .states dd {
+        display: flex;
+        gap: 5px;
+        padding-top: 3px;
+      }
+      .dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 1px solid var(--border-strong);
+      }
+      .theme-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        padding-top: 4px;
+      }
+      .theme-actions .cmd {
+        font-size: 0.82rem;
+        padding: 4px 4px 4px 12px;
+      }
+      .theme-actions .copy-btn {
+        height: 28px;
+      }
+
+      .cvd-protan .term {
+        filter: url(#protan);
+      }
+      .cvd-deutan .term {
+        filter: url(#deutan);
+      }
+      .cvd-tritan .term {
+        filter: url(#tritan);
+      }
+
+      .note {
+        color: var(--muted);
+        font-size: 0.85rem;
+        margin: 0;
+        max-width: 75ch;
+      }
+
+      @media (max-width: 640px) {
+        .theme {
+          padding: 16px;
+        }
+        .theme-head {
+          grid-template-columns: 1fr;
+        }
+        .metrics {
+          grid-column: 1;
+          grid-row: auto;
+          margin-top: 6px;
+        }
+        .controls {
+          position: static;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+      <!-- Machado et al. (2009) full-severity simulation, applied in linear RGB. -->
+      <filter id="protan" color-interpolation-filters="linearRGB">
+        <feColorMatrix
+          type="matrix"
+          values="0.152286 1.052583 -0.204868 0 0  0.114503 0.786281 0.099216 0 0  -0.003882 -0.048116 1.051998 0 0  0 0 0 1 0"
+        />
+      </filter>
+      <filter id="deutan" color-interpolation-filters="linearRGB">
+        <feColorMatrix
+          type="matrix"
+          values="0.367322 0.860646 -0.227968 0 0  0.280085 0.672501 0.047413 0 0  -0.01182 0.04294 0.968881 0 0  0 0 0 1 0"
+        />
+      </filter>
+      <filter id="tritan" color-interpolation-filters="linearRGB">
+        <feColorMatrix
+          type="matrix"
+          values="1.255528 -0.076749 -0.178779 0 0  -0.078411 0.930809 0.147602 0 0  0.004733 0.691367 0.3039 0 0  0 0 0 1 0"
+        />
+      </filter>
+    </svg>
+
+    <!--SITE_HEADER-->
+
+    <main class="wrap" id="main" data-termdark="dark terminal" data-termlight="light terminal">
+      <header class="page-head">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <ol>
+            <li><a href="/">agy-powerline</a></li>
+            <li aria-current="page">Themes</li>
+          </ol>
+        </nav>
+        <p class="eyebrow">{{count}} themes</p>
+        <h1>agy statusline themes</h1>
+        <p>
+          agy-powerline has {{count}} built-in themes for dark, light and color-blind terminals.
+          Each one below is drawn by the real statusline code in the three layouts, with its lowest
+          contrast figures and its ok, caution and danger colors. Switch with one command, or open a
+          theme in the configurator.
+        </p>
+      </header>
+
+      <div class="controls" role="group" aria-label="Display options">
+        <fieldset class="control">
+          <legend>Themes</legend>
+          <div class="seg">
+            <input type="radio" name="kind" id="kind-all" value="all" checked /><label
+              for="kind-all"
+              >All</label
+            >
+            <input type="radio" name="kind" id="kind-dark" value="dark" /><label for="kind-dark"
+              >Dark</label
+            >
+            <input type="radio" name="kind" id="kind-light" value="light" /><label for="kind-light"
+              >Light</label
+            >
+            <input type="radio" name="kind" id="kind-cb" value="colorblind" /><label for="kind-cb"
+              >Color-blind</label
+            >
+          </div>
+        </fieldset>
+        <fieldset class="control">
+          <legend>Terminal background</legend>
+          <div class="seg">
+            <input type="radio" name="bg" id="bg-match" value="match" checked /><label
+              for="bg-match"
+              >Intended</label
+            >
+            <input type="radio" name="bg" id="bg-dark" value="dark" /><label for="bg-dark"
+              >Dark</label
+            >
+            <input type="radio" name="bg" id="bg-light" value="light" /><label for="bg-light"
+              >Light</label
+            >
+          </div>
+        </fieldset>
+        <fieldset class="control">
+          <legend>Color vision</legend>
+          <div class="seg">
+            <input type="radio" name="cvd" id="cvd-none" value="none" checked /><label
+              for="cvd-none"
+              >Typical</label
+            >
+            <input type="radio" name="cvd" id="cvd-protan" value="protan" /><label for="cvd-protan"
+              >Protanopia</label
+            >
+            <input type="radio" name="cvd" id="cvd-deutan" value="deutan" /><label for="cvd-deutan"
+              >Deuteranopia</label
+            >
+            <input type="radio" name="cvd" id="cvd-tritan" value="tritan" /><label for="cvd-tritan"
+              >Tritanopia</label
+            >
+          </div>
+        </fieldset>
+      </div>
+
+      <div class="list">
+        <!--CARDS-->
+      </div>
+
+      <p class="note">
+        Contrast figures are the lowest across all widget colors: "Pill text" is text on a pill, "On
+        terminal" is the lines layout text on the intended terminal background. 4.5:1 is the WCAG AA
+        minimum for body text. Pill caps take the terminal's own background, so they blend into any
+        terminal. Browsers can't draw Nerd Font glyphs, so the round caps and arrows are drawn with
+        CSS in the same colors.
+      </p>
+    </main>
+
+    <!--SITE_FOOTER-->
+
+    <script>
+      /* SITE_THEME_SCRIPT */
+    </script>
+    <script>
+      (function () {
+        const page = document.getElementById("main");
+        const cards = Array.from(document.querySelectorAll(".theme"));
+
+        function apply() {
+          const kind = document.querySelector('input[name="kind"]:checked').value;
+          const bg = document.querySelector('input[name="bg"]:checked').value;
+          const cvd = document.querySelector('input[name="cvd"]:checked').value;
+          for (const card of cards) {
+            card.hidden = kind !== "all" && card.dataset.kind !== kind;
+            const nextBg = bg === "match" ? card.dataset.target : bg;
+            const term = card.querySelector(".term");
+            const frame = card.querySelector(".term-frame");
+            const bgLabel = card.querySelector(".term-bg-label");
+            term.dataset.bg = nextBg;
+            if (frame) frame.dataset.bg = nextBg;
+            if (bgLabel) bgLabel.textContent = page.dataset["term" + nextBg];
+          }
+          page.classList.remove("cvd-protan", "cvd-deutan", "cvd-tritan");
+          if (cvd !== "none") page.classList.add("cvd-" + cvd);
+        }
+
+        document
+          .querySelectorAll(".controls input")
+          .forEach((input) => input.addEventListener("change", apply));
+        apply();
+      })();
+    </script>
+  </body>
+</html>

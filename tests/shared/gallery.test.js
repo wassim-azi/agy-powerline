@@ -1,12 +1,13 @@
 "use strict";
 
-// The theme gallery is the home page of agy-powerline.com, in English and in
-// French. What every page of the site must do (CSP, no outside loads, sitemap,
-// links that resolve) is checked in tests/shared/site.test.js.
+// The home page (/ and /fr/) and the theme gallery (/themes/) of
+// agy-powerline.com. What every page of the site must do (CSP, no outside
+// loads, sitemap, share cards, links that resolve) is checked in
+// tests/shared/site.test.js.
 
 const { record } = require("../helpers");
 const { THEME_ORDER } = require("../../src/lib/themes");
-const { buildGalleryHtml } = require("../../scripts/gallery/build");
+const { buildHomeHtml, buildThemesHtml } = require("../../scripts/gallery/build");
 const themeToggle = require("../../scripts/site/theme-toggle");
 const { ansiToHtml } = require("../../scripts/site/ansi");
 const { renderStatusline, sampleData, defaultConfig } = require("../../src/lib/shared");
@@ -15,55 +16,102 @@ const { FLEX_GAP_START, FLEX_GAP_END } = require("../../src/lib/layouts/pills");
 const REPO_URL = "https://github.com/wassim-azi/agy-powerline";
 const SITE_URL = "https://agy-powerline.com/";
 
-async function run() {
-  const html = buildGalleryHtml();
-  const fr = buildGalleryHtml({ lang: "fr" });
+function jsonLd(html) {
+  return [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map(
+    (m) => {
+      try {
+        return JSON.parse(m[1]);
+      } catch {
+        return {};
+      }
+    }
+  );
+}
 
-  const ld = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
-  let graph;
-  try {
-    graph = (ld && JSON.parse(ld[1])["@graph"]) || [];
-  } catch {
-    graph = [];
-  }
+// Elements in the page's DOM; a <template>'s content isn't part of it.
+const domSize = (html) =>
+  (html.replace(/<template[\s\S]*?<\/template>/g, "").match(/<[a-z][a-z0-9-]*[\s>/]/g) || [])
+    .length;
+
+async function run() {
+  const html = buildHomeHtml();
+  const fr = buildHomeHtml({ lang: "fr" });
+  const themes = buildThemesHtml();
+  const galleryThemes = THEME_ORDER.filter((id) => id !== "custom");
+
+  const graph = (jsonLd(html)[0] || {})["@graph"] || [];
   const app = graph.find((node) => node["@type"] === "SoftwareApplication");
+  const author = graph.find((node) => node["@type"] === "Person");
   record(
-    "the gallery describes the site and the app in JSON-LD",
+    "the home page describes the site, its author and the app in JSON-LD",
     graph.some((node) => node["@type"] === "WebSite" && node.url === SITE_URL) &&
       Boolean(app) &&
       app.url === SITE_URL &&
       /agy statusline/.test(app.description) &&
-      /^\d+\.\d+\.\d+/.test(app.softwareVersion)
+      /^\d+\.\d+\.\d+/.test(app.softwareVersion) &&
+      Boolean(author) &&
+      author.sameAs.includes("https://x.com/wassim_azi") &&
+      author.sameAs.includes("https://www.linkedin.com/in/wassim-azi")
   );
   record(
-    'the gallery title and heading say "agy statusline", the phrase people search for',
+    'the home page title and heading say "agy statusline", the phrase people search for',
     /<title>[^<]*agy statusline[^<]*<\/title>/.test(html) &&
-      /<h1>[^\n]*<code>agy<\/code> statusline/.test(html)
-  );
-
-  // "custom" has no colors of its own, so the gallery leaves it out.
-  const missing = THEME_ORDER.filter(
-    (id) => id !== "custom" && !(html.includes(`id="${id}"`) && fr.includes(`id="${id}"`))
-  );
-  record(
-    "the gallery shows every built-in theme, in both languages",
-    missing.length === 0,
-    missing.join(", ")
+      /<h1[^>]*>The <code>agy<\/code> statusline/.test(html)
   );
 
   record(
-    "the gallery has the shared header and footer, with Themes as the current page",
+    "the home page leads with the install command and the configurator",
+    /<div class="cmd cmd-lg"><code><span class="prompt" aria-hidden="true">\$ <\/span>npx agy-powerline init<\/code>/.test(
+      html
+    ) && html.includes('href="/configure/"')
+  );
+
+  // The demo switches between themes and layouts kept in <template>s, so the
+  // page's DOM stays small (Lighthouse warns above 1,400 elements).
+  const variants = (html.match(/<template data-variant="[a-z-]+:(pills|lines|classic)"/g) || [])
+    .length;
+  const size = domSize(html);
+  record(
+    "the home page's demo has every theme and layout pair, and its DOM stays under 1,200 elements",
+    variants > 0 &&
+      variants % 3 === 0 &&
+      (html.match(/data-demo-theme="/g) || []).length * 3 === variants &&
+      size < 1200,
+    `${variants} variants, ${size} elements`
+  );
+
+  record(
+    "the home page has the shared header and footer, with no nav link marked current",
     /<header class="site-header">/.test(html) &&
-      /<a class="nav-link" href="\/" aria-current="page">Themes<\/a>/.test(html) &&
+      /<a class="nav-link" href="\/themes\/">Themes<\/a>/.test(html) &&
       /<a class="nav-link" href="\/configure\/">Configurator<\/a>/.test(html) &&
+      !/class="nav-link"[^>]*aria-current/.test(html) &&
       html.includes(`href="${REPO_URL}"`) &&
       /<footer class="site-footer">/.test(html)
   );
 
   record(
-    "the gallery links to the configurator from the hero and from every theme card",
-    html.includes('href="/configure/"') &&
-      (html.match(/href="\/configure\/#/g) || []).length === THEME_ORDER.length - 1
+    "the home page links to every theme on the gallery",
+    galleryThemes.every((id) => html.includes(`href="/themes/#${id}"`))
+  );
+
+  // "custom" has no colors of its own, so the gallery leaves it out.
+  const missing = galleryThemes.filter((id) => !themes.includes(`id="${id}"`));
+  record("the gallery shows every built-in theme", missing.length === 0, missing.join(", "));
+
+  const collection = jsonLd(themes).find((d) => d["@type"] === "CollectionPage");
+  record(
+    "the gallery is a CollectionPage of the themes, with Themes as the current page",
+    Boolean(collection) &&
+      collection.mainEntity.numberOfItems === galleryThemes.length &&
+      /<a class="nav-link" href="\/themes\/" aria-current="page">Themes<\/a>/.test(themes) &&
+      themes.includes(`<link rel="canonical" href="${SITE_URL}themes/" />`) &&
+      new RegExp(`<title>[^<]*${galleryThemes.length} themes[^<]*</title>`).test(themes)
+  );
+
+  record(
+    "the gallery links every theme card to the configurator",
+    (themes.match(/href="\/configure\/#/g) || []).length === galleryThemes.length
   );
 
   // Previews mark the gaps between widget groups so the page can stretch them
@@ -86,20 +134,21 @@ async function run() {
       /<span class="wc" style="width:2ch">/.test(preview)
   );
 
-  const hero = (html.match(/<figure class="term-frame hero-term"[\s\S]*?<\/figure>/) || [""])[0];
+  const demo = (html.match(/<div class="screen" id="demoBar">[\s\S]*?<\/figure>/) || [""])[0];
   record(
     "the home page's bars have a blank line between rows and gaps that stretch",
-    /class="ln flex fit"/.test(hero) &&
-      /<div class="ln fit" style="--cols:\d+"><span class="r"[^>]*> <\/span><\/div>/.test(hero)
+    /class="ln flex fit"/.test(demo) &&
+      /<div class="ln fit" style="--cols:\d+"><span class="r"[^>]*> <\/span><\/div>/.test(demo)
   );
 
   record(
-    "the French gallery is in French and links back to the English one",
+    "the French home page is in French and links back to the English one",
     /^<!doctype html>\s*<html lang="fr">/i.test(fr) &&
       /<title>[^<]*agy[^<]*<\/title>/.test(fr) &&
       fr.includes(`<link rel="canonical" href="${SITE_URL}fr/" />`) &&
       fr.includes(`hreflang="en" href="${SITE_URL}"`) &&
-      !/\{\{\w+\}\}/.test(fr)
+      fr.includes("Copier") &&
+      !/\{\{\w+\}\}|<!--[A-Z_]+-->/.test(fr)
   );
 
   // Theme toggle unit test in Node

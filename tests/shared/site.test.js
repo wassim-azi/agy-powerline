@@ -12,7 +12,9 @@ const { spawnSync } = require("child_process");
 const { record, ROOT, NODE } = require("../helpers");
 const { KNOWN_KEYS } = require("../../src/lib/config-check");
 const { VALID_WIDGET_IDS, defaultConfig, mergeConfig } = require("../../src/lib/config");
-const { INDEXNOW_KEY } = require("../../scripts/site/build");
+const { INDEXNOW_KEY, cardPages } = require("../../scripts/site/build");
+const { cardHash } = require("../../scripts/site/images");
+const { cardSlug } = require("../../scripts/site/layout");
 const { quotaPace, formatDuration } = require("../../scripts/site/quota-pace");
 const { renderMarkdown } = require("../../scripts/site/markdown");
 
@@ -105,12 +107,12 @@ async function run() {
 
     const noCsp = files.filter(
       (file) =>
-        !/<meta http-equiv="Content-Security-Policy" content="default-src 'none';[^"]*img-src 'self' data:;/.test(
+        !/<meta http-equiv="Content-Security-Policy" content="default-src 'none';[^"]*img-src 'self' data:; font-src 'self';/.test(
           pages[file]
         )
     );
     record(
-      "every page allows only its own inline style and script, and images from the site",
+      "every page allows only its own inline style and script, and images and fonts from the site",
       noCsp.length === 0,
       noCsp.join(", ")
     );
@@ -131,6 +133,101 @@ async function run() {
       "every indexable page names its own canonical URL",
       badCanonical.length === 0,
       badCanonical.join(", ")
+    );
+
+    // Search results show about 60 characters of a title and 160 of a
+    // description; under 120 a description wastes the space.
+    const unescape = (s) => s.replace(/&quot;/g, '"').replace(/&amp;/g, "&");
+    const titleOf = (file) =>
+      unescape((pages[file].match(/<title>([^<]*)<\/title>/) || [])[1] || "");
+    const descriptionOf = (file) =>
+      unescape(
+        (pages[file].match(/<meta\s+name="description"\s+content="([^"]*)"/) || [])[1] || ""
+      );
+    const badLength = indexable.filter(
+      (file) =>
+        titleOf(file).length > 60 ||
+        descriptionOf(file).length < 120 ||
+        descriptionOf(file).length > 160
+    );
+    record(
+      "every indexable page has a title of at most 60 characters and a description of 120 to 160",
+      badLength.length === 0,
+      badLength.map((f) => `${f} (${titleOf(f).length}, ${descriptionOf(f).length})`).join(", ")
+    );
+    const repeated = (values) => values.filter((v, i) => values.indexOf(v) !== i);
+    const sameTitle = repeated(indexable.map(titleOf));
+    const sameDescription = repeated(indexable.map(descriptionOf));
+    record(
+      "no two indexable pages share a title or a description",
+      sameTitle.length === 0 && sameDescription.length === 0,
+      [...sameTitle, ...sameDescription].join(" | ")
+    );
+
+    // Share cards: X, LinkedIn, Facebook and Reddit read og:image; WhatsApp
+    // drops images over about 300 KB.
+    const jpegSize = (buf) => {
+      for (let i = 2; i < buf.length - 9;) {
+        if (buf[i] !== 0xff) return null;
+        const marker = buf[i + 1];
+        if (marker >= 0xc0 && marker <= 0xc3) {
+          return { height: buf.readUInt16BE(i + 5), width: buf.readUInt16BE(i + 7) };
+        }
+        i += 2 + buf.readUInt16BE(i + 2);
+      }
+      return null;
+    };
+    const badCards = indexable.filter((file) => {
+      const html = pages[file];
+      const image = (html.match(/<meta property="og:image" content="([^"]+)"/) || [])[1] || "";
+      const local = path.join(out, image.replace(SITE_URL, ""));
+      if (!image.startsWith(`${SITE_URL}og/`) || !fs.existsSync(local)) return true;
+      const buf = fs.readFileSync(local);
+      const size = jpegSize(buf);
+      return !(
+        size &&
+        size.width === 1200 &&
+        size.height === 630 &&
+        buf.length <= 300 * 1024 &&
+        html.includes('<meta property="og:image:width" content="1200" />') &&
+        html.includes('<meta property="og:image:height" content="630" />') &&
+        /<meta property="og:image:alt" content="[^"]+"/.test(html) &&
+        html.includes(`<meta name="twitter:image" content="${image}" />`) &&
+        html.includes('<meta name="twitter:card" content="summary_large_image" />') &&
+        html.includes('<meta name="twitter:site" content="@wassim_azi" />')
+      );
+    });
+    record(
+      "every indexable page has its own 1200×630 share card of at most 300 KB, for X too",
+      badCards.length === 0,
+      badCards.join(", ")
+    );
+
+    let manifest = {};
+    try {
+      manifest = JSON.parse(
+        fs.readFileSync(path.join(ROOT, "assets", "site", "og", "manifest.json"), "utf8")
+      );
+    } catch {
+      manifest = {};
+    }
+    const stale = cardPages().filter((card) => manifest[cardSlug(card.path)] !== cardHash(card));
+    record(
+      "every share card shows the page's current title (run npm run site:images otherwise)",
+      stale.length === 0,
+      stale.map((card) => card.path || "home").join(", ")
+    );
+
+    const guides = indexable.filter((file) => /^guides\/[^/]+\/index\.html$/.test(file));
+    record(
+      "guides are articles with their publication and update dates",
+      guides.length > 0 &&
+        guides.every(
+          (file) =>
+            pages[file].includes('<meta property="og:type" content="article" />') &&
+            /<meta property="article:modified_time" content="\d{4}-/.test(pages[file]) &&
+            pages[file].includes('<meta property="article:author"')
+        )
     );
 
     const badJsonLd = [];
@@ -249,10 +346,12 @@ async function run() {
       "favicon.ico",
       "icon.svg",
       "apple-touch-icon.png",
-      "og.png",
+      "fonts/inter-latin.woff2",
+      "fonts/OFL.txt",
+      "og/home.jpg",
     ].filter((file) => !fs.existsSync(path.join(out, file)));
     record(
-      "the site has its 404 page, manifest, icons and social card",
+      "the site has its 404 page, manifest, icons, font and share card",
       missingFiles.length === 0,
       missingFiles.join(", ")
     );

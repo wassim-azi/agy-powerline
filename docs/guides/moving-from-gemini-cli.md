@@ -42,4 +42,4 @@ The default bar has two rows: the model, the context window and the git branch, 
 
 On Google AI Pro, Gemini 4 Argon has a weekly quota of its own; add the `argonWeekly` widget to see it. If you use Claude or GPT models in agy, `thirdPartyFiveHour` and `thirdPartyWeekly` show their quotas.
 
-Browse every theme in the [theme gallery](https://agy-powerline.com/), and see the [full widget list](https://agy-powerline.com/widgets/).
+Browse every theme in the [theme gallery](https://agy-powerline.com/themes/), and see the [full widget list](https://agy-powerline.com/widgets/).

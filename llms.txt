@@ -126,7 +126,8 @@ Default: `~/.agy-powerline/statusline.config.json`; with `AGY_POWERLINE_HOME`, u
 - `import` asks before adding shell commands; never pass `--allow-exec` without approval of the exact commands.
 
 ## Docs
-- [Website](https://agy-powerline.com/): themes, docs and the browser configurator
+- [Website](https://agy-powerline.com/): what the bar shows, install, docs and the browser configurator
+- [Themes](https://agy-powerline.com/themes/): every theme on dark and light terminals
 - [README](https://github.com/wassim-azi/agy-powerline#readme)
 - [Install](https://agy-powerline.com/install/)
 - [Configuration](https://agy-powerline.com/docs/configuration/)

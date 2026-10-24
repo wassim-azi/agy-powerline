@@ -1,10 +1,11 @@
 "use strict";
 
-// Builds the whole agy-powerline.com site into one folder: the theme gallery
-// (home, in English and French), the configurator, the docs and guides from
-// the repo's Markdown, the widget list, the quota calculator, the trust pages,
-// and the files around them (sitemap, robots.txt, feed, llms.txt, icons,
-// schema). The sitemap lists exactly the indexable pages this build writes.
+// Builds the whole agy-powerline.com site into one folder: the home page (in
+// English and French), the theme gallery, the configurator, the docs and
+// guides from the repo's Markdown, the widget list, the quota calculator, the
+// trust pages, and the files around them (sitemap, robots.txt, feed,
+// llms.txt, font, images, share cards, schema). The sitemap lists exactly the
+// indexable pages this build writes.
 // Usage: npm run site [-- <dir>]   (default: ./_site)
 const fs = require("fs");
 const path = require("path");
@@ -27,8 +28,19 @@ const {
   buildSitemapXml,
   buildRobotsTxt,
   readFaviconSvg,
+  cardPath,
+  AUTHOR_URL,
+  X_URL,
+  LINKEDIN_URL,
 } = require("./layout");
-const { buildGalleryHtml, SCREENSHOTS } = require("../gallery/build");
+const {
+  buildHomeHtml,
+  buildThemesHtml,
+  THEMES_PAGE,
+  SCREENSHOTS,
+  screenshotUrl,
+} = require("../gallery/build");
+const { HOME_TEXT } = require("./home-text");
 const { buildConfiguratorHtml } = require("../configurator/build");
 
 // IndexNow (Bing, Yandex, Naver, Seznam): the key file at the site root proves
@@ -41,6 +53,7 @@ const FAKE_DIR = "/home/you/projects/agy-powerline";
 const MARKDOWN_PAGES = [
   {
     source: "docs/install.md",
+    card: { title: "Install the agy statusline in one command", label: "Install" },
     path: "install/",
     nav: "install",
     parent: "docs",
@@ -51,6 +64,7 @@ const MARKDOWN_PAGES = [
   },
   {
     source: "docs/configuration.md",
+    card: { title: "Every agy-powerline setting, explained", label: "Docs" },
     path: "docs/configuration/",
     parent: "docs",
     name: "Configuration",
@@ -69,15 +83,17 @@ const MARKDOWN_PAGES = [
   },
   {
     source: "docs/payload.md",
+    card: { title: "What Antigravity CLI sends to your status line", label: "Reference" },
     path: "docs/payload/",
     parent: "docs",
     name: "Payload reference",
-    title: "What Antigravity CLI sends to your status line - payload reference",
+    title: "What Antigravity CLI sends to a status line (payload)",
     description:
       "Every field of the JSON Antigravity CLI (agy) pipes to a status line command, from real payloads: model, context window, quota buckets, git, sandbox and more.",
   },
   {
     source: "docs/faq.md",
+    card: { title: "agy statusline questions, answered", label: "FAQ" },
     path: "faq/",
     name: "FAQ",
     title: "agy-powerline FAQ - agy statusline questions",
@@ -86,6 +102,7 @@ const MARKDOWN_PAGES = [
   },
   {
     source: "SECURITY.md",
+    card: { title: "What agy-powerline does on your machine", label: "Security" },
     path: "security/",
     name: "Security",
     title: "Security and privacy of agy-powerline",
@@ -94,6 +111,7 @@ const MARKDOWN_PAGES = [
   },
   {
     source: "CHANGELOG.md",
+    card: { title: "What's new in agy-powerline", label: "Changelog" },
     path: "changelog/",
     parent: "docs",
     name: "Changelog",
@@ -112,6 +130,7 @@ const MARKDOWN_PAGES = [
   },
   {
     source: "scripts/site/content/privacy.md",
+    card: { title: "No cookies, no analytics, no telemetry", label: "Privacy" },
     path: "privacy/",
     name: "Privacy",
     edit: false,
@@ -128,7 +147,7 @@ const GUIDES = [
     name: "See your Antigravity quota while you work",
     title: "See your Antigravity quota while you work - agy-powerline",
     description:
-      "Read Antigravity CLI's 5-hour and 7-day quotas in agy's status bar, with pace markers that show whether a quota lasts until its reset, and alerts before it runs out.",
+      "Read Antigravity CLI's 5-hour and 7-day quotas in agy's status bar, with pace markers that show whether a quota lasts until its reset.",
   },
   {
     source: "docs/guides/add-statusline-to-antigravity-cli.md",
@@ -163,6 +182,76 @@ const GUIDES = [
       "A free, ready-to-run 30-minute workshop for meetups and student groups: how agy's status bar works, installing one, reading quotas and making it your own.",
   },
 ];
+
+// The pages a docs reader moves between: the sidebar of every text page, and
+// the "Next steps" at the end of each one. [title, one line about it]
+const LINKS = {
+  "install/": ["Install", "One command, what it changes, upgrades and removal."],
+  "docs/configuration/": ["Configuration", "Every setting, from widgets to themes."],
+  "widgets/": ["Widgets", "Every widget, with a preview."],
+  "troubleshooting/": ["Troubleshooting", "doctor, common problems, bug reports."],
+  "docs/payload/": ["Payload reference", "What agy sends to a status line."],
+  "faq/": ["FAQ", "Short answers to the common questions."],
+  "security/": ["Security", "What runs on your machine."],
+  "privacy/": ["Privacy", "No cookies, analytics or telemetry."],
+  "changelog/": ["Changelog", "Release notes for every version."],
+  "about/": ["About", "Who builds it, and why."],
+  "configure/": ["Configurator", "Build your bar in the browser."],
+  "quota-calculator/": ["Quota calculator", "Will your quota last until it resets?"],
+  "themes/": ["Themes", "Every theme on dark and light terminals."],
+  "guides/antigravity-quota/": ["Antigravity quota", "Read your quotas and pace markers."],
+  "guides/add-statusline-to-antigravity-cli/": [
+    "Add a status line",
+    "How agy runs a status line command.",
+  ],
+  "guides/nerd-font-symbols/": ["Powerline symbols", "Fix boxes and question marks."],
+  "guides/moving-from-gemini-cli/": ["From Gemini CLI", "Set up agy's status bar in a minute."],
+  "guides/workshop/": ["Workshop", "A 30-minute session for groups."],
+};
+
+const SIDEBAR = [
+  ["Get started", ["install/", "docs/configuration/", "widgets/", "troubleshooting/"]],
+  [
+    "Guides",
+    [
+      "guides/antigravity-quota/",
+      "guides/add-statusline-to-antigravity-cli/",
+      "guides/nerd-font-symbols/",
+      "guides/moving-from-gemini-cli/",
+      "guides/workshop/",
+    ],
+  ],
+  ["Reference", ["docs/payload/", "faq/", "security/", "changelog/"]],
+  ["Tools", ["configure/", "quota-calculator/", "themes/"]],
+].map(([title, paths]) => ({ title, links: paths.map((p) => [`/${p}`, LINKS[p][0]]) }));
+
+const NEXT_STEPS = {
+  "install/": ["docs/configuration/", "guides/antigravity-quota/", "troubleshooting/"],
+  "docs/configuration/": ["widgets/", "themes/", "configure/"],
+  "troubleshooting/": ["guides/nerd-font-symbols/", "faq/", "install/"],
+  "docs/payload/": ["guides/add-statusline-to-antigravity-cli/", "widgets/", "docs/configuration/"],
+  "faq/": ["install/", "security/", "troubleshooting/"],
+  "security/": ["privacy/", "faq/", "install/"],
+  "changelog/": ["install/", "docs/configuration/", "themes/"],
+  "about/": ["install/", "security/", "changelog/"],
+  "privacy/": ["security/", "about/", "faq/"],
+  "guides/antigravity-quota/": ["quota-calculator/", "docs/configuration/", "install/"],
+  "guides/add-statusline-to-antigravity-cli/": ["docs/payload/", "install/", "docs/configuration/"],
+  "guides/nerd-font-symbols/": ["troubleshooting/", "themes/", "docs/configuration/"],
+  "guides/moving-from-gemini-cli/": ["install/", "guides/antigravity-quota/", "themes/"],
+  "guides/workshop/": ["install/", "guides/antigravity-quota/", "configure/"],
+  "widgets/": ["docs/configuration/", "configure/", "themes/"],
+  "quota-calculator/": ["guides/antigravity-quota/", "install/", "widgets/"],
+};
+
+// Every text page: the docs sidebar, and where to go next.
+function docPage(options) {
+  return buildDocPage({
+    ...options,
+    sidebar: SIDEBAR,
+    next: (NEXT_STEPS[options.path] || []).map((p) => [`/${p}`, ...LINKS[p]]),
+  });
+}
 
 // Every repo file that has a page, so links between them stay on the site.
 const SITE_PATH_OF = Object.fromEntries([
@@ -247,7 +336,11 @@ const CRUMB_HOME = { name: "agy-powerline", path: "" };
 const CRUMB_DOCS = { name: "Docs", path: "docs/" };
 const CRUMB_GUIDES = { name: "Guides", path: "guides/" };
 
-function markdownPage(page, { crumbs, ogType, structuredData } = {}) {
+// What a page's share card shows: its title without the site name, and a
+// label for the kind of page.
+const cardTitle = (title) => title.replace(/ - agy-powerline$/, "");
+
+function markdownPage(page, { crumbs, ogType, structuredData, article, label } = {}) {
   const { html, headings } = renderSource(page.source);
   const body =
     page.source === "scripts/site/content/about.md"
@@ -257,8 +350,12 @@ function markdownPage(page, { crumbs, ogType, structuredData } = {}) {
   return {
     path: page.path,
     sources: [page.source],
+    card: page.card || {
+      title: cardTitle(page.title),
+      label: label || (page.parent === "docs" ? "Docs" : page.name),
+    },
     markdown: fs.readFileSync(path.join(repo, page.source), "utf8"),
-    html: buildDocPage({
+    html: docPage({
       path: page.path,
       title: page.title,
       description: page.description,
@@ -269,8 +366,27 @@ function markdownPage(page, { crumbs, ogType, structuredData } = {}) {
       source: page.edit === false ? "" : page.source,
       lastmod,
       ogType,
-      structuredData,
+      structuredData:
+        page.source === "scripts/site/content/about.md" ? aboutStructuredData() : structuredData,
+      article,
     }),
+  };
+}
+
+// The About page describes its author (ProfilePage), with the profiles that
+// are theirs.
+function aboutStructuredData() {
+  return {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    url: absoluteUrl("about/"),
+    mainEntity: {
+      "@type": "Person",
+      "@id": `${SITE_URL}#author`,
+      name: "Wassim AZI",
+      url: AUTHOR_URL,
+      sameAs: [AUTHOR_URL, X_URL, LINKEDIN_URL],
+    },
   };
 }
 
@@ -283,10 +399,10 @@ function guidePage(guide) {
     headline: guide.name,
     description: guide.description,
     url: absoluteUrl(guide.path),
-    image: absoluteUrl("og.png"),
+    image: absoluteUrl(cardPath(guide.path)),
     inLanguage: "en",
-    author: { "@type": "Person", name: "Wassim AZI", url: "https://github.com/wassim-azi" },
-    publisher: { "@type": "Person", name: "Wassim AZI", url: "https://github.com/wassim-azi" },
+    author: { "@type": "Person", name: "Wassim AZI", url: AUTHOR_URL },
+    publisher: { "@type": "Person", name: "Wassim AZI", url: AUTHOR_URL },
     ...(published ? { datePublished: published } : {}),
     ...(modified ? { dateModified: modified } : {}),
   };
@@ -294,6 +410,8 @@ function guidePage(guide) {
     crumbs: [CRUMB_HOME, CRUMB_GUIDES, guide],
     ogType: "article",
     structuredData: article,
+    article: { published, modified },
+    label: "Guide",
   });
 }
 
@@ -352,12 +470,13 @@ function docsIndexPage() {
         ${cardList([
           ["/configure/", "Configurator", "Build your bar in the browser with a live preview."],
           ["/quota-calculator/", "Quota pace calculator", "Will your quota last until it resets?"],
-          ["/", "Theme gallery", "Every theme on dark and light terminals."],
+          ["/themes/", "Theme gallery", "Every theme on dark and light terminals."],
         ])}`;
   return {
     path: "docs/",
     sources: ["scripts/site/build.js"],
-    html: buildDocPage({
+    card: { title: "Everything about the agy statusline", label: "Docs" },
+    html: docPage({
       path: "docs/",
       title: "agy-powerline docs - agy statusline documentation",
       description:
@@ -379,7 +498,8 @@ function guidesIndexPage() {
   return {
     path: "guides/",
     sources: GUIDES.map((g) => g.source),
-    html: buildDocPage({
+    card: { title: "Guides for Antigravity CLI's status bar", label: "Guides" },
+    html: docPage({
       path: "guides/",
       title: "agy statusline guides - agy-powerline",
       description:
@@ -446,11 +566,15 @@ function widgetsPage() {
   return {
     path: "widgets/",
     sources: ["src/lib/catalog.js", "src/lib/widget-style.js"],
-    html: buildDocPage({
+    card: {
+      title: `All ${widgets.length} agy statusline widgets, with previews`,
+      label: "Widgets",
+    },
+    html: docPage({
       path: "widgets/",
       title: "agy statusline widgets - every agy-powerline widget",
       description:
-        "Every widget of the agy-powerline statusline for Antigravity CLI, with a live preview: model, quotas with pace markers, context, git, tokens, agent state and more.",
+        "Every widget of the agy-powerline statusline for Antigravity CLI, with a live preview: model, quotas with pace markers, context, git, tokens and more.",
       bodyHtml: body,
       headings: [],
       crumbs: [CRUMB_HOME, CRUMB_DOCS, { name: "Widgets", path: "widgets/" }],
@@ -547,7 +671,8 @@ function calculatorPage() {
   return {
     path: "quota-calculator/",
     sources: ["scripts/site/quota-pace.js"],
-    html: buildDocPage({
+    card: { title: "Will your Antigravity quota last until it resets?", label: "Calculator" },
+    html: docPage({
       path: "quota-calculator/",
       title: "Antigravity quota pace calculator - will your quota last?",
       description:
@@ -737,6 +862,60 @@ function webManifest() {
 
 // --- build -------------------------------------------------------------------
 
+const HOME_SOURCES = [
+  "scripts/gallery/home.html",
+  "scripts/site/home-text.js",
+  "src/lib/themes.js",
+];
+const plainText = (html) => html.replace(/<[^>]+>/g, "");
+
+// Every page of the site, with what its share card shows.
+function sitePages() {
+  const markdownPages = [...MARKDOWN_PAGES.map((p) => markdownPage(p)), ...GUIDES.map(guidePage)];
+  return [
+    {
+      path: "",
+      sources: HOME_SOURCES,
+      html: buildHomeHtml({ lang: "en" }),
+      card: { title: plainText(HOME_TEXT.en.heroTitle), label: "Antigravity CLI" },
+      images: SCREENSHOTS.map(screenshotUrl),
+    },
+    {
+      path: "fr/",
+      sources: HOME_SOURCES,
+      html: buildHomeHtml({ lang: "fr" }),
+      card: { title: plainText(HOME_TEXT.fr.heroTitle), label: "Antigravity CLI", lang: "fr" },
+      images: SCREENSHOTS.map(screenshotUrl),
+    },
+    {
+      path: THEMES_PAGE.path,
+      sources: ["scripts/gallery/themes.html", "scripts/gallery/build.js", "src/lib/themes.js"],
+      html: buildThemesHtml(),
+      card: { title: "Themes for the agy statusline", label: "Themes" },
+    },
+    {
+      path: "configure/",
+      sources: ["scripts/configurator/template.html", "scripts/configurator/page.js"],
+      html: buildConfiguratorHtml(),
+      card: { title: "Build your agy statusline in the browser", label: "Configurator" },
+    },
+    docsIndexPage(),
+    guidesIndexPage(),
+    widgetsPage(),
+    calculatorPage(),
+    ...markdownPages,
+  ];
+}
+
+const isIndexable = (page) => !/<meta name="robots" content="noindex/.test(page.html);
+
+// The share cards scripts/site/images.js draws: one per indexable page.
+function cardPages() {
+  return sitePages()
+    .filter(isIndexable)
+    .map((page) => ({ path: page.path, ...page.card }));
+}
+
 function buildSite(outDir) {
   fs.mkdirSync(outDir, { recursive: true });
   const write = (rel, content) => {
@@ -746,29 +925,8 @@ function buildSite(outDir) {
   };
   const copy = (from, rel) => write(rel, fs.readFileSync(path.join(repo, from)));
 
-  const markdownPages = [...MARKDOWN_PAGES.map((p) => markdownPage(p)), ...GUIDES.map(guidePage)];
-  const pages = [
-    {
-      path: "",
-      sources: ["scripts/gallery/template.html", "scripts/site/home-text.js", "src/lib/themes.js"],
-      html: buildGalleryHtml({ lang: "en" }),
-    },
-    {
-      path: "fr/",
-      sources: ["scripts/gallery/template.html", "scripts/site/home-text.js", "src/lib/themes.js"],
-      html: buildGalleryHtml({ lang: "fr" }),
-    },
-    {
-      path: "configure/",
-      sources: ["scripts/configurator/template.html", "scripts/configurator/page.js"],
-      html: buildConfiguratorHtml(),
-    },
-    docsIndexPage(),
-    guidesIndexPage(),
-    widgetsPage(),
-    calculatorPage(),
-    ...markdownPages,
-  ];
+  const pages = sitePages();
+  const markdownPages = pages.filter((page) => page.markdown);
 
   for (const page of pages) {
     write(path.join(page.path, "index.html"), page.html);
@@ -776,9 +934,11 @@ function buildSite(outDir) {
   }
   write("404.html", build404Html());
 
-  const sitemap = pages
-    .filter((p) => !/<meta name="robots" content="noindex/.test(p.html))
-    .map((p) => ({ path: p.path, lastmod: lastCommitDate(p.sources) }));
+  const sitemap = pages.filter(isIndexable).map((p) => ({
+    path: p.path,
+    lastmod: lastCommitDate(p.sources),
+    images: [cardPath(p.path), ...(p.images || [])],
+  }));
   write("sitemap.xml", buildSitemapXml(sitemap));
   write("robots.txt", buildRobotsTxt());
   write("changelog.xml", changelogFeed());
@@ -788,14 +948,19 @@ function buildSite(outDir) {
   write("site.webmanifest", webManifest());
   write(`${INDEXNOW_KEY}.txt`, `${INDEXNOW_KEY}\n`);
   write("icon.svg", `${readFaviconSvg()}\n`);
-  for (const file of [
-    "favicon.ico",
-    "apple-touch-icon.png",
-    "icon-192.png",
-    "icon-512.png",
-    "og.png",
-  ]) {
+  for (const file of ["favicon.ico", "apple-touch-icon.png", "icon-192.png", "icon-512.png"]) {
     copy(path.join("assets", "site", file), file);
+  }
+  copy("assets/site/fonts/inter-latin.woff2", "fonts/inter-latin.woff2");
+  copy("assets/site/fonts/OFL.txt", "fonts/OFL.txt");
+  // The card background is only drawn into the cards.
+  for (const file of fs.readdirSync(path.join(repo, "assets", "site", "art"))) {
+    if (file.endsWith(".webp") && file !== "card-background.webp") {
+      copy(path.join("assets", "site", "art", file), path.join("img", file));
+    }
+  }
+  for (const file of fs.readdirSync(path.join(repo, "assets", "site", "og"))) {
+    if (file.endsWith(".jpg")) copy(path.join("assets", "site", "og", file), path.join("og", file));
   }
   for (const file of fs.readdirSync(path.join(repo, "assets", "screenshots"))) {
     if (file.endsWith(".png")) {
@@ -813,6 +978,8 @@ if (require.main === module) {
 
 module.exports = {
   buildSite,
+  sitePages,
+  cardPages,
   MARKDOWN_PAGES,
   GUIDES,
   INDEXNOW_KEY,

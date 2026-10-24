@@ -1,31 +1,95 @@
 "use strict";
 
-// Draws the site's images into assets/site/: the 1200×630 link preview card
-// (og.png), the 1280×640 GitHub social preview, and the PNG and ICO icons made
-// from scripts/site/favicon.svg. The card shows a bar rendered by the real
-// statusline code. The PNGs are committed, so the Pages build needs no
-// browser; rerun this after changing the card, the logo or the default bar.
+// Draws the site's images into assets/site/ with headless Chrome:
+// - og/<slug>.jpg: a 1200×630 share card for every indexable page (X,
+//   LinkedIn, Facebook, Reddit, Slack and WhatsApp previews), with the page's
+//   title and a bar rendered by the real statusline code; og/manifest.json
+//   records what each card shows, so a test catches a stale card;
+// - github-social-preview.png (1280×640, uploaded by hand in the repo settings);
+// - the PNG and ICO icons made from scripts/site/favicon.svg.
+// The images are committed, so the Pages build needs no browser; rerun this
+// after changing a page title, the card or the logo.
+//
+// The artwork in assets/site/art/ (hero backdrops, card background, feature
+// icons) was drawn once with agy's image generator, from the prompts in
+// ART_PROMPTS below. To redo it, save agy's PNGs under those names in a folder
+// and pass it with --art: they are cropped, resized and saved as WebP.
+//
 // Needs Chrome or Chromium (CHROME=<path> to pick one).
-// Usage: npm run site:images
+// Usage: npm run site:images [-- --art <folder of agy PNGs>]
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
+const crypto = require("crypto");
 const { execFileSync } = require("child_process");
 
 const repo = path.join(__dirname, "..", "..");
 const outDir = path.join(repo, "assets", "site");
+const artDir = path.join(outDir, "art");
+const ogDir = path.join(outDir, "og");
 const { renderStatusline, sampleData, defaultConfig } = require(path.join(repo, "src/lib/shared"));
 const { ansiToHtml } = require("./ansi");
 const { THEME_ORDER } = require(path.join(repo, "src/lib/themes"));
-const { SHARED_CSS, readFaviconSvg } = require("./layout");
+const { SHARED_CSS, readFaviconSvg, cardSlug, esc } = require("./layout");
 
 const FAKE_DIR = "/home/you/projects/agy-powerline";
-// Drawn once with agy's image generator: no text, dark on the left for the
-// headline. Only the card uses it; the site doesn't serve it.
-const BACKGROUND_URL = `file:///${path
-  .join(outDir, "card-background.png")
-  .replace(/\\/g, "/")
-  .replace(/^\//, "")}`;
+// Bump when the card's design changes, so every card is redrawn and checked.
+const CARD_VERSION = 2;
+
+const STYLE =
+  "No text, no letters, no numbers, no logos, no user interface, no watermark. Clean, modern, premium, minimal, high quality.";
+const ICON_STYLE =
+  "Square 1:1 app icon: a rounded-square tile with a subtle dark gradient (#1a1d27 to #11131a) and a thin soft border, centered flat glyph drawn with a smooth gradient from pink (#e07ab8) through blue (#7aa2f7) to green (#7ed69a), simple geometric line style, generous padding, consistent with a set of six icons.";
+// What agy was asked for (agy -p "Use your image generation tool to create
+// this image and save it as <file>... <prompt>"), and how each image is cut.
+const ART_PROMPTS = {
+  "hero-dark": {
+    size: [1376, 768],
+    prompt: `Wide 16:9 abstract background for the hero of a developer tool website. Very dark charcoal-navy base (#0e1016). On the right half, large flowing ribbons shaped like rounded powerline segments and chevrons, in soft gradients of pink (#e07ab8), blue (#7aa2f7) and green (#7ed69a), with a gentle glow, depth and a little bokeh blur. The left 55 percent stays mostly empty and dark so text can sit on it. ${STYLE}`,
+  },
+  "hero-light": {
+    size: [1376, 768],
+    prompt: `Wide 16:9 abstract background for the hero of a developer tool website. Very light cool-white base (#f6f7fb). On the right half, large flowing ribbons shaped like rounded powerline segments and chevrons, in soft pastel gradients of pink (#e07ab8), blue (#7aa2f7) and green (#7ed69a), airy and subtle with soft shadows. The left 55 percent stays mostly empty and light so dark text can sit on it. ${STYLE}`,
+  },
+  "card-background": {
+    size: [1376, 768],
+    prompt: `Wide 16:9 abstract background for a social media link preview card. Very dark charcoal-navy base (#111319). Decorative flowing ribbons shaped like rounded powerline chevrons in pink (#e07ab8), blue (#7aa2f7) and green (#7ed69a) with a soft glow, only along the right edge and the bottom-right corner. The center and the left two thirds stay calm, dark and empty for text. ${STYLE}`,
+  },
+  // Icons: the middle of agy's 1024×1024 tile, without its outer edge; the
+  // page rounds the corners.
+  "icon-pace": {
+    size: [128, 128],
+    crop: [200, 200, 624],
+    prompt: `${ICON_STYLE} The glyph: a semicircular gauge with a needle and one small dot marker on the arc. ${STYLE}`,
+  },
+  "icon-themes": {
+    size: [128, 128],
+    crop: [200, 200, 624],
+    prompt: `${ICON_STYLE} The glyph: a painter's palette with three paint dots. ${STYLE}`,
+  },
+  "icon-layouts": {
+    size: [128, 128],
+    crop: [200, 200, 624],
+    prompt: `${ICON_STYLE} The glyph: three horizontal stacked rounded bars of different lengths, like rows of a status bar. ${STYLE}`,
+  },
+  "icon-widgets": {
+    size: [128, 128],
+    crop: [200, 200, 624],
+    prompt: `${ICON_STYLE} The glyph: four puzzle-like rounded squares in a 2 by 2 grid, one slightly offset. ${STYLE}`,
+  },
+  "icon-configure": {
+    size: [128, 128],
+    crop: [200, 200, 624],
+    prompt: `${ICON_STYLE} The glyph: three horizontal slider controls with knobs at different positions. ${STYLE}`,
+  },
+  "icon-platforms": {
+    size: [128, 128],
+    crop: [200, 200, 624],
+    prompt: `${ICON_STYLE} The glyph: a terminal window outline with a prompt chevron and an underscore cursor. ${STYLE}`,
+  },
+};
+
+const fileUrl = (file) => `file:///${file.replace(/\\/g, "/").replace(/^\//, "")}`;
 
 function findChrome() {
   const candidates = [
@@ -55,38 +119,69 @@ function bar(width) {
   return ansiToHtml(renderStatusline(data, config, { color: "truecolor" }));
 }
 
-function cardHtml({ width, height }) {
-  const logo = readFaviconSvg().replace(/<svg /, '<svg width="56" height="56" ');
+// What a card shows; its hash goes in og/manifest.json.
+function cardInput(card) {
+  return {
+    v: CARD_VERSION,
+    title: card.title,
+    label: card.label,
+    lang: card.lang || "en",
+    themes: THEME_ORDER.length - 1,
+  };
+}
+
+const cardHash = (card) =>
+  crypto
+    .createHash("sha256")
+    .update(JSON.stringify(cardInput(card)))
+    .digest("hex")
+    .slice(0, 16);
+
+function cardHtml({ width, height, title, label, lang = "en" }) {
+  const logo = readFaviconSvg().replace(/<svg /, '<svg width="52" height="52" ');
+  const font = fileUrl(path.join(outDir, "fonts", "inter-latin.woff2"));
+  const background = fileUrl(path.join(artDir, "card-background.webp"));
+  const facts =
+    lang === "fr"
+      ? `${THEME_ORDER.length - 1} thèmes · 0 dépendance · sans télémétrie`
+      : `${THEME_ORDER.length - 1} themes · 0 dependencies · no telemetry`;
+  const size = title.length > 60 ? 50 : title.length > 40 ? 58 : 66;
   return `<!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="${lang}" data-theme="dark">
 <head>
 <meta charset="utf-8" />
 <style>
 ${SHARED_CSS}
+@font-face { font-family: "Inter Card"; font-weight: 100 900; src: url("${font}") format("woff2"); }
 html, body { margin: 0; width: ${width}px; height: ${height}px; overflow: hidden; }
 body {
-  background: #111319 url("${BACKGROUND_URL}") center / cover no-repeat;
-  color: #eceef4; display: block; min-height: 0;
+  /* The artwork moves right, away from the text; its left edge fades into the ground. */
+  background:
+    linear-gradient(90deg, #10131a 0 90px, rgba(16, 19, 26, 0) 320px),
+    #10131a url("${background}") 90px 50% / cover no-repeat;
+  color: #eef0f6; display: block; min-height: 0;
+  font-family: "Inter Card", sans-serif;
 }
-.card { box-sizing: border-box; width: 100%; height: 100%; padding: 60px 68px; display: grid; grid-template-rows: auto auto 1fr auto; gap: 26px; }
-.brand { display: flex; align-items: center; gap: 16px; font-size: 34px; font-weight: 700; letter-spacing: -0.02em; }
-h1 { margin: 0; font-size: 56px; line-height: 1.08; letter-spacing: -0.03em; max-width: 1000px; }
-h1 em { font-style: normal; color: #8fa8ff; }
-.term-frame { align-self: center; justify-self: start; }
-.term { padding: 18px 22px; }
-.screen { font-size: 21px; }
-.foot { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
-.pill { font-family: var(--font-mono); font-size: 26px; padding: 12px 22px; border-radius: 10px; background: #181b24; border: 2px solid #636b7e; }
-.facts { font-size: 22px; color: #c9cfdb; padding: 10px 18px; border-radius: 10px; background: rgba(17, 19, 25, 0.88); }
-.pill { background: rgba(24, 27, 36, 0.95); }
+.card { box-sizing: border-box; width: 100%; height: 100%; padding: 56px 64px 52px; display: grid; grid-template-rows: auto 1fr auto auto; gap: 28px; }
+.top { display: flex; align-items: center; gap: 16px; }
+.brand { font-size: 32px; font-weight: 700; letter-spacing: -0.02em; }
+.label { margin-left: 8px; padding: 7px 16px; border-radius: 999px; font-size: 19px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #c9d4ff; background: rgba(143, 168, 255, 0.14); border: 1.5px solid rgba(143, 168, 255, 0.45); }
+h1 { margin: 0; align-self: center; font-size: ${size}px; font-weight: 750; line-height: 1.08; letter-spacing: -0.035em; max-width: ${Math.round(width * 0.8)}px; text-wrap: balance; }
+.term-frame { justify-self: start; border-radius: 14px; }
+.term { padding: 14px 18px; container-type: normal; }
+.screen { font-size: 16px; }
+.ln.fit { font-size: inherit; }
+.foot { display: flex; align-items: center; gap: 28px; font-size: 21px; }
+.cmd { font-size: 24px; padding: 12px 22px; border-radius: 12px; box-shadow: none; }
+.facts { color: #b9c1d1; }
 </style>
 </head>
 <body>
 <div class="card">
-  <div class="brand">${logo}<span>agy-powerline</span></div>
-  <h1>The <em>agy statusline</em> that shows your quota pace before you run out</h1>
+  <div class="top">${logo}<span class="brand">agy-powerline</span><span class="label">${esc(label)}</span></div>
+  <h1>${esc(title)}</h1>
   <div class="term-frame" data-bg="dark"><div class="term" data-bg="dark"><div class="screen">${bar(78)}</div></div></div>
-  <div class="foot"><span class="pill">npx agy-powerline init</span><span class="facts">Google Antigravity CLI · ${THEME_ORDER.length - 1} themes · no telemetry</span></div>
+  <div class="foot"><span class="cmd"><code><span class="prompt">$ </span>npx agy-powerline init</code></span><span class="facts">${facts}</span></div>
 </div>
 </body>
 </html>`;
@@ -103,6 +198,20 @@ svg { display: block; }
 </style></head><body>${svg}</body></html>`;
 }
 
+// One of agy's PNGs, cropped and scaled to the size it is served at.
+function artHtml(file, { size: [width, height], crop }) {
+  const [x, y, side] = crop || [0, 0, 0];
+  const scale = crop ? width / side : 1;
+  const position = crop ? `${-x * scale}px ${-y * scale}px` : "0 0";
+  const bgSize = crop ? `${1024 * scale}px auto` : `${width}px ${height}px`;
+  return `<!doctype html><html><head><meta charset="utf-8" /><style>
+html, body { margin: 0; width: ${width}px; height: ${height}px; overflow: hidden; }
+body { background: url("${fileUrl(file)}") ${position} / ${bgSize} no-repeat; }
+</style></head><body></body></html>`;
+}
+
+// Chrome picks the screenshot's format from the file extension: .png, .jpg
+// or .webp.
 function shoot(chrome, html, file, width, height, transparent) {
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "agy-site-images-"));
   try {
@@ -121,7 +230,7 @@ function shoot(chrome, html, file, width, height, transparent) {
     if (transparent) {
       args.push("--default-background-color=00000000");
     }
-    args.push(`file:///${page.replace(/\\/g, "/").replace(/^\//, "")}`);
+    args.push(fileUrl(page));
     fs.rmSync(file, { force: true });
     execFileSync(chrome, args, { stdio: "ignore", timeout: 60000 });
     // On Windows chrome.exe can return before its browser process has written
@@ -161,14 +270,61 @@ function pngToIco(png, size) {
   return Buffer.concat([header, png]);
 }
 
+function convertArt(chrome, sourceDir) {
+  fs.mkdirSync(artDir, { recursive: true });
+  for (const [name, spec] of Object.entries(ART_PROMPTS)) {
+    const source = path.join(sourceDir, `${name}.png`);
+    if (!fs.existsSync(source)) {
+      console.log(`skipped ${name}: no ${source}`);
+      continue;
+    }
+    const [width, height] = spec.size;
+    shoot(chrome, artHtml(source, spec), path.join(artDir, `${name}.webp`), width, height);
+  }
+}
+
+function drawCards(chrome) {
+  // Required here, not at the top: the site build reads this file's exports.
+  const { cardPages } = require("./build");
+  fs.mkdirSync(ogDir, { recursive: true });
+  const manifest = {};
+  for (const card of cardPages()) {
+    const slug = cardSlug(card.path);
+    shoot(
+      chrome,
+      cardHtml({ width: 1200, height: 630, ...card }),
+      path.join(ogDir, `${slug}.jpg`),
+      1200,
+      630
+    );
+    manifest[slug] = cardHash(card);
+  }
+  // Cards of pages that no longer exist go.
+  for (const file of fs.readdirSync(ogDir)) {
+    if (file.endsWith(".jpg") && !(file.slice(0, -4) in manifest)) {
+      fs.rmSync(path.join(ogDir, file));
+    }
+  }
+  fs.writeFileSync(path.join(ogDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
+}
+
 function main() {
   const chrome = findChrome();
   fs.mkdirSync(outDir, { recursive: true });
+  const artFlag = process.argv.indexOf("--art");
+  if (artFlag !== -1) {
+    convertArt(chrome, path.resolve(process.argv[artFlag + 1] || "."));
+  }
 
-  shoot(chrome, cardHtml({ width: 1200, height: 630 }), path.join(outDir, "og.png"), 1200, 630);
+  drawCards(chrome);
   shoot(
     chrome,
-    cardHtml({ width: 1280, height: 640 }),
+    cardHtml({
+      width: 1280,
+      height: 640,
+      title: "The agy statusline that tells you if your quota will last",
+      label: "Antigravity CLI",
+    }),
     path.join(outDir, "github-social-preview.png"),
     1280,
     640
@@ -189,10 +345,13 @@ function main() {
   fs.writeFileSync(path.join(outDir, "favicon.ico"), pngToIco(fs.readFileSync(ico), 48));
   fs.rmSync(ico);
 
-  for (const file of fs.readdirSync(outDir)) {
-    console.log(
-      `wrote ${path.join(outDir, file)} (${(fs.statSync(path.join(outDir, file)).size / 1024).toFixed(0)} KB)`
-    );
+  for (const dir of [outDir, artDir, ogDir]) {
+    for (const file of fs.readdirSync(dir)) {
+      const full = path.join(dir, file);
+      if (fs.statSync(full).isFile()) {
+        console.log(`wrote ${full} (${(fs.statSync(full).size / 1024).toFixed(0)} KB)`);
+      }
+    }
   }
 }
 
@@ -200,4 +359,14 @@ if (require.main === module) {
   main();
 }
 
-module.exports = { cardHtml, iconHtml, pngToIco };
+module.exports = {
+  cardHtml,
+  cardInput,
+  cardHash,
+  iconHtml,
+  pngToIco,
+  convertArt,
+  findChrome,
+  ART_PROMPTS,
+  CARD_VERSION,
+};

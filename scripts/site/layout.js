@@ -1,8 +1,9 @@
 "use strict";
 
 /*
- * Shared layout, design tokens, header, footer, favicon and 404 page builder
- * for the agy-powerline GitHub Pages site (Theme Gallery & Web Configurator).
+ * Shared layout of agy-powerline.com: design tokens and components, the self-
+ * hosted font, header, footer, head tags (canonical, share cards, JSON-LD),
+ * the site-wide script, the 404 page, sitemap and robots.txt.
  */
 
 const fs = require("fs");
@@ -12,12 +13,18 @@ const REPO_URL = "https://github.com/wassim-azi/agy-powerline";
 const NPM_URL = "https://www.npmjs.com/package/agy-powerline";
 // The custom domain the Pages site is served on (set in the repo's Pages settings).
 const SITE_URL = "https://agy-powerline.com/";
-// The 1200×630 card link previews show (scripts/site/images.js draws it).
-const OG_IMAGE = { path: "og.png", width: 1200, height: 630 };
-// Nothing loads from other sites. 'self' lets the icons, the manifest and
-// tools that read robots.txt or llms.txt from inside the page reach this site.
+const X_HANDLE = "wassim_azi";
+const X_URL = `https://x.com/${X_HANDLE}`;
+const LINKEDIN_URL = "https://www.linkedin.com/in/wassim-azi";
+const AUTHOR_URL = "https://github.com/wassim-azi";
+// Every indexable page has its own 1200×630 share card, drawn by
+// scripts/site/images.js into assets/site/og/<slug>.jpg.
+const OG_SIZE = { width: 1200, height: 630 };
+// Nothing loads from other sites. 'self' lets the font, the icons, the manifest
+// and tools that read robots.txt or llms.txt from inside the page reach this site.
 const SITE_CSP =
-  "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'";
+  "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'";
+const FONT_URL = "/fonts/inter-latin.woff2";
 const FAVICON_PATH = path.join(__dirname, "favicon.svg");
 const THEME_TOGGLE_PATH = path.join(__dirname, "theme-toggle.js");
 
@@ -32,46 +39,148 @@ function readFaviconSvg() {
   return fs.readFileSync(FAVICON_PATH, "utf8").trim();
 }
 
-function inlineLogoSvg() {
+function inlineLogoSvg(size = 28) {
   /* Strip xmlns so the raw HTML has no external w3.org URL string */
   return readFaviconSvg().replace(
     /<svg\s+xmlns="[^"]*"/,
-    '<svg class="brand-logo" width="26" height="26" aria-hidden="true" focusable="false"'
+    `<svg class="brand-logo" width="${size}" height="${size}" aria-hidden="true" focusable="false"`
   );
 }
 
-const SHARED_CSS = `
-      :root {
-        --bg: #f4f5f8;
+// Line icons (24×24, drawn with currentColor) and the brand marks of the
+// sites the footer links to.
+const ICON_PATHS = {
+  system: '<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+  light:
+    '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  dark: '<path d="M20.5 14.1A8.5 8.5 0 1 1 9.9 3.5a7 7 0 0 0 10.6 10.6z"/>',
+  menu: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+  copy: '<rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/>',
+  arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+};
+const BRAND_PATHS = {
+  github:
+    "M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.04-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.76 2.7 1.25 3.36.96.1-.75.4-1.25.73-1.54-2.55-.29-5.24-1.28-5.24-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.4-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5z",
+  x: "M18.24 2.25h3.31l-7.23 8.26 8.5 11.24h-6.65l-5.21-6.82-5.97 6.82H1.68l7.73-8.84L1.25 2.25h6.83l4.71 6.23zm-1.16 17.52h1.83L7.08 4.13H5.12z",
+  linkedin:
+    "M20.45 20.45h-3.55v-5.57c0-1.33-.03-3.04-1.85-3.04-1.86 0-2.14 1.45-2.14 2.94v5.67H9.35V9h3.41v1.56h.05c.48-.9 1.64-1.85 3.37-1.85 3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.22 0H1.77C.79 0 0 .77 0 1.73v20.54C0 23.23.79 24 1.77 24h20.45c.98 0 1.78-.77 1.78-1.73V1.73C24 .77 23.2 0 22.22 0z",
+  npm: "M1.76 0A1.76 1.76 0 0 0 0 1.76v20.48A1.76 1.76 0 0 0 1.76 24h20.48A1.76 1.76 0 0 0 24 22.24V1.76A1.76 1.76 0 0 0 22.24 0zm3.37 5.32 13.84.02-.01 13.84h-3.46l.01-10.38h-3.46l-.01 10.38H5.11z",
+};
+
+function icon(name, size = 18) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">${ICON_PATHS[name]}</svg>`;
+}
+
+function brandIcon(name, size = 18) {
+  return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="${BRAND_PATHS[name]}"/></svg>`;
+}
+
+// One copy button for every command on the site; the site script copies its
+// data-copy text and says so in the footer's live region.
+function copyButton(command, label, text = "Copy") {
+  return `<button type="button" class="copy-btn" data-copy="${esc(command)}" aria-label="${esc(label)}">${icon("copy", 15)}<span class="copy-label">${esc(text)}</span></button>`;
+}
+
+// A terminal-style command with its copy button.
+function commandBox(command, { label, copy = "Copy", large = false } = {}) {
+  return `<div class="cmd${large ? " cmd-lg" : ""}"><code><span class="prompt" aria-hidden="true">$ </span>${esc(command)}</code>${copyButton(command, label || `Copy: ${command}`, copy)}</div>`;
+}
+
+const DARK_TOKENS = `
+        --bg: #0b0d12;
+        --bg-tint: #0f1219;
+        --surface: #12151d;
+        --surface-2: #191d28;
+        --surface-glass: rgba(11, 13, 18, 0.74);
+        --fg: #eef0f6;
+        --fg-soft: #d3d7e2;
+        --muted: #a0a8b9;
+        --line: #232836;
+        --line-strong: #323a4b;
+        --border-strong: #5d6577;
+        --accent: #8fa8ff;
+        --accent-hover: #aabcff;
+        --accent-fg: #0a0d16;
+        --accent-soft: #1a2136;
+        --grad: linear-gradient(100deg, #f08cc8 0%, #8fa8ff 50%, #7ee0a0 100%);
+        --danger: #ff7b72;
+        --danger-soft: #3c1e22;
+        --warning: #e3b341;
+        --warning-soft: #382c16;
+        --success: #56d364;
+        --success-soft: #14321d;
+        --term-edge: #5d6577;
+        --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+        --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.35);
+        --shadow-lg: 0 30px 80px rgba(0, 0, 0, 0.55);
+        --shadow-term: 0 24px 64px rgba(0, 0, 0, 0.55);
+        color-scheme: dark;`;
+
+const LIGHT_TOKENS = `
+        --bg: #f7f8fb;
+        --bg-tint: #eff2f8;
         --surface: #ffffff;
-        --surface-glass: rgba(255, 255, 255, 0.86);
-        --fg: #181b22;
-        --muted: #525866;
-        --line: #cfd5e2;
-        --border-strong: #798294;
-        --accent: #2f4fb8;
+        --surface-2: #f1f3f8;
+        --surface-glass: rgba(247, 248, 251, 0.8);
+        --fg: #12141a;
+        --fg-soft: #2b2f3a;
+        --muted: #525a6b;
+        --line: #e0e4ed;
+        --line-strong: #c8cedb;
+        --border-strong: #7a8294;
+        --accent: #3550c8;
+        --accent-hover: #2a42ad;
         --accent-fg: #ffffff;
-        --accent-soft: #eef2ff;
+        --accent-soft: #ebefff;
+        --grad: linear-gradient(100deg, #b8327f 0%, #3550c8 50%, #13804a 100%);
         --danger: #b91c1c;
         --danger-soft: #fef2f2;
         --warning: #854d0e;
         --warning-soft: #fefce8;
         --success: #15803d;
         --success-soft: #f0fdf4;
+        --term-edge: #7a8294;
+        --shadow-sm: 0 1px 2px rgba(16, 20, 30, 0.06), 0 1px 1px rgba(16, 20, 30, 0.04);
+        --shadow-md: 0 6px 16px rgba(16, 20, 30, 0.06), 0 14px 36px rgba(16, 20, 30, 0.08);
+        --shadow-lg: 0 28px 70px rgba(16, 20, 30, 0.16);
+        --shadow-term: 0 22px 56px rgba(10, 12, 18, 0.24);
+        color-scheme: light;`;
+
+const SHARED_CSS = `
+      /* Inter, Latin subset, served from this site (assets/site/fonts/OFL.txt). */
+      @font-face {
+        font-family: "Inter";
+        font-style: normal;
+        font-weight: 100 900;
+        font-display: swap;
+        src: url("${FONT_URL}") format("woff2");
+        unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+          U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215,
+          U+FEFF, U+FFFD;
+      }
+      /* Arial resized to Inter's metrics, so the text doesn't move when Inter arrives. */
+      @font-face {
+        font-family: "Inter Fallback";
+        src: local("Arial"), local("Helvetica"), local("Liberation Sans");
+        size-adjust: 107.06%;
+        ascent-override: 90.49%;
+        descent-override: 22.56%;
+        line-gap-override: 0%;
+      }
+      :root {${LIGHT_TOKENS}
         /* Terminal grounds are content, identical in both page themes. */
         --term-dark-bg: #1d1f27;
         --term-dark-fg: #d4d6de;
-        --term-dark-chrome: #161820;
-        --term-dark-border: #323746;
+        --term-dark-chrome: #15171e;
+        --term-dark-border: #2e3342;
         --term-light-bg: #fbfbf8;
         --term-light-fg: #2b2d34;
         --term-light-chrome: #efefe9;
         --term-light-border: #c6cad4;
-        --term-edge: #798294;
-        /* Radii, spacing and shadows */
-        --radius-sm: 6px;
-        --radius-md: 10px;
-        --radius-lg: 14px;
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 16px;
+        --radius-xl: 22px;
         --radius-pill: 999px;
         --space-1: 4px;
         --space-2: 8px;
@@ -79,82 +188,19 @@ const SHARED_CSS = `
         --space-4: 16px;
         --space-5: 24px;
         --space-6: 32px;
-        --shadow-sm: 0 2px 8px rgba(15, 18, 26, 0.05);
-        --shadow-md: 0 8px 24px rgba(15, 18, 26, 0.08);
-        --shadow-term: 0 10px 28px rgba(10, 12, 18, 0.16);
-        /* System fonts only: a web font would be a request to another site. */
-        --font-ui: system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        --header-h: 60px;
+        --font-ui: Inter, "Inter Fallback", system-ui, "Segoe UI", Roboto, "Helvetica Neue", Arial,
+          sans-serif;
         --font-mono:
           "Cascadia Mono", ui-monospace, "SF Mono", Menlo, Consolas, "DejaVu Sans Mono", monospace;
-        color-scheme: light;
       }
       @media (prefers-color-scheme: dark) {
-        :root:not([data-theme="light"]) {
-          --bg: #111319;
-          --surface: #181b24;
-          --surface-glass: rgba(24, 27, 36, 0.86);
-          --fg: #eceef4;
-          --muted: #9da5b4;
-          --line: #2a2f3d;
-          --border-strong: #636b7e;
-          --accent: #8fa8ff;
-          --accent-fg: #0d1017;
-          --accent-soft: #1e263b;
-          --danger: #ff7b72;
-          --danger-soft: #3c1e22;
-          --warning: #e3b341;
-          --warning-soft: #382c16;
-          --success: #56d364;
-          --success-soft: #14321d;
-          --term-edge: #636b7e;
-          --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.28);
-          --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.36);
-          --shadow-term: 0 12px 32px rgba(0, 0, 0, 0.45);
-          color-scheme: dark;
+        :root:not([data-theme="light"]) {${DARK_TOKENS}
         }
       }
-      :root[data-theme="dark"] {
-        --bg: #111319;
-        --surface: #181b24;
-        --surface-glass: rgba(24, 27, 36, 0.86);
-        --fg: #eceef4;
-        --muted: #9da5b4;
-        --line: #2a2f3d;
-        --border-strong: #636b7e;
-        --accent: #8fa8ff;
-        --accent-fg: #0d1017;
-        --accent-soft: #1e263b;
-        --danger: #ff7b72;
-        --danger-soft: #3c1e22;
-        --warning: #e3b341;
-        --warning-soft: #382c16;
-        --success: #56d364;
-        --success-soft: #14321d;
-        --term-edge: #636b7e;
-        --shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.28);
-        --shadow-md: 0 10px 30px rgba(0, 0, 0, 0.36);
-        --shadow-term: 0 12px 32px rgba(0, 0, 0, 0.45);
-        color-scheme: dark;
+      :root[data-theme="dark"] {${DARK_TOKENS}
       }
-      :root[data-theme="light"] {
-        --bg: #f4f5f8;
-        --surface: #ffffff;
-        --surface-glass: rgba(255, 255, 255, 0.86);
-        --fg: #181b22;
-        --muted: #525866;
-        --line: #cfd5e2;
-        --border-strong: #798294;
-        --accent: #2f4fb8;
-        --accent-fg: #ffffff;
-        --accent-soft: #eef2ff;
-        --danger: #b91c1c;
-        --danger-soft: #fef2f2;
-        --warning: #854d0e;
-        --warning-soft: #fefce8;
-        --success: #15803d;
-        --success-soft: #f0fdf4;
-        --term-edge: #798294;
-        color-scheme: light;
+      :root[data-theme="light"] {${LIGHT_TOKENS}
       }
 
       *,
@@ -164,21 +210,33 @@ const SHARED_CSS = `
       }
       html {
         overflow-x: hidden;
+        -webkit-text-size-adjust: 100%;
+        text-size-adjust: 100%;
       }
       body {
         margin: 0;
         background: var(--bg);
         color: var(--fg);
         font-family: var(--font-ui);
-        font-size: 15px;
-        line-height: 1.5;
+        font-size: 16px;
+        line-height: 1.6;
         min-height: 100vh;
         display: flex;
         flex-direction: column;
         overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+        font-feature-settings: "cv11", "ss01";
+      }
+      img {
+        max-width: 100%;
+      }
+      h1,
+      h2,
+      h3 {
+        line-height: 1.2;
+        letter-spacing: -0.02em;
       }
 
-      /* Screen-reader only utility */
       .sr-only {
         position: absolute;
         width: 1px;
@@ -190,8 +248,6 @@ const SHARED_CSS = `
         white-space: nowrap;
         border: 0;
       }
-
-      /* Skip link */
       .skip-link {
         position: absolute;
         top: -100px;
@@ -210,36 +266,40 @@ const SHARED_CSS = `
         outline: 2px solid var(--fg);
         outline-offset: 2px;
       }
-
-      /* Focus rings (WCAG AA 3:1+) */
       a:focus-visible,
       button:focus-visible,
+      summary:focus-visible,
       input:focus-visible,
       select:focus-visible,
       textarea:focus-visible {
         outline: 2px solid var(--accent);
         outline-offset: 2px;
       }
+      .container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding-inline: 20px;
+      }
 
-      /* Shared Site Header */
+      /* Header */
       .site-header {
         position: sticky;
         top: 0;
-        z-index: 20;
+        z-index: 50;
         background: var(--surface-glass);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
+        backdrop-filter: saturate(180%) blur(14px);
+        -webkit-backdrop-filter: saturate(180%) blur(14px);
         border-bottom: 1px solid var(--line);
       }
       .site-header-inner {
-        max-width: 1240px;
+        max-width: 1200px;
+        height: var(--header-h);
         margin: 0 auto;
-        padding: 12px 16px;
+        padding: 0 20px;
         display: flex;
         align-items: center;
-        justify-content: space-between;
-        flex-wrap: wrap;
-        gap: 10px 16px;
+        gap: 28px;
       }
       .brand-link {
         display: inline-flex;
@@ -248,31 +308,25 @@ const SHARED_CSS = `
         text-decoration: none;
         color: var(--fg);
         font-weight: 700;
-        font-size: 1.1rem;
+        font-size: 1.08rem;
         letter-spacing: -0.02em;
+        white-space: nowrap;
       }
       .brand-logo {
         flex-shrink: 0;
-        border-radius: 6px;
-      }
-      .header-right {
-        display: flex;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px 18px;
+        border-radius: 7px;
       }
       .site-nav {
         display: flex;
         align-items: center;
-        flex-wrap: wrap;
-        gap: 4px;
+        gap: 2px;
       }
       .nav-link {
         color: var(--muted);
         text-decoration: none;
-        font-size: 0.9rem;
+        font-size: 0.92rem;
         font-weight: 500;
-        padding: 5px 10px;
+        padding: 6px 12px;
         border-radius: var(--radius-sm);
         transition:
           color 120ms ease,
@@ -280,34 +334,57 @@ const SHARED_CSS = `
       }
       .nav-link:hover {
         color: var(--fg);
-        background: var(--accent-soft);
+        background: var(--surface-2);
       }
       .nav-link[aria-current="page"] {
-        color: var(--accent);
-        background: var(--accent-soft);
+        color: var(--fg);
+        background: var(--surface-2);
         font-weight: 600;
       }
-
-      /* Page Theme Switch (System / Light / Dark) */
+      .header-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        color: var(--muted);
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        text-decoration: none;
+        transition:
+          color 120ms ease,
+          background-color 120ms ease;
+      }
+      .icon-btn:hover {
+        color: var(--fg);
+        background: var(--surface-2);
+      }
       .theme-switch {
         display: inline-flex;
         align-items: center;
-        border: 1px solid var(--border-strong);
-        border-radius: var(--radius-sm);
-        background: var(--surface);
-        padding: 2px;
         gap: 2px;
+        padding: 3px;
+        border: 1px solid var(--line);
+        border-radius: 11px;
+        background: var(--surface);
       }
       .theme-btn {
         appearance: none;
+        display: grid;
+        place-items: center;
+        width: 28px;
+        height: 28px;
         border: 0;
+        border-radius: 8px;
         background: transparent;
         color: var(--muted);
-        font-family: inherit;
-        font-size: 0.78rem;
-        font-weight: 500;
-        padding: 3px 8px;
-        border-radius: 4px;
         cursor: pointer;
         transition:
           color 120ms ease,
@@ -317,37 +394,107 @@ const SHARED_CSS = `
         color: var(--fg);
       }
       .theme-btn[aria-pressed="true"] {
-        background: var(--accent);
-        color: var(--accent-fg);
-        font-weight: 600;
+        background: var(--surface-2);
+        color: var(--fg);
+        box-shadow: inset 0 0 0 1px var(--line-strong);
+      }
+      /* Narrow screens: the links move into a menu that works without script. */
+      .nav-menu {
+        display: none;
+        position: relative;
+      }
+      .nav-menu > summary {
+        list-style: none;
+      }
+      .nav-menu > summary::-webkit-details-marker {
+        display: none;
+      }
+      .nav-menu-panel {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 12px);
+        width: min(260px, calc(100vw - 28px));
+        display: grid;
+        gap: 2px;
+        padding: 8px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+      }
+      .menu-link {
+        padding: 10px 12px;
+        border-radius: var(--radius-sm);
+        color: var(--fg);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .menu-link:hover,
+      .menu-link[aria-current="page"] {
+        background: var(--surface-2);
+      }
+      .nav-menu-panel .btn {
+        margin-top: 6px;
+      }
+      @media (max-width: 880px) {
+        .site-nav,
+        .site-header .header-cta {
+          display: none;
+        }
+        .nav-menu {
+          display: block;
+        }
+      }
+      @media (max-width: 400px) {
+        .site-header-inner {
+          padding: 0 14px;
+        }
+        .header-actions {
+          gap: 4px;
+        }
+        .header-github {
+          display: none;
+        }
       }
 
-      /* Shared Site Footer */
+      /* Footer */
       .site-footer {
         margin-top: auto;
         border-top: 1px solid var(--line);
-        background: var(--surface);
+        background: var(--bg-tint);
         color: var(--muted);
-        font-size: 0.85rem;
+        font-size: 0.9rem;
       }
       .site-footer-inner {
-        max-width: 1240px;
+        max-width: 1200px;
         margin: 0 auto;
-        padding: 28px 16px 20px;
+        padding: 56px 20px 36px;
         display: grid;
-        gap: 24px;
+        grid-template-columns: minmax(220px, 1fr) minmax(0, 2.4fr);
+        gap: 40px;
+      }
+      .footer-brand p {
+        margin: 12px 0 16px;
+        max-width: 34ch;
+      }
+      .social {
+        list-style: none;
+        margin: 0 0 0 -8px;
+        padding: 0;
+        display: flex;
+        gap: 2px;
       }
       .footer-cols {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-        gap: 20px 32px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 24px;
       }
       .footer-col h2 {
-        margin: 0 0 8px;
-        font-size: 0.74rem;
+        margin: 0 0 12px;
+        font-size: 0.76rem;
         font-weight: 600;
         text-transform: uppercase;
-        letter-spacing: 0.06em;
+        letter-spacing: 0.08em;
         color: var(--fg);
       }
       .footer-col ul {
@@ -355,65 +502,330 @@ const SHARED_CSS = `
         margin: 0;
         padding: 0;
         display: grid;
-        gap: 6px;
+        gap: 8px;
+      }
+      .footer-col a,
+      .footer-bottom a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .footer-col a:hover,
+      .footer-bottom a:hover {
+        color: var(--fg);
+        text-decoration: underline;
+        text-underline-offset: 3px;
       }
       .footer-bottom {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 18px 20px 28px;
+        border-top: 1px solid var(--line);
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
         gap: 8px 16px;
-        padding-top: 16px;
-        border-top: 1px solid var(--line);
+        font-size: 0.85rem;
       }
-      .site-footer a {
-        color: var(--accent);
-        text-decoration: underline;
-        text-underline-offset: 2px;
-        font-weight: 500;
+      @media (max-width: 760px) {
+        .site-footer-inner {
+          grid-template-columns: minmax(0, 1fr);
+          padding-top: 40px;
+        }
+        .footer-cols {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
       }
 
-      /* Shared Buttons */
+      /* Buttons */
       .btn {
-        padding: 8px 16px;
-        border-radius: var(--radius-sm);
-        font-family: inherit;
-        font-size: 0.9rem;
-        font-weight: 600;
-        cursor: pointer;
-        border: 1px solid transparent;
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        gap: 6px;
+        gap: 8px;
+        min-height: 40px;
+        padding: 8px 18px;
+        border-radius: 10px;
+        border: 1px solid transparent;
+        font-family: inherit;
+        font-size: 0.92rem;
+        font-weight: 600;
+        line-height: 1.2;
         text-decoration: none;
+        cursor: pointer;
         transition:
           background-color 120ms ease,
           border-color 120ms ease,
-          opacity 120ms ease;
+          color 120ms ease,
+          transform 120ms ease;
+      }
+      .btn:active {
+        transform: translateY(1px);
       }
       .btn-primary {
         background: var(--accent);
         color: var(--accent-fg);
+        box-shadow: var(--shadow-sm);
       }
       .btn-primary:hover {
-        opacity: 0.92;
+        background: var(--accent-hover);
       }
       .btn-secondary {
         background: var(--surface);
-        border-color: var(--border-strong);
+        border-color: var(--line-strong);
         color: var(--fg);
       }
       .btn-secondary:hover {
-        background: var(--accent-soft);
-        border-color: var(--accent);
+        border-color: var(--border-strong);
+        background: var(--surface-2);
+      }
+      .btn-ghost {
+        background: transparent;
+        color: var(--fg);
+      }
+      .btn-ghost:hover {
+        background: var(--surface-2);
+      }
+      .btn-sm {
+        min-height: 34px;
+        padding: 6px 14px;
+        font-size: 0.86rem;
+      }
+      .btn-lg {
+        min-height: 48px;
+        padding: 12px 24px;
+        font-size: 1rem;
+        border-radius: 12px;
       }
 
-      /* Shared Segmented Radios */
+      /* Commands with a copy button: a terminal line in both page themes. */
+      .cmd {
+        display: inline-flex;
+        align-items: center;
+        gap: 12px;
+        max-width: 100%;
+        min-width: 0;
+        padding: 6px 6px 6px 16px;
+        border-radius: 12px;
+        background: #10131a;
+        border: 1px solid #2c3242;
+        color: #e9ecf2;
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        box-shadow: var(--shadow-sm);
+      }
+      .cmd code {
+        font-family: inherit;
+        white-space: nowrap;
+        overflow-x: auto;
+        scrollbar-width: none;
+      }
+      .cmd .prompt {
+        color: #7ee0a0;
+        user-select: none;
+      }
+      .cmd-lg {
+        font-size: 1rem;
+        padding: 8px 8px 8px 18px;
+      }
+      .copy-btn {
+        appearance: none;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 32px;
+        padding: 0 11px;
+        border-radius: 8px;
+        border: 1px solid #3a4253;
+        background: #1b1f2a;
+        color: #e9ecf2;
+        font-family: var(--font-ui);
+        font-size: 0.8rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition:
+          background-color 120ms ease,
+          border-color 120ms ease,
+          color 120ms ease;
+      }
+      .copy-btn:hover {
+        background: #262b38;
+        border-color: #576075;
+      }
+      .copy-btn.copied {
+        color: #7ee0a0;
+        border-color: #3e7a55;
+      }
+
+      /* Sections, tiles, chips and tabs */
+      .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin: 0;
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.09em;
+        color: var(--accent);
+      }
+      .grad-text {
+        background: var(--grad);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+      }
+      .section {
+        padding-block: clamp(56px, 8vw, 104px);
+        scroll-margin-top: var(--header-h);
+      }
+      .section-head {
+        max-width: 720px;
+        margin: 0 auto 44px;
+        text-align: center;
+        display: grid;
+        gap: 12px;
+        justify-items: center;
+      }
+      .section-head h2 {
+        margin: 0;
+        font-size: clamp(1.75rem, 3.4vw, 2.5rem);
+        letter-spacing: -0.03em;
+        text-wrap: balance;
+      }
+      .section-head p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.08rem;
+        text-wrap: pretty;
+      }
+      .tile {
+        display: grid;
+        align-content: start;
+        gap: 10px;
+        padding: 24px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-sm);
+        min-width: 0;
+        transition:
+          border-color 160ms ease,
+          box-shadow 160ms ease,
+          transform 160ms ease;
+      }
+      a.tile {
+        color: inherit;
+        text-decoration: none;
+      }
+      .tile:hover {
+        border-color: var(--line-strong);
+        box-shadow: var(--shadow-md);
+      }
+      a.tile:hover {
+        transform: translateY(-2px);
+      }
+      .tile h3 {
+        margin: 0;
+        font-size: 1.1rem;
+      }
+      .tile p {
+        margin: 0;
+        color: var(--muted);
+      }
+      .tile code,
+      .section-head code {
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 1px 6px;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chip {
+        appearance: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 34px;
+        padding: 4px 13px;
+        border-radius: var(--radius-pill);
+        border: 1px solid var(--line-strong);
+        background: var(--surface);
+        color: var(--fg);
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 500;
+        text-decoration: none;
+        cursor: pointer;
+        transition:
+          border-color 120ms ease,
+          background-color 120ms ease,
+          color 120ms ease;
+      }
+      .chip:hover {
+        border-color: var(--accent);
+      }
+      .chip[aria-pressed="true"] {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .swatch {
+        display: inline-flex;
+      }
+      .swatch i {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        box-shadow: 0 0 0 1.5px var(--surface);
+      }
+      .swatch i + i {
+        margin-left: -3px;
+      }
+      .tabs {
+        display: inline-flex;
+        gap: 2px;
+        padding: 3px;
+        border-radius: 11px;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+      }
+      .tab {
+        appearance: none;
+        min-height: 32px;
+        padding: 4px 14px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: var(--muted);
+        font-family: inherit;
+        font-size: 0.86rem;
+        font-weight: 600;
+        cursor: pointer;
+      }
+      .tab:hover {
+        color: var(--fg);
+      }
+      .tab[aria-selected="true"],
+      .tab[aria-pressed="true"] {
+        background: var(--surface);
+        color: var(--fg);
+        box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--line);
+      }
+
+      /* Segmented radios */
       .seg {
         display: inline-flex;
         flex-wrap: wrap;
-        border: 1px solid var(--border-strong);
-        border-radius: var(--radius-sm);
+        border: 1px solid var(--line-strong);
+        border-radius: 10px;
         overflow: hidden;
         background: var(--surface);
         margin: 0;
@@ -425,8 +837,8 @@ const SHARED_CSS = `
         pointer-events: none;
       }
       .seg label {
-        padding: 5px 11px;
-        font-size: 0.83rem;
+        padding: 6px 12px;
+        font-size: 0.84rem;
         font-weight: 500;
         cursor: pointer;
         color: var(--fg);
@@ -449,7 +861,7 @@ const SHARED_CSS = `
         outline-offset: -2px;
       }
 
-      /* Terminal Window Frame */
+      /* Terminal window frame */
       .term-frame {
         border: 1px solid var(--term-dark-border);
         border-radius: var(--radius-md);
@@ -467,7 +879,7 @@ const SHARED_CSS = `
         display: flex;
         align-items: center;
         gap: 10px;
-        padding: 7px 12px;
+        padding: 9px 14px;
         background: var(--term-dark-chrome);
         border-bottom: 1px solid var(--term-dark-border);
         color: #9da5b4;
@@ -483,12 +895,12 @@ const SHARED_CSS = `
       .term-dots {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 7px;
         flex-shrink: 0;
       }
       .term-dot {
-        width: 10px;
-        height: 10px;
+        width: 11px;
+        height: 11px;
         border-radius: 50%;
         background: rgba(157, 165, 180, 0.35);
       }
@@ -507,7 +919,7 @@ const SHARED_CSS = `
         white-space: nowrap;
       }
       .term {
-        padding: 12px 14px 14px;
+        padding: 14px 16px 16px;
         overflow-x: auto;
         container-type: inline-size;
         display: grid;
@@ -604,17 +1016,6 @@ const SHARED_CSS = `
         clip-path: polygon(0 0, 100% 100%, 0 100%);
       }
 
-      @media (max-width: 520px) {
-        .site-header-inner {
-          padding: 10px 12px;
-          gap: 8px 12px;
-        }
-        .header-right {
-          width: 100%;
-          justify-content: space-between;
-        }
-      }
-
       @media (prefers-reduced-motion: reduce) {
         *,
         *::before,
@@ -636,12 +1037,21 @@ const CHROME_TEXT = {
     system: "System",
     light: "Light",
     dark: "Dark",
+    menu: "Menu",
     nav: { install: "Install", docs: "Docs", themes: "Themes", configurator: "Configurator" },
+    getStarted: "Get started",
+    github: "agy-powerline on GitHub",
+    tagline:
+      "The agy statusline for Google Antigravity CLI. Free and open source, with no telemetry.",
     product: "Product",
     docs: "Docs",
     project: "Project",
-    footerNote: "MIT License · Every bar on this site is rendered by the real statusline code",
+    footerNote: "MIT License · Every bar on this site is drawn by the real statusline code",
     otherLanguage: { href: "/fr/", label: "Français", lang: "fr" },
+    copy: "Copy",
+    copied: "Copied",
+    copiedStatus: "Copied to the clipboard",
+    copyCode: "Copy the code",
   },
   fr: {
     skip: "Aller au contenu",
@@ -649,18 +1059,26 @@ const CHROME_TEXT = {
     system: "Système",
     light: "Clair",
     dark: "Sombre",
+    menu: "Menu",
     nav: {
       install: "Installation",
       docs: "Docs",
       themes: "Thèmes",
       configurator: "Configurateur",
     },
+    getStarted: "Commencer",
+    github: "agy-powerline sur GitHub",
+    tagline: "La statusline agy pour Google Antigravity CLI. Libre et gratuite, sans télémétrie.",
     product: "Produit",
     docs: "Docs",
     project: "Projet",
     footerNote:
-      "Licence MIT · Chaque barre de ce site est rendue par le vrai code de la statusline",
+      "Licence MIT · Chaque barre de ce site est dessinée par le vrai code de la statusline",
     otherLanguage: { href: "/", label: "English", lang: "en" },
+    copy: "Copier",
+    copied: "Copié",
+    copiedStatus: "Copié dans le presse-papiers",
+    copyCode: "Copier le code",
   },
 };
 
@@ -670,7 +1088,7 @@ const FOOTER_COLUMNS = [
   {
     key: "product",
     links: [
-      ["Themes", "/"],
+      ["Themes", "/themes/"],
       ["Configurator", "/configure/"],
       ["Install", "/install/"],
       ["Quota calculator", "/quota-calculator/"],
@@ -696,7 +1114,6 @@ const FOOTER_COLUMNS = [
       ["Security", "/security/"],
       ["Privacy", "/privacy/"],
       ["License (MIT)", `${REPO_URL}/blob/main/LICENSE`],
-      ["GitHub", REPO_URL],
       ["npm", NPM_URL],
       ["Report an issue", `${REPO_URL}/issues`],
     ],
@@ -705,9 +1122,18 @@ const FOOTER_COLUMNS = [
 
 const absoluteUrl = (p) => SITE_URL + String(p).replace(/^\//, "");
 
+// A page's share card file name: "" is home, "docs/configuration/" is
+// docs-configuration.
+const cardSlug = (pagePath) =>
+  String(pagePath || "")
+    .replace(/\/+$/, "")
+    .replace(/\//g, "-") || "home";
+const cardPath = (pagePath) => `og/${cardSlug(pagePath)}.jpg`;
+
 // pagePath (relative to SITE_URL) gives an indexed page its canonical URL, so
 // search engines merge the github.io and custom-domain copies into one result.
 // alternates lists the same page in other languages ({ hreflang, path }).
+// article ({ published, modified }) adds the article:* tags of a guide.
 function buildHead({
   title,
   description,
@@ -717,6 +1143,8 @@ function buildHead({
   lang = "en",
   alternates = [],
   ogType = "website",
+  imageAlt,
+  article,
 }) {
   const safeTitle = esc(title);
   const safeDesc = esc(description);
@@ -752,9 +1180,23 @@ function buildHead({
     <script type="application/ld+json">${JSON.stringify(data).replace(/</g, "\\u003c")}</script>`
     )
     .join("");
-  const image = esc(absoluteUrl(OG_IMAGE.path));
-  const imageAlt =
-    "agy-powerline: a two-row powerline statusline showing the model, context, git and Gemini quota meters with pace markers";
+  const image = esc(absoluteUrl(cardPath(noindex ? "" : pagePath)));
+  const alt = esc(
+    imageAlt ||
+      `${title.replace(/ - agy-powerline$/, "")}: share card with an agy-powerline statusline`
+  );
+  const articleTags = article
+    ? [
+        article.published &&
+          `<meta property="article:published_time" content="${esc(article.published)}" />`,
+        article.modified &&
+          `<meta property="article:modified_time" content="${esc(article.modified)}" />`,
+        `<meta property="article:author" content="${absoluteUrl("about/")}" />`,
+      ]
+        .filter(Boolean)
+        .map((tag) => `\n    ${tag}`)
+        .join("")
+    : "";
   return `<meta
       name="description"
       content="${safeDesc}"
@@ -763,23 +1205,26 @@ function buildHead({
     <meta name="author" content="Wassim AZI" />
     <meta name="application-name" content="agy-powerline" />${urlTags}${alternateTags}
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#f4f5f8" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#111319" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f7f8fb" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0b0d12" media="(prefers-color-scheme: dark)" />
+    <link rel="preload" href="${FONT_URL}" as="font" type="font/woff2" crossorigin />
     <meta property="og:site_name" content="agy-powerline" />
     <meta property="og:locale" content="${locale}" />${otherLocales}
     <meta property="og:title" content="${safeTitle}" />
     <meta property="og:description" content="${safeDesc}" />
-    <meta property="og:type" content="${esc(ogType)}" />
+    <meta property="og:type" content="${esc(ogType)}" />${articleTags}
     <meta property="og:image" content="${image}" />
-    <meta property="og:image:type" content="image/png" />
-    <meta property="og:image:width" content="${OG_IMAGE.width}" />
-    <meta property="og:image:height" content="${OG_IMAGE.height}" />
-    <meta property="og:image:alt" content="${imageAlt}" />
+    <meta property="og:image:type" content="image/jpeg" />
+    <meta property="og:image:width" content="${OG_SIZE.width}" />
+    <meta property="og:image:height" content="${OG_SIZE.height}" />
+    <meta property="og:image:alt" content="${alt}" />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@${X_HANDLE}" />
+    <meta name="twitter:creator" content="@${X_HANDLE}" />
     <meta name="twitter:title" content="${safeTitle}" />
     <meta name="twitter:description" content="${safeDesc}" />
     <meta name="twitter:image" content="${image}" />
-    <meta name="twitter:image:alt" content="${imageAlt}" />
+    <meta name="twitter:image:alt" content="${alt}" />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" href="/icon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
@@ -800,18 +1245,26 @@ function buildHead({
 // currentPage: install, docs, themes or configurator marks that nav link as
 // the current page; links are root-relative, so they work from any depth,
 // including the 404 page GitHub serves at any missing path.
-function buildHeader({ currentPage = "themes", lang = "en" } = {}) {
+function buildHeader({ currentPage = "", lang = "en" } = {}) {
   const text = CHROME_TEXT[lang] || CHROME_TEXT.en;
   const home = lang === "fr" ? "/fr/" : "/";
-  const links = [
+  const items = [
     ["install", "/install/"],
     ["docs", "/docs/"],
-    ["themes", home],
+    ["themes", "/themes/"],
     ["configurator", "/configure/"],
-  ]
+  ];
+  const links = (cls) =>
+    items
+      .map(
+        ([key, href]) =>
+          `<a class="${cls}" href="${href}"${currentPage === key ? ' aria-current="page"' : ""}>${esc(text.nav[key])}</a>`
+      )
+      .join("\n            ");
+  const themeButtons = ["system", "light", "dark"]
     .map(
-      ([key, href]) =>
-        `<a class="nav-link" href="${href}"${currentPage === key ? ' aria-current="page"' : ""}>${esc(text.nav[key])}</a>`
+      (value) =>
+        `<button type="button" class="theme-btn" data-theme-value="${value}" aria-pressed="${value === "system"}" aria-label="${esc(text[value])}" title="${esc(text[value])}">${icon(value, 15)}</button>`
     )
     .join("\n            ");
 
@@ -822,22 +1275,23 @@ function buildHeader({ currentPage = "themes", lang = "en" } = {}) {
           ${inlineLogoSvg()}
           <span>agy-powerline</span>
         </a>
-        <div class="header-right">
-          <nav class="site-nav" aria-label="Primary">
-            ${links}
-            <a class="nav-link" href="${REPO_URL}">GitHub</a>
-          </nav>
+        <nav class="site-nav" aria-label="Primary">
+            ${links("nav-link")}
+        </nav>
+        <div class="header-actions">
+          <a class="icon-btn header-github" href="${REPO_URL}" aria-label="${esc(text.github)}" title="GitHub">${brandIcon("github", 19)}</a>
           <div class="theme-switch" role="group" aria-label="${esc(text.pageTheme)}">
-            <button type="button" class="theme-btn" data-theme-value="system" aria-pressed="true">
-              ${esc(text.system)}
-            </button>
-            <button type="button" class="theme-btn" data-theme-value="light" aria-pressed="false">
-              ${esc(text.light)}
-            </button>
-            <button type="button" class="theme-btn" data-theme-value="dark" aria-pressed="false">
-              ${esc(text.dark)}
-            </button>
+            ${themeButtons}
           </div>
+          <a class="btn btn-primary btn-sm header-cta" href="/install/">${esc(text.getStarted)}</a>
+          <details class="nav-menu">
+            <summary class="icon-btn" aria-label="${esc(text.menu)}">${icon("menu", 20)}</summary>
+            <nav class="nav-menu-panel" aria-label="${esc(text.menu)}">
+            ${links("menu-link")}
+              <a class="menu-link" href="${REPO_URL}">GitHub</a>
+              <a class="btn btn-primary" href="/install/">${esc(text.getStarted)}</a>
+            </nav>
+          </details>
         </div>
       </div>
     </header>`;
@@ -845,6 +1299,7 @@ function buildHeader({ currentPage = "themes", lang = "en" } = {}) {
 
 function buildFooter({ lang = "en" } = {}) {
   const text = CHROME_TEXT[lang] || CHROME_TEXT.en;
+  const home = lang === "fr" ? "/fr/" : "/";
   const cols = FOOTER_COLUMNS.map(
     (col) => `<div class="footer-col">
             <h2>${esc(text[col.key])}</h2>
@@ -853,23 +1308,110 @@ function buildFooter({ lang = "en" } = {}) {
             </ul>
           </div>`
   ).join("\n          ");
+  // rel="me" ties the author's profiles to this site.
+  const social = [
+    ["github", REPO_URL, "GitHub", ""],
+    ["x", X_URL, `X (@${X_HANDLE})`, ' rel="me"'],
+    ["linkedin", LINKEDIN_URL, "LinkedIn", ' rel="me"'],
+    ["npm", NPM_URL, "npm", ""],
+  ]
+    .map(
+      ([name, href, label, rel]) =>
+        `<li><a class="icon-btn" href="${href}"${rel} aria-label="${esc(label)}" title="${esc(label)}">${brandIcon(name, 18)}</a></li>`
+    )
+    .join("\n            ");
   const other = text.otherLanguage;
   return `<footer class="site-footer">
       <div class="site-footer-inner">
+        <div class="footer-brand">
+          <a class="brand-link" href="${home}">${inlineLogoSvg(26)}<span>agy-powerline</span></a>
+          <p>${esc(text.tagline)}</p>
+          <ul class="social">
+            ${social}
+          </ul>
+        </div>
         <nav class="footer-cols" aria-label="Site">
           ${cols}
         </nav>
-        <div class="footer-bottom">
-          <span>${esc(text.footerNote)}</span>
-          <a href="${other.href}" hreflang="${other.lang}" lang="${other.lang}">${esc(other.label)}</a>
-        </div>
       </div>
+      <div class="footer-bottom">
+        <span>${esc(text.footerNote)}</span>
+        <a href="${other.href}" hreflang="${other.lang}" lang="${other.lang}">${esc(other.label)}</a>
+      </div>
+      <span class="sr-only" id="copyStatus" aria-live="polite" data-label-copy="${esc(text.copy)}" data-label-copied="${esc(text.copied)}" data-label-status="${esc(text.copiedStatus)}" data-label-code="${esc(text.copyCode)}"></span>
     </footer>`;
 }
 
+// Copy buttons ([data-copy]) and a copy button on every code block of a text
+// page. The labels come from the footer, in the page's language.
+const SITE_SCRIPT = `(function () {
+  var status = document.getElementById("copyStatus");
+  if (!status) return;
+  var label = function (key) {
+    return status.getAttribute("data-label-" + key) || "";
+  };
+  var copyIcon = ${JSON.stringify(icon("copy", 15))};
+  document.querySelectorAll(".prose pre").forEach(function (pre) {
+    var wrap = document.createElement("div");
+    wrap.className = "pre-wrap";
+    pre.parentNode.insertBefore(wrap, pre);
+    wrap.appendChild(pre);
+    var btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "copy-btn pre-copy";
+    btn.setAttribute("aria-label", label("code"));
+    btn.innerHTML = copyIcon + '<span class="copy-label"></span>';
+    btn.querySelector(".copy-label").textContent = label("copy");
+    wrap.appendChild(btn);
+  });
+  function done(btn) {
+    var text = btn.querySelector(".copy-label");
+    if (text) text.textContent = label("copied");
+    btn.classList.add("copied");
+    status.textContent = label("status");
+    clearTimeout(btn._copyTimer);
+    btn._copyTimer = setTimeout(function () {
+      if (text) text.textContent = label("copy");
+      btn.classList.remove("copied");
+    }, 1800);
+  }
+  function select(el) {
+    if (!el || !window.getSelection) return;
+    var range = document.createRange();
+    range.selectNodeContents(el);
+    var sel = window.getSelection();
+    sel.removeAllRanges();
+    sel.addRange(range);
+  }
+  document.addEventListener("click", function (e) {
+    var btn = e.target.closest && e.target.closest("button[data-copy], .pre-copy");
+    if (!btn) return;
+    var source = btn.classList.contains("pre-copy")
+      ? btn.parentElement.querySelector("pre")
+      : btn.parentElement.querySelector("code");
+    var text = btn.getAttribute("data-copy") || (source ? source.innerText.replace(/\\n$/, "") : "");
+    if (!text) return;
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).then(
+        function () { done(btn); },
+        function () { select(source); }
+      );
+    } else {
+      select(source);
+    }
+  });
+  // The menu closes when a link in it is followed to a section of the page.
+  var menu = document.querySelector(".nav-menu");
+  if (menu) {
+    menu.addEventListener("click", function (e) {
+      if (e.target.closest("a")) menu.removeAttribute("open");
+    });
+  }
+})();`;
+
 function themeToggleScript() {
   const code = fs.readFileSync(THEME_TOGGLE_PATH, "utf8");
-  return `${code}\n(function () {\n  if (typeof document !== "undefined" && window.AgySiteTheme) {\n    window.AgySiteTheme.initThemeToggle(document, window.localStorage);\n  }\n})();`;
+  return `${code}\n(function () {\n  if (typeof document !== "undefined" && window.AgySiteTheme) {\n    window.AgySiteTheme.initThemeToggle(document, window.localStorage);\n  }\n})();\n${SITE_SCRIPT}`;
 }
 
 function injectSiteChrome(html, options) {
@@ -889,7 +1431,7 @@ function injectSiteChrome(html, options) {
 function build404Html() {
   const title = "Page not found - agy-powerline";
   const description =
-    "Page not found. Return to the agy-powerline theme gallery, the docs or the web configurator.";
+    "Page not found. Return to the agy-powerline home page, the themes, the docs or the web configurator.";
   const template = `<!doctype html>
 <html lang="en">
   <head>
@@ -904,28 +1446,22 @@ function build404Html() {
         max-width: 720px;
         width: 100%;
         margin: 0 auto;
-        padding: 64px 16px;
+        padding: 96px 20px;
         display: grid;
         gap: 20px;
+        justify-items: center;
         text-align: center;
-      }
-      .not-found-code {
-        font-family: var(--font-mono);
-        font-size: 0.85rem;
-        font-weight: 600;
-        color: var(--accent);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
       }
       .not-found-main h1 {
         margin: 0;
-        font-size: 2rem;
-        letter-spacing: -0.02em;
+        font-size: clamp(2rem, 5vw, 3rem);
+        letter-spacing: -0.03em;
       }
       .not-found-main p {
         margin: 0 auto;
         color: var(--muted);
         max-width: 52ch;
+        font-size: 1.05rem;
       }
       .not-found-actions {
         display: flex;
@@ -939,16 +1475,17 @@ function build404Html() {
   <body>
     <!--SITE_HEADER-->
     <main class="not-found-main" id="main">
-      <div class="not-found-code">404 · Page not found</div>
+      <p class="eyebrow">404 · Page not found</p>
       <h1>Nothing on this segment of the bar</h1>
       <p>
-        The page you requested does not exist. Explore the built-in statusline themes, read the
-        docs, or customize your own bar in the browser.
+        The page you requested does not exist. Start from the home page, browse the themes, read
+        the docs, or build your own bar in the browser.
       </p>
       <div class="not-found-actions">
-        <a class="btn btn-primary" href="/">Browse Themes</a>
-        <a class="btn btn-secondary" href="/docs/">Read the Docs</a>
-        <a class="btn btn-secondary" href="/configure/">Open Configurator →</a>
+        <a class="btn btn-primary" href="/">Home</a>
+        <a class="btn btn-secondary" href="/themes/">Browse themes</a>
+        <a class="btn btn-secondary" href="/docs/">Read the docs</a>
+        <a class="btn btn-ghost" href="/configure/">Open the configurator →</a>
       </div>
     </main>
     <!--SITE_FOOTER-->
@@ -966,19 +1503,23 @@ function build404Html() {
   });
 }
 
-// pages: [{ path, lastmod }], path relative to SITE_URL. lastmod is the last
-// commit of the page's source files; a page without one (not committed yet)
-// gets none, since search engines learn to ignore a lastmod that isn't
-// accurate, and a build date would change on every deploy.
+// pages: [{ path, lastmod, images }], path relative to SITE_URL. lastmod is the
+// last commit of the page's source files; a page without one (not committed
+// yet) gets none, since search engines learn to ignore a lastmod that isn't
+// accurate, and a build date would change on every deploy. images are the
+// page's main pictures (its share card, screenshots), as site paths.
 function buildSitemapXml(pages) {
   const urls = pages
     .map((p) => {
       const lastmod = p.lastmod ? `<lastmod>${esc(p.lastmod)}</lastmod>` : "";
-      return `  <url><loc>${esc(absoluteUrl(p.path))}</loc>${lastmod}</url>`;
+      const images = (p.images || [])
+        .map((img) => `<image:image><image:loc>${esc(absoluteUrl(img))}</image:loc></image:image>`)
+        .join("");
+      return `  <url><loc>${esc(absoluteUrl(p.path))}</loc>${lastmod}${images}</url>`;
     })
     .join("\n");
   return `<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 ${urls}
 </urlset>
 `;
@@ -1000,12 +1541,23 @@ module.exports = {
   NPM_URL,
   SITE_URL,
   SITE_CSP,
-  OG_IMAGE,
+  X_URL,
+  X_HANDLE,
+  LINKEDIN_URL,
+  AUTHOR_URL,
+  OG_SIZE,
+  FONT_URL,
   SHARED_CSS,
   CHROME_TEXT,
   FOOTER_COLUMNS,
   esc,
   absoluteUrl,
+  cardSlug,
+  cardPath,
+  icon,
+  brandIcon,
+  copyButton,
+  commandBox,
   readFaviconSvg,
   inlineLogoSvg,
   buildHead,

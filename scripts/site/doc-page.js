@@ -1,38 +1,109 @@
 "use strict";
 
 // The page around the site's text pages (docs, guides, About, FAQ...): the
-// shared header and footer, a breadcrumb, an "On this page" list built from
-// the headings, and styles for the rendered Markdown.
+// shared header and footer, the docs sidebar, a breadcrumb, an "On this page"
+// list built from the headings, "Next steps" at the end, and styles for the
+// rendered Markdown. The site script adds a copy button to each code block.
 
 const { injectSiteChrome, absoluteUrl, esc, REPO_URL } = require("./layout");
 
 const PROSE_CSS = `
-      /* Text reads best at about 80 characters a line, so the column and the
-         "On this page" list sit together in the middle of wide screens. */
+      /* Text reads best at about 80 characters a line: the sidebar on the
+         left and "On this page" on the right sit around it on wide screens. */
       .doc-wrap {
-        max-width: 1020px;
+        max-width: 1280px;
         width: 100%;
         margin: 0 auto;
-        padding: 24px 16px 64px;
+        padding: 32px 20px 72px;
         display: grid;
         grid-template-columns: minmax(0, 1fr);
-        gap: 28px;
+        gap: 40px;
       }
-      @media (min-width: 1000px) {
+      .doc-side,
+      .doc-toc {
+        display: none;
+      }
+      @media (min-width: 1040px) {
         .doc-wrap.has-toc {
-          grid-template-columns: minmax(0, 1fr) 240px;
+          grid-template-columns: minmax(0, 1fr) 220px;
         }
         .doc-toc {
-          position: sticky;
-          top: 76px;
-          align-self: start;
-          max-height: calc(100vh - 96px);
-          overflow-y: auto;
+          display: block;
         }
+      }
+      @media (min-width: 1240px) {
+        .doc-wrap.has-side {
+          grid-template-columns: 220px minmax(0, 1fr);
+        }
+        .doc-wrap.has-side.has-toc {
+          grid-template-columns: 220px minmax(0, 1fr) 220px;
+        }
+        .doc-side {
+          display: block;
+        }
+      }
+      .doc-side,
+      .doc-toc {
+        position: sticky;
+        top: calc(var(--header-h) + 24px);
+        align-self: start;
+        max-height: calc(100vh - var(--header-h) - 48px);
+        overflow-y: auto;
+        font-size: 0.88rem;
+      }
+      .doc-side h2,
+      .doc-toc h2 {
+        margin: 0 0 8px;
+        font-size: 0.74rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+      .doc-side ul,
+      .doc-toc ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        gap: 2px;
+      }
+      .doc-side ul {
+        margin-bottom: 22px;
+      }
+      .doc-side a {
+        display: block;
+        padding: 5px 10px;
+        border-radius: var(--radius-sm);
+        color: var(--fg-soft);
+        text-decoration: none;
+      }
+      .doc-side a:hover {
+        background: var(--surface-2);
+        color: var(--fg);
+      }
+      .doc-side a[aria-current="page"] {
+        background: var(--accent-soft);
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .doc-toc {
+        border-left: 1px solid var(--line);
+        padding-left: 16px;
+      }
+      .doc-toc ul {
+        gap: 7px;
+      }
+      .doc-toc a {
+        color: var(--muted);
+        text-decoration: none;
+      }
+      .doc-toc a:hover {
+        color: var(--accent);
       }
       .breadcrumb ol {
         list-style: none;
-        margin: 0 0 8px;
+        margin: 0 0 12px;
         padding: 0;
         display: flex;
         flex-wrap: wrap;
@@ -47,73 +118,50 @@ const PROSE_CSS = `
       .breadcrumb a {
         color: var(--muted);
       }
-      .doc-toc {
-        font-size: 0.86rem;
-        border-left: 1px solid var(--line);
-        padding-left: 14px;
-      }
-      .doc-toc h2 {
-        margin: 0 0 8px;
-        font-size: 0.74rem;
-        text-transform: uppercase;
-        letter-spacing: 0.06em;
-        color: var(--muted);
-      }
-      .doc-toc ul {
-        list-style: none;
-        margin: 0;
-        padding: 0;
-        display: grid;
-        gap: 6px;
-      }
-      .doc-toc a {
-        color: var(--fg);
-        text-decoration: none;
-      }
-      .doc-toc a:hover {
-        color: var(--accent);
-        text-decoration: underline;
-      }
       .prose {
         min-width: 0;
-        max-width: 80ch;
+        max-width: 78ch;
+        font-size: 1rem;
+        line-height: 1.7;
       }
       .prose > :first-child {
         margin-top: 0;
       }
       .prose h1 {
-        font-size: clamp(1.6rem, 3vw, 2.2rem);
-        letter-spacing: -0.02em;
-        line-height: 1.2;
-        margin: 0 0 12px;
+        font-size: clamp(1.9rem, 3.6vw, 2.6rem);
+        letter-spacing: -0.035em;
+        line-height: 1.12;
+        margin: 0 0 16px;
+        text-wrap: balance;
       }
       .prose h2 {
-        font-size: 1.35rem;
-        margin: 36px 0 10px;
-        padding-bottom: 6px;
-        border-bottom: 1px solid var(--line);
-        scroll-margin-top: 76px;
+        font-size: 1.45rem;
+        letter-spacing: -0.02em;
+        margin: 44px 0 12px;
+        padding-top: 4px;
+        scroll-margin-top: calc(var(--header-h) + 16px);
       }
       .prose h3 {
-        font-size: 1.08rem;
-        margin: 26px 0 8px;
-        scroll-margin-top: 76px;
+        font-size: 1.12rem;
+        margin: 30px 0 8px;
+        scroll-margin-top: calc(var(--header-h) + 16px);
       }
       .prose h4 {
         font-size: 1rem;
-        margin: 20px 0 6px;
-        scroll-margin-top: 76px;
+        margin: 22px 0 6px;
+        scroll-margin-top: calc(var(--header-h) + 16px);
       }
       .prose p,
       .prose ul,
       .prose ol,
       .prose blockquote,
       .prose pre,
+      .prose .pre-wrap,
       .prose .table-wrap {
-        margin: 0 0 14px;
+        margin: 0 0 16px;
       }
       .prose li {
-        margin: 4px 0;
+        margin: 5px 0;
       }
       .prose li > ul,
       .prose li > ol {
@@ -121,58 +169,92 @@ const PROSE_CSS = `
       }
       .prose a {
         color: var(--accent);
-        text-underline-offset: 2px;
+        text-underline-offset: 3px;
+        text-decoration-thickness: 1px;
+      }
+      .prose a:hover {
+        text-decoration-thickness: 2px;
       }
       .prose code {
         font-family: var(--font-mono);
-        font-size: 0.88em;
-        background: var(--accent-soft);
-        border-radius: 4px;
+        font-size: 0.86em;
+        background: var(--surface-2);
+        border: 1px solid var(--line);
+        border-radius: 6px;
         padding: 1px 5px;
         overflow-wrap: anywhere;
       }
       .prose pre {
-        background: var(--term-dark-bg);
-        color: var(--term-dark-fg);
-        border: 1px solid var(--term-dark-border);
+        background: #10131a;
+        color: #e1e4ec;
+        border: 1px solid #262c3a;
         border-radius: var(--radius-md);
-        padding: 12px 14px;
+        padding: 14px 16px;
         overflow-x: auto;
-        font-size: 0.85rem;
-        line-height: 1.45;
+        font-size: 0.86rem;
+        line-height: 1.55;
       }
       .prose pre code {
         background: none;
+        border: 0;
         padding: 0;
         color: inherit;
         font-size: inherit;
         overflow-wrap: normal;
       }
+      .pre-wrap {
+        position: relative;
+      }
+      .pre-wrap pre {
+        margin: 0;
+        padding-right: 88px;
+      }
+      .pre-copy {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        opacity: 0;
+        transition: opacity 120ms ease;
+      }
+      .pre-wrap:hover .pre-copy,
+      .pre-copy:focus-visible,
+      .pre-copy.copied {
+        opacity: 1;
+      }
+      @media (hover: none) {
+        .pre-copy {
+          opacity: 1;
+        }
+      }
       .prose blockquote {
         border-left: 3px solid var(--accent);
-        padding: 2px 14px;
-        color: var(--muted);
-        background: var(--surface);
+        border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+        padding: 10px 16px;
+        color: var(--fg-soft);
+        background: var(--accent-soft);
+      }
+      .prose blockquote > :last-child {
+        margin-bottom: 0;
       }
       .prose .table-wrap {
         overflow-x: auto;
         border: 1px solid var(--line);
-        border-radius: var(--radius-sm);
+        border-radius: var(--radius-md);
       }
       .prose table {
         border-collapse: collapse;
         width: 100%;
-        font-size: 0.9rem;
+        font-size: 0.92rem;
       }
       .prose th,
       .prose td {
         text-align: left;
         vertical-align: top;
-        padding: 7px 10px;
+        padding: 9px 12px;
         border-bottom: 1px solid var(--line);
       }
       .prose th {
-        background: var(--surface);
+        background: var(--surface-2);
         font-weight: 600;
       }
       .prose tr:last-child td {
@@ -186,30 +268,40 @@ const PROSE_CSS = `
       .prose hr {
         border: 0;
         border-top: 1px solid var(--line);
-        margin: 28px 0;
+        margin: 32px 0;
+      }
+      .prose details {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-md);
+        padding: 10px 14px;
+        margin: 0 0 16px;
+      }
+      .prose summary {
+        cursor: pointer;
+        font-weight: 600;
       }
       .lede {
-        font-size: 1.05rem;
+        font-size: 1.12rem;
         color: var(--muted);
       }
       .doc-meta {
-        margin-top: 32px;
-        padding-top: 14px;
+        margin-top: 40px;
+        padding-top: 16px;
         border-top: 1px solid var(--line);
-        font-size: 0.85rem;
+        font-size: 0.86rem;
         color: var(--muted);
         display: flex;
         flex-wrap: wrap;
-        gap: 6px 18px;
+        gap: 6px 20px;
       }
       .doc-meta a {
         color: var(--accent);
       }
       .card-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
         gap: 14px;
-        margin: 0 0 18px;
+        margin: 0 0 20px;
         padding: 0;
         list-style: none;
       }
@@ -220,26 +312,44 @@ const PROSE_CSS = `
         display: grid;
         gap: 4px;
         height: 100%;
-        padding: 14px 16px;
+        padding: 16px 18px;
         border: 1px solid var(--line);
         border-radius: var(--radius-md);
         background: var(--surface);
         color: var(--fg);
         text-decoration: none;
         box-shadow: var(--shadow-sm);
+        transition:
+          border-color 160ms ease,
+          transform 160ms ease;
+      }
+      .prose .card-link {
+        text-decoration: none;
       }
       .card-link:hover {
         border-color: var(--accent);
+        transform: translateY(-2px);
       }
       .card-link strong {
-        color: var(--accent);
+        color: var(--fg);
       }
       .card-link span {
         color: var(--muted);
         font-size: 0.9rem;
+        line-height: 1.5;
+      }
+      .next-steps {
+        margin-top: 44px;
+      }
+      .next-steps h2 {
+        margin-top: 0;
+      }
+      .next-steps .card-link strong::after {
+        content: " →";
+        color: var(--accent);
       }
       .prose .screen-wrap {
-        margin: 0 0 14px;
+        margin: 0 0 16px;
       }
 `;
 
@@ -277,6 +387,41 @@ function tocHtml(headings) {
       </aside>`;
 }
 
+// sidebar: [{ title, links: [[href, label]] }]
+function sidebarHtml(sidebar, pagePath) {
+  if (!sidebar || !sidebar.length) return "";
+  const current = `/${pagePath}`;
+  return `<nav class="doc-side" aria-label="Docs">
+        ${sidebar
+          .map(
+            (group) => `<h2>${esc(group.title)}</h2>
+        <ul>
+          ${group.links
+            .map(
+              ([href, label]) =>
+                `<li><a href="${esc(href)}"${href === current ? ' aria-current="page"' : ""}>${esc(label)}</a></li>`
+            )
+            .join("\n          ")}
+        </ul>`
+          )
+          .join("\n        ")}
+      </nav>`;
+}
+
+// next: [[href, title, text]]
+function nextStepsHtml(next) {
+  if (!next || !next.length) return "";
+  return `<section class="next-steps" aria-labelledby="next-steps">
+          <h2 id="next-steps">Next steps</h2>
+          <ul class="card-grid">${next
+            .map(
+              ([href, title, text]) =>
+                `<li><a class="card-link" href="${esc(href)}"><strong>${esc(title)}</strong><span>${esc(text)}</span></a></li>`
+            )
+            .join("")}</ul>
+        </section>`;
+}
+
 const formatDate = (iso) =>
   new Date(iso).toLocaleDateString("en-GB", {
     day: "numeric",
@@ -286,7 +431,8 @@ const formatDate = (iso) =>
   });
 
 // page: { path, title, description, bodyHtml, headings, crumbs, currentPage,
-// structuredData, source, lastmod, extraCss, script, ogType }
+// structuredData, source, lastmod, extraCss, script, ogType, article,
+// sidebar, next }
 function buildDocPage(page) {
   const crumbs = page.crumbs || [{ name: "agy-powerline", path: "" }];
   const structuredData = [
@@ -298,6 +444,7 @@ function buildDocPage(page) {
         : []),
   ];
   const toc = page.toc === false ? "" : tocHtml(page.headings || []);
+  const side = sidebarHtml(page.sidebar, page.path);
   const meta = [];
   if (page.lastmod) meta.push(`<span>Updated ${esc(formatDate(page.lastmod))}</span>`);
   if (page.source) {
@@ -306,6 +453,7 @@ function buildDocPage(page) {
       `<a href="${REPO_URL}/issues">Report a problem</a>`
     );
   }
+  const classes = ["doc-wrap", side && "has-side", toc && "has-toc"].filter(Boolean).join(" ");
   const template = `<!doctype html>
 <html lang="en">
   <head>
@@ -321,10 +469,12 @@ ${PROSE_CSS}${page.extraCss || ""}
   </head>
   <body>
     <!--SITE_HEADER-->
-    <main class="doc-wrap${toc ? " has-toc" : ""}" id="main">
+    <main class="${classes}" id="main">
+      ${side}
       <article class="prose">
         ${crumbs.length > 1 ? breadcrumbHtml(crumbs) : ""}
         ${page.bodyHtml}
+        ${nextStepsHtml(page.next)}
         ${meta.length ? `<footer class="doc-meta">${meta.join("\n          ")}</footer>` : ""}
       </article>
       ${toc}
@@ -343,6 +493,7 @@ ${PROSE_CSS}${page.extraCss || ""}
     pagePath: page.path,
     structuredData,
     ogType: page.ogType,
+    article: page.article,
   });
 }
 

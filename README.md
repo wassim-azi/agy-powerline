@@ -97,7 +97,7 @@ Start from a preset, then adjust:
 | Color-blind safe    | `colorblind-dark`, `colorblind-light`                                                                                                                                                     |
 | Your own colors     | `custom` ([how](docs/configuration.md#custom-theme))                                                                                                                                      |
 
-Preview them all in the [theme gallery](https://agy-powerline.com/) or with `npx agy-powerline theme --gallery`. For one color sweep across each row, add a gradient: `npx agy-powerline gradient <name>` with `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono` or your own colors ([how](docs/configuration.md#gradients)).
+Preview them all in the [theme gallery](https://agy-powerline.com/themes/) or with `npx agy-powerline theme --gallery`. For one color sweep across each row, add a gradient: `npx agy-powerline gradient <name>` with `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono` or your own colors ([how](docs/configuration.md#gradients)).
 
 ### Layouts
 

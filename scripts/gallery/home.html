@@ -1,0 +1,648 @@
+<!doctype html>
+<html lang="{{lang}}">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- Nothing loads from other sites: the page is its own inline style and script. -->
+    <!--SITE_CSP-->
+    <!--SITE_HEAD-->
+    <style>
+      /* SITE_CSS */
+
+      /* Hero: the pitch on the left, the bar in an agy window on the right,
+         over agy-drawn artwork (assets/site/art/). */
+      .hero {
+        position: relative;
+        isolation: isolate;
+        overflow: hidden;
+        padding-block: clamp(40px, 7vw, 96px) clamp(56px, 7vw, 104px);
+        border-bottom: 1px solid var(--line);
+      }
+      .hero-bg {
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        background: url("/img/hero-light.webp") 100% 40% / auto 110% no-repeat;
+        opacity: 0.9;
+      }
+      .hero-bg::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background:
+          linear-gradient(90deg, var(--bg) 0%, var(--bg) 30%, transparent 75%),
+          linear-gradient(0deg, var(--bg) 0%, transparent 35%);
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme="light"]) .hero-bg {
+          background-image: url("/img/hero-dark.webp");
+        }
+      }
+      :root[data-theme="dark"] .hero-bg {
+        background-image: url("/img/hero-dark.webp");
+      }
+      .hero-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+        gap: clamp(32px, 5vw, 64px);
+        align-items: center;
+      }
+      .hero-copy {
+        display: grid;
+        gap: 22px;
+        justify-items: start;
+        min-width: 0;
+      }
+      .hero h1 {
+        margin: 0;
+        font-size: clamp(2.2rem, 4.2vw, 3.4rem);
+        line-height: 1.05;
+        letter-spacing: -0.04em;
+        font-weight: 800;
+        text-wrap: balance;
+      }
+      .hero h1 code {
+        font-family: var(--font-mono);
+        font-size: 0.84em;
+        font-weight: 700;
+        letter-spacing: -0.03em;
+        padding: 0 0.16em;
+        border-radius: 10px;
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .hero-lead {
+        margin: 0;
+        font-size: clamp(1.05rem, 1.5vw, 1.2rem);
+        color: var(--muted);
+        max-width: 52ch;
+      }
+      .hero-cta {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        max-width: 100%;
+      }
+      .hero-facts {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px 20px;
+        color: var(--muted);
+        font-size: 0.88rem;
+      }
+      .hero-facts li {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .hero-facts li::before {
+        content: "";
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--grad);
+      }
+      .hero-demo {
+        display: grid;
+        gap: 16px;
+        min-width: 0;
+      }
+      .agy-window,
+      .anatomy-bar {
+        margin: 0;
+      }
+      /* On a phone an 80-column bar is drawn smaller rather than cut. */
+      .agy-window .ln.fit,
+      .anatomy-bar .ln.fit {
+        font-size: clamp(5px, calc(100cqi / (var(--cols) * 0.61)), 13px);
+      }
+      .agy-window {
+        border-radius: 14px;
+        box-shadow: var(--shadow-lg);
+      }
+      .agy-body {
+        padding: 18px 18px 16px;
+        gap: 14px;
+        font-family: var(--font-mono);
+        font-size: 13px;
+      }
+      .agy-msg {
+        margin: 0;
+        opacity: 0.72;
+      }
+      .agy-ok {
+        color: #56d364;
+      }
+      .term[data-bg="light"] .agy-ok {
+        color: #15803d;
+      }
+      .agy-input {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 14px;
+        border: 1px solid currentColor;
+        border-radius: 10px;
+        opacity: 0.6;
+      }
+      .agy-prompt {
+        font-weight: 700;
+      }
+      .caret {
+        width: 8px;
+        height: 1.15em;
+        background: currentColor;
+        animation: blink 1.1s steps(1) infinite;
+      }
+      @keyframes blink {
+        50% {
+          opacity: 0;
+        }
+      }
+      .demo-controls {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .chip-more {
+        color: var(--accent);
+        font-weight: 600;
+      }
+      @media (max-width: 1020px) {
+        .hero-grid {
+          grid-template-columns: minmax(0, 1fr);
+        }
+        .hero-bg {
+          background-position: 120% 0;
+          opacity: 0.55;
+        }
+      }
+
+      /* Read the bar */
+      .anatomy {
+        display: grid;
+        gap: 32px;
+        max-width: 980px;
+        margin: 0 auto;
+      }
+      .legend {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 22px 28px;
+      }
+      .legend-item {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        gap: 14px;
+        align-items: start;
+      }
+      .legend-num {
+        display: grid;
+        place-items: center;
+        width: 30px;
+        height: 30px;
+        border-radius: 9px;
+        background: var(--c);
+        color: #111319;
+        font-weight: 700;
+        font-size: 0.86rem;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.15);
+      }
+      .legend-item h3 {
+        margin: 2px 0 4px;
+        font-size: 1rem;
+      }
+      .legend-item p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.94rem;
+      }
+      .more-link {
+        justify-self: center;
+        color: var(--accent);
+        font-weight: 600;
+        text-decoration: none;
+      }
+      .more-link:hover {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+      }
+
+      /* Steps and features */
+      .alt {
+        background: var(--bg-tint);
+        border-block: 1px solid var(--line);
+      }
+      .grid-3 {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 20px;
+      }
+      .grid-3 > li {
+        min-width: 0;
+        display: grid;
+      }
+      @media (max-width: 900px) {
+        .grid-3 {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+      @media (min-width: 640px) and (max-width: 900px) {
+        .features {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      .step {
+        gap: 12px;
+      }
+      .step .cmd {
+        margin-top: auto;
+        justify-self: start;
+        font-size: 0.8rem;
+      }
+      .step-num {
+        display: grid;
+        place-items: center;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background: var(--grad);
+        color: #ffffff;
+        font-weight: 700;
+      }
+      .section-foot {
+        display: flex;
+        justify-content: center;
+        margin-top: 32px;
+      }
+      .tile-icon {
+        width: 56px;
+        height: 56px;
+        border-radius: 15px;
+        box-shadow:
+          0 0 0 1px rgba(255, 255, 255, 0.06),
+          var(--shadow-md);
+        margin-bottom: 6px;
+      }
+
+      /* Screenshots */
+      .shots {
+        display: grid;
+        justify-items: center;
+        gap: 22px;
+      }
+      .shot-stage {
+        width: 100%;
+        max-width: 1000px;
+      }
+      .shot {
+        margin: 0;
+      }
+      .shot img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border-radius: var(--radius-lg);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow-lg);
+        background: var(--term-dark-bg);
+      }
+
+      /* Themes */
+      .theme-strip {
+        list-style: none;
+        margin: 0 auto;
+        padding: 0;
+        max-width: 980px;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      /* Trust and FAQ */
+      .split {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: clamp(32px, 6vw, 80px);
+        align-items: start;
+      }
+      @media (max-width: 860px) {
+        .split {
+          grid-template-columns: minmax(0, 1fr);
+        }
+      }
+      .split .section-head {
+        text-align: left;
+        justify-items: start;
+        margin: 0 0 24px;
+      }
+      .split .section-head p a {
+        color: var(--accent);
+      }
+      .badges {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      .faq-item {
+        border-bottom: 1px solid var(--line);
+      }
+      .faq-item:first-child {
+        border-top: 1px solid var(--line);
+      }
+      .faq-item summary {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 18px 2px;
+        font-weight: 600;
+        cursor: pointer;
+        list-style: none;
+      }
+      .faq-item summary::-webkit-details-marker {
+        display: none;
+      }
+      .faq-item summary::after {
+        content: "+";
+        color: var(--muted);
+        font-size: 1.35rem;
+        line-height: 1;
+        font-weight: 400;
+      }
+      .faq-item[open] summary::after {
+        content: "−";
+      }
+      .faq-item p {
+        margin: 0 0 18px;
+        color: var(--muted);
+      }
+      .faq-item a {
+        color: var(--accent);
+      }
+      .faq-item code {
+        font-family: var(--font-mono);
+        font-size: 0.88em;
+      }
+      .faq .more-link {
+        display: inline-block;
+        margin-top: 18px;
+      }
+
+      /* Final call to action */
+      .cta {
+        position: relative;
+        overflow: hidden;
+        display: grid;
+        justify-items: center;
+        gap: 18px;
+        text-align: center;
+        padding: clamp(36px, 6vw, 64px) 24px;
+        border-radius: var(--radius-xl);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow-md);
+      }
+      .cta::before {
+        content: "";
+        position: absolute;
+        inset: 0 0 auto;
+        height: 4px;
+        background: var(--grad);
+      }
+      .cta h2 {
+        margin: 0;
+        font-size: clamp(1.75rem, 3.4vw, 2.5rem);
+        letter-spacing: -0.03em;
+      }
+      .cta p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 1.08rem;
+      }
+      .cta-actions {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <!--SITE_HEADER-->
+
+    <main id="main">
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-bg" aria-hidden="true"></div>
+        <div class="container hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">{{eyebrow}}</p>
+            <h1 id="hero-title">{{heroTitle}}</h1>
+            <p class="hero-lead">{{heroLead}}</p>
+            <div class="hero-cta">
+              <!--INSTALL_CMD-->
+              <a class="btn btn-secondary btn-lg" href="/configure/">{{buildInBrowser}}</a>
+            </div>
+            <ul class="hero-facts">
+              {{heroFacts}}
+            </ul>
+          </div>
+          <div class="hero-demo">
+            <!--DEMO-->
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="anatomy" aria-labelledby="anatomy-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="eyebrow">{{anatomyEyebrow}}</p>
+            <h2 id="anatomy-title">{{anatomyTitle}}</h2>
+            <p>{{anatomyLead}}</p>
+          </div>
+          <div class="anatomy">
+            <!--ANATOMY-->
+            <a class="more-link" href="/guides/antigravity-quota/">{{paceGuide}}</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt" id="start" aria-labelledby="start-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="eyebrow">{{stepsEyebrow}}</p>
+            <h2 id="start-title">{{stepsTitle}}</h2>
+          </div>
+          <ol class="grid-3">
+            <!--STEPS-->
+          </ol>
+          <div class="section-foot">
+            <a class="more-link" href="/install/">{{installGuide}}</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" id="features" aria-labelledby="features-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="eyebrow">{{featuresEyebrow}}</p>
+            <h2 id="features-title">{{featuresTitle}}</h2>
+            <p>{{featuresLead}}</p>
+          </div>
+          <ul class="grid-3 features">
+            <!--FEATURES-->
+          </ul>
+        </div>
+      </section>
+
+      <section class="section alt" id="screenshots" aria-labelledby="shots-title">
+        <div class="container shots">
+          <div class="section-head">
+            <p class="eyebrow">{{shotsEyebrow}}</p>
+            <h2 id="shots-title">{{shotsTitle}}</h2>
+            <p>{{shotsLead}}</p>
+          </div>
+          <!--SHOTS-->
+        </div>
+      </section>
+
+      <section class="section" id="themes" aria-labelledby="themes-title">
+        <div class="container">
+          <div class="section-head">
+            <p class="eyebrow">{{themesEyebrow}}</p>
+            <h2 id="themes-title">{{themesTitle}}</h2>
+            <p>{{themesLead}}</p>
+          </div>
+          <ul class="theme-strip">
+            <!--THEME_STRIP-->
+          </ul>
+          <div class="section-foot">
+            <a class="btn btn-primary btn-lg" href="/themes/">{{seeAllThemes}} {{arrow}}</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section alt" id="trust" aria-label="{{trustEyebrow}} · {{faqEyebrow}}">
+        <div class="container split">
+          <div>
+            <div class="section-head">
+              <p class="eyebrow">{{trustEyebrow}}</p>
+              <h2>{{trustTitle}}</h2>
+              <p>{{trustBody}}</p>
+            </div>
+            <ul class="badges">
+              <!--TRUST-->
+            </ul>
+          </div>
+          <div class="faq">
+            <div class="section-head">
+              <p class="eyebrow">{{faqEyebrow}}</p>
+              <h2>{{faqTitle}}</h2>
+            </div>
+            <!--FAQ-->
+            <a class="more-link" href="/faq/">{{allQuestions}}</a>
+          </div>
+        </div>
+      </section>
+
+      <section class="section" aria-labelledby="cta-title">
+        <div class="container">
+          <div class="cta">
+            <h2 id="cta-title">{{ctaTitle}}</h2>
+            <p>{{ctaLead}}</p>
+            <!--INSTALL_CMD-->
+            <div class="cta-actions">
+              <a class="btn btn-primary" href="/configure/">{{buildInBrowser}}</a>
+              <a class="btn btn-secondary" href="https://github.com/wassim-azi/agy-powerline"
+                >{{viewOnGithub}}</a
+              >
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!--SITE_FOOTER-->
+
+    <script>
+      /* SITE_THEME_SCRIPT */
+    </script>
+    <script>
+      (function () {
+        // A link to a theme on the home page (/#dark-nord) goes to its card on /themes/.
+        var hash = location.hash.slice(1);
+        if (/^(dark|light|colorblind)-[a-z-]+$/.test(hash)) {
+          location.replace("/themes/#" + hash);
+          return;
+        }
+
+        var demo = document.getElementById("demo");
+        var bar = document.getElementById("demoBar");
+        var label = demo.querySelector(".demo-label");
+        var state = { theme: "dark-aurora", layout: "pills" };
+        function show() {
+          var tpl = document.querySelector(
+            'template[data-variant="' + state.theme + ":" + state.layout + '"]'
+          );
+          if (!tpl) return;
+          bar.innerHTML = tpl.innerHTML;
+          var bg = tpl.getAttribute("data-bg");
+          demo.setAttribute("data-bg", bg);
+          demo.querySelector(".term").setAttribute("data-bg", bg);
+          label.textContent = state.theme + " · " + state.layout;
+          document.querySelectorAll("[data-demo-theme]").forEach(function (b) {
+            b.setAttribute("aria-pressed", String(b.dataset.demoTheme === state.theme));
+          });
+          document.querySelectorAll("[data-demo-layout]").forEach(function (b) {
+            b.setAttribute("aria-pressed", String(b.dataset.demoLayout === state.layout));
+          });
+        }
+        document.addEventListener("click", function (e) {
+          var theme = e.target.closest("[data-demo-theme]");
+          var layout = e.target.closest("[data-demo-layout]");
+          if (theme) state.theme = theme.dataset.demoTheme;
+          if (layout) state.layout = layout.dataset.demoLayout;
+          if (theme || layout) show();
+        });
+
+        // Screenshot tabs, with arrow keys between them.
+        var tabs = Array.prototype.slice.call(document.querySelectorAll(".shot-tabs [role=tab]"));
+        function select(tab) {
+          tabs.forEach(function (t) {
+            var on = t === tab;
+            t.setAttribute("aria-selected", String(on));
+            t.tabIndex = on ? 0 : -1;
+            document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+          });
+        }
+        tabs.forEach(function (tab, i) {
+          tab.addEventListener("click", function () {
+            select(tab);
+          });
+          tab.addEventListener("keydown", function (e) {
+            var step = e.key === "ArrowRight" ? 1 : e.key === "ArrowLeft" ? -1 : 0;
+            if (!step) return;
+            var next = tabs[(i + step + tabs.length) % tabs.length];
+            select(next);
+            next.focus();
+          });
+        });
+      })();
+    </script>
+  </body>
+</html>

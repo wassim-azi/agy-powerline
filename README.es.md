@@ -99,7 +99,7 @@ Comienza desde un preajuste y luego ajústalo:
 | Apto para daltonismo | `colorblind-dark`, `colorblind-light`                                                                                                                                                            |
 | Tus propios colores  | `custom` ([cómo hacerlo](docs/configuration.md#custom-theme))                                                                                                                                    |
 
-Previsualízalos todos en la [galería de temas](https://agy-powerline.com/) o con `npx agy-powerline theme --gallery`. Para un degradado de color continuo en cada fila, añade un gradiente: `npx agy-powerline gradient <name>` con `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono` o tus propios colores ([cómo hacerlo](docs/configuration.md#gradients)).
+Previsualízalos todos en la [galería de temas](https://agy-powerline.com/themes/) o con `npx agy-powerline theme --gallery`. Para un degradado de color continuo en cada fila, añade un gradiente: `npx agy-powerline gradient <name>` con `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono` o tus propios colores ([cómo hacerlo](docs/configuration.md#gradients)).
 
 ### Diseños
 

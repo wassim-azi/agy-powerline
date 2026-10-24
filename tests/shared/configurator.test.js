@@ -66,7 +66,7 @@ async function run() {
     record(
       "the configurator has the shared header and footer, with Configurator as the current page",
       /<header class="site-header">/.test(html) &&
-        /<a class="nav-link" href="\/">Themes<\/a>/.test(html) &&
+        /<a class="nav-link" href="\/themes\/">Themes<\/a>/.test(html) &&
         /<a class="nav-link" href="\/configure\/" aria-current="page">Configurator<\/a>/.test(
           html
         ) &&

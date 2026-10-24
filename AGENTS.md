@@ -19,9 +19,9 @@ Run all of these from the repo root.
 | Format check / fix            | `npm run format:check` / `npm run format`                          |
 | Render the bar with demo data | `node src/index.js render --demo`                                  |
 | Render a payload file         | `node src/index.js render < tests/fixtures/antigravity-1.3.0.json` |
-| Theme preview page            | `npm run gallery` (writes `gallery.html`, gitignored)              |
+| Theme gallery page            | `npm run gallery` (writes `gallery.html`, gitignored)              |
 | Build the website             | `npm run site` (writes `_site/`, gitignored)                       |
-| Social card and site icons    | `npm run site:images` (needs Chrome; writes `assets/site/`)        |
+| Share cards and site icons    | `npm run site:images` (needs Chrome; writes `assets/site/`)        |
 | Theme screenshots (SVG)       | `npm run screenshots` (writes `screenshots/`, gitignored)          |
 | Demo GIF                      | `vhs scripts/demo/demo.tape` (writes `assets/demo.gif`)            |
 
@@ -61,8 +61,8 @@ Suite names are the `registerSuite()` calls in `tests/shared.js` (e.g. `renderer
 - `src/lib/log.js`: the local problem log; `payload-dump.js`: privacy-safe payload dumps; `mock-data.js`: the `render --demo` sample payload; `run.js`: runs a command and captures its output (doctor's live check); `prompt.js`: yes/no prompts for `init` and `uninstall`.
 - `tests/shared/*.test.js`: cross-platform suites; `tests/platform/`: launcher tests per OS; `tests/snapshots/`: expected output; `tests/fixtures/`: sample payloads.
 - `docs/`: user docs beyond the README (`configuration.md`, `install.md`, `troubleshooting.md`, `payload.md`, `faq.md`) and `docs/guides/`; all of them are pages of the site too.
-- `scripts/site/`: agy-powerline.com, published by `.github/workflows/pages.yml`. `build.js` writes every page into `_site/` (home, configurator, the Markdown docs and guides, the widget page, the quota calculator) with the sitemap, feed, `llms.txt` and the config JSON Schema (`config-schema.js`); `layout.js` holds the shared head, header and footer, `doc-page.js` the docs page, `markdown.js` the Markdown renderer, `home-text.js` the home page's English and French text, `images.js` the social card and icons in `assets/site/`; `content/` has the About and Privacy pages. A doc page gets on the site through `MARKDOWN_PAGES` or `GUIDES` in `build.js`.
-- `scripts/gallery/`: the theme gallery (the site's home page) and `npm run screenshots`; `scripts/hooks/`: the git hooks (`.githooks/` points at them); `scripts/release/`: the plugin archives `release.yml` attaches to each release; `scripts/demo/`: the [VHS](https://github.com/charmbracelet/vhs) tape that records `assets/demo.gif`.
+- `scripts/site/`: agy-powerline.com, published by `.github/workflows/pages.yml`. `build.js` writes every page into `_site/` (home, themes, configurator, the Markdown docs and guides, the widget page, the quota calculator) with the sitemap, feed, `llms.txt` and the config JSON Schema (`config-schema.js`), and lists each page's share card and the docs sidebar; `layout.js` holds the design tokens, the shared head, header, footer and site script, `doc-page.js` the docs page, `markdown.js` the Markdown renderer, `home-text.js` the home page's English and French text, `images.js` the share cards (`assets/site/og/`, one per page, checked against `og/manifest.json`), the icons and the WebP artwork (`assets/site/art/`, drawn with agy); the Inter font is in `assets/site/fonts/`; `content/` has the About and Privacy pages. A doc page gets on the site through `MARKDOWN_PAGES` or `GUIDES` in `build.js`.
+- `scripts/gallery/`: the home page (`home.html`) and the theme gallery (`themes.html`), both rendered by `build.js`, and `npm run screenshots`; `scripts/hooks/`: the git hooks (`.githooks/` points at them); `scripts/release/`: the plugin archives `release.yml` attaches to each release; `scripts/demo/`: the [VHS](https://github.com/charmbracelet/vhs) tape that records `assets/demo.gif`.
 
 The installed runtime is a **copy**: `init` joins `src/runtime/statusline.js` and the files listed in `RUNTIME_FILES` (`src/lib/paths.js`) into one `~/.agy-powerline/statusline.js` (`src/cli/bundle.js`), because Node opens one file much faster than many. If runtime code needs a new file in `src/lib/`, add it to `RUNTIME_FILES`. The runtime must never require `src/cli/` or anything outside that list; inside the bundle such a require fails.
 
