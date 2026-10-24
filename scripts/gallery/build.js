@@ -252,7 +252,7 @@ function homeStructuredData(description) {
 
 // --- Home page ----------------------------------------------------------------
 
-function demoHtml(text) {
+function demoHtml(text, language) {
   const n = counts();
   const [first] = DEMO_THEMES;
   // Every theme × layout pair waits in a <template>, outside the page's DOM
@@ -260,7 +260,7 @@ function demoHtml(text) {
   const variants = DEMO_THEMES.flatMap((id) =>
     LAYOUTS.map(
       (layout) =>
-        `<template data-variant="${id}:${layout}" data-bg="${targetOf(id)}">${renderBar(payload(), { theme: id, layout })}</template>`
+        `<template data-variant="${id}:${layout}" data-bg="${targetOf(id)}">${renderBar(payload(), { theme: id, layout, language })}</template>`
     )
   ).join("\n        ");
   const chips = DEMO_THEMES.map(
@@ -284,7 +284,7 @@ function demoHtml(text) {
           <div class="term agy-body" data-bg="dark" aria-hidden="true">
             <p class="agy-msg"><span class="agy-ok">✓</span> Updated 3 files. All 128 tests pass.</p>
             <div class="agy-input"><span class="agy-prompt">&gt;</span> ${text.askAgy}<span class="caret"></span></div>
-            <div class="screen" id="demoBar">${renderBar(payload(), { theme: first, layout: "pills" })}</div>
+            <div class="screen" id="demoBar">${renderBar(payload(), { theme: first, layout: "pills", language })}</div>
           </div>
         </figure>
         <div class="demo-controls">
@@ -297,7 +297,7 @@ function demoHtml(text) {
         ${variants}`;
 }
 
-function anatomyHtml(text) {
+function anatomyHtml(text, language) {
   const colors = THEMES["dark-aurora"].colors;
   const items = text.anatomy
     .map(
@@ -315,7 +315,7 @@ function anatomyHtml(text) {
               </div>
               <span class="term-title">dark-aurora · default preset</span>
             </div>
-            <div class="term" data-bg="dark"><div class="screen">${renderBar(payload(), {})}</div></div>
+            <div class="term" data-bg="dark"><div class="screen">${renderBar(payload(), { language })}</div></div>
           </figure>
           <ol class="legend">
             ${items}
@@ -389,8 +389,9 @@ function buildHomeHtml({ lang = "en" } = {}) {
       copy: text.copy,
       large: true,
     }),
-    DEMO: demoHtml(text),
-    ANATOMY: anatomyHtml(text),
+    // The bars speak the page's language.
+    DEMO: demoHtml(text, lang),
+    ANATOMY: anatomyHtml(text, lang),
     STEPS: stepsHtml(text),
     FEATURES: featuresHtml(text),
     SHOTS: shotsHtml(text),

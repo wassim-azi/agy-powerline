@@ -603,6 +603,12 @@
             </select>
           </div>
           <div class="form-group">
+            <label class="form-label" for="languageSelect">Bar language</label>
+            <select class="form-select" id="languageSelect">
+              <!--LANGUAGE_OPTIONS-->
+            </select>
+          </div>
+          <div class="form-group">
             <label class="form-label" for="capSelect">Powerline Caps</label>
             <select class="form-select" id="capSelect">
               <!--CAP_OPTIONS-->
@@ -794,6 +800,7 @@
         const presetSelect = document.getElementById("presetSelect");
         const themeSelect = document.getElementById("themeSelect");
         const layoutSelect = document.getElementById("layoutSelect");
+        const languageSelect = document.getElementById("languageSelect");
         const capSelect = document.getElementById("capSelect");
         const gradientSelect = document.getElementById("gradientSelect");
         const customGradientGroup = document.getElementById("customGradientGroup");
@@ -873,6 +880,7 @@
         function syncControls() {
           themeSelect.value = state.config.theme || "dark-aurora";
           layoutSelect.value = state.config.layout || "pills";
+          languageSelect.value = state.config.language || "en";
 
           const currentStyle = Agy.detectStyle(state.config.powerline);
           capSelect.value = currentStyle || "round";
@@ -1191,6 +1199,11 @@
 
           layoutSelect.addEventListener("change", (e) => {
             state.config.layout = e.target.value;
+            syncControls();
+          });
+
+          languageSelect.addEventListener("change", (e) => {
+            state.config.language = e.target.value;
             syncControls();
           });
 

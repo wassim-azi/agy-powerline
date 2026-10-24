@@ -22,6 +22,7 @@ const { WIDGET_CATALOG } = require("../../src/lib/catalog");
 const { WIDGET_TAGS } = require("../../src/lib/widget-style");
 const { PRESETS, PRESET_ORDER, defaultConfig } = require("../../src/lib/config");
 const { STYLES, STYLE_ORDER } = require("../../src/lib/powerline");
+const { SUPPORTED_LANGUAGES } = require("../../src/lib/i18n");
 
 const repo = path.join(__dirname, "..", "..");
 const defaultOut = path.join(repo, "_site", "configure", "index.html");
@@ -65,6 +66,14 @@ function buildGradientOptions() {
     ...GRADIENT_ORDER.map((id) => `<option value="${id}">${GRADIENTS[id].name}</option>`),
     '<option value="custom">Custom gradient</option>',
   ].join("\n");
+}
+
+// Each language in its own name (English, Français), from Node's Intl.
+function buildLanguageOptions() {
+  return SUPPORTED_LANGUAGES.map((code) => {
+    const name = new Intl.DisplayNames([code], { type: "language" }).of(code);
+    return `<option value="${code}">${name[0].toUpperCase()}${name.slice(1)} (${code})</option>`;
+  }).join("\n");
 }
 
 function buildConfiguratorHtml() {
@@ -114,6 +123,7 @@ function buildConfiguratorHtml() {
     .replace("<!--PRESET_OPTIONS-->", buildPresetOptions())
     .replace("<!--CAP_OPTIONS-->", buildCapOptions())
     .replace("<!--GRADIENT_OPTIONS-->", buildGradientOptions())
+    .replace("<!--LANGUAGE_OPTIONS-->", buildLanguageOptions())
     .replace("/* BUNDLE_PLACEHOLDER */", bundleCode)
     .replace("/* PAGE_LOGIC_PLACEHOLDER */", pageLogicCode);
 }

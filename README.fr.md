@@ -135,6 +135,16 @@ Prévisualisez tous les thèmes avec `npx agy-powerline theme --gallery`.
 
 </details>
 
+### Langue de la barre
+
+Les mots de la barre elle-même (`Réinit`, `rest.`, les unités de `2h 47m`) peuvent s’afficher en français :
+
+```sh
+npx agy-powerline init --language fr
+```
+
+ou `"language": "fr"` dans `statusline.config.json` (touche `u` dans `configure`). Le nom du modèle, la branche et tout ce qu’envoie agy restent tels quels ; les commandes et `configure` restent en anglais. Détails dans la [documentation de configuration](docs/configuration.md#language).
+
 ## Widgets
 
 | Widget                                                        | Informations affichées                                                                                               |
