@@ -404,6 +404,20 @@ async function run() {
       )
     );
 
+    // The hero artwork is the home page's LCP element: both themes' versions
+    // are preloaded at high priority, each for its own color scheme.
+    const heroPreloads = ["light", "dark"].every((scheme) =>
+      new RegExp(
+        `<link\\s+rel="preload"\\s+href="/img/hero-${scheme}\\.webp"\\s+as="image"\\s+type="image/webp"\\s+fetchpriority="high"\\s+media="\\(prefers-color-scheme: ${scheme}\\)"`
+      ).test(home)
+    );
+    record(
+      "the home page preloads its hero artwork with fetchpriority=high",
+      heroPreloads &&
+        fs.existsSync(path.join(out, "img", "hero-light.webp")) &&
+        fs.existsSync(path.join(out, "img", "hero-dark.webp"))
+    );
+
     // Chrome tags its WebPs with a color profile; images.js drops it.
     const webpChunks = (buf) => {
       const types = [];
@@ -448,6 +462,47 @@ async function run() {
         half.data[2] === 153 &&
         Math.abs(half.data[3] - 212.5) < 1,
       [...half.data].join(",")
+    );
+
+    // Indexed screenshots (an optimizer's palette PNGs) round-trip, and a
+    // shrunk copy keeps the palette: black, white and a mid gray in between.
+    const palette = [
+      [0, 0, 0, 255],
+      [255, 255, 255, 255],
+      [128, 128, 128, 255],
+    ];
+    const indexed = { width: 2, height: 1, data: Buffer.from([0, 0, 0, 255, 255, 255, 255, 255]) };
+    const indexedPng = encodePng({ ...indexed, palette });
+    const shrunk = decodePng(encodePng(resizePng(decodePng(indexedPng), 1)));
+    // A 1-bit indexed PNG: 3 pixels, indexes 1, 0, 1 packed in one byte.
+    const pngChunk = (type, body) => {
+      const head = Buffer.alloc(8);
+      head.writeUInt32BE(body.length, 0);
+      head.write(type, 4, "latin1");
+      return Buffer.concat([head, body, Buffer.alloc(4)]);
+    };
+    const ihdr = Buffer.alloc(13);
+    ihdr.writeUInt32BE(3, 0);
+    ihdr.writeUInt32BE(1, 4);
+    ihdr.set([1, 3, 0, 0, 0], 8);
+    const oneBit = decodePng(
+      Buffer.concat([
+        Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]),
+        pngChunk("IHDR", ihdr),
+        pngChunk("PLTE", Buffer.from([0, 0, 0, 255, 255, 255])),
+        pngChunk("IDAT", require("zlib").deflateSync(Buffer.from([0, 0b10100000]))),
+        pngChunk("IEND", Buffer.alloc(0)),
+      ])
+    );
+    record(
+      "the PNG resizer reads indexed PNGs and keeps their palette in shrunk copies",
+      indexedPng[25] === 3 &&
+        decodePng(indexedPng).data.equals(indexed.data) &&
+        decodePng(indexedPng).palette.length === 3 &&
+        shrunk.palette.length === 3 &&
+        [...shrunk.data].join() === "128,128,128,255" &&
+        [...oneBit.data].join() === "255,255,255,255,0,0,0,255,255,255,255,255",
+      `${[...shrunk.data].join()} | ${[...oneBit.data].join()}`
     );
 
     // RFC 9116: a contact (GitHub's private reporting, never an email
