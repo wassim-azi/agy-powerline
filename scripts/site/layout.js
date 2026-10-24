@@ -509,6 +509,7 @@ const SHARED_CSS = `
       .term {
         padding: 12px 14px 14px;
         overflow-x: auto;
+        container-type: inline-size;
         display: grid;
         gap: 4px;
         background: var(--term-dark-bg);
@@ -532,25 +533,43 @@ const SHARED_CSS = `
       .term-label:first-child {
         margin-top: 0;
       }
+      /* At least as wide as the box, so a bar's marked gaps can stretch to it. */
       .screen {
         font-family: var(--font-mono);
         font-size: 13px;
         white-space: pre;
         width: max-content;
+        min-width: 100%;
         contain: layout style;
       }
       .ln {
         height: 1.45em;
         line-height: 1.45em;
       }
+      .ln.flex {
+        display: flex;
+      }
+      .gap {
+        flex: 1 0 auto;
+      }
+      /* A bar with gaps (ansi.js sets --cols, the columns it needs) shrinks to
+         fit a narrow box, down to 10px; below that the box scrolls. */
+      .ln.fit {
+        font-size: clamp(10px, calc(100cqi / (var(--cols) * 0.61)), 13px);
+      }
       .r,
-      .g {
+      .g,
+      .wc {
         display: inline-block;
         height: 1.45em;
         vertical-align: top;
       }
+      .wc {
+        text-align: center;
+      }
+      /* One column, like the glyph in a terminal font. */
       .g {
-        width: 0.62em;
+        width: 1ch;
         background: var(--b);
         position: relative;
       }

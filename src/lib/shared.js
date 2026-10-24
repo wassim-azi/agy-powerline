@@ -102,6 +102,8 @@ function renderBar(data, config, overrides) {
   session.execMode =
     overrides.exec === "run" || overrides.exec === "blocked" ? overrides.exec : "preview";
   session.execMemo = new Map();
+  // Web previews only: mark the gaps between widget groups (see joinFlex).
+  session.flexGaps = overrides.flexGaps === true;
   // Built only when a command will run and asked for it.
   if (
     session.execMode === "run" &&

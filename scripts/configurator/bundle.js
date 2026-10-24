@@ -314,6 +314,8 @@ function __require(from, id) {
     key += ".js";
   }
   key = key.replace(/^\\.\\//, "");
+  // ansi.js comes from scripts/site/ and requires the renderer by its repo path.
+  key = key.replace(/^(\\.\\.\\/)+src\\/lib\\//, "");
 
   if (!__files[key]) {
     const err = new Error("Cannot find module '" + id + "' from '" + from + "'");

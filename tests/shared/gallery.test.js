@@ -8,6 +8,9 @@ const { record } = require("../helpers");
 const { THEME_ORDER } = require("../../src/lib/themes");
 const { buildGalleryHtml } = require("../../scripts/gallery/build");
 const themeToggle = require("../../scripts/site/theme-toggle");
+const { ansiToHtml } = require("../../scripts/site/ansi");
+const { renderStatusline, sampleData, defaultConfig } = require("../../src/lib/shared");
+const { FLEX_GAP_START, FLEX_GAP_END } = require("../../src/lib/layouts/pills");
 
 const REPO_URL = "https://github.com/wassim-azi/agy-powerline";
 const SITE_URL = "https://agy-powerline.com/";
@@ -61,6 +64,33 @@ async function run() {
     "the gallery links to the configurator from the hero and from every theme card",
     html.includes('href="/configure/"') &&
       (html.match(/href="\/configure\/#/g) || []).length === THEME_ORDER.length - 1
+  );
+
+  // Previews mark the gaps between widget groups so the page can stretch them
+  // to its own width; a bar rendered for a terminal never has the markers.
+  const data = { ...sampleData(), terminal_width: 96 };
+  const plain = renderStatusline(data, defaultConfig(), { color: "truecolor" });
+  const marked = renderStatusline(data, defaultConfig(), { color: "truecolor", flexGaps: true });
+  record(
+    "only previews mark the gaps between widget groups, and the bar is otherwise the same",
+    !plain.includes(FLEX_GAP_START) &&
+      marked.includes(FLEX_GAP_START) &&
+      marked.split(FLEX_GAP_START).join("").split(FLEX_GAP_END).join("") === plain
+  );
+
+  const preview = ansiToHtml(marked);
+  record(
+    "a preview's gaps stretch to the box and its emoji keep the columns the renderer counted",
+    /<div class="ln flex fit" style="--cols:\d+">/.test(preview) &&
+      /<span class="r gap"[^>]*> <\/span>/.test(preview) &&
+      /<span class="wc" style="width:2ch">/.test(preview)
+  );
+
+  const hero = (html.match(/<figure class="term-frame hero-term"[\s\S]*?<\/figure>/) || [""])[0];
+  record(
+    "the home page's bars have a blank line between rows and gaps that stretch",
+    /class="ln flex fit"/.test(hero) &&
+      /<div class="ln fit" style="--cols:\d+"><span class="r"[^>]*> <\/span><\/div>/.test(hero)
   );
 
   record(

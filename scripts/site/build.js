@@ -404,8 +404,12 @@ function widgetPreview(id) {
   data.cwd = FAKE_DIR;
   data.workspace = { current_dir: FAKE_DIR, project_dir: FAKE_DIR };
   data.terminal_width = 96;
-  const config = { ...defaultConfig(), widgets: [{ id, ...(PREVIEW_OPTIONS[id] || {}) }] };
-  const out = renderStatusline(data, config, { color: "truecolor" });
+  const config = {
+    ...defaultConfig(),
+    rowGap: true,
+    widgets: [{ id, ...(PREVIEW_OPTIONS[id] || {}) }],
+  };
+  const out = renderStatusline(data, config, { color: "truecolor", flexGaps: true });
   if (!out.replace(/\x1b\[[0-9;]*m/g, "").trim()) return "";
   return `<div class="screen-wrap"><div class="term-frame" data-bg="dark"><div class="term" data-bg="dark"><div class="screen">${ansiToHtml(out)}</div></div></div></div>`;
 }

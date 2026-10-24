@@ -24,6 +24,9 @@ const TERM = { dark: [29, 31, 39], light: [251, 251, 248] };
 const SCREENSHOTS = ["windows", "pills-dark", "lines-light", "classic-dark"];
 const screenshotUrl = (name) => `/img/agy-statusline-${name}.png`;
 
+// The page's bars: a blank line between rows, and gaps that stretch to the box.
+const PREVIEW = { config: { rowGap: true }, render: { color: "truecolor", flexGaps: true } };
+
 function payload(overrides = {}) {
   const data = sampleData();
   data.cwd = FAKE_DIR;
@@ -78,7 +81,11 @@ function buildThemes() {
     const target = t.kind === "light" || id.endsWith("-light") ? "light" : "dark";
     const render = (data, config) =>
       ansiToHtml(
-        renderStatusline(data, { ...defaultConfig(), theme: id, ...config }, { color: "truecolor" })
+        renderStatusline(
+          data,
+          { ...defaultConfig(), ...PREVIEW.config, theme: id, ...config },
+          PREVIEW.render
+        )
       );
     const status = [0.8, 0.22, 0.06]
       .map((f) => render(withFiveHour(f), { layout: "pills", widgets: [{ id: "fiveHourBar" }] }))
@@ -251,7 +258,9 @@ function homeStructuredData(description) {
 function buildGalleryHtml({ lang = "en" } = {}) {
   const text = HOME_TEXT[lang];
   const themes = buildThemes();
-  const heroBar = ansiToHtml(renderStatusline(payload(), defaultConfig(), { color: "truecolor" }));
+  const heroBar = ansiToHtml(
+    renderStatusline(payload(), { ...defaultConfig(), ...PREVIEW.config }, PREVIEW.render)
+  );
   const rawTemplate = fs.readFileSync(path.join(__dirname, "template.html"), "utf8");
   const filled = rawTemplate.replace(/\{\{(\w+)\}\}/g, (match, key) => {
     if (key === "facts") {

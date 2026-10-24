@@ -8,6 +8,14 @@
 // - 256-color palette (\x1b[38;5;nm and 48;5;nm)
 // - Bold (\x1b[1m), dim (\x1b[2m), normal intensity (\x1b[22m) and resets
 // - Powerline glyphs: round caps, arrows and diagonal slants
+// - The gaps joinFlex marks between widget groups, which stretch to the box
+// - Emoji and other wide characters, held to the columns the renderer counted
+
+const { charWidth } = require("../../src/lib/formatters");
+const { FLEX_GAP_START, FLEX_GAP_END } = require("../../src/lib/layouts/pills");
+
+const GAP_START = Number(FLEX_GAP_START.slice(2, -1));
+const GAP_END = Number(FLEX_GAP_END.slice(2, -1));
 
 const esc = (s) => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 const css = (c) => (c ? `rgb(${c.join(",")})` : null);
@@ -57,9 +65,10 @@ const GLYPH_MAP = {
   0xe0be: "slant-ur",
 };
 
-// Splits ANSI text into lines of styled runs: { text, fg, bg, bold, dim } for
-// text and { glyph, fg, bg } for powerline glyphs, which fonts often lack, so
-// the previews draw them as shapes. Colors are [r, g, b] or null.
+// Splits ANSI text into lines of styled runs: { text, fg, bg, bold, dim, gap }
+// for text and { glyph, fg, bg } for powerline glyphs, which fonts often lack,
+// so the previews draw them as shapes. Colors are [r, g, b] or null; gap marks
+// the spaces between widget groups.
 function ansiRuns(text) {
   const lines = String(text ?? "")
     .replace(/\x1b\[0m$/, "")
@@ -68,6 +77,7 @@ function ansiRuns(text) {
   let bg = null;
   let bold = false;
   let dim = false;
+  let gap = false;
 
   return lines.map((line) => {
     const runs = [];
@@ -75,7 +85,7 @@ function ansiRuns(text) {
 
     const flush = () => {
       if (!run) return;
-      runs.push({ text: run, fg, bg, bold, dim });
+      runs.push({ text: run, fg, bg, bold, dim, gap });
       run = "";
     };
 
@@ -99,7 +109,9 @@ function ansiRuns(text) {
         flush();
         for (let k = 0; k < codes.length; k++) {
           const c = codes[k];
-          if (c === 0) {
+          if (c === GAP_START || c === GAP_END) {
+            gap = c === GAP_START;
+          } else if (c === 0) {
             fg = null;
             bg = null;
             bold = false;
@@ -151,8 +163,57 @@ function ansiRuns(text) {
 // each one as "bullet"; the percentage printed next to the meter says it all.
 const METER_ONLY = /^[\s•●○◉█░▓▒┃│]*[•●○◉█░▓▒┃][\s•●○◉█░▓▒┃│]*$/;
 
+// A font draws emoji wider or narrower than the two columns the renderer
+// counts, which pushes everything after them out of line, so each character
+// wider than one column gets a box of exactly its width.
+function cellsToHtml(text) {
+  let html = "";
+  let cluster = "";
+  let width = 0;
+  let joined = false;
+  const flush = () => {
+    if (cluster) {
+      html +=
+        width > 1
+          ? `<span class="wc" style="width:${width}ch">${esc(cluster)}</span>`
+          : esc(cluster);
+    }
+    cluster = "";
+    width = 0;
+  };
+  for (const ch of text) {
+    const w = charWidth(ch.codePointAt(0));
+    // Zero-width marks (variation selectors, skin tones, joiners) and the
+    // character after a joiner belong to the cluster before them.
+    if (w > 0 && !joined) flush();
+    cluster += ch;
+    width += w;
+    joined = ch === "‍";
+  }
+  flush();
+  return html;
+}
+
+// The columns a line needs once each of its gaps is down to one space.
+function minColumns(runs) {
+  let cols = 0;
+  for (const r of runs) {
+    if (r.glyph || r.gap) {
+      cols += 1;
+      continue;
+    }
+    for (const ch of r.text) cols += charWidth(ch.codePointAt(0));
+  }
+  return cols;
+}
+
 function ansiToHtml(text) {
-  return ansiRuns(text)
+  const lines = ansiRuns(text);
+  // A bar with gaps also shrinks its font to fit a narrower box (.ln.fit), the
+  // same for every line so the rows stay aligned.
+  const flexible = lines.some((runs) => runs.some((r) => r.gap));
+  const fit = flexible ? ` fit" style="--cols:${Math.max(...lines.map(minColumns))}` : "";
+  return lines
     .map((runs) => {
       let html = "";
       for (const r of runs) {
@@ -167,9 +228,15 @@ function ansiToHtml(text) {
         if (r.bold) style.push("font-weight:700");
         if (r.dim) style.push("opacity:0.65");
         const hidden = METER_ONLY.test(r.text) ? ' aria-hidden="true"' : "";
-        html += `<span class="r"${hidden}${style.length ? ` style="${style.join(";")}"` : ""}>${esc(r.text)}</span>`;
+        const attrs = `${hidden}${style.length ? ` style="${style.join(";")}"` : ""}`;
+        // A gap keeps one space and grows to fill the box (.gap), so a bar fits
+        // any box as wide as its widgets, with the last group on the right edge.
+        html += r.gap
+          ? `<span class="r gap"${attrs}> </span>`
+          : `<span class="r"${attrs}>${cellsToHtml(r.text)}</span>`;
       }
-      return `<div class="ln">${html || "&nbsp;"}</div>`;
+      const flex = runs.some((r) => r.gap) ? " flex" : "";
+      return `<div class="ln${flex}${fit}">${html || "&nbsp;"}</div>`;
     })
     .join("");
 }

@@ -783,7 +783,7 @@ function renderLinesLayout(session, emojis, ascii = false, colors, config) {
     rows
       .map((groups) => {
         const parts = groups.map((group) => group.join(pipe));
-        return joinFlex(parts, session.terminalWidth);
+        return joinFlex(parts, session.terminalWidth, session.flexGaps === true);
       })
       // rowGap: a line holding a space, as in Pills, so a host keeps it.
       .join(config.rowGap === true ? "\n \n" : "\n") + RESET

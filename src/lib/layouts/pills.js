@@ -975,7 +975,13 @@ function renderPills(group, colors, config, counters) {
   return group.map((segment) => renderGroup([segment], colors, config, counters)).join(" ");
 }
 
-function joinFlex(parts, terminalWidth) {
+// Web previews ask for each gap between widget groups to be marked, so the
+// page can stretch it to its own width instead of these fixed columns. These
+// SGR codes mean nothing to a terminal and never reach one.
+const FLEX_GAP_START = "\x1b[1000m";
+const FLEX_GAP_END = "\x1b[1001m";
+
+function joinFlex(parts, terminalWidth, markGaps = false) {
   if (parts.length <= 1) {
     return parts[0] || "";
   }
@@ -996,7 +1002,8 @@ function joinFlex(parts, terminalWidth) {
       leftover -= 1;
     }
 
-    out += " ".repeat(pad) + parts[i];
+    const gap = " ".repeat(pad);
+    out += (markGaps ? FLEX_GAP_START + gap + FLEX_GAP_END : gap) + parts[i];
   }
 
   return out;
@@ -1011,7 +1018,8 @@ function renderPillRows(rows, session, colors, config) {
     .map((row) =>
       joinFlex(
         row.map((group) => renderPills(group, colors, config, counters)),
-        session.terminalWidth
+        session.terminalWidth,
+        session.flexGaps === true
       )
     )
     .join(config.rowGap === true ? "\n \n" : "\n");
@@ -1031,4 +1039,6 @@ module.exports = {
   renderGroup,
   renderPillRows,
   joinFlex,
+  FLEX_GAP_START,
+  FLEX_GAP_END,
 };
