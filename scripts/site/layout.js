@@ -1457,9 +1457,10 @@ function injectSiteChrome(html, options) {
 // the inline scripts it runs by their SHA-256 instead of allowing any inline
 // script, so a script that got into a page through a build bug wouldn't run.
 // JSON-LD isn't run and needs none. The browser hashes a script's text with its
-// line breaks read as \n, so that's what is hashed here.
+// line breaks read as \n, so that's what is hashed here. Tags match in any case,
+// and end tags with trailing text, the way the browser reads them.
 function finishPage(html) {
-  const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(
+  const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script[^>]*>/gi)].map(
     ([, body]) =>
       `'sha256-${crypto.createHash("sha256").update(body.replace(/\r\n?/g, "\n")).digest("base64")}'`
   );

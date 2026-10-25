@@ -130,7 +130,7 @@ async function run() {
       const html = pages[file];
       const scriptSrc = (html.match(/Content-Security-Policy" content="[^"]*script-src ([^;"]*)/) ||
         [])[1];
-      const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+      const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script[^>]*>/gi)].map((m) => m[1]);
       return (
         !scriptSrc ||
         scriptSrc.includes("'unsafe-inline'") ||

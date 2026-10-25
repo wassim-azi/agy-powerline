@@ -14,6 +14,7 @@ const { buildHomeHtml, buildThemesHtml } = require("../../scripts/gallery/build"
 const themeToggle = require("../../scripts/site/theme-toggle");
 const { ansiToHtml, ansiRuns } = require("../../scripts/site/ansi");
 const { styleClasses } = require("../../scripts/site/style-classes");
+const { stripTags } = require("../../scripts/site/markdown");
 const { renderStatusline, sampleData, defaultConfig } = require("../../src/lib/shared");
 const { FLEX_GAP_START, FLEX_GAP_END } = require("../../src/lib/layouts/pills");
 
@@ -159,8 +160,7 @@ async function run() {
           .join(";");
       return `<${tag} ${own.join(" ")}|${/aria-hidden/.test(attrs)}|${style}>`;
     });
-  const shown = classed
-    .replace(/<[^>]*>/g, "")
+  const shown = stripTags(classed)
     .replace(/&nbsp;/g, "")
     .replace(/&lt;/g, "<")
     .replace(/&gt;/g, ">")
