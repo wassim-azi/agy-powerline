@@ -266,6 +266,8 @@ Only the bar is translated: payload text, numbers and dates (those follow `clock
 
 ## 🧪 Testing Guidelines
 
+A pull request that adds a feature must add tests for it, and one that fixes a bug must add a test that fails without the fix (a new fixture and snapshot counts). Pull requests without them aren't merged.
+
 Every change must keep the bar cross-platform and fast:
 
 1. **Cross-Platform Compatibility:**

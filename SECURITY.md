@@ -127,3 +127,41 @@ Please include:
 - affected platforms (Windows, macOS, Linux, WSL).
 
 We aim to acknowledge reports within 48 hours and to agree on a disclosure date with you once a fix is ready.
+
+### What happens next
+
+1. The maintainer confirms the issue in the private advisory, or explains why it isn't one.
+2. The fix is developed in the advisory's private fork, with a test that fails without it, and released as a new version. Fixes for issues rated medium or higher ship within 60 days of the report, and sooner for critical ones.
+3. The advisory is published with the release, with a CVE requested through GitHub, and the release's `CHANGELOG.md` entry goes under `### Security`.
+4. You are credited by name or GitHub handle in the advisory and the changelog, unless you ask to stay anonymous.
+
+## Assurance case
+
+Why the measures above are enough for what agy-powerline does.
+
+**Threat model.** agy-powerline runs as your user on every refresh of agy, and its CLI writes your config and agy's `settings.json`. What could go wrong: a repository you open, or text from agy, makes it run a command, rewrite your terminal or leak data; a config file someone shares with you runs a command; a broken refresh hangs or crashes agy's bar; a write loses your settings; or a tampered package reaches npm.
+
+**Trust boundaries.** Trusted: your config in `~/.agy-powerline` (or `AGY_POWERLINE_HOME`) and the commands you put in it. Untrusted: the session JSON agy sends, everything inside the project you work in (its `.git` folder, its config, branch names), the output of commands, and files passed to `import`. Between the repository and the npm package, GitHub Actions is the only path, with the checks under _Supply chain_.
+
+**Secure design principles applied.**
+
+- Least privilege: no network access, no shell except for the commands you configure, workflows start from no permissions and get them per job.
+- Fail-safe defaults: `exec` runs only from the trusted install folder, previews never run commands, imported commands are refused unless you confirm them.
+- Economy of mechanism: zero runtime dependencies and one bundled runtime file.
+- Complete mediation: every untrusted string goes through the same cleaning functions (`stripControl`, `sanitizeDeep`) before it is printed.
+- Separation of privilege: a release needs a tag on `main` and the maintainer's approval, and the job that writes to the release is separate from the one that runs npm and the tests.
+- Open design: all of this is in the source and in this file.
+
+**Common weaknesses countered.**
+
+| Weakness                                             | Countered by                                                                                                                                                                                                       |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| OS command injection (CWE-78)                        | agy-powerline's own processes start with an argument array and no shell; only commands you configure (`exec` widgets, and your `statusLine` in `doctor`) use one. Branch names git would reject never reach `git`. |
+| Terminal escape injection (CWE-150)                  | Escape and control characters are stripped from untrusted text before it's printed.                                                                                                                                |
+| Uncontrolled search path (CWE-427)                   | Config is never read from the current directory; git commands that would start programs named in a repository's own `.git/config` are skipped.                                                                     |
+| Sensitive data in logs (CWE-532)                     | The problem log is built from an allowlist and redacts paths, names and tokens; private files are created `0600`.                                                                                                  |
+| Loss of user data                                    | `settings.json` and the config are never overwritten when they can't be parsed, and a backup is kept.                                                                                                              |
+| Resource exhaustion and hangs (CWE-400)              | Every process the statusline starts has a timeout, and the runtime exits quickly on any input.                                                                                                                     |
+| Untrusted dependencies and build tampering (CWE-829) | No runtime dependencies, actions pinned to commits, signed provenance for each release.                                                                                                                            |
+
+The tests check these properties on every change (the `security`, `robustness` and `install safety` suites, among others), and CodeQL and OpenSSF Scorecard scan the repository.
