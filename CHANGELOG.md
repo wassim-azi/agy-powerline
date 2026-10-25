@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- The bar in Spanish with `"language": "es"`, and a Spanish home page at agy-powerline.com/es/ (#149)
+- A language menu with flags in agy-powerline.com's header, and footer links to the home page in every other language (#149)
+
 ### Changed
 
 - agy-powerline.com pages are 25 to 40% lighter: the shared styles are one stylesheet the browser keeps between pages, and the bar demos take their colors from classes instead of a style on every cell

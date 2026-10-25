@@ -410,6 +410,69 @@ const SHARED_CSS = `
         color: var(--fg);
         box-shadow: inset 0 0 0 1px var(--line-strong);
       }
+      /* The language menu: the home page in each language, with its flag. */
+      .lang-menu {
+        position: relative;
+      }
+      .lang-menu > summary {
+        list-style: none;
+      }
+      .lang-menu > summary::-webkit-details-marker {
+        display: none;
+      }
+      .lang-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 36px;
+        padding: 0 8px;
+        border-radius: 10px;
+        color: var(--muted);
+        font-size: 0.8rem;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        transition:
+          color 120ms ease,
+          background-color 120ms ease;
+      }
+      .lang-btn:hover,
+      .lang-menu[open] > .lang-btn {
+        color: var(--fg);
+        background: var(--surface-2);
+      }
+      .flag {
+        display: block;
+        width: 20px;
+        height: 20px;
+      }
+      .lang-menu-panel {
+        position: absolute;
+        right: 0;
+        top: calc(100% + 12px);
+        min-width: 180px;
+        display: grid;
+        gap: 2px;
+        padding: 8px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-lg);
+        box-shadow: var(--shadow-lg);
+      }
+      .lang-link {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border-radius: var(--radius-sm);
+        color: var(--fg);
+        text-decoration: none;
+        font-weight: 500;
+      }
+      .lang-link:hover,
+      .lang-link[aria-current="true"] {
+        background: var(--surface-2);
+      }
       /* Narrow screens: the links move into a menu that works without script. */
       .nav-menu {
         display: none;
@@ -464,7 +527,8 @@ const SHARED_CSS = `
         .header-actions {
           gap: 4px;
         }
-        .header-github {
+        .header-github,
+        .lang-code {
           display: none;
         }
       }
@@ -526,6 +590,11 @@ const SHARED_CSS = `
         color: var(--fg);
         text-decoration: underline;
         text-underline-offset: 3px;
+      }
+      .footer-langs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px 16px;
       }
       .footer-bottom {
         max-width: 1200px;
@@ -1040,12 +1109,22 @@ const SHARED_CSS = `
       }
 `;
 
+// The languages the home page is published in, each named in itself. Every
+// page's footer links to the home page in each of the others.
+const SITE_LANGUAGES = [
+  { lang: "en", href: "/", label: "English", locale: "en_US" },
+  { lang: "fr", href: "/fr/", label: "Français", locale: "fr_FR" },
+  { lang: "es", href: "/es/", label: "Español", locale: "es_ES" },
+];
+const siteLanguage = (lang) => SITE_LANGUAGES.find((l) => l.lang === lang) || SITE_LANGUAGES[0];
+
 // The site's text that isn't page content, per language. The bar's own text
 // stays in English (AGENTS.md); only the page around it is translated.
 const CHROME_TEXT = {
   en: {
     skip: "Skip to content",
     pageTheme: "Page theme",
+    language: "Language",
     system: "System",
     light: "Light",
     dark: "Dark",
@@ -1059,7 +1138,6 @@ const CHROME_TEXT = {
     docs: "Docs",
     project: "Project",
     footerNote: "MIT License · Every bar on this site is drawn by the real statusline code",
-    otherLanguage: { href: "/fr/", label: "Français", lang: "fr" },
     copy: "Copy",
     copied: "Copied",
     copiedStatus: "Copied to the clipboard",
@@ -1068,6 +1146,7 @@ const CHROME_TEXT = {
   fr: {
     skip: "Aller au contenu",
     pageTheme: "Thème de la page",
+    language: "Langue",
     system: "Système",
     light: "Clair",
     dark: "Sombre",
@@ -1086,11 +1165,36 @@ const CHROME_TEXT = {
     project: "Projet",
     footerNote:
       "Licence MIT · Chaque barre de ce site est dessinée par le vrai code de la statusline",
-    otherLanguage: { href: "/", label: "English", lang: "en" },
     copy: "Copier",
     copied: "Copié",
     copiedStatus: "Copié dans le presse-papiers",
     copyCode: "Copier le code",
+  },
+  es: {
+    skip: "Ir al contenido",
+    pageTheme: "Tema de la página",
+    language: "Idioma",
+    system: "Sistema",
+    light: "Claro",
+    dark: "Oscuro",
+    menu: "Menú",
+    nav: {
+      install: "Instalación",
+      docs: "Docs",
+      themes: "Temas",
+      configurator: "Configurador",
+    },
+    getStarted: "Empezar",
+    github: "agy-powerline en GitHub",
+    tagline: "La statusline de agy para Google Antigravity CLI. Libre y gratuita, sin telemetría.",
+    product: "Producto",
+    docs: "Docs",
+    project: "Proyecto",
+    footerNote: "Licencia MIT · Cada barra de este sitio la dibuja el código real de la statusline",
+    copy: "Copiar",
+    copied: "Copiado",
+    copiedStatus: "Copiado al portapapeles",
+    copyCode: "Copiar el código",
   },
 };
 
@@ -1178,12 +1282,12 @@ function buildHead({
     <link rel="alternate" hreflang="${esc(alt.hreflang)}" href="${esc(absoluteUrl(alt.path))}" />`
     )
     .join("");
-  const locale = lang === "fr" ? "fr_FR" : "en_US";
+  const locale = siteLanguage(lang).locale;
   const otherLocales = alternates
     .filter((alt) => alt.hreflang !== lang && alt.hreflang !== "x-default")
     .map(
       (alt) => `
-    <meta property="og:locale:alternate" content="${alt.hreflang === "fr" ? "fr_FR" : "en_US"}" />`
+    <meta property="og:locale:alternate" content="${siteLanguage(alt.hreflang).locale}" />`
     )
     .join("");
   // JSON-LD is data, not script, so the CSP doesn't block it; "<" is escaped so
@@ -1267,7 +1371,7 @@ function buildHead({
 // including the 404 page GitHub serves at any missing path.
 function buildHeader({ currentPage = "", lang = "en" } = {}) {
   const text = CHROME_TEXT[lang] || CHROME_TEXT.en;
-  const home = lang === "fr" ? "/fr/" : "/";
+  const home = siteLanguage(lang).href;
   const items = [
     ["install", "/install/"],
     ["docs", "/docs/"],
@@ -1281,6 +1385,12 @@ function buildHeader({ currentPage = "", lang = "en" } = {}) {
           `<a class="${cls}" href="${href}"${currentPage === key ? ' aria-current="page"' : ""}>${esc(text.nav[key])}</a>`
       )
       .join("\n            ");
+  const current = siteLanguage(lang);
+  const flag = (l) => `<img class="flag" src="/img/flag-${l}.png" width="20" height="20" alt="" />`;
+  const languageLinks = SITE_LANGUAGES.map(
+    (l) =>
+      `<a class="lang-link" href="${l.href}" hreflang="${l.lang}" lang="${l.lang}"${l.lang === current.lang ? ' aria-current="true"' : ""}>${flag(l.lang)}${esc(l.label)}</a>`
+  ).join("\n              ");
   const themeButtons = ["system", "light", "dark"]
     .map(
       (value) =>
@@ -1300,6 +1410,12 @@ function buildHeader({ currentPage = "", lang = "en" } = {}) {
         </nav>
         <div class="header-actions">
           <a class="icon-btn header-github" href="${REPO_URL}" aria-label="${esc(text.github)}" title="GitHub">${brandIcon("github", 19)}</a>
+          <details class="lang-menu">
+            <summary class="lang-btn" aria-label="${esc(text.language)}: ${esc(current.label)}" title="${esc(text.language)}">${flag(current.lang)}<span class="lang-code">${current.lang.toUpperCase()}</span></summary>
+            <nav class="lang-menu-panel" aria-label="${esc(text.language)}">
+              ${languageLinks}
+            </nav>
+          </details>
           <div class="theme-switch" role="group" aria-label="${esc(text.pageTheme)}">
             ${themeButtons}
           </div>
@@ -1319,7 +1435,7 @@ function buildHeader({ currentPage = "", lang = "en" } = {}) {
 
 function buildFooter({ lang = "en" } = {}) {
   const text = CHROME_TEXT[lang] || CHROME_TEXT.en;
-  const home = lang === "fr" ? "/fr/" : "/";
+  const home = siteLanguage(lang).href;
   const cols = FOOTER_COLUMNS.map(
     (col) => `<div class="footer-col">
             <p class="footer-title">${esc(text[col.key])}</p>
@@ -1340,7 +1456,9 @@ function buildFooter({ lang = "en" } = {}) {
         `<li><a class="icon-btn" href="${href}"${rel} aria-label="${esc(label)}" title="${esc(label)}">${brandIcon(name, 18)}</a></li>`
     )
     .join("\n            ");
-  const other = text.otherLanguage;
+  const others = SITE_LANGUAGES.filter((l) => l.lang !== siteLanguage(lang).lang)
+    .map((l) => `<a href="${l.href}" hreflang="${l.lang}" lang="${l.lang}">${esc(l.label)}</a>`)
+    .join("\n          ");
   return `<footer class="site-footer">
       <div class="site-footer-inner">
         <div class="footer-brand">
@@ -1356,7 +1474,9 @@ function buildFooter({ lang = "en" } = {}) {
       </div>
       <div class="footer-bottom">
         <span>${esc(text.footerNote)}</span>
-        <a href="${other.href}" hreflang="${other.lang}" lang="${other.lang}">${esc(other.label)}</a>
+        <span class="footer-langs">
+          ${others}
+        </span>
       </div>
       <span class="sr-only" id="copyStatus" aria-live="polite" data-label-copy="${esc(text.copy)}" data-label-copied="${esc(text.copied)}" data-label-status="${esc(text.copiedStatus)}" data-label-code="${esc(text.copyCode)}"></span>
     </footer>`;
@@ -1427,6 +1547,12 @@ const SITE_SCRIPT = `(function () {
       if (e.target.closest("a")) menu.removeAttribute("open");
     });
   }
+  // An open header menu closes on a click outside it.
+  document.addEventListener("click", function (e) {
+    document.querySelectorAll(".site-header details[open]").forEach(function (d) {
+      if (!d.contains(e.target)) d.removeAttribute("open");
+    });
+  });
 })();`;
 
 function themeToggleScript() {
@@ -1613,6 +1739,7 @@ module.exports = {
   FONT_URL,
   SHARED_CSS,
   CHROME_TEXT,
+  SITE_LANGUAGES,
   FOOTER_COLUMNS,
   esc,
   absoluteUrl,

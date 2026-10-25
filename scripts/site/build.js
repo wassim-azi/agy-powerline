@@ -4,7 +4,7 @@
 "use strict";
 
 // Builds the whole agy-powerline.com site into one folder: the home page (in
-// English and French), the theme gallery, the configurator, the docs and
+// English, French and Spanish), the theme gallery, the configurator, the docs and
 // guides from the repo's Markdown, the widget list, the quota calculator, the
 // trust pages, and the files around them (sitemap, robots.txt, feed,
 // llms.txt, font, images, share cards, schema). The sitemap lists exactly the
@@ -936,6 +936,13 @@ function sitePages() {
       images: SCREENSHOTS.map((name) => screenshotUrl(name)),
     },
     {
+      path: "es/",
+      sources: HOME_SOURCES,
+      html: buildHomeHtml({ lang: "es" }),
+      card: { title: stripTags(HOME_TEXT.es.heroTitle), label: "Antigravity CLI", lang: "es" },
+      images: SCREENSHOTS.map((name) => screenshotUrl(name)),
+    },
+    {
       path: THEMES_PAGE.path,
       sources: ["scripts/gallery/themes.html", "scripts/gallery/build.js", "src/lib/themes.js"],
       html: buildThemesHtml(),
@@ -1000,6 +1007,9 @@ function buildSite(outDir) {
   write("icon.svg", `${readFaviconSvg()}\n`);
   for (const file of ["favicon.ico", "apple-touch-icon.png", "icon-192.png", "icon-512.png"]) {
     copy(path.join("assets", "site", file), file);
+  }
+  for (const file of fs.readdirSync(path.join(repo, "assets", "site", "flags"))) {
+    copy(path.join("assets", "site", "flags", file), path.join("img", `flag-${file}`));
   }
   copy("assets/site/fonts/inter-latin.woff2", "fonts/inter-latin.woff2");
   copy("assets/site/fonts/OFL.txt", "fonts/OFL.txt");

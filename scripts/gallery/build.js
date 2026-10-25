@@ -3,7 +3,7 @@
 
 "use strict";
 
-// Builds the site's home page (/ and /fr/) and the theme gallery (/themes/):
+// Builds the site's home page (/, /fr/ and /es/) and the theme gallery (/themes/):
 // every bar on them is rendered by the real statusline code. The home page
 // shows the bar in an agy window with a few themes and the three layouts to
 // switch between; the gallery shows every theme on dark and light terminals,
@@ -35,6 +35,7 @@ const {
   AUTHOR_URL,
   absoluteUrl,
   cardPath,
+  SITE_LANGUAGES,
 } = require("../site/layout");
 const { breadcrumbData } = require("../site/doc-page");
 const { HOME_TEXT } = require("../site/home-text");
@@ -260,7 +261,7 @@ function homeStructuredData(description) {
         name: "agy-powerline",
         alternateName: ["agy powerline", "agy statusline", "agy-powerline.com"],
         url: SITE_URL,
-        inLanguage: ["en", "fr"],
+        inLanguage: SITE_LANGUAGES.map((l) => l.lang),
         publisher: { "@id": `${SITE_URL}#author` },
       },
       {
@@ -430,7 +431,7 @@ function trustHtml(text) {
     .join("\n            ");
 }
 
-// lang: "en" for /, "fr" for /fr/.
+// lang: "en" for /, "fr" for /fr/, "es" for /es/.
 function buildHomeHtml({ lang = "en" } = {}) {
   const text = HOME_TEXT[lang];
   const n = counts();
@@ -468,14 +469,10 @@ function buildHomeHtml({ lang = "en" } = {}) {
     pagePath: lang === "en" ? "" : `${lang}/`,
     lang,
     alternates: [
-      { hreflang: "en", path: "" },
-      { hreflang: "fr", path: "fr/" },
+      ...SITE_LANGUAGES.map((l) => ({ hreflang: l.lang, path: l.href.slice(1) })),
       { hreflang: "x-default", path: "" },
     ],
-    imageAlt:
-      lang === "fr"
-        ? "agy-powerline : la statusline agy qui vous dit si votre quota va tenir, avec la barre par défaut"
-        : "agy-powerline: the agy statusline that tells you if your quota will last, with the default bar",
+    imageAlt: text.imageAlt,
     structuredData: lang === "en" ? homeStructuredData(text.description) : undefined,
     pageCss: styles.css(),
   });
