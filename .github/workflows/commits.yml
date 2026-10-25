@@ -5,7 +5,7 @@ name: Commit messages
 # against Conventional Commits.
 on:
   pull_request:
-    branches: [main, develop]
+    branches: [main]
     types: [opened, edited, reopened, synchronize]
 
 permissions:

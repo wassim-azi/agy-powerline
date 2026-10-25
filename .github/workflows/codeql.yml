@@ -5,9 +5,9 @@ name: CodeQL
 # satisfy OpenSSF Scorecard's SAST check.
 on:
   push:
-    branches: [develop, main]
+    branches: [main]
   pull_request:
-    branches: [develop, main]
+    branches: [main]
   schedule:
     # Run once a week on Wednesdays at 14:00 UTC
     - cron: "0 14 * * 3"

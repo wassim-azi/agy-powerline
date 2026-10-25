@@ -6,10 +6,10 @@ name: Links
 # without any commit. .lycheeignore lists the pages that refuse link checkers.
 on:
   push:
-    branches: [develop, main]
+    branches: [main]
     paths: ["**.md", ".lycheeignore", ".github/workflows/links.yml"]
   pull_request:
-    branches: [develop, main]
+    branches: [main]
     paths: ["**.md", ".lycheeignore", ".github/workflows/links.yml"]
   schedule:
     - cron: "17 6 * * 1" # Mondays, 06:17 UTC

@@ -222,7 +222,7 @@ Todos los detalles: [SECURITY.md](SECURITY.md).
 
 ## Contribuir
 
-Las contribuciones son bienvenidas. Comienza con [CONTRIBUTING.md](CONTRIBUTING.md) (configuración, arquitectura, añadir un widget o tema) y el [Código de conducta](CODE_OF_CONDUCT.md). Abre solicitudes de extracción (pull requests) contra `develop`. Informa de errores en los [problemas de GitHub (issues)](https://github.com/wassim-azi/agy-powerline/issues) o comparte ideas y comentarios en [Discusiones](https://github.com/wassim-azi/agy-powerline/discussions).
+Las contribuciones son bienvenidas. Comienza con [CONTRIBUTING.md](CONTRIBUTING.md) (configuración, arquitectura, añadir un widget o tema) y el [Código de conducta](CODE_OF_CONDUCT.md). Abre solicitudes de extracción (pull requests) contra `main`. Informa de errores en los [problemas de GitHub (issues)](https://github.com/wassim-azi/agy-powerline/issues) o comparte ideas y comentarios en [Discusiones](https://github.com/wassim-azi/agy-powerline/discussions).
 
 Gracias a todas las personas que han contribuido:
 

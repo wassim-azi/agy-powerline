@@ -7,10 +7,10 @@ name: Workflow audit
 # most for the ones that rarely run, like release.yml and thanks.yml.
 on:
   push:
-    branches: [develop, main]
+    branches: [main]
     paths: [".github/workflows/**", ".github/dependabot.yml"]
   pull_request:
-    branches: [develop, main]
+    branches: [main]
     paths: [".github/workflows/**", ".github/dependabot.yml"]
 
 permissions: {}

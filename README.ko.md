@@ -222,7 +222,7 @@ npx agy-powerline doctor       # 모든 것이 최신인지 확인
 
 ## 기여
 
-기여를 환영합니다. [CONTRIBUTING.md](CONTRIBUTING.md)(설정, 아키텍처, 위젯/테마 추가)와 [Code of Conduct](CODE_OF_CONDUCT.md)부터 읽어보세요. 풀 리퀘스트는 `develop` 브랜치로 보내주세요. 버그는 [GitHub issues](https://github.com/wassim-azi/agy-powerline/issues)에, 아이디어와 피드백은 [Discussions](https://github.com/wassim-azi/agy-powerline/discussions)에 남겨주세요.
+기여를 환영합니다. [CONTRIBUTING.md](CONTRIBUTING.md)(설정, 아키텍처, 위젯/테마 추가)와 [Code of Conduct](CODE_OF_CONDUCT.md)부터 읽어보세요. 풀 리퀘스트는 `main` 브랜치로 보내주세요. 버그는 [GitHub issues](https://github.com/wassim-azi/agy-powerline/issues)에, 아이디어와 피드백은 [Discussions](https://github.com/wassim-azi/agy-powerline/discussions)에 남겨주세요.
 
 기여해 주신 모든 분들께 감사드립니다:
 
