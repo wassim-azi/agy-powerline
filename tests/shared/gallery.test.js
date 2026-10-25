@@ -3,7 +3,7 @@
 
 "use strict";
 
-// The home page (/ and /fr/) and the theme gallery (/themes/) of
+// The home page (/, /fr/ and /es/) and the theme gallery (/themes/) of
 // agy-powerline.com. What every page of the site must do (CSP, no outside
 // loads, sitemap, share cards, links that resolve) is checked in
 // tests/shared/site.test.js.
@@ -15,6 +15,7 @@ const themeToggle = require("../../scripts/site/theme-toggle");
 const { ansiToHtml, ansiRuns } = require("../../scripts/site/ansi");
 const { styleClasses } = require("../../scripts/site/style-classes");
 const { stripTags } = require("../../scripts/site/markdown");
+const { HOME_TEXT } = require("../../scripts/site/home-text");
 const { renderStatusline, sampleData, defaultConfig } = require("../../src/lib/shared");
 const { FLEX_GAP_START, FLEX_GAP_END } = require("../../src/lib/layouts/pills");
 
@@ -41,6 +42,7 @@ const domSize = (html) =>
 async function run() {
   const html = buildHomeHtml();
   const fr = buildHomeHtml({ lang: "fr" });
+  const es = buildHomeHtml({ lang: "es" });
   const themes = buildThemesHtml();
   const galleryThemes = THEME_ORDER.filter((id) => id !== "custom");
 
@@ -193,6 +195,49 @@ async function run() {
       fr.includes(`hreflang="en" href="${SITE_URL}"`) &&
       fr.includes("Copier") &&
       !/\{\{\w+\}\}|<!--[A-Z_]+-->/.test(fr)
+  );
+
+  record(
+    "the Spanish home page is in Spanish and links back to the English one",
+    /^<!doctype html>\s*<html lang="es">/i.test(es) &&
+      /<title>[^<]*agy[^<]*<\/title>/.test(es) &&
+      es.includes(`<link rel="canonical" href="${SITE_URL}es/" />`) &&
+      es.includes(`hreflang="en" href="${SITE_URL}"`) &&
+      es.includes(`<meta property="og:locale" content="es_ES" />`) &&
+      es.includes("Copiar") &&
+      !/\{\{\w+\}\}|<!--[A-Z_]+-->/.test(es)
+  );
+
+  // Each home page's footer links to the home page in every other language.
+  const footerLangs = (page) =>
+    (page.match(/<span class="footer-langs">([\s\S]*?)<\/span>/) || [])[1] || "";
+  const langLinks = (page) =>
+    [...footerLangs(page).matchAll(/href="([^"]+)" hreflang="(\w+)"/g)].map((m) => m[2]).join(",");
+  record(
+    "every home page links to the home page in each other language",
+    langLinks(html) === "fr,es" && langLinks(fr) === "en,es" && langLinks(es) === "en,fr",
+    [langLinks(html), langLinks(fr), langLinks(es)].join(" | ")
+  );
+
+  // The header's language menu lists every home page, with a flag, and marks
+  // the page's own language.
+  const langMenu = (page) =>
+    (page.match(/<details class="lang-menu">([\s\S]*?)<\/details>/) || [])[1] || "";
+  const menuOk = (page, lang) =>
+    ["en", "fr", "es"].every(
+      (l) =>
+        langMenu(page).includes(`hreflang="${l}" lang="${l}"`) &&
+        langMenu(page).includes(`src="/img/flag-${l}.png"`)
+    ) && new RegExp(`hreflang="${lang}" lang="${lang}" aria-current="true"`).test(langMenu(page));
+  record(
+    "every home page has a language menu in its header, with its own language marked",
+    menuOk(html, "en") && menuOk(fr, "fr") && menuOk(es, "es")
+  );
+
+  const keys = (obj) => Object.keys(obj).sort().join(",");
+  record(
+    "every home page translation has exactly the keys of the English one",
+    Object.values(HOME_TEXT).every((text) => keys(text) === keys(HOME_TEXT.en))
   );
 
   // Theme toggle unit test in Node

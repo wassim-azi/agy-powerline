@@ -151,10 +151,12 @@ function cardHtml({ width, height, title, label, lang = "en" }) {
   const logo = readFaviconSvg().replace(/<svg /, '<svg width="52" height="52" ');
   const font = fileUrl(path.join(outDir, "fonts", "inter-latin.woff2"));
   const background = fileUrl(path.join(artDir, "card-background.webp"));
+  const themes = THEME_ORDER.length - 1;
   const facts =
-    lang === "fr"
-      ? `${THEME_ORDER.length - 1} thèmes · 0 dépendance · sans télémétrie`
-      : `${THEME_ORDER.length - 1} themes · 0 dependencies · no telemetry`;
+    {
+      fr: `${themes} thèmes · 0 dépendance · sans télémétrie`,
+      es: `${themes} temas · 0 dependencias · sin telemetría`,
+    }[lang] || `${themes} themes · 0 dependencies · no telemetry`;
   const size = title.length > 60 ? 50 : title.length > 40 ? 58 : 66;
   return `<!doctype html>
 <html lang="${lang}" data-theme="dark">

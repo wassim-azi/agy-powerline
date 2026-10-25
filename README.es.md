@@ -148,6 +148,16 @@ Previsualízalos todos en la [galería de temas](https://agy-powerline.com/theme
 
 </details>
 
+### Idioma de la barra
+
+Las palabras propias de la barra (`Reinicio`, `rest.`, las unidades de `2h 47m`) pueden mostrarse en español:
+
+```sh
+npx agy-powerline init --language es
+```
+
+o `"language": "es"` en `statusline.config.json` (tecla `u` en `configure`). El nombre del modelo, la rama y todo lo que envía agy quedan tal cual; los comandos y `configure` siguen en inglés. Detalles en la [documentación de configuración](docs/configuration.md#language).
+
 ## Widgets
 
 | Widget                                                        | Muestra                                                                                                                               |

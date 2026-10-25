@@ -88,7 +88,7 @@ async function run() {
     const incomplete = files.filter((file) => {
       const html = pages[file];
       return !(
-        /^<!doctype html>\s*<html lang="(en|fr)">\s*<head>/i.test(html) &&
+        /^<!doctype html>\s*<html lang="(en|fr|es)">\s*<head>/i.test(html) &&
         /<meta charset="utf-8"/i.test(html) &&
         /<meta name="viewport" content="width=device-width, initial-scale=1"/.test(html) &&
         /<title>[^<]+<\/title>/.test(html) &&
@@ -350,13 +350,19 @@ async function run() {
 
     const home = pages["index.html"];
     const fr = pages["fr/index.html"] || "";
+    const es = pages["es/index.html"] || "";
     const alternates = (html) =>
       html.includes(`<link rel="alternate" hreflang="en" href="${SITE_URL}" />`) &&
       html.includes(`<link rel="alternate" hreflang="fr" href="${SITE_URL}fr/" />`) &&
+      html.includes(`<link rel="alternate" hreflang="es" href="${SITE_URL}es/" />`) &&
       html.includes(`<link rel="alternate" hreflang="x-default" href="${SITE_URL}" />`);
     record(
-      "the English and French home pages name each other with hreflang",
-      /<html lang="fr">/.test(fr) && alternates(home) && alternates(fr)
+      "the English, French and Spanish home pages name each other with hreflang",
+      /<html lang="fr">/.test(fr) &&
+        /<html lang="es">/.test(es) &&
+        alternates(home) &&
+        alternates(fr) &&
+        alternates(es)
     );
 
     const sitemap = fs.readFileSync(path.join(out, "sitemap.xml"), "utf8");

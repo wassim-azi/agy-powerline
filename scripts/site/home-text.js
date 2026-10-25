@@ -16,6 +16,8 @@ const HOME_TEXT = {
     title: "agy statusline for Google Antigravity CLI - agy-powerline",
     description:
       "agy-powerline is an agy statusline for Google Antigravity CLI: Gemini, Claude/GPT and Argon quotas with pace markers, context and git in agy's status bar.",
+    imageAlt:
+      "agy-powerline: the agy statusline that tells you if your quota will last, with the default bar",
     eyebrow: "Statusline for Google Antigravity CLI",
     heroTitle:
       'The agy statusline that tells you <span class="grad-text">if your quota will last</span>',
@@ -182,6 +184,8 @@ const HOME_TEXT = {
     title: "Statusline agy pour Google Antigravity CLI - agy-powerline",
     description:
       "agy-powerline, la statusline de Google Antigravity CLI (agy) : quotas Gemini, Claude/GPT et Argon avec repère de rythme, contexte et git dans la barre d'agy.",
+    imageAlt:
+      "agy-powerline : la statusline agy qui vous dit si votre quota va tenir, avec la barre par défaut",
     eyebrow: "Statusline pour Google Antigravity CLI",
     heroTitle:
       'La statusline agy qui vous dit <span class="grad-text">si votre quota va tenir</span>',
@@ -358,6 +362,190 @@ const HOME_TEXT = {
     ctaTitle: "Sachez-le avant d'être à court",
     ctaLead: "Installez-la en une commande, ou composez d'abord votre barre dans le navigateur.",
     viewOnGithub: "Voir sur GitHub",
+  },
+  es: {
+    lang: "es",
+    title: "Statusline agy para Google Antigravity CLI - agy-powerline",
+    description:
+      "agy-powerline, la statusline de Google Antigravity CLI (agy): cuotas de Gemini, Claude/GPT y Argon con marcador de ritmo, contexto y git en la barra de agy.",
+    imageAlt:
+      "agy-powerline: la statusline de agy que te dice si tu cuota va a durar, con la barra por defecto",
+    eyebrow: "Statusline para Google Antigravity CLI",
+    heroTitle:
+      'La statusline de agy que te dice <span class="grad-text">si tu cuota va a durar</span>',
+    heroLead:
+      "Tu modelo, la ventana de contexto, git y cada cuota de Antigravity con un marcador de ritmo, en una barra powerline bajo el cuadro de texto de agy. <strong>Un solo comando</strong> para instalarla.",
+    copy: "Copiar",
+    copyCommand: "Copiar:",
+    copyInstall: "Copiar el comando de instalación",
+    buildInBrowser: "Crea tu barra en el navegador",
+    heroFacts: ["Node.js 20+", "0 dependencias", "Sin telemetría", "Licencia MIT"],
+    askAgy: "Pregúntale a agy…",
+    heroBarCaption:
+      "Una vista previa en vivo de agy-powerline bajo el cuadro de texto de agy. Elige un tema y un diseño para cambiarla; cada barra de esta página la dibuja el código real de la statusline.",
+    demoThemes: "Tema",
+    demoLayouts: "Diseño",
+    allThemes: (n) => `Los ${n} →`,
+    anatomyEyebrow: "De un vistazo",
+    anatomyTitle: "Lee la statusline de agy en diez segundos",
+    anatomyLead:
+      "La barra por defecto tiene dos filas: arriba, con qué estás trabajando; abajo, cuánta cuota te queda.",
+    anatomy: [
+      ["model", "Modelo", "El modelo que agy usa en este momento."],
+      [
+        "context",
+        "Ventana de contexto",
+        "Cuánto se ha llenado la conversación, antes de que agy tenga que compactarla.",
+      ],
+      [
+        "git",
+        "Git",
+        "La rama, los cambios sin commit y los commits por delante o por detrás del upstream.",
+      ],
+      [
+        "fiveHour",
+        "Cuota de 5 horas",
+        "Lo que queda de tu cuota de Gemini de 5 horas, y cuándo se reinicia.",
+      ],
+      [
+        "pace",
+        "Marcador de ritmo",
+        "Dónde estás dentro de la ventana de la cuota. Si el relleno pasa el marcador, gastas cuota más rápido de lo que pasa el tiempo y se agotará antes del reinicio.",
+      ],
+      [
+        "weekly",
+        "Cuota de 7 días",
+        "Tu cuota semanal, con su propio marcador de ritmo y su hora de reinicio.",
+      ],
+    ],
+    paceGuide: "Cómo funciona el marcador de ritmo (en inglés) →",
+    stepsEyebrow: "Empezar",
+    stepsTitle: "Lista en un minuto",
+    steps: [
+      [
+        "Instalar",
+        "Necesita Node.js 20 o más reciente y Antigravity CLI. <code>init</code> guarda una copia del <code>settings.json</code> de agy antes de cambiarlo.",
+        "npx agy-powerline init",
+      ],
+      [
+        "Elegir un estilo",
+        "Elige un preajuste, un diseño y un tema cuando <code>init</code> te lo pida, con una vista previa de cada uno. Puedes cambiarlos cuando quieras.",
+        "npx agy-powerline configure",
+      ],
+      [
+        "Reiniciar agy una vez",
+        "La barra aparece bajo el cuadro de texto y se actualiza con agy. Los cambios posteriores se ven sin reiniciar.",
+        "agy",
+      ],
+    ],
+    installGuide: "Detalles de la instalación (en inglés) →",
+    featuresEyebrow: "Funciones",
+    featuresTitle: "Todo lo que quieres ver en la barra de estado de Antigravity CLI",
+    featuresLead:
+      "Hecha para Antigravity CLI a partir de sus datos reales de statusline, y segura para dejarla funcionando todo el día.",
+    features: (n) => [
+      [
+        "pace",
+        "Marcadores de ritmo",
+        "Cada medidor de cuota muestra dónde estás dentro de su ventana, así ves que una cuota se va a agotar antes de que pase. Aviso al 30 % restante, peligro al 10 %.",
+        "/guides/antigravity-quota/",
+      ],
+      [
+        "themes",
+        `${n.themes} temas`,
+        "Paletas oscuras, claras y aptas para daltónicos, cada una comprobada para el contraste WCAG AA sobre su terminal.",
+        "/themes/",
+      ],
+      [
+        "layouts",
+        "3 diseños",
+        "Pills, Lines y Classic, en tantas filas como quieras. Las filas se ajustan al ancho del terminal.",
+        "/docs/configuration/",
+      ],
+      [
+        "widgets",
+        `${n.widgets} widgets`,
+        "Modelo, contexto, git, cuotas, tokens, duración de la sesión, estado del agente, tus propios comandos de shell y más.",
+        "/widgets/",
+      ],
+      [
+        "configure",
+        "Configúrala a tu manera",
+        "Un editor en el terminal con vista previa en vivo, un configurador en el navegador, preajustes o JSON con un esquema.",
+        "/configure/",
+      ],
+      [
+        "platforms",
+        "Windows, macOS, Linux, WSL",
+        "Ninguna dependencia en tiempo de ejecución, Node.js 20 o más reciente. Sin llamadas de red y sin telemetría.",
+        "/install/",
+      ],
+    ],
+    shotsEyebrow: "Capturas reales",
+    shotsTitle: "En un terminal real",
+    shotsLead: "Tomadas en sesiones de agy, no son maquetas.",
+    shots: {
+      windows: [
+        "Sesión de agy",
+        "agy-powerline bajo el cuadro de texto de agy en Windows Terminal: una conversación corta arriba, la barra Pills de tres filas abajo",
+      ],
+      "pills-dark": [
+        "Pills",
+        "Diseño Pills de agy-powerline con el tema dark-aurora: modelo, contexto, proyecto y git; cuotas de Gemini de 5 h y 7 d con marcadores de ritmo y reinicios; cuotas semanales de Claude/GPT y Argon",
+      ],
+      "lines-light": [
+        "Lines",
+        "Diseño Lines de agy-powerline con el tema light-paper en un terminal claro",
+      ],
+      "classic-dark": [
+        "Classic",
+        "Diseño Classic de agy-powerline con el tema dark-aurora en un terminal oscuro, con medidores de bloques",
+      ],
+    },
+    themesEyebrow: "Temas",
+    themesTitle: (n) => `${n} temas para terminales oscuros, claros y para daltónicos`,
+    themesLead:
+      "Cada tema se dibuja sobre el fondo de terminal previsto, con una simulación de la visión de los colores, en la página de temas (en inglés).",
+    seeAllThemes: (n) => `Ver los ${n} temas`,
+    trustEyebrow: "Segura de ejecutar",
+    trustTitle: "Se ejecuta en cada actualización, así que se mantiene ligera",
+    trustBody:
+      'Ninguna dependencia en tiempo de ejecución, ninguna llamada de red y una configuración que solo se lee de tu propia carpeta de instalación: un repositorio que clones no puede cambiar tu barra ni ejecutar comandos. <a href="/security/">Qué hace en tu equipo</a> (en inglés).',
+    trust: [
+      [
+        "https://scorecard.dev/viewer/?uri=github.com/wassim-azi/agy-powerline",
+        "OpenSSF Scorecard",
+      ],
+      ["https://www.bestpractices.dev/projects/15655", "OpenSSF Best Practices"],
+      ["https://www.npmjs.com/package/agy-powerline", "Procedencia npm"],
+      ["/security/", "0 dependencias"],
+      ["/privacy/", "Sin telemetría"],
+      ["https://github.com/wassim-azi/agy-powerline/blob/main/LICENSE", "Licencia MIT"],
+    ],
+    faqEyebrow: "Preguntas frecuentes",
+    faqTitle: "Lo primero que se pregunta",
+    faq: [
+      [
+        "¿Funciona en Windows?",
+        'Sí: Windows, macOS, Linux y WSL. En Windows, agy ejecuta la barra con <code>cmd /c</code>, y <code>init</code> lo configura por ti. Para WSL, instálala con un Node.js de Linux dentro de WSL (<a href="/install/#wsl">notas sobre WSL</a>, en inglés).',
+      ],
+      [
+        "¿Envía datos a algún sitio?",
+        'No. agy-powerline no hace ninguna petición de red y no tiene telemetría ni analíticas. Los problemas van a un registro local que puedes leer, vaciar o desactivar. <a href="/security/">Seguridad y privacidad</a> (en inglés) enumera cada archivo que lee y escribe.',
+      ],
+      [
+        "¿Hace más lento a agy?",
+        "Una actualización le cuesta unos 0,1 s de trabajo a agy-powerline en un portátil con Windows 11. En Windows, arrancar <code>cmd</code> y Node añade unos 0,1–0,25 s, como para cualquier comando de statusline.",
+      ],
+      [
+        "¿Qué cuotas muestra?",
+        'Las cuotas de Gemini de 5 horas y 7 días, las cuotas de terceros (Claude y GPT) de 5 horas y 7 días, y la cuota semanal de Gemini 4 Argon en Google AI Pro, cada una con su hora de reinicio. La <a href="/guides/antigravity-quota/">guía de cuotas</a> (en inglés) explica los medidores.',
+      ],
+    ],
+    allQuestions: "Todas las preguntas (en inglés) →",
+    ctaTitle: "Entérate antes de quedarte sin cuota",
+    ctaLead: "Instálala con un solo comando, o crea primero tu barra en el navegador.",
+    viewOnGithub: "Ver en GitHub",
   },
 };
 
