@@ -45,7 +45,7 @@
 
 ## pills full · fr
 {bg default}{fg #cccccc}{bg #cccccc}{fg #16161c}{bold} 🟢 Agent: idle {/bold}{fg #cccccc}{bg #c586c0}{bg #c586c0}{fg #16161c}{bold} 🤖 Gemini 3.8 Flash (High) {/bold}{fg #c586c0}{bg default}               {bg default}{fg #cccccc}{bg #cccccc}{fg #16161c}{bold} 📦 Projet: agy-powerline {/bold}{fg #cccccc}{bg #4ec9b0}{bg #4ec9b0}{fg #16161c}{bold} 🌿 main {/bold}{fg #4ec9b0}{bg default}
-{bg default}{fg #569cd6}{bg #569cd6}{fg #16161c}{bold} 💾 {fg #bbd7ef}•{fg #2b4e6b}•••••••••••{bg #569cd6}{bg #569cd6}{fg #16161c}{bold} 1 (12.0%) {/bold}{fg #569cd6}{bg #cccccc}{bg #cccccc}{fg #16161c}{bold} 🪙 Jetons: 0↑ 0↓ {/bold}{fg #16161c}{bg #cccccc}│{bg #cccccc}{fg #16161c}{bold} ⚡ Succès cache: 0% {/bold}{fg #cccccc}{bg default}
+{bg default}{fg #569cd6}{bg #569cd6}{fg #16161c}{bold} 💾 {fg #bbd7ef}•{fg #2b4e6b}•••••••••••{bg #569cd6}{bg #569cd6}{fg #16161c}{bold} 1 (12.0%) {/bold}{fg #569cd6}{bg #cccccc}{bg #cccccc}{fg #16161c}{bold} 🪙 Tokens: 0↑ 0↓ {/bold}{fg #16161c}{bg #cccccc}│{bg #cccccc}{fg #16161c}{bold} ⚡ Cache hit: 0% {/bold}{fg #cccccc}{bg default}
 {bg default}{fg #73c991}{bg #73c991}{fg #16161c}{bold} {fg #c7e9d3}••{fg #3a6549}••{fg #c7e9d3}●{fg #3a6549}•••••••{bg #73c991}{bg #73c991}{fg #16161c}{bold} 80.0% rest. {/bold}{fg #16161c}{bg #73c991}│{bg #73c991}{fg #16161c}{bold} 3h 0m {/bold}{fg #73c991}{bg default}                           {bg default}{fg #9cdcfe}{bg #9cdcfe}{fg #16161c}{bold} {fg #4e6e7f}●{fg #d7f1ff}•••••{fg #4e6e7f}••••••{bg #9cdcfe}{bg #9cdcfe}{fg #16161c}{bold} 50.0% rest. {/bold}{fg #16161c}{bg #9cdcfe}│{bg #9cdcfe}{fg #16161c}{bold} 6j 17h {/bold}{fg #9cdcfe}{bg default}{reset}
 
 ## lines · fr
@@ -58,7 +58,7 @@
 
 ## pills full · es
 {bg default}{fg #cccccc}{bg #cccccc}{fg #16161c}{bold} 🟢 Agente: idle {/bold}{fg #cccccc}{bg #c586c0}{bg #c586c0}{fg #16161c}{bold} 🤖 Gemini 3.8 Flash (High) {/bold}{fg #c586c0}{bg default}            {bg default}{fg #cccccc}{bg #cccccc}{fg #16161c}{bold} 📦 Proyecto: agy-powerline {/bold}{fg #cccccc}{bg #4ec9b0}{bg #4ec9b0}{fg #16161c}{bold} 🌿 main {/bold}{fg #4ec9b0}{bg default}
-{bg default}{fg #569cd6}{bg #569cd6}{fg #16161c}{bold} 💾 {fg #bbd7ef}•{fg #2b4e6b}•••••••••••{bg #569cd6}{bg #569cd6}{fg #16161c}{bold} 1 (12.0%) {/bold}{fg #569cd6}{bg #cccccc}{bg #cccccc}{fg #16161c}{bold} 🪙 Tokens: 0↑ 0↓ {/bold}{fg #16161c}{bg #cccccc}│{bg #cccccc}{fg #16161c}{bold} ⚡ Aciertos caché: 0% {/bold}{fg #cccccc}{bg default}
+{bg default}{fg #569cd6}{bg #569cd6}{fg #16161c}{bold} 💾 {fg #bbd7ef}•{fg #2b4e6b}•••••••••••{bg #569cd6}{bg #569cd6}{fg #16161c}{bold} 1 (12.0%) {/bold}{fg #569cd6}{bg #cccccc}{bg #cccccc}{fg #16161c}{bold} 🪙 Tokens: 0↑ 0↓ {/bold}{fg #16161c}{bg #cccccc}│{bg #cccccc}{fg #16161c}{bold} ⚡ Cache hit: 0% {/bold}{fg #cccccc}{bg default}
 {bg default}{fg #73c991}{bg #73c991}{fg #16161c}{bold} {fg #c7e9d3}••{fg #3a6549}••{fg #c7e9d3}●{fg #3a6549}•••••••{bg #73c991}{bg #73c991}{fg #16161c}{bold} 80.0% rest. {/bold}{fg #16161c}{bg #73c991}│{bg #73c991}{fg #16161c}{bold} 3h 0m {/bold}{fg #73c991}{bg default}                           {bg default}{fg #9cdcfe}{bg #9cdcfe}{fg #16161c}{bold} {fg #4e6e7f}●{fg #d7f1ff}•••••{fg #4e6e7f}••••••{bg #9cdcfe}{bg #9cdcfe}{fg #16161c}{bold} 50.0% rest. {/bold}{fg #16161c}{bg #9cdcfe}│{bg #9cdcfe}{fg #16161c}{bold} 6d 17h {/bold}{fg #9cdcfe}{bg default}{reset}
 
 ## lines · es
