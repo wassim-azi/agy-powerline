@@ -287,6 +287,19 @@ async function run() {
       `${locs.length} in the sitemap, ${expected.length} indexable`
     );
 
+    const sitemapImages = [...sitemap.matchAll(/<image:loc>([^<]+)<\/image:loc>/g)].map(
+      (m) => m[1]
+    );
+    const brokenImages = sitemapImages.filter(
+      (url) =>
+        !url.startsWith(SITE_URL) || !fs.existsSync(path.join(out, url.slice(SITE_URL.length)))
+    );
+    record(
+      "sitemap.xml images point to files in the build",
+      sitemapImages.length > 0 && brokenImages.length === 0,
+      brokenImages.join(", ")
+    );
+
     const robots = fs.readFileSync(path.join(out, "robots.txt"), "utf8");
     record(
       "robots.txt allows everything and points to the sitemap",

@@ -893,14 +893,14 @@ function sitePages() {
       sources: HOME_SOURCES,
       html: buildHomeHtml({ lang: "en" }),
       card: { title: plainText(HOME_TEXT.en.heroTitle), label: "Antigravity CLI" },
-      images: SCREENSHOTS.map(screenshotUrl),
+      images: SCREENSHOTS.map((name) => screenshotUrl(name)),
     },
     {
       path: "fr/",
       sources: HOME_SOURCES,
       html: buildHomeHtml({ lang: "fr" }),
       card: { title: plainText(HOME_TEXT.fr.heroTitle), label: "Antigravity CLI", lang: "fr" },
-      images: SCREENSHOTS.map(screenshotUrl),
+      images: SCREENSHOTS.map((name) => screenshotUrl(name)),
     },
     {
       path: THEMES_PAGE.path,
