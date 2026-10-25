@@ -94,7 +94,7 @@ Text that does not come from your own config (payload fields, branch names, comm
 
 - Zero runtime dependencies.
 - Releases are published from GitHub Actions with [npm provenance](https://docs.npmjs.com/generating-provenance-statements), so you can verify that a published version was built from this repository.
-- Each GitHub release has the npm tarball attached (`agy-powerline-<version>.tgz`, the same file that's on npm) and the plugin archives (`agy-powerline-plugin-<version>.tar.gz` and `.zip`, for installing without npm), each with its signed build attestation (`<file>.sigstore.json`). To check a downloaded file: `gh attestation verify <file> -R wassim-azi/agy-powerline`, adding `--bundle <file>.sigstore.json`.
+- Each GitHub release has the npm tarball attached (`agy-powerline-<version>.tgz`, the same file that's on npm) and the plugin archives (`agy-powerline-plugin-<version>.tar.gz` and `.zip`, for installing without npm), each with its signed build attestation (`<file>.sigstore.json`), plus their SLSA provenance in one file (`agy-powerline-<version>.intoto.jsonl`). To check a downloaded file: `gh attestation verify <file> -R wassim-azi/agy-powerline`, adding `--bundle <file>.sigstore.json`.
 - Publishing uses npm trusted publishing (OIDC): no npm token is stored in the repository. Each release needs the maintainer's approval in a protected GitHub environment and is refused unless its tag is on `main`; release tags can't be created, moved or deleted outside that process.
 - Secret scanning with push protection blocks commits that contain credentials.
 - No install scripts (`preinstall`, `install`, `postinstall`, `prepare`) in the published package; CI checks this on every change.
