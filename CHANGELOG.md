@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Pull requests go to `main`, now the only long-lived branch (`develop` is retired), and agy-powerline.com updates when a release is published
 
+### Fixed
+
+- The commands in the home page's Get started steps on agy-powerline.com show their text instead of a blank light box
+
 ## [1.8.0] - 2026-10-25
 
 ### Added
