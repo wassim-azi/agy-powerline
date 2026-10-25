@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: MIT
+# Copyright (c) 2026 agy-powerline contributors
+
 # agy-powerline demo, recorded with VHS (https://github.com/charmbracelet/vhs)
 # Run from the repo root, in a normal (non-Administrator) terminal:
 #   vhs scripts/demo/demo.tape

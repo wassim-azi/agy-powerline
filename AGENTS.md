@@ -105,6 +105,7 @@ Follow the matching section of [CONTRIBUTING.md](CONTRIBUTING.md); in short:
 
 - Prettier (`printWidth` 100) and ESLint decide formatting; don't hand-format against them.
 - CommonJS (`require`, `module.exports`), `"use strict"` at the top of new files, double quotes, semicolons.
+- Every source file (`.js`, `.html`, `.tape`) starts with `SPDX-License-Identifier: MIT` and `Copyright (c) 2026 agy-powerline contributors` as comments, after the shebang if there is one; the `license` suite checks it.
 - Comments explain _why_, not what. Match the density of the surrounding code.
 - Keep the runtime path fast: no new work on every refresh unless it's cached or cheap (`git` calls already have a 150 ms timeout).
 - **The statusline never crashes or hangs.** Antigravity runs it on every refresh, so runtime code exits 0 quickly on any input (missing or malformed payload, stdin left open, a closed stdout) and never prints a stack trace or raw error text where the bar goes: stdout gets the bar, nothing, or a short fixed marker such as `[agy-powerline: invalid JSON]`; a problem goes to the local log (`src/lib/log.js`) and at most one short, redacted line to stderr, the way `src/runtime/statusline.js` already does it. Cover new failure paths in the `robustness` suite.
