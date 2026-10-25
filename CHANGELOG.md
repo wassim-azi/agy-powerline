@@ -10,6 +10,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Each GitHub release has its signed SLSA provenance attached as `agy-powerline-<version>.intoto.jsonl`, next to the `.sigstore.json` attestations
+- GOVERNANCE.md (roles, how decisions are made, continuity), ROADMAP.md (plans to October 2027) and SECURITY-REVIEW.md (the first security review and its findings); SECURITY.md says how vulnerability reports are handled and credited and gives the project's assurance case
+
+### Changed
+
+- The README screenshots and agy-powerline.com's images are smaller files, and the home page fetches its hero artwork first
+
+### Fixed
+
+- agy-powerline.com's sitemap lists the screenshots at the addresses the site serves them from
 
 ## [1.7.0] - 2026-10-24
 

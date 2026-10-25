@@ -351,6 +351,8 @@ At release time the maintainer renames `## [Unreleased]` to the new version and 
 | `develop` | Where all work lands. Open your pull requests here.        | Anyone, through a reviewed pull request                     |
 | `main`    | Released code. Every npm release is published from `main`. | Only the maintainer, by fast-forwarding `main` to `develop` |
 
+Nobody pushes to either branch directly, the maintainer included: every change to `develop` is a pull request, squash-merged once its checks pass. At release time the maintainer opens a pull request from `develop` into `main` and, once its checks pass, completes it by fast-forwarding `main`, so both branches keep the same commits.
+
 History is linear on both branches: no merge commits. A pull request into `main` from any other branch or author fails a required CI check and can't be merged. If you opened one by mistake, change its base branch to `develop` ("Edit" next to the PR title).
 
 ---
