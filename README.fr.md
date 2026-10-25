@@ -74,7 +74,7 @@ Choisissez un préréglage comme point de départ, puis personnalisez-le :
 | `agent`    | État de l’agent, sous-agents, titre, mode, sandbox ; modèle, contexte %, artefacts, quota le plus proche de sa limite |
 | `git`      | Projet, branche, worktree, stash ; nombre de fichiers, lignes modifiées, commit                                       |
 | `tokens`   | Tokens du contexte, tokens de la session en entrée et en sortie, cache ; tokens du jour et des 7 derniers jours       |
-| `quotas`   | Forfait et modèle ; quotas sur 5h et 7d côte à côte ; modèles tiers et Argon sur une troisième ligne                  |
+| `quotas`   | Offre et modèle ; quotas sur 5h et 7d côte à côte ; modèles tiers et Argon sur une troisième ligne                    |
 | `full`     | Toutes les informations : session, projet et Git ; contexte, tokens et cache ; les deux quotas                        |
 
 ### Thèmes
@@ -150,7 +150,7 @@ ou `"language": "fr"` dans `statusline.config.json` (touche `u` dans `configure`
 | Widget                                                        | Informations affichées                                                                                               |
 | ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
 | `model`                                                       | Modèle utilisé                                                                                                       |
-| `clock`                                                       | Current local time (12/24-hour format set under `clock`)                                                             |
+| `clock`                                                       | Heure locale (format 12h ou 24h réglé sous `clock`)                                                                  |
 | `fiveHourBar`, `weeklyBar`                                    | Quota restant sur 5h/7d sous forme de jauge, avec un [indicateur de rythme](docs/configuration.md#quota-pace-marker) |
 | `fiveHourPct`, `weeklyPct`                                    | Pourcentage de quota restant sur 5h/7d                                                                               |
 | `fiveHourReset`, `weeklyReset`                                | Temps restant avant la réinitialisation du quota, ou heure de réinitialisation                                       |
@@ -159,39 +159,39 @@ ou `"language": "fr"` dans `statusline.config.json` (touche `u` dans `configure`
 | `argonWeekly`, `argonReset`                                   | Quota hebdomadaire propre à Gemini 4 Argon (Google AI Pro) et sa réinitialisation                                    |
 | `context`, `contextPct`, `contextTokens`                      | Fenêtre de contexte utilisée : jauge, pourcentage ou nombre de tokens                                                |
 | `git`                                                         | Branche, modifications non validées et commits en avance ou en retard                                                |
-| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree` | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree             |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree` | Lignes ajoutées et supprimées, fichiers indexés/modifiés/non suivis/en conflit, ID du commit, stashes, worktree lié  |
 | `project`, `cwd`                                              | Dossier du projet et dossier courant                                                                                 |
-| `agentState`, `plan`, `sandbox`, `artifacts`, `version`       | Activité de l’agent, abonnement Antigravity, bac à sable, artefacts et version de la CLI                             |
+| `agentState`, `plan`, `sandbox`, `artifacts`, `version`       | Activité de l’agent, offre Antigravity, sandbox, artefacts et version de la CLI                                      |
 | `tasks`                                                       | Sous-agents actifs et tâches en arrière-plan                                                                         |
 | `mode`                                                        | Mode d’approbation (par exemple `accept-edits`) et mode Vim                                                          |
 | `title`                                                       | Titre de la conversation                                                                                             |
-| `sessionTime`                                                 | Time since the active conversation started                                                                           |
+| `sessionTime`                                                 | Temps écoulé depuis le début de la conversation active                                                               |
 | `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Tokens de la session et utilisation du cache des prompts                                                             |
 | `tokensToday`, `tokensWeek`                                   | Tokens utilisés aujourd’hui et sur les 7 derniers jours, toutes conversations confondues (Node 22.13+)               |
 | `ram`                                                         | Mémoire utilisée sur votre machine                                                                                   |
-| `os`                                                          | System agy runs on: Windows, macOS, Linux or WSL                                                                     |
-| `host`                                                        | Current user and short hostname from the OS (`alex@devbox`)                                                          |
+| `os`                                                          | Système sur lequel agy tourne : Windows, macOS, Linux ou WSL                                                         |
+| `host`                                                        | Utilisateur courant et nom d’hôte court du système (`alex@devbox`)                                                   |
 | `customText`, `exec`                                          | Texte personnalisé ou résultat d’une [commande shell](docs/configuration.md#shell-command-widget-exec)               |
 
 Un widget qui n’a rien à afficher se masque automatiquement. Vous pouvez personnaliser sa couleur, masquer son libellé ou définir ses propres seuils d’alerte : consultez la [documentation de configuration](docs/configuration.md).
 
 ## Commandes
 
-| Commande                                           | Fonction                                                               |
-| -------------------------------------------------- | ---------------------------------------------------------------------- |
-| `npx agy-powerline init [--yes]`                   | Installer ou mettre à jour la barre d’état                             |
-| `npx agy-powerline configure`                      | Ouvrir l’éditeur (alias `config`)                                      |
-| `npx agy-powerline preset <name>`                  | Appliquer un préréglage (`--list` pour afficher la liste)              |
-| `npx agy-powerline theme <name>`                   | Changer de thème (`--list`, `--gallery`)                               |
-| `npx agy-powerline gradient <name>`                | Color each row with a gradient (`--list`, `off`)                       |
-| `npx agy-powerline layout <pills\|lines\|classic>` | Changer de disposition                                                 |
-| `npx agy-powerline caps <style>`                   | Changer la forme des capsules : `round`, `angled`, `slanted`, `flat`   |
-| `npx agy-powerline export [file]`                  | Save your config to a file, to back it up or share it                  |
-| `npx agy-powerline import <file>`                  | Load a config, after showing what changes (`--merge`)                  |
-| `npx agy-powerline doctor`                         | Vérifier l’installation et expliquer les éventuels problèmes           |
-| `npx agy-powerline report`                         | Générer un rapport de bogue respectueux de la vie privée               |
-| `npx agy-powerline uninstall [--delete]`           | Retirer la barre d’état d’agy (`--delete` supprime aussi ses fichiers) |
-| `npx agy-powerline render --demo`                  | Afficher la barre avec des données d’exemple                           |
+| Commande                                           | Fonction                                                                         |
+| -------------------------------------------------- | -------------------------------------------------------------------------------- |
+| `npx agy-powerline init [--yes]`                   | Installer ou mettre à jour la barre d’état                                       |
+| `npx agy-powerline configure`                      | Ouvrir l’éditeur (alias `config`)                                                |
+| `npx agy-powerline preset <name>`                  | Appliquer un préréglage (`--list` pour afficher la liste)                        |
+| `npx agy-powerline theme <name>`                   | Changer de thème (`--list`, `--gallery`)                                         |
+| `npx agy-powerline gradient <name>`                | Colorer chaque ligne avec un dégradé (`--list`, `off`)                           |
+| `npx agy-powerline layout <pills\|lines\|classic>` | Changer de disposition                                                           |
+| `npx agy-powerline caps <style>`                   | Changer la forme des capsules : `round`, `angled`, `slanted`, `flat`             |
+| `npx agy-powerline export [file]`                  | Enregistrer la configuration dans un fichier, pour la sauvegarder ou la partager |
+| `npx agy-powerline import <file>`                  | Charger une configuration, après avoir montré ce qui change (`--merge`)          |
+| `npx agy-powerline doctor`                         | Vérifier l’installation et expliquer les éventuels problèmes                     |
+| `npx agy-powerline report`                         | Générer un rapport de bogue respectueux de la vie privée                         |
+| `npx agy-powerline uninstall [--delete]`           | Retirer la barre d’état d’agy (`--delete` supprime aussi ses fichiers)           |
+| `npx agy-powerline render --demo`                  | Afficher la barre avec des données d’exemple                                     |
 
 Utilisez l’option `--help` avec n’importe quelle commande pour afficher les options disponibles.
 

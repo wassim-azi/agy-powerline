@@ -319,7 +319,7 @@ const HOME_TEXT = {
       ],
     },
     themesEyebrow: "Thèmes",
-    themesTitle: (n) => `${n} thèmes pour terminaux sombres, clairs et daltoniens`,
+    themesTitle: (n) => `${n} thèmes pour terminaux sombres, clairs et adaptés au daltonisme`,
     themesLead:
       "Chaque thème est dessiné sur le fond de terminal prévu, avec une simulation de la vision des couleurs, sur la page des thèmes (en anglais).",
     seeAllThemes: (n) => `Voir les ${n} thèmes`,
@@ -508,7 +508,7 @@ const HOME_TEXT = {
       "Cada tema se dibuja sobre el fondo de terminal previsto, con una simulación de la visión de los colores, en la página de temas (en inglés).",
     seeAllThemes: (n) => `Ver los ${n} temas`,
     trustEyebrow: "Segura de ejecutar",
-    trustTitle: "Se ejecuta en cada actualización, así que se mantiene ligera",
+    trustTitle: "Se ejecuta en cada refresco, así que se mantiene ligera",
     trustBody:
       'Ninguna dependencia en tiempo de ejecución, ninguna llamada de red y una configuración que solo se lee de tu propia carpeta de instalación: un repositorio que clones no puede cambiar tu barra ni ejecutar comandos. <a href="/security/">Qué hace en tu equipo</a> (en inglés).',
     trust: [
@@ -535,7 +535,7 @@ const HOME_TEXT = {
       ],
       [
         "¿Hace más lento a agy?",
-        "Una actualización le cuesta unos 0,1 s de trabajo a agy-powerline en un portátil con Windows 11. En Windows, arrancar <code>cmd</code> y Node añade unos 0,1–0,25 s, como para cualquier comando de statusline.",
+        "Un refresco le cuesta unos 0,1 s de trabajo a agy-powerline en un portátil con Windows 11. En Windows, arrancar <code>cmd</code> y Node añade unos 0,1–0,25 s, como para cualquier comando de statusline.",
       ],
       [
         "¿Qué cuotas muestra?",

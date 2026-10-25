@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- In French, the bar says `Tokens` and `Cache hit` instead of `Jetons` and `Succès cache`, the words French developers use and the French README already uses
 - agy-powerline.com pages are 25 to 40% lighter: the shared styles are one stylesheet the browser keeps between pages, and the bar demos take their colors from classes instead of a style on every cell
 - On a phone, the themes page draws its bars at a readable 12px and each terminal scrolls inside its card
 

@@ -45,7 +45,7 @@
 
 ## pills full · fr
 {bg default}{fg #f48771}{bg #f48771}{fg #16161c}{bold} 🟣 Agent: working {/bold}{fg #f48771}{bg #c586c0}{bg #c586c0}{fg #16161c}{bold} 🤖 Gemini 3.8 Flash (High) {/bold}{fg #c586c0}{bg #cccccc}{bg #cccccc}{fg #16161c}{bold} ⭐ Offre: Google AI Pro {/bold}{fg #cccccc}{bg default}  {bg default}{fg #cccccc}{bg #cccccc}{fg #16161c}{bold} 📦 Projet: project {/bold}{fg #cccccc}{bg default}
-{bg default}{fg #569cd6}{bg #569cd6}{fg #16161c}{bold} 💾 {fg #bbd7ef}•{fg #2b4e6b}•••••••••••{bg #569cd6}{bg #569cd6}{fg #16161c}{bold} 109.3K/1.0M (10.4%) {/bold}{fg #569cd6}{bg #cccccc}{bg #cccccc}{fg #16161c}{bold} 🪙 Jetons: 109.3K↑ 36.2K↓ {/bold}{fg #cccccc}{bg #73c991}{bg #73c991}{fg #16161c}{bold} ⚡ Succès cache: 98% {/bold}{fg #73c991}{bg default}
+{bg default}{fg #569cd6}{bg #569cd6}{fg #16161c}{bold} 💾 {fg #bbd7ef}•{fg #2b4e6b}•••••••••••{bg #569cd6}{bg #569cd6}{fg #16161c}{bold} 109.3K/1.0M (10.4%) {/bold}{fg #569cd6}{bg #cccccc}{bg #cccccc}{fg #16161c}{bold} 🪙 Tokens: 109.3K↑ 36.2K↓ {/bold}{fg #cccccc}{bg #73c991}{bg #73c991}{fg #16161c}{bold} ⚡ Cache hit: 98% {/bold}{fg #73c991}{bg default}
 {bg default}{fg #73c991}{bg #73c991}{fg #16161c}{bold} {fg #c7e9d3}●{fg #3a6549}•••••••••••{bg #73c991}{bg #73c991}{fg #16161c}{bold} 97.9% rest. {/bold}{fg #16161c}{bg #73c991}│{bg #73c991}{fg #16161c}{bold} 4h 44m {/bold}{fg #73c991}{bg default}                          {bg default}{fg #9cdcfe}{bg #9cdcfe}{fg #16161c}{bold} {fg #4e6e7f}●•••••••••••{bg #9cdcfe}{bg #9cdcfe}{fg #16161c}{bold} 93.9% rest. {/bold}{fg #16161c}{bg #9cdcfe}│{bg #9cdcfe}{fg #16161c}{bold} 6j 14h {/bold}{fg #9cdcfe}{bg default}{reset}
 
 ## lines · fr
@@ -58,7 +58,7 @@
 
 ## pills full · es
 {bg default}{fg #f48771}{bg #f48771}{fg #16161c}{bold} working {/bold}{fg #f48771}{bg #c586c0}{bg #c586c0}{fg #16161c}{bold} Gemini 3.8 Flash (High) {/bold}{fg #c586c0}{bg #cccccc}{bg #cccccc}{fg #16161c}{bold} Google AI Pro {/bold}{fg #cccccc}{bg default}                                    {bg default}{fg #cccccc}{bg #cccccc}{fg #16161c}{bold} project {/bold}{fg #cccccc}{bg default}
-{bg default}{fg #569cd6}{bg #569cd6}{fg #16161c}{bold} 💾 {fg #bbd7ef}•{fg #2b4e6b}•••••••••••{bg #569cd6}{bg #569cd6}{fg #16161c}{bold} 109.3K/1.0M (10.4%) {/bold}{fg #569cd6}{bg #cccccc}{bg #cccccc}{fg #16161c}{bold} 🪙 Tokens: 109.3K↑ 36.2K↓ {/bold}{fg #cccccc}{bg #73c991}{bg #73c991}{fg #16161c}{bold} ⚡ Aciertos caché: 98% {/bold}{fg #73c991}{bg default}
+{bg default}{fg #569cd6}{bg #569cd6}{fg #16161c}{bold} 💾 {fg #bbd7ef}•{fg #2b4e6b}•••••••••••{bg #569cd6}{bg #569cd6}{fg #16161c}{bold} 109.3K/1.0M (10.4%) {/bold}{fg #569cd6}{bg #cccccc}{bg #cccccc}{fg #16161c}{bold} 🪙 Tokens: 109.3K↑ 36.2K↓ {/bold}{fg #cccccc}{bg #73c991}{bg #73c991}{fg #16161c}{bold} ⚡ Cache hit: 98% {/bold}{fg #73c991}{bg default}
 {bg default}{fg #73c991}{bg #73c991}{fg #16161c}{bold} {fg #c7e9d3}●{fg #3a6549}•••••••••••{bg #73c991}{bg #73c991}{fg #16161c}{bold} 97.9% rest. {/bold}{fg #16161c}{bg #73c991}│{bg #73c991}{fg #16161c}{bold} 4h 44m {/bold}{fg #73c991}{bg default}                          {bg default}{fg #9cdcfe}{bg #9cdcfe}{fg #16161c}{bold} {fg #4e6e7f}●•••••••••••{bg #9cdcfe}{bg #9cdcfe}{fg #16161c}{bold} 93.9% rest. {/bold}{fg #16161c}{bg #9cdcfe}│{bg #9cdcfe}{fg #16161c}{bold} 6d 14h {/bold}{fg #9cdcfe}{bg default}{reset}
 
 ## lines · es

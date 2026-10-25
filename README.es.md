@@ -74,7 +74,7 @@ Para una terminal sin fuentes Nerd Font, activa el modo ASCII (tecla `i` en `con
 
 ¿Prefieres el navegador? [Construye tu barra en el navegador](https://agy-powerline.com/configure/) con vistas previas en tiempo real, y luego descárgala o impórtala.
 
-Los cambios se aplican a una sesión en ejecución de `agy` en su siguiente actualización.
+Los cambios se aplican a una sesión en ejecución de `agy` en su siguiente refresco.
 
 ### Preajustes
 
@@ -171,7 +171,7 @@ o `"language": "es"` en `statusline.config.json` (tecla `u` en `configure`). El 
 | `thirdPartyFiveHour`, `thirdPartyWeekly`                      | Cuotas de modelos de terceros                                                                                                         |
 | `argonWeekly`, `argonReset`                                   | La cuota semanal propia de Gemini 4 Argon (Google AI Pro) y su reinicio                                                               |
 | `context`, `contextPct`, `contextTokens`                      | Ventana de contexto utilizada: medidor, porcentaje o recuento de tokens                                                               |
-| `git`                                                         | Rama, cambios no confirmados y adelantado/atrasado (ahead/behind)                                                                     |
+| `git`                                                         | Rama, cambios no confirmados y commits por delante o por detrás (ahead/behind)                                                        |
 | `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree` | Líneas añadidas y eliminadas, archivos preparados/modificados/sin seguimiento/en conflicto, ID de commit, stashes, worktree vinculado |
 | `project`, `cwd`                                              | Directorio del proyecto, directorio actual                                                                                            |
 | `agentState`, `plan`, `sandbox`, `artifacts`, `version`       | Qué está haciendo el agente, tu plan, sandbox, artefactos, versión de la CLI                                                          |
