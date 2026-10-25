@@ -79,7 +79,7 @@
         min-width: 0;
       }
       .control legend {
-        font-size: 0.72rem;
+        font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.06em;
@@ -108,6 +108,8 @@
         padding: 20px;
         box-shadow: var(--shadow-sm);
         display: grid;
+        /* The terminal and the command scroll inside the card, never past it. */
+        grid-template-columns: minmax(0, 1fr);
         gap: 14px;
         min-width: 0;
         scroll-margin-top: calc(var(--header-h) + 96px);
@@ -163,6 +165,7 @@
         grid-column: 2;
         grid-row: 1 / span 2;
         display: flex;
+        flex-wrap: wrap;
         gap: 16px;
         margin: 0;
       }
@@ -171,7 +174,7 @@
         gap: 1px;
       }
       .metrics dt {
-        font-size: 0.68rem;
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.06em;
         color: var(--muted);
@@ -186,6 +189,14 @@
         display: flex;
         gap: 5px;
         padding-top: 3px;
+      }
+      /* Each bar keeps a readable 12px; on a phone its terminal scrolls sideways
+         instead of shrinking the bar further. */
+      .theme .ln.fit {
+        font-size: clamp(12px, calc(100cqi / (var(--cols) * 0.61)), 13px);
+      }
+      .cvd-filters {
+        position: absolute;
       }
       .dot {
         width: 14px;
@@ -231,7 +242,7 @@
           padding: 16px;
         }
         .theme-head {
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr);
         }
         .metrics {
           grid-column: 1;
@@ -245,7 +256,7 @@
     </style>
   </head>
   <body>
-    <svg width="0" height="0" style="position: absolute" aria-hidden="true">
+    <svg class="cvd-filters" width="0" height="0" aria-hidden="true">
       <!-- Machado et al. (2009) full-severity simulation, applied in linear RGB. -->
       <filter id="protan" color-interpolation-filters="linearRGB">
         <feColorMatrix

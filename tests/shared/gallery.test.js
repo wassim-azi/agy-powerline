@@ -12,7 +12,8 @@ const { record } = require("../helpers");
 const { THEME_ORDER } = require("../../src/lib/themes");
 const { buildHomeHtml, buildThemesHtml } = require("../../scripts/gallery/build");
 const themeToggle = require("../../scripts/site/theme-toggle");
-const { ansiToHtml } = require("../../scripts/site/ansi");
+const { ansiToHtml, ansiRuns } = require("../../scripts/site/ansi");
+const { styleClasses } = require("../../scripts/site/style-classes");
 const { renderStatusline, sampleData, defaultConfig } = require("../../src/lib/shared");
 const { FLEX_GAP_START, FLEX_GAP_END } = require("../../src/lib/layouts/pills");
 
@@ -60,12 +61,12 @@ async function run() {
   record(
     'the home page title and heading say "agy statusline", the phrase people search for',
     /<title>[^<]*agy statusline[^<]*<\/title>/.test(html) &&
-      /<h1[^>]*>The <code>agy<\/code> statusline/.test(html)
+      /<h1[^>]*>The agy statusline/.test(html)
   );
 
   record(
     "the home page leads with the install command and the configurator",
-    /<div class="cmd cmd-lg"><code><span class="prompt" aria-hidden="true">\$ <\/span>npx agy-powerline init<\/code>/.test(
+    /<div class="cmd cmd-lg"><code tabindex="0"><span class="prompt" aria-hidden="true">\$ <\/span>npx agy-powerline init<\/code>/.test(
       html
     ) && html.includes('href="/configure/"')
   );
@@ -138,11 +139,50 @@ async function run() {
       /<span class="wc" style="width:2ch">/.test(preview)
   );
 
+  // With a page stylesheet, each style becomes a class: the same bar, cell for
+  // cell, as with style attributes. Neighboring runs that look the same are
+  // one span, and the text is the bar's text.
+  const styles = styleClasses();
+  const classed = ansiToHtml(marked, { styles });
+  const rules = new Map(
+    [...styles.css().matchAll(/^\.(k\w+)\{(.*)\}$/gm)].map((m) => [m[1], m[2]])
+  );
+  const canonical = (markup) =>
+    markup.replace(/<(div|span)([^>]*)>/g, (_m, tag, attrs) => {
+      const cls = ((attrs.match(/class="([^"]*)"/) || [])[1] || "").split(" ");
+      const own = cls.filter((c) => !rules.has(c));
+      const style =
+        (attrs.match(/style="([^"]*)"/) || [])[1] ||
+        cls
+          .filter((c) => rules.has(c))
+          .map((c) => rules.get(c))
+          .join(";");
+      return `<${tag} ${own.join(" ")}|${/aria-hidden/.test(attrs)}|${style}>`;
+    });
+  const shown = classed
+    .replace(/<[^>]*>/g, "")
+    .replace(/&nbsp;/g, "")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&amp;/g, "&");
+  const runs = ansiRuns(marked).flat();
+  const runText = runs.map((r) => (r.glyph ? "" : r.gap ? " " : r.text)).join("");
+  const spans = (classed.match(/<span class="r[ "]/g) || []).length;
+  record(
+    "a bar drawn with classes matches its style attributes, with same-looking runs merged",
+    !/\sstyle="/.test(classed) &&
+      canonical(classed) === canonical(preview) &&
+      shown === runText &&
+      spans <= runs.filter((r) => !r.glyph).length,
+    `${spans} spans for ${runs.filter((r) => !r.glyph).length} runs`
+  );
+
   const demo = (html.match(/<div class="screen" id="demoBar">[\s\S]*?<\/figure>/) || [""])[0];
   record(
     "the home page's bars have a blank line between rows and gaps that stretch",
-    /class="ln flex fit"/.test(demo) &&
-      /<div class="ln fit" style="--cols:\d+"><span class="r"[^>]*> <\/span><\/div>/.test(demo)
+    /class="ln flex fit k\w+"/.test(demo) &&
+      /<div class="ln fit k\w+"><span class="r[^"]*"[^>]*> <\/span><\/div>/.test(demo) &&
+      !/\sstyle="/.test(html)
   );
 
   record(

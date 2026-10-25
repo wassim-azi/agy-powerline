@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- agy-powerline.com pages are 25 to 40% lighter: the shared styles are one stylesheet the browser keeps between pages, and the bar demos take their colors from classes instead of a style on every cell
+- On a phone, the themes page draws its bars at a readable 12px and each terminal scrolls inside its card
+
+### Fixed
+
+- agy-powerline.com is easier to use with a screen reader or a keyboard: headings in order on every page, tables named and their header cells marked, code blocks and commands that scroll can be reached with the keyboard, and the docs' screenshot keeps its space while it loads
+
+### Security
+
+- agy-powerline.com's Content Security Policy lets a page run only the scripts it was built with, named by their hash, instead of any inline script
+
 ## [1.8.1] - 2026-10-25
 
 ### Changed

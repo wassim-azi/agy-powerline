@@ -20,9 +20,11 @@ const { THEMES, THEME_ORDER } = require(path.join(repo, "src/lib/themes"));
 const { WIDGET_CATALOG } = require(path.join(repo, "src/lib/catalog"));
 const { version } = require(path.join(repo, "package.json"));
 const { ansiToHtml } = require("../site/ansi");
+const { styleClasses } = require("../site/style-classes");
 const { decodePng, resizePng, encodePng } = require("../site/png");
 const {
   injectSiteChrome,
+  finishPage,
   commandBox,
   icon,
   REPO_URL,
@@ -108,9 +110,11 @@ function withFiveHour(fraction) {
   return data;
 }
 
-function renderBar(data, config) {
+// styles: the page's style-classes.js stylesheet, which takes the bar's colors.
+function renderBar(data, config, styles) {
   return ansiToHtml(
-    renderStatusline(data, { ...defaultConfig(), ...PREVIEW.config, ...config }, PREVIEW.render)
+    renderStatusline(data, { ...defaultConfig(), ...PREVIEW.config, ...config }, PREVIEW.render),
+    { styles }
   );
 }
 
@@ -139,9 +143,9 @@ const KEYS = [
 
 const hexOf = (c) => "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("");
 const targetOf = (id) => (THEMES[id].kind === "light" || id.endsWith("-light") ? "light" : "dark");
-const swatch = (id) =>
+const swatch = (id, styles) =>
   `<span class="swatch" aria-hidden="true">${["model", "git", "weekly"]
-    .map((k) => `<i style="background:${hexOf(THEMES[id].colors[k])}"></i>`)
+    .map((k) => `<i class="${styles.cls(`background:${hexOf(THEMES[id].colors[k])}`)}"></i>`)
     .join("")}</span>`;
 
 // Width and height from a PNG's header, so images reserve their space.
@@ -156,13 +160,17 @@ const counts = () => ({
   widgets: WIDGET_CATALOG.filter((w) => w.id !== "separator" && w.id !== "lineBreak").length,
 });
 
-function buildThemes() {
+function buildThemes(styles) {
   return galleryThemes().map((id) => {
     const t = THEMES[id];
     const target = targetOf(id);
     const status = [0.8, 0.22, 0.06]
       .map((f) =>
-        renderBar(withFiveHour(f), { theme: id, layout: "pills", widgets: [{ id: "fiveHourBar" }] })
+        renderBar(
+          withFiveHour(f),
+          { theme: id, layout: "pills", widgets: [{ id: "fiveHourBar" }] },
+          styles
+        )
       )
       .join("");
     return {
@@ -171,9 +179,9 @@ function buildThemes() {
       kind: t.kind,
       description: t.description,
       target,
-      pills: renderBar(payload(), { theme: id, layout: "pills" }),
-      lines: renderBar(payload(), { theme: id, layout: "lines" }),
-      classic: renderBar(payload(), { theme: id, layout: "classic" }),
+      pills: renderBar(payload(), { theme: id, layout: "pills" }, styles),
+      lines: renderBar(payload(), { theme: id, layout: "lines" }, styles),
+      classic: renderBar(payload(), { theme: id, layout: "classic" }, styles),
       status,
       configHash: encodeConfig({ ...defaultConfig(), theme: id }),
       states: ["fiveHour", "caution", "warn"].map((k) => hexOf(t.colors[k])),
@@ -194,7 +202,7 @@ const GALLERY_TEXT = {
   copy: "Copy",
 };
 
-function card(t) {
+function card(t, styles) {
   const text = GALLERY_TEXT;
   return `
 <article class="theme" data-kind="${t.kind}" data-target="${t.target}" id="${t.id}">
@@ -208,7 +216,7 @@ function card(t) {
       <div><dt>${text.pillText}</dt><dd>${t.pillContrast.toFixed(1)}:1</dd></div>
       <div><dt>${text.onTerminal}</dt><dd>${t.termContrast.toFixed(1)}:1</dd></div>
       <div class="states"><dt>${text.states}</dt><dd>${t.states
-        .map((c) => `<span class="dot" style="background:${c}" title="${c}"></span>`)
+        .map((c) => `<span class="dot ${styles.cls(`background:${c}`)}" title="${c}"></span>`)
         .join("")}</dd></div>
     </dl>
   </header>
@@ -221,7 +229,7 @@ function card(t) {
       </div>
       <span class="term-title">${t.id} · <span class="term-bg-label">${t.target === "light" ? text.termLight : text.termDark}</span></span>
     </div>
-    <div class="term" data-bg="${t.target}">
+    <div class="term" data-bg="${t.target}" tabindex="0">
       <div class="term-label">pills</div>
       <div class="screen">${t.pills}</div>
       <div class="term-label">lines</div>
@@ -289,7 +297,7 @@ function homeStructuredData(description) {
 
 // --- Home page ----------------------------------------------------------------
 
-function demoHtml(text, language) {
+function demoHtml(text, language, styles) {
   const n = counts();
   const [first] = DEMO_THEMES;
   // Every theme × layout pair waits in a <template>, outside the page's DOM
@@ -297,12 +305,12 @@ function demoHtml(text, language) {
   const variants = DEMO_THEMES.flatMap((id) =>
     LAYOUTS.map(
       (layout) =>
-        `<template data-variant="${id}:${layout}" data-bg="${targetOf(id)}">${renderBar(payload(), { theme: id, layout, language })}</template>`
+        `<template data-variant="${id}:${layout}" data-bg="${targetOf(id)}">${renderBar(payload(), { theme: id, layout, language }, styles)}</template>`
     )
   ).join("\n        ");
   const chips = DEMO_THEMES.map(
     (id) =>
-      `<button type="button" class="chip" data-demo-theme="${id}" aria-pressed="${id === first}">${swatch(id)}${esc(THEMES[id].name)}</button>`
+      `<button type="button" class="chip" data-demo-theme="${id}" aria-pressed="${id === first}">${swatch(id, styles)}${esc(THEMES[id].name)}</button>`
   ).join("\n            ");
   const tabs = LAYOUTS.map(
     (layout) =>
@@ -321,7 +329,7 @@ function demoHtml(text, language) {
           <div class="term agy-body" data-bg="dark" aria-hidden="true">
             <p class="agy-msg"><span class="agy-ok">✓</span> Updated 3 files. All 128 tests pass.</p>
             <div class="agy-input"><span class="agy-prompt">&gt;</span> ${text.askAgy}<span class="caret"></span></div>
-            <div class="screen" id="demoBar">${renderBar(payload(), { theme: first, layout: "pills", language })}</div>
+            <div class="screen" id="demoBar">${renderBar(payload(), { theme: first, layout: "pills", language }, styles)}</div>
           </div>
         </figure>
         <div class="demo-controls">
@@ -334,12 +342,12 @@ function demoHtml(text, language) {
         ${variants}`;
 }
 
-function anatomyHtml(text, language) {
+function anatomyHtml(text, language, styles) {
   const colors = THEMES["dark-aurora"].colors;
   const items = text.anatomy
     .map(
       ([key, title, body], i) =>
-        `<li class="legend-item"><span class="legend-num" style="--c:${key === "pace" ? "#ffffff" : hexOf(colors[key])}">${i + 1}</span><div><h3>${title}</h3><p>${body}</p></div></li>`
+        `<li class="legend-item"><span class="legend-num ${styles.cls(`--c:${key === "pace" ? "#ffffff" : hexOf(colors[key])}`)}">${i + 1}</span><div><h3>${title}</h3><p>${body}</p></div></li>`
     )
     .join("\n            ");
   return `<figure class="term-frame anatomy-bar" data-bg="dark">
@@ -352,7 +360,7 @@ function anatomyHtml(text, language) {
               </div>
               <span class="term-title">dark-aurora · default preset</span>
             </div>
-            <div class="term" data-bg="dark"><div class="screen">${renderBar(payload(), { language })}</div></div>
+            <div class="term" data-bg="dark"><div class="screen">${renderBar(payload(), { language }, styles)}</div></div>
           </figure>
           <ol class="legend">
             ${items}
@@ -368,12 +376,18 @@ function stepsHtml(text) {
     .join("\n            ");
 }
 
-function featuresHtml(text) {
+// Each icon repeats its tile's heading, so it's decoration: a CSS background,
+// which screen readers skip, rather than an image with an empty alt. The 56 px
+// copy is for 1x screens, the full one for 2x.
+const iconStyle = (art) =>
+  `background-image:url("/img/icon-${art}-56.webp");background-image:image-set(url("/img/icon-${art}-56.webp") 1x,url("/img/icon-${art}.webp") 2x)`;
+
+function featuresHtml(text, styles) {
   return text
     .features(counts())
     .map(
       ([art, title, body, href]) =>
-        `<li><a class="tile feature" href="${href}"><img class="tile-icon" src="/img/icon-${art}-56.webp" srcset="/img/icon-${art}-56.webp 1x, /img/icon-${art}.webp 2x" alt="" width="56" height="56" loading="lazy" decoding="async" /><h3>${title}</h3><p>${body}</p></a></li>`
+        `<li><a class="tile feature" href="${href}"><span class="tile-icon ${styles.cls(iconStyle(art))}"></span><h3>${title}</h3><p>${body}</p></a></li>`
     )
     .join("\n            ");
 }
@@ -395,11 +409,11 @@ function shotsHtml(text) {
           </div>`;
 }
 
-function themeStripHtml() {
+function themeStripHtml(styles) {
   return galleryThemes()
     .map(
       (id) =>
-        `<li><a class="chip" href="/themes/#${id}">${swatch(id)}${esc(THEMES[id].name)}</a></li>`
+        `<li><a class="chip" href="/themes/#${id}">${swatch(id, styles)}${esc(THEMES[id].name)}</a></li>`
     )
     .join("\n            ");
 }
@@ -420,6 +434,7 @@ function trustHtml(text) {
 function buildHomeHtml({ lang = "en" } = {}) {
   const text = HOME_TEXT[lang];
   const n = counts();
+  const styles = styleClasses();
   const sections = {
     INSTALL_CMD: commandBox("npx agy-powerline init", {
       label: text.copyInstall,
@@ -427,12 +442,12 @@ function buildHomeHtml({ lang = "en" } = {}) {
       large: true,
     }),
     // The bars speak the page's language.
-    DEMO: demoHtml(text, lang),
-    ANATOMY: anatomyHtml(text, lang),
+    DEMO: demoHtml(text, lang, styles),
+    ANATOMY: anatomyHtml(text, lang, styles),
     STEPS: stepsHtml(text),
-    FEATURES: featuresHtml(text),
+    FEATURES: featuresHtml(text, styles),
     SHOTS: shotsHtml(text),
-    THEME_STRIP: themeStripHtml(),
+    THEME_STRIP: themeStripHtml(styles),
     TRUST: trustHtml(text),
     FAQ: faqHtml(text),
   };
@@ -462,9 +477,10 @@ function buildHomeHtml({ lang = "en" } = {}) {
         ? "agy-powerline : la statusline agy qui vous dit si votre quota va tenir, avec la barre par défaut"
         : "agy-powerline: the agy statusline that tells you if your quota will last, with the default bar",
     structuredData: lang === "en" ? homeStructuredData(text.description) : undefined,
+    pageCss: styles.css(),
   });
-  return page.replace(/<!--([A-Z_]+)-->/g, (match, key) =>
-    key in sections ? sections[key] : match
+  return finishPage(
+    page.replace(/<!--([A-Z_]+)-->/g, (match, key) => (key in sections ? sections[key] : match))
   );
 }
 
@@ -505,8 +521,11 @@ function themesStructuredData(themes) {
   ];
 }
 
-function buildThemesHtml() {
-  const themes = buildThemes();
+// standalone: the page as one file, with the shared styles in it (npm run gallery).
+function buildThemesHtml({ standalone = false } = {}) {
+  const styles = styleClasses();
+  const themes = buildThemes(styles);
+  const cards = themes.map((t) => card(t, styles)).join("\n");
   const template = fs.readFileSync(path.join(__dirname, "themes.html"), "utf8");
   const title = THEMES_PAGE.title.replace("20", String(themes.length));
   const page = injectSiteChrome(template.replace(/\{\{count\}\}/g, String(themes.length)), {
@@ -515,14 +534,16 @@ function buildThemesHtml() {
     currentPage: "themes",
     pagePath: THEMES_PAGE.path,
     structuredData: themesStructuredData(themes),
+    pageCss: styles.css(),
+    standalone,
   });
-  return page.replace("<!--CARDS-->", themes.map((t) => card(t)).join("\n"));
+  return finishPage(page.replace("<!--CARDS-->", () => cards));
 }
 
 if (require.main === module) {
   const out = path.resolve(process.argv[2] || path.join(repo, "gallery.html"));
   fs.mkdirSync(path.dirname(out), { recursive: true });
-  fs.writeFileSync(out, buildThemesHtml(), "utf8");
+  fs.writeFileSync(out, buildThemesHtml({ standalone: true }), "utf8");
   console.log(`wrote ${out} (${(fs.statSync(out).size / 1024).toFixed(0)} KB)`);
 }
 

@@ -166,10 +166,19 @@ function ansiRuns(text) {
 // each one as "bullet"; the percentage printed next to the meter says it all.
 const METER_ONLY = /^[\s•●○◉█░▓▒┃│]*[•●○◉█░▓▒┃][\s•●○◉█░▓▒┃│]*$/;
 
+// The class and style attributes of an element. With a page stylesheet
+// (style-classes.js) the style becomes one of its classes; without one, as in
+// the configurator, which draws its preview in the browser, it stays inline.
+function attrs(classes, style, styles, extra = "") {
+  if (!style) return ` class="${classes}"${extra}`;
+  if (styles) return ` class="${classes} ${styles.cls(style)}"${extra}`;
+  return ` class="${classes}"${extra} style="${style}"`;
+}
+
 // A font draws emoji wider or narrower than the two columns the renderer
 // counts, which pushes everything after them out of line, so each character
 // wider than one column gets a box of exactly its width.
-function cellsToHtml(text) {
+function cellsToHtml(text, styles) {
   let html = "";
   let cluster = "";
   let width = 0;
@@ -178,7 +187,7 @@ function cellsToHtml(text) {
     if (cluster) {
       html +=
         width > 1
-          ? `<span class="wc" style="width:${width}ch">${esc(cluster)}</span>`
+          ? `<span${attrs("wc", `width:${width}ch`, styles)}>${esc(cluster)}</span>`
           : esc(cluster);
     }
     cluster = "";
@@ -210,19 +219,43 @@ function minColumns(runs) {
   return cols;
 }
 
-function ansiToHtml(text) {
-  const lines = ansiRuns(text);
+// Neighboring text runs that look the same become one span: fewer elements for
+// the same bar. A meter's cells stay apart from the text around them, which
+// screen readers read.
+const sameLook = (a, b) =>
+  String(a.fg) === String(b.fg) &&
+  String(a.bg) === String(b.bg) &&
+  a.bold === b.bold &&
+  a.dim === b.dim &&
+  METER_ONLY.test(a.text) === METER_ONLY.test(b.text);
+
+function mergeRuns(runs) {
+  const merged = [];
+  for (const r of runs) {
+    const last = merged[merged.length - 1];
+    if (last && !last.glyph && !r.glyph && !last.gap && !r.gap && sameLook(last, r)) {
+      merged[merged.length - 1] = { ...last, text: last.text + r.text };
+    } else {
+      merged.push(r);
+    }
+  }
+  return merged;
+}
+
+// options.styles: the page's style-classes.js stylesheet, if it has one.
+function ansiToHtml(text, { styles } = {}) {
+  const lines = ansiRuns(text).map(mergeRuns);
   // A bar with gaps also shrinks its font to fit a narrower box (.ln.fit), the
   // same for every line so the rows stay aligned.
   const flexible = lines.some((runs) => runs.some((r) => r.gap));
-  const fit = flexible ? ` fit" style="--cols:${Math.max(...lines.map(minColumns))}` : "";
+  const cols = flexible ? `--cols:${Math.max(...lines.map(minColumns))}` : "";
   return lines
     .map((runs) => {
       let html = "";
       for (const r of runs) {
         if (r.glyph) {
           const vars = [`--c:${css(r.fg) || "currentColor"}`, `--b:${css(r.bg) || "transparent"}`];
-          html += `<span class="g ${r.glyph}" style="${vars.join(";")}"></span>`;
+          html += `<span${attrs(`g ${r.glyph}`, vars.join(";"), styles)}></span>`;
           continue;
         }
         const style = [];
@@ -231,15 +264,14 @@ function ansiToHtml(text) {
         if (r.bold) style.push("font-weight:700");
         if (r.dim) style.push("opacity:0.65");
         const hidden = METER_ONLY.test(r.text) ? ' aria-hidden="true"' : "";
-        const attrs = `${hidden}${style.length ? ` style="${style.join(";")}"` : ""}`;
         // A gap keeps one space and grows to fill the box (.gap), so a bar fits
         // any box as wide as its widgets, with the last group on the right edge.
         html += r.gap
-          ? `<span class="r gap"${attrs}> </span>`
-          : `<span class="r"${attrs}>${cellsToHtml(r.text)}</span>`;
+          ? `<span${attrs("r gap", style.join(";"), styles, hidden)}> </span>`
+          : `<span${attrs("r", style.join(";"), styles, hidden)}>${cellsToHtml(r.text, styles)}</span>`;
       }
       const flex = runs.some((r) => r.gap) ? " flex" : "";
-      return `<div class="ln${flex}${fit}">${html || "&nbsp;"}</div>`;
+      return `<div${attrs(`ln${flex}${cols ? " fit" : ""}`, cols, styles)}>${html || "&nbsp;"}</div>`;
     })
     .join("");
 }

@@ -15,6 +15,12 @@ on:
 
 permissions: {}
 
+# A new push to a pull request cancels the run for its previous commit. Each
+# push to main gets a group of its own, so those always run.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
 jobs:
   zizmor:
     name: zizmor

@@ -18,9 +18,9 @@ const HOME_TEXT = {
       "agy-powerline is an agy statusline for Google Antigravity CLI: Gemini, Claude/GPT and Argon quotas with pace markers, context and git in agy's status bar.",
     eyebrow: "Statusline for Google Antigravity CLI",
     heroTitle:
-      'The <code>agy</code> statusline that tells you <span class="grad-text">if your quota will last</span>',
+      'The agy statusline that tells you <span class="grad-text">if your quota will last</span>',
     heroLead:
-      "Your model, context window, git and every Antigravity quota with a pace marker, in a powerline bar under agy's input box. One command to set up.",
+      "Your model, context window, git and every Antigravity quota with a pace marker, in a powerline bar under agy's input box. <strong>One command</strong> to set up.",
     copy: "Copy",
     copyCommand: "Copy:",
     copyInstall: "Copy the install command",
@@ -33,7 +33,7 @@ const HOME_TEXT = {
     demoLayouts: "Layout",
     allThemes: (n) => `All ${n} →`,
     anatomyEyebrow: "At a glance",
-    anatomyTitle: "Read the bar in ten seconds",
+    anatomyTitle: "Read the agy statusline in ten seconds",
     anatomyLead:
       "The default bar has two rows: what you are working with on top, how much quota you have left below.",
     anatomy: [
@@ -70,7 +70,7 @@ const HOME_TEXT = {
     ],
     installGuide: "Installation details →",
     featuresEyebrow: "Features",
-    featuresTitle: "Everything you want to see while agy works",
+    featuresTitle: "Everything you want to see in Antigravity CLI's status bar",
     featuresLead:
       "Built for Antigravity CLI from its real status line data, and safe to leave running all day.",
     features: (n) => [
@@ -184,9 +184,9 @@ const HOME_TEXT = {
       "agy-powerline, la statusline de Google Antigravity CLI (agy) : quotas Gemini, Claude/GPT et Argon avec repère de rythme, contexte et git dans la barre d'agy.",
     eyebrow: "Statusline pour Google Antigravity CLI",
     heroTitle:
-      'La statusline <code>agy</code> qui vous dit <span class="grad-text">si votre quota va tenir</span>',
+      'La statusline agy qui vous dit <span class="grad-text">si votre quota va tenir</span>',
     heroLead:
-      "Votre modèle, la fenêtre de contexte, git et chaque quota Antigravity avec un repère de rythme, dans une barre powerline sous la zone de saisie d'agy. Une seule commande pour l'installer.",
+      "Votre modèle, la fenêtre de contexte, git et chaque quota Antigravity avec un repère de rythme, dans une barre powerline sous la zone de saisie d'agy. <strong>Une seule commande</strong> pour l'installer.",
     copy: "Copier",
     copyCommand: "Copier :",
     copyInstall: "Copier la commande d'installation",
@@ -199,7 +199,7 @@ const HOME_TEXT = {
     demoLayouts: "Disposition",
     allThemes: (n) => `Les ${n} →`,
     anatomyEyebrow: "En un coup d'œil",
-    anatomyTitle: "Lire la barre en dix secondes",
+    anatomyTitle: "Lire la statusline agy en dix secondes",
     anatomyLead:
       "La barre par défaut a deux lignes : ce avec quoi vous travaillez en haut, le quota qu'il vous reste en bas.",
     anatomy: [
@@ -252,7 +252,7 @@ const HOME_TEXT = {
     ],
     installGuide: "Détails de l'installation (en anglais) →",
     featuresEyebrow: "Fonctionnalités",
-    featuresTitle: "Tout ce que vous voulez voir pendant qu'agy travaille",
+    featuresTitle: "Tout ce que vous voulez voir dans la barre d'état d'Antigravity CLI",
     featuresLead:
       "Conçue pour Antigravity CLI à partir de ses vraies données de statusline, et sûre à laisser tourner toute la journée.",
     features: (n) => [

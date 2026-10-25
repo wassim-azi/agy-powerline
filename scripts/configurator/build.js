@@ -11,7 +11,7 @@
 const fs = require("fs");
 const path = require("path");
 const { buildBrowserBundle } = require("./bundle");
-const { injectSiteChrome, SITE_URL } = require("../site/layout");
+const { injectSiteChrome, finishPage, SITE_URL } = require("../site/layout");
 const { breadcrumbData } = require("../site/doc-page");
 const { renderPreview } = require("./page");
 const {
@@ -119,16 +119,18 @@ function buildConfiguratorHtml() {
     colorDepth: "truecolor",
   }).html;
 
-  return template
-    .replace("<!--PREVIEW-->", preview)
-    .replace("<!--PALETTE_ITEMS-->", buildPaletteItems())
-    .replace("<!--THEME_OPTIONS-->", buildThemeOptions())
-    .replace("<!--PRESET_OPTIONS-->", buildPresetOptions())
-    .replace("<!--CAP_OPTIONS-->", buildCapOptions())
-    .replace("<!--GRADIENT_OPTIONS-->", buildGradientOptions())
-    .replace("<!--LANGUAGE_OPTIONS-->", buildLanguageOptions())
-    .replace("/* BUNDLE_PLACEHOLDER */", bundleCode)
-    .replace("/* PAGE_LOGIC_PLACEHOLDER */", pageLogicCode);
+  return finishPage(
+    template
+      .replace("<!--PREVIEW-->", preview)
+      .replace("<!--PALETTE_ITEMS-->", buildPaletteItems())
+      .replace("<!--THEME_OPTIONS-->", buildThemeOptions())
+      .replace("<!--PRESET_OPTIONS-->", buildPresetOptions())
+      .replace("<!--CAP_OPTIONS-->", buildCapOptions())
+      .replace("<!--GRADIENT_OPTIONS-->", buildGradientOptions())
+      .replace("<!--LANGUAGE_OPTIONS-->", buildLanguageOptions())
+      .replace("/* BUNDLE_PLACEHOLDER */", bundleCode)
+      .replace("/* PAGE_LOGIC_PLACEHOLDER */", pageLogicCode)
+  );
 }
 
 function buildConfigurator(dest = out) {
