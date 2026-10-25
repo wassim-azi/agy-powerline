@@ -214,7 +214,9 @@ function testFreshInstall() {
     );
     record(
       "init ends with a link to the project page",
-      stripAnsi(res.stdout).includes("https://github.com/wassim-azi/agy-powerline"),
+      stripAnsi(res.stdout)
+        .split(/\r?\n/)
+        .some((line) => line.trim() === "https://github.com/wassim-azi/agy-powerline"),
       res.stdout
     );
   });

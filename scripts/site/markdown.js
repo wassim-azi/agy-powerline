@@ -13,11 +13,20 @@ const esc = (s) =>
     .replace(/>/g, "&gt;")
     .replace(/"/g, "&quot;");
 
+// Repeats until nothing is left, so a tag split by another one ("<scr<b>ipt>")
+// can't come back together.
+function stripTags(html) {
+  let text = String(html ?? "");
+  for (let prev; prev !== text;) {
+    prev = text;
+    text = text.replace(/<[^>]*>/g, "");
+  }
+  return text;
+}
+
 // GitHub's heading anchors, so links like configuration.md#widgets keep working.
 function slugify(text) {
-  return text
-    .toLowerCase()
-    .replace(/<[^>]*>/g, "")
+  return stripTags(text.toLowerCase())
     .replace(/[^\p{L}\p{N} _-]/gu, "")
     .replace(/ /g, "-");
 }
@@ -268,4 +277,4 @@ function renderMarkdown(md, options = {}) {
   return { html, headings: ctx.headings };
 }
 
-module.exports = { renderMarkdown, slugify, plainText, inline };
+module.exports = { renderMarkdown, slugify, plainText, inline, stripTags };
