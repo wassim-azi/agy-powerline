@@ -209,7 +209,7 @@ npx agy-powerline doctor       # 检查一切是否为最新
 
 ## 参与贡献
 
-欢迎贡献。请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md)（环境搭建、架构、添加组件或主题）和 [Code of Conduct](CODE_OF_CONDUCT.md)。Pull request 请提交到 `develop` 分支。在 [GitHub issues](https://github.com/wassim-azi/agy-powerline/issues) 中报告错误，或在 [Discussions](https://github.com/wassim-azi/agy-powerline/discussions) 中分享想法和反馈。
+欢迎贡献。请先阅读 [CONTRIBUTING.md](CONTRIBUTING.md)（环境搭建、架构、添加组件或主题）和 [Code of Conduct](CODE_OF_CONDUCT.md)。Pull request 请提交到 `main` 分支。在 [GitHub issues](https://github.com/wassim-azi/agy-powerline/issues) 中报告错误，或在 [Discussions](https://github.com/wassim-azi/agy-powerline/discussions) 中分享想法和反馈。
 
 感谢所有贡献者：
 

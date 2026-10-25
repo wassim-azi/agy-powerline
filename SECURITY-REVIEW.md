@@ -1,6 +1,6 @@
 # Security review
 
-**Date:** 25 October 2026 · **Code reviewed:** `develop` at commit `1483985` (after release 1.7.0) · **Next review:** by October 2027, or before a release that adds a process, a file write or a network call.
+**Date:** 25 October 2026 · **Code reviewed:** the code as of 25 October 2026, released with this review as 1.8.0 (`v1.8.0`) · **Next review:** by October 2027, or before a release that adds a process, a file write or a network call.
 
 This is an in-house review of agy-powerline against the security requirements and trust boundaries in the [assurance case](SECURITY.md#assurance-case). It reads the code where those boundaries are crossed, checks that each claim in [SECURITY.md](SECURITY.md) holds, and records what it found.
 
@@ -37,4 +37,4 @@ No finding allows a repository, a payload, command output or an imported file to
 
 ## Process
 
-Every change to `develop` runs the full test suite on Linux, macOS and Windows, ESLint, CodeQL and, for workflow changes, zizmor and actionlint. The project has one maintainer, so the maintainer's own changes are not reviewed by a second person; [GOVERNANCE.md](GOVERNANCE.md) and [ROADMAP.md](ROADMAP.md) cover this.
+Every change to `main` runs the full test suite on Linux, macOS and Windows, ESLint, CodeQL and, for workflow changes, zizmor and actionlint. The project has one maintainer, so the maintainer's own changes are not reviewed by a second person; [GOVERNANCE.md](GOVERNANCE.md) and [ROADMAP.md](ROADMAP.md) cover this.

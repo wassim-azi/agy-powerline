@@ -1,4 +1,4 @@
-<!-- Pull requests must target the `develop` branch and are squash-merged; the PR title becomes the commit message. `main` is only fast-forwarded to `develop` at release time. -->
+<!-- Pull requests target `main` and are squash-merged; the PR title becomes the commit message. -->
 
 ## Description
 
@@ -21,7 +21,6 @@ Briefly describe the change and why it was made. If it fixes an open issue, link
 
 Before submitting this PR, please make sure:
 
-- [ ] This PR targets `develop` (not `main`)
 - [ ] All tests pass locally: `npm test`
 - [ ] Lint and formatting pass: `npm run lint` and `npm run format:check`
 - [ ] If the bar's output changed on purpose, snapshots are updated (`npm run test:update`) and the diff in `tests/snapshots/` matches the change

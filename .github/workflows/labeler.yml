@@ -2,7 +2,7 @@ name: Labels
 
 # Labels pull requests from the rules in .github/labeler.yml.
 # pull_request_target so fork PRs can be labeled too: it runs this file as it
-# is on develop, with a token that can write labels. Nothing from the PR is
+# is on main, with a token that can write labels. Nothing from the PR is
 # checked out or run; the labeler only reads the list of changed files.
 on:
   pull_request_target: # zizmor: ignore[dangerous-triggers] PR code is never checked out

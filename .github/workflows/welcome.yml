@@ -2,7 +2,7 @@ name: Welcome
 
 # Greets a person's first issue or pull request with pointers to the
 # contribution rules. pull_request_target so it can comment on fork PRs: it
-# runs this file as it is on develop and never checks out the PR's code.
+# runs this file as it is on main and never checks out the PR's code.
 on:
   issues:
     types: [opened]
@@ -24,15 +24,14 @@ jobs:
           issue_message: |
             Thanks for opening your first issue in agy-powerline!
 
-            If it's a bug, `npx agy-powerline doctor` and `npx agy-powerline report` help a lot: the report is privacy-safe and can be pasted here as-is. See [Troubleshooting](https://github.com/wassim-azi/agy-powerline/blob/develop/docs/troubleshooting.md) for more.
+            If it's a bug, `npx agy-powerline doctor` and `npx agy-powerline report` help a lot: the report is privacy-safe and can be pasted here as-is. See [Troubleshooting](https://github.com/wassim-azi/agy-powerline/blob/main/docs/troubleshooting.md) for more.
           pr_message: |
             Thanks for your first pull request to agy-powerline!
 
             A few things that help it get merged quickly:
 
-            - The pull request targets `develop`, not `main`.
             - `npm test`, `npm run lint` and `npm run format:check` pass. If the bar's output changed on purpose, run `npm run test:update` and check the snapshot diff.
             - User-visible changes have a line in `CHANGELOG.md` under `[Unreleased]`.
             - The pull request template is filled in.
 
-            [CONTRIBUTING.md](https://github.com/wassim-azi/agy-powerline/blob/develop/CONTRIBUTING.md) has the details, including how to add a widget or a theme.
+            [CONTRIBUTING.md](https://github.com/wassim-azi/agy-powerline/blob/main/CONTRIBUTING.md) has the details, including how to add a widget or a theme.

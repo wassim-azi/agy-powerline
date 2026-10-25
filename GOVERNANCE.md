@@ -14,7 +14,7 @@ agy-powerline is a single-maintainer open source project under the [MIT license]
 
 ## How decisions are made
 
-- Every change, the maintainer's included, goes through a pull request with the required CI checks; nobody pushes to `develop` or `main` directly.
+- Every change, the maintainer's included, goes through a pull request with the required CI checks; nobody pushes to `main` directly.
 - Bugs, features and changes start as [GitHub issues](https://github.com/wassim-azi/agy-powerline/issues); open questions and ideas go to [Discussions](https://github.com/wassim-azi/agy-powerline/discussions). Anyone can comment.
 - The maintainer makes the final decision, explains it in the issue or pull request, and records user-visible changes in [CHANGELOG.md](CHANGELOG.md).
 - Rules that protect users' machines (no runtime dependencies, no network calls, no shell, never lose user settings) are listed in [AGENTS.md](AGENTS.md#hard-rules) and are not relaxed for a feature.

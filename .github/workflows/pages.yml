@@ -1,13 +1,14 @@
 name: Pages
 
 # Publishes agy-powerline.com to GitHub Pages: the theme gallery, the
-# configurator, the docs and guides (scripts/site/build.js). It builds from main
-# only, so the site always shows the released version; a manual run from another
-# branch builds but doesn't deploy. After a deploy, the pages are announced to
-# IndexNow so search engines that use it see changes sooner.
+# configurator, the docs and guides (scripts/site/build.js). It deploys when a
+# release is published, from that release's tag, so the site always shows the
+# released version; a manual run from a v* tag redeploys that release, and a
+# run from anywhere else builds but doesn't deploy. After a deploy, the pages
+# are announced to IndexNow so search engines that use it see changes sooner.
 on:
-  push:
-    branches: [main]
+  release:
+    types: [published]
   workflow_dispatch:
 
 permissions: {}
@@ -51,7 +52,7 @@ jobs:
   deploy:
     name: Deploy to GitHub Pages
     needs: build
-    if: github.ref == 'refs/heads/main'
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
       pages: write
