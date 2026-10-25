@@ -6,7 +6,7 @@ This is an in-house review of agy-powerline against the security requirements an
 
 ## Method
 
-The code was read where untrusted input comes in or where the software acts on the machine: running commands, starting `git`, writing and deleting files, printing text, and publishing releases. Each area below names what was checked. The test suites that cover those areas (`security`, `robustness`, `install safety`, `fuzz`, `git`, `exec cache`, `problem log`) were run, as were ESLint, CodeQL and the workflow audits (zizmor, actionlint).
+The code was read where untrusted input comes in or where the software acts on the machine: running commands, starting `git`, writing and deleting files, printing text, and publishing releases. Each area below names what was checked. The test suites that cover those areas (`security`, `robustness`, `install safety`, `fuzz`, `git`, `exec cache`, `problem log`) were run with ESLint, and CodeQL scanned the reviewed commit in CI. The workflows were read by hand; zizmor and actionlint check them in CI whenever a workflow file changes.
 
 ## Areas reviewed
 
