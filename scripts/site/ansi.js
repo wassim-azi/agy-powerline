@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 agy-powerline contributors
+
 "use strict";
 
 // Converts ANSI-colored statusline text to HTML for web previews (theme

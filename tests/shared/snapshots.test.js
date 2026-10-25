@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 agy-powerline contributors
+
 "use strict";
 
 // Snapshot tests: render known inputs with several layouts and themes and

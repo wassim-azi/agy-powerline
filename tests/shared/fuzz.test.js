@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 agy-powerline contributors
+
 "use strict";
 
 // Property-based fuzzing with fast-check. The statusline reads JSON it doesn't

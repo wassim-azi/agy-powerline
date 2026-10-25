@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 agy-powerline contributors
+
 "use strict";
 
 // The home page (/ and /fr/) and the theme gallery (/themes/) of
@@ -50,8 +53,9 @@ async function run() {
       /agy statusline/.test(app.description) &&
       /^\d+\.\d+\.\d+/.test(app.softwareVersion) &&
       Boolean(author) &&
-      author.sameAs.includes("https://x.com/wassim_azi") &&
-      author.sameAs.includes("https://www.linkedin.com/in/wassim-azi")
+      ["https://x.com/wassim_azi", "https://www.linkedin.com/in/wassim-azi"].every((url) =>
+        author.sameAs.some((link) => link === url)
+      )
   );
   record(
     'the home page title and heading say "agy statusline", the phrase people search for',

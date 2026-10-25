@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 agy-powerline contributors
+
 "use strict";
 
 // Cross-platform suites. Run with `npm run test:shared`.
@@ -36,3 +39,4 @@ registerSuite("install safety", "./shared/install-safety.test");
 registerSuite("init and doctor", "./shared/init-doctor.test");
 registerSuite("snapshots", "./shared/snapshots.test");
 registerSuite("commit messages", "./shared/commit-message.test");
+registerSuite("license", "./shared/license.test");

@@ -99,7 +99,7 @@ Where npm or cloning from GitHub is blocked, each [GitHub release](https://githu
 
 Restart agy once afterwards, as after any `init`. Later commands work the same way: `node <folder>/src/index.js theme --list` stands in for `npx agy-powerline theme --list`. To update, download the newer release's file and repeat.
 
-Each of these files has a signed attestation next to it (`<file>.sigstore.json`); [SECURITY.md](../SECURITY.md) shows how to check a download with `gh attestation verify`.
+Each of these files has a signed attestation next to it (`<file>.sigstore.json`), and `agy-powerline-<version>.intoto.jsonl` holds the SLSA provenance of all three; [SECURITY.md](../SECURITY.md) shows how to check a download with `gh attestation verify`.
 
 ## Where files live
 

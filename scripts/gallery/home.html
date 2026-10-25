@@ -1,11 +1,31 @@
 <!doctype html>
 <html lang="{{lang}}">
   <head>
+    <!-- SPDX-License-Identifier: MIT -->
+    <!-- Copyright (c) 2026 agy-powerline contributors -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- Nothing loads from other sites: the page is its own inline style and script. -->
     <!--SITE_CSP-->
     <!--SITE_HEAD-->
+    <!-- The hero artwork is the largest thing on the first screen (LCP), so it
+         is fetched first, in the system theme's version like the CSS below. -->
+    <link
+      rel="preload"
+      href="/img/hero-light.webp"
+      as="image"
+      type="image/webp"
+      fetchpriority="high"
+      media="(prefers-color-scheme: light)"
+    />
+    <link
+      rel="preload"
+      href="/img/hero-dark.webp"
+      as="image"
+      type="image/webp"
+      fetchpriority="high"
+      media="(prefers-color-scheme: dark)"
+    />
     <style>
       /* SITE_CSS */
 

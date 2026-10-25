@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 agy-powerline contributors
+
 "use strict";
 
 // Builds the whole agy-powerline.com site into one folder: the home page (in
@@ -16,7 +19,7 @@ const { renderStatusline, sampleData, defaultConfig } = require(path.join(repo, 
 const { WIDGET_CATALOG } = require(path.join(repo, "src/lib/catalog"));
 const { WIDGET_TAGS } = require(path.join(repo, "src/lib/widget-style"));
 const { ansiToHtml } = require("./ansi");
-const { renderMarkdown } = require("./markdown");
+const { renderMarkdown, stripTags } = require("./markdown");
 const { buildDocPage } = require("./doc-page");
 const { buildConfigSchema } = require("./config-schema");
 const {
@@ -882,7 +885,6 @@ const HOME_SOURCES = [
   "scripts/site/home-text.js",
   "src/lib/themes.js",
 ];
-const plainText = (html) => html.replace(/<[^>]+>/g, "");
 
 // Every page of the site, with what its share card shows.
 function sitePages() {
@@ -892,15 +894,15 @@ function sitePages() {
       path: "",
       sources: HOME_SOURCES,
       html: buildHomeHtml({ lang: "en" }),
-      card: { title: plainText(HOME_TEXT.en.heroTitle), label: "Antigravity CLI" },
-      images: SCREENSHOTS.map(screenshotUrl),
+      card: { title: stripTags(HOME_TEXT.en.heroTitle), label: "Antigravity CLI" },
+      images: SCREENSHOTS.map((name) => screenshotUrl(name)),
     },
     {
       path: "fr/",
       sources: HOME_SOURCES,
       html: buildHomeHtml({ lang: "fr" }),
-      card: { title: plainText(HOME_TEXT.fr.heroTitle), label: "Antigravity CLI", lang: "fr" },
-      images: SCREENSHOTS.map(screenshotUrl),
+      card: { title: stripTags(HOME_TEXT.fr.heroTitle), label: "Antigravity CLI", lang: "fr" },
+      images: SCREENSHOTS.map((name) => screenshotUrl(name)),
     },
     {
       path: THEMES_PAGE.path,

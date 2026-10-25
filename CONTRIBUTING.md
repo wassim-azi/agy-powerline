@@ -266,6 +266,8 @@ Only the bar is translated: payload text, numbers and dates (those follow `clock
 
 ## 🧪 Testing Guidelines
 
+A pull request that adds a feature must add tests for it, and one that fixes a bug must add a test that fails without the fix (a new fixture and snapshot counts). Pull requests without them aren't merged.
+
 Every change must keep the bar cross-platform and fast:
 
 1. **Cross-Platform Compatibility:**
@@ -349,7 +351,26 @@ At release time the maintainer renames `## [Unreleased]` to the new version and 
 | `develop` | Where all work lands. Open your pull requests here.        | Anyone, through a reviewed pull request                     |
 | `main`    | Released code. Every npm release is published from `main`. | Only the maintainer, by fast-forwarding `main` to `develop` |
 
+Nobody pushes to either branch directly, the maintainer included: every change to `develop` is a pull request, squash-merged once its checks pass. At release time the maintainer opens a pull request from `develop` into `main` and, once its checks pass, completes it by fast-forwarding `main`, so both branches keep the same commits.
+
 History is linear on both branches: no merge commits. A pull request into `main` from any other branch or author fails a required CI check and can't be merged. If you opened one by mistake, change its base branch to `develop` ("Edit" next to the PR title).
+
+---
+
+## 🔍 Code Review
+
+Every pull request is reviewed before it's merged; `.github/CODEOWNERS` requests the maintainer's review. A review is done on GitHub: the reviewer reads the whole diff, runs anything the CI can't check (a visual change in a real terminal, the `configure` TUI), and approves or asks for changes in comments. Pull requests are squash-merged once approved and green.
+
+The reviewer checks that:
+
+1. **The hard rules hold** ([AGENTS.md](AGENTS.md#hard-rules)): no runtime dependency, no network call, no shell, no config read from the current directory, `exec` only from the trusted install dir, untrusted text cleaned before it's printed, user settings written only through the safe helpers.
+2. **The statusline can't crash or hang**: new runtime code exits quickly on any input, and new failure paths are covered in the `robustness` suite.
+3. **Tests come with the change**: a feature has tests, a bug fix has a test that fails without it, and a snapshot diff shows only the intended change.
+4. **It works everywhere**: Linux, macOS, Windows (`cmd` and PowerShell) and WSL, with `--ascii` and `--color none`.
+5. **The docs match**: the READMEs' tables, `docs/`, `llms.txt`, `SECURITY.md` for a new process, file write or network call, and a `CHANGELOG.md` line for a user-visible change.
+6. **The pull request is one issue's worth**: no unrelated refactors or formatting, a Conventional Commits title, and the template filled in with the commands that were really run.
+
+A change is acceptable when all of these hold and every required CI check passes. Security-sensitive changes (anything in the list in point 1, `src/runtime/`, `src/lib/exec.js`, `src/lib/paths.js` or `.github/workflows/`) get a line-by-line read, not a skim.
 
 ---
 

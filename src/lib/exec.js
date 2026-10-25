@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 agy-powerline contributors
+
 "use strict";
 
 const fs = require("fs");
@@ -28,7 +31,9 @@ function getCacheFilePath() {
   } catch {
     // Fallback
   }
-  // Per-user name so other accounts on a shared machine cannot pre-create it.
+  // Per-user name so accounts don't share one cache. Another account could
+  // still guess and pre-create it in a shared /tmp, so the runtime never comes
+  // here: exec widgets only run from a config file in the install dir above.
   let user = "user";
   try {
     user = os.userInfo().username.replace(/[^A-Za-z0-9_.-]/g, "_") || user;

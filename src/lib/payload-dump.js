@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: MIT
+// Copyright (c) 2026 agy-powerline contributors
+
 "use strict";
 
 // Debug payload dumps (AGY_POWERLINE_DEBUG / --dump-payload). Instead of a raw

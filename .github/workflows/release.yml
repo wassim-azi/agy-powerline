@@ -4,8 +4,8 @@ name: Release
 # This is the only way a version reaches npm or any other platform. Uses npm trusted
 # publishing (OIDC): no long-lived npm token is stored in the repo, and the
 # package gets a provenance attestation linking it to this workflow run.
-# The same tarball and the plugin archives, with a signed GitHub attestation,
-# are attached to the release.
+# The same tarball and the plugin archives, with a signed GitHub attestation
+# and its SLSA provenance, are attached to the release.
 on:
   release:
     types: [published]
@@ -107,7 +107,9 @@ jobs:
 
       # One attestation covers the three files. A copy named after each one
       # lets `gh attestation verify <file> --bundle <file>.sigstore.json` work
-      # the same way for all of them.
+      # the same way for all of them. Its signed SLSA provenance also goes in
+      # <name>-<version>.intoto.jsonl, the file SLSA tools and OpenSSF
+      # Scorecard look for.
       - name: Name the attestation bundle after each file
         env:
           TARBALL: ${{ steps.pack.outputs.tarball }}
@@ -118,6 +120,7 @@ jobs:
           for file in "$TARBALL" "$PLUGIN_TAR" "$PLUGIN_ZIP"; do
             cp "$BUNDLE" "$file.sigstore.json"
           done
+          jq -c .dsseEnvelope "$BUNDLE" > "${TARBALL%.tgz}.intoto.jsonl"
 
       # Authenticates with npm trusted publishing (OIDC, configured on
       # npmjs.com for this workflow and environment): no npm token exists.
@@ -138,6 +141,7 @@ jobs:
             ${{ steps.plugin.outputs.tar }}.sigstore.json
             ${{ steps.plugin.outputs.zip }}
             ${{ steps.plugin.outputs.zip }}.sigstore.json
+            *.intoto.jsonl
           if-no-files-found: error
           retention-days: 1
 
@@ -168,4 +172,5 @@ jobs:
             "$TARBALL" "$TARBALL.sigstore.json" \
             "$PLUGIN_TAR" "$PLUGIN_TAR.sigstore.json" \
             "$PLUGIN_ZIP" "$PLUGIN_ZIP.sigstore.json" \
+            "${TARBALL%.tgz}.intoto.jsonl" \
             --repo "$GITHUB_REPOSITORY" --clobber
