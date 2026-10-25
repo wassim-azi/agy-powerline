@@ -8,7 +8,7 @@
 // list built from the headings, "Next steps" at the end, and styles for the
 // rendered Markdown. The site script adds a copy button to each code block.
 
-const { injectSiteChrome, absoluteUrl, esc, REPO_URL } = require("./layout");
+const { injectSiteChrome, finishPage, absoluteUrl, esc, REPO_URL } = require("./layout");
 
 const PROSE_CSS = `
       /* Text reads best at about 80 characters a line: the sidebar on the
@@ -54,10 +54,9 @@ const PROSE_CSS = `
         overflow-y: auto;
         font-size: 0.88rem;
       }
-      .doc-side h2,
-      .doc-toc h2 {
+      .doc-side-title {
         margin: 0 0 8px;
-        font-size: 0.74rem;
+        font-size: 0.75rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.08em;
@@ -354,6 +353,13 @@ const PROSE_CSS = `
       .prose .screen-wrap {
         margin: 0 0 16px;
       }
+      .prose .align-center,
+      .prose .center {
+        text-align: center;
+      }
+      .prose .align-right {
+        text-align: right;
+      }
 `;
 
 function breadcrumbData(crumbs) {
@@ -383,21 +389,23 @@ function tocHtml(headings) {
   const items = headings.filter((h) => h.level === 2);
   if (items.length < 3) return "";
   return `<aside class="doc-toc" aria-label="On this page">
-        <h2>On this page</h2>
+        <p class="doc-side-title">On this page</p>
         <ul>
           ${items.map((h) => `<li><a href="#${esc(h.id)}">${esc(h.text)}</a></li>`).join("\n          ")}
         </ul>
       </aside>`;
 }
 
-// sidebar: [{ title, links: [[href, label]] }]
+// sidebar: [{ title, links: [[href, label]] }]. The group titles aren't
+// headings: the sidebar comes before the page's h1, and the nav's label already
+// names it for screen readers.
 function sidebarHtml(sidebar, pagePath) {
   if (!sidebar || !sidebar.length) return "";
   const current = `/${pagePath}`;
   return `<nav class="doc-side" aria-label="Docs">
         ${sidebar
           .map(
-            (group) => `<h2>${esc(group.title)}</h2>
+            (group) => `<p class="doc-side-title">${esc(group.title)}</p>
         <ul>
           ${group.links
             .map(
@@ -489,15 +497,17 @@ ${PROSE_CSS}${page.extraCss || ""}
   </body>
 </html>
 `;
-  return injectSiteChrome(template, {
-    title: page.title,
-    description: page.description,
-    currentPage: page.currentPage || "docs",
-    pagePath: page.path,
-    structuredData,
-    ogType: page.ogType,
-    article: page.article,
-  });
+  return finishPage(
+    injectSiteChrome(template, {
+      title: page.title,
+      description: page.description,
+      currentPage: page.currentPage || "docs",
+      pagePath: page.path,
+      structuredData,
+      ogType: page.ogType,
+      article: page.article,
+    })
+  );
 }
 
 module.exports = { buildDocPage, breadcrumbData, PROSE_CSS, formatDate };

@@ -12,6 +12,12 @@ on:
 
 permissions: {}
 
+# One run per release tag; a running publish is never cancelled. A group per
+# tag, because a group-wide queue would drop a release waiting behind two others.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
   publish:
     name: Publish to npm

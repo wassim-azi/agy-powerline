@@ -671,7 +671,14 @@
       <!-- Output & Share -->
       <section class="card" aria-label="Output &amp; Apply">
         <h2 class="card-title">Apply Your Config</h2>
-        <div class="output-box" id="configJson"></div>
+        <!-- Focusable, so a JSON wider than the box can be scrolled with the keyboard. -->
+        <div
+          class="output-box"
+          id="configJson"
+          tabindex="0"
+          role="region"
+          aria-label="statusline.config.json"
+        ></div>
         <div class="action-row">
           <button type="button" class="btn btn-primary" id="copyJsonBtn">Copy JSON</button>
           <button type="button" class="btn btn-secondary" id="downloadBtn">

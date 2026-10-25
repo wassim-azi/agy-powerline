@@ -11,6 +11,7 @@
 
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 const REPO_URL = "https://github.com/wassim-azi/agy-powerline";
 const NPM_URL = "https://www.npmjs.com/package/agy-powerline";
@@ -23,11 +24,17 @@ const AUTHOR_URL = "https://github.com/wassim-azi";
 // Every indexable page has its own 1200×630 share card, drawn by
 // scripts/site/images.js into assets/site/og/<slug>.jpg.
 const OG_SIZE = { width: 1200, height: 630 };
-// Nothing loads from other sites. 'self' lets the font, the icons, the manifest
-// and tools that read robots.txt or llms.txt from inside the page reach this site.
+// Nothing loads from other sites. 'self' lets the stylesheet, the font, the
+// icons, the manifest and tools that read robots.txt or llms.txt from inside the
+// page reach this site. finishPage() swaps 'unsafe-inline' in script-src for the
+// hashes of the page's own scripts. Styles stay inline-able: the configurator
+// draws its preview with style attributes in the browser.
 const SITE_CSP =
-  "default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'";
+  "default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'";
 const FONT_URL = "/fonts/inter-latin.woff2";
+// The styles every page shares (SHARED_CSS), in one file the browser keeps
+// between pages.
+const STYLESHEET_URL = "/site.css";
 const FAVICON_PATH = path.join(__dirname, "favicon.svg");
 const THEME_TOGGLE_PATH = path.join(__dirname, "theme-toggle.js");
 
@@ -84,9 +91,10 @@ function copyButton(command, label, text = "Copy") {
   return `<button type="button" class="copy-btn" data-copy="${esc(command)}" aria-label="${esc(label)}">${icon("copy", 15)}<span class="copy-label">${esc(text)}</span></button>`;
 }
 
-// A terminal-style command with its copy button.
+// A terminal-style command with its copy button. The command can take focus,
+// so on a narrow screen it can be scrolled with the keyboard.
 function commandBox(command, { label, copy = "Copy", large = false } = {}) {
-  return `<div class="cmd${large ? " cmd-lg" : ""}"><code><span class="prompt" aria-hidden="true">$ </span>${esc(command)}</code>${copyButton(command, label || `Copy: ${command}`, copy)}</div>`;
+  return `<div class="cmd${large ? " cmd-lg" : ""}"><code tabindex="0"><span class="prompt" aria-hidden="true">$ </span>${esc(command)}</code>${copyButton(command, label || `Copy: ${command}`, copy)}</div>`;
 }
 
 const DARK_TOKENS = `
@@ -274,7 +282,8 @@ const SHARED_CSS = `
       summary:focus-visible,
       input:focus-visible,
       select:focus-visible,
-      textarea:focus-visible {
+      textarea:focus-visible,
+      [tabindex="0"]:focus-visible {
         outline: 2px solid var(--accent);
         outline-offset: 2px;
       }
@@ -492,7 +501,7 @@ const SHARED_CSS = `
         grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 24px;
       }
-      .footer-col h2 {
+      .footer-title {
         margin: 0 0 12px;
         font-size: 0.76rem;
         font-weight: 600;
@@ -887,7 +896,7 @@ const SHARED_CSS = `
         border-bottom: 1px solid var(--term-dark-border);
         color: #9da5b4;
         font-family: var(--font-mono);
-        font-size: 0.74rem;
+        font-size: 0.75rem;
         user-select: none;
       }
       .term-frame[data-bg="light"] .term-titlebar {
@@ -939,7 +948,7 @@ const SHARED_CSS = `
         color: var(--term-light-fg);
       }
       .term-label {
-        font-size: 0.68rem;
+        font-size: 0.75rem;
         text-transform: uppercase;
         letter-spacing: 0.08em;
         opacity: 0.7;
@@ -1086,7 +1095,8 @@ const CHROME_TEXT = {
 };
 
 // Every page links to every other page from the footer: it helps crawling and
-// tells search engines which pages matter (sitelinks).
+// tells search engines which pages matter (sitelinks). Column titles aren't
+// headings, so a page's own headings are the only ones in its outline.
 const FOOTER_COLUMNS = [
   {
     key: "product",
@@ -1137,6 +1147,7 @@ const cardPath = (pagePath) => `og/${cardSlug(pagePath)}.jpg`;
 // search engines merge the github.io and custom-domain copies into one result.
 // alternates lists the same page in other languages ({ hreflang, path }).
 // article ({ published, modified }) adds the article:* tags of a guide.
+// standalone pages carry the shared styles themselves instead of linking them.
 function buildHead({
   title,
   description,
@@ -1148,6 +1159,7 @@ function buildHead({
   ogType = "website",
   imageAlt,
   article,
+  standalone = false,
 }) {
   const safeTitle = esc(title);
   const safeDesc = esc(description);
@@ -1210,7 +1222,12 @@ function buildHead({
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f7f8fb" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b0d12" media="(prefers-color-scheme: dark)" />
-    <link rel="preload" href="${FONT_URL}" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="${FONT_URL}" as="font" type="font/woff2" crossorigin />${
+      standalone
+        ? ""
+        : `
+    <link rel="stylesheet" href="${STYLESHEET_URL}" />`
+    }
     <meta property="og:site_name" content="agy-powerline" />
     <meta property="og:locale" content="${locale}" />${otherLocales}
     <meta property="og:title" content="${safeTitle}" />
@@ -1305,7 +1322,7 @@ function buildFooter({ lang = "en" } = {}) {
   const home = lang === "fr" ? "/fr/" : "/";
   const cols = FOOTER_COLUMNS.map(
     (col) => `<div class="footer-col">
-            <h2>${esc(text[col.key])}</h2>
+            <p class="footer-title">${esc(text[col.key])}</p>
             <ul>
               ${col.links.map(([label, href]) => `<li><a href="${esc(href)}">${esc(label)}</a></li>`).join("\n              ")}
             </ul>
@@ -1417,18 +1434,45 @@ function themeToggleScript() {
   return `${code}\n(function () {\n  if (typeof document !== "undefined" && window.AgySiteTheme) {\n    window.AgySiteTheme.initThemeToggle(document, window.localStorage);\n  }\n})();\n${SITE_SCRIPT}`;
 }
 
+// options.pageCss: styles of the page's generated markup (style-classes.js),
+// last in the page's stylesheet so they win over the template's rules, as the
+// style attributes they replace did. options.standalone inlines the shared
+// styles, for a page opened as a single file (npm run gallery).
 function injectSiteChrome(html, options) {
-  const { currentPage, lang = "en" } = options;
+  const { currentPage, lang = "en", pageCss = "", standalone = false } = options;
   return html
     .replace(
       "<!--SITE_CSP-->",
       `<meta http-equiv="Content-Security-Policy" content="${SITE_CSP}" />`
     )
     .replace("<!--SITE_HEAD-->", buildHead(options))
-    .replace("/* SITE_CSS */", SHARED_CSS)
+    .replace("/* SITE_CSS */", () => (standalone ? SHARED_CSS : ""))
+    .replace("</style>", () => (pageCss ? `${pageCss}\n    </style>` : "</style>"))
     .replace("<!--SITE_HEADER-->", buildHeader({ currentPage, lang }))
     .replace("<!--SITE_FOOTER-->", buildFooter({ lang }))
     .replace("/* SITE_THEME_SCRIPT */", themeToggleScript());
+}
+
+// The last step of every page, once nothing more is added to it: its CSP names
+// the inline scripts it runs by their SHA-256 instead of allowing any inline
+// script, so a script that got into a page through a build bug wouldn't run.
+// JSON-LD isn't run and needs none. The browser hashes a script's text with its
+// line breaks read as \n, so that's what is hashed here. Tags match in any case,
+// and end tags with trailing text, the way the browser reads them.
+function finishPage(html) {
+  const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script[^>]*>/gi)].map(
+    ([, body]) =>
+      `'sha256-${crypto.createHash("sha256").update(body.replace(/\r\n?/g, "\n")).digest("base64")}'`
+  );
+  const scripts = [...new Set(hashes)].join(" ") || "'none'";
+  return html.replace(SITE_CSP, () =>
+    SITE_CSP.replace("script-src 'unsafe-inline'", `script-src ${scripts}`)
+  );
+}
+
+// The stylesheet every page links.
+function buildStylesheet() {
+  return `${SHARED_CSS.replace(/^ {6}/gm, "").trim()}\n`;
 }
 
 function build404Html() {
@@ -1498,12 +1542,14 @@ function build404Html() {
   </body>
 </html>
 `;
-  return injectSiteChrome(template, {
-    title,
-    description,
-    currentPage: "404",
-    noindex: true,
-  });
+  return finishPage(
+    injectSiteChrome(template, {
+      title,
+      description,
+      currentPage: "404",
+      noindex: true,
+    })
+  );
 }
 
 // pages: [{ path, lastmod, images }], path relative to SITE_URL. lastmod is the
@@ -1558,6 +1604,7 @@ module.exports = {
   NPM_URL,
   SITE_URL,
   SITE_CSP,
+  STYLESHEET_URL,
   X_URL,
   X_HANDLE,
   LINKEDIN_URL,
@@ -1582,6 +1629,8 @@ module.exports = {
   buildFooter,
   themeToggleScript,
   injectSiteChrome,
+  finishPage,
+  buildStylesheet,
   build404Html,
   buildSitemapXml,
   buildRobotsTxt,

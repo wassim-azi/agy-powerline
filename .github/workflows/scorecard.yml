@@ -13,6 +13,11 @@ on:
 
 permissions: {}
 
+# Only the latest state of the branch matters, so a newer run replaces an older one.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   analysis:
     name: Scorecard

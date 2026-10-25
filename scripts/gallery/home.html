@@ -81,21 +81,14 @@
         font-weight: 800;
         text-wrap: balance;
       }
-      .hero h1 code {
-        font-family: var(--font-mono);
-        font-size: 0.84em;
-        font-weight: 700;
-        letter-spacing: -0.03em;
-        padding: 0 0.16em;
-        border-radius: 10px;
-        background: var(--accent-soft);
-        color: var(--accent);
-      }
       .hero-lead {
         margin: 0;
         font-size: clamp(1.05rem, 1.5vw, 1.2rem);
         color: var(--muted);
         max-width: 52ch;
+      }
+      .hero-lead strong {
+        color: var(--fg);
       }
       .hero-cta {
         display: flex;
@@ -308,8 +301,13 @@
         margin-top: 32px;
       }
       .tile-icon {
+        display: block;
         width: 56px;
         height: 56px;
+        /* Longhands only: the image itself comes from the tile's own class. */
+        background-position: center;
+        background-size: 56px 56px;
+        background-repeat: no-repeat;
         border-radius: 15px;
         box-shadow:
           0 0 0 1px rgba(255, 255, 255, 0.06),

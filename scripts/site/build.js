@@ -19,6 +19,7 @@ const { renderStatusline, sampleData, defaultConfig } = require(path.join(repo, 
 const { WIDGET_CATALOG } = require(path.join(repo, "src/lib/catalog"));
 const { WIDGET_TAGS } = require(path.join(repo, "src/lib/widget-style"));
 const { ansiToHtml } = require("./ansi");
+const { styleClasses } = require("./style-classes");
 const { renderMarkdown, stripTags } = require("./markdown");
 const { buildDocPage } = require("./doc-page");
 const { buildConfigSchema } = require("./config-schema");
@@ -28,6 +29,8 @@ const {
   esc,
   absoluteUrl,
   build404Html,
+  buildStylesheet,
+  STYLESHEET_URL,
   buildSitemapXml,
   buildRobotsTxt,
   buildSecurityTxt,
@@ -45,6 +48,7 @@ const {
   screenshotUrl,
   screenshotCopies,
   screenshotAttrs,
+  pngSize,
 } = require("../gallery/build");
 const { HOME_TEXT } = require("./home-text");
 const { buildConfiguratorHtml } = require("../configurator/build");
@@ -319,11 +323,19 @@ function imageUrl(fromSource, src) {
   return shot ? screenshotUrl(shot) : resolveLinkFrom(fromSource)(src);
 }
 
+// A repo PNG's size, read from its header; null for anything else.
+function imageSize(fromSource, src) {
+  const target = path.posix.normalize(path.posix.join(path.posix.dirname(fromSource), src));
+  const file = path.join(repo, target);
+  return target.endsWith(".png") && fs.existsSync(file) ? pngSize(file) : null;
+}
+
 function renderSource(source, extra = {}) {
   const md = fs.readFileSync(path.join(repo, source), "utf8");
   return renderMarkdown(md, {
     resolveLink: resolveLinkFrom(source),
     resolveImage: (src) => imageUrl(source, src),
+    imageSize: (src) => imageSize(source, src),
     // A screenshot with a width gets its smaller copies, sized to that width.
     resolveHtml: (html) =>
       html.replace(/<img\b[^>]*>/g, (tag) =>
@@ -358,12 +370,29 @@ const CRUMB_GUIDES = { name: "Guides", path: "guides/" };
 // label for the kind of page.
 const cardTitle = (title) => title.replace(/ - agy-powerline$/, "");
 
+// Every release has its own "Added", "Fixed"...: a screen reader listing the
+// headings also hears which release each one belongs to.
+function versionedSections(html) {
+  let version = "";
+  return html.replace(/<h([23]) id="[^"]*">[\s\S]*?<\/h\1>/g, (tag, level) => {
+    if (level === "2") {
+      version = (stripTags(tag).match(/\d+\.\d+\.\d+/) || [""])[0];
+      return tag;
+    }
+    return version
+      ? tag.replace(/<\/h3>$/, `<span class="sr-only"> in ${version}</span></h3>`)
+      : tag;
+  });
+}
+
 function markdownPage(page, { crumbs, ogType, structuredData, article, label } = {}) {
   const { html, headings } = renderSource(page.source);
   const body =
     page.source === "scripts/site/content/about.md"
       ? html.replace("<p>CONTRIBUTORS_LIST</p>", contributorsHtml())
-      : html;
+      : page.source === "CHANGELOG.md"
+        ? versionedSections(html)
+        : html;
   const lastmod = lastCommitDate([page.source]);
   return {
     path: page.path,
@@ -536,7 +565,7 @@ function guidesIndexPage() {
 const NO_PREVIEW = new Set(["os", "host", "ram", "clock", "tokensToday", "tokensWeek"]);
 const PREVIEW_OPTIONS = { customText: { text: "Production" }, exec: { cmd: "echo deploy" } };
 
-function widgetPreview(id) {
+function widgetPreview(id, styles) {
   if (NO_PREVIEW.has(id) || id === "separator" || id === "lineBreak") return "";
   const data = sampleData();
   data.cwd = FAKE_DIR;
@@ -549,12 +578,13 @@ function widgetPreview(id) {
   };
   const out = renderStatusline(data, config, { color: "truecolor", flexGaps: true });
   if (!out.replace(/\x1b\[[0-9;]*m/g, "").trim()) return "";
-  return `<div class="screen-wrap"><div class="term-frame" data-bg="dark"><div class="term" data-bg="dark"><div class="screen">${ansiToHtml(out)}</div></div></div></div>`;
+  return `<div class="screen-wrap"><div class="term-frame" data-bg="dark"><div class="term" data-bg="dark"><div class="screen">${ansiToHtml(out, { styles })}</div></div></div></div>`;
 }
 
 function widgetsPage() {
   const widgets = WIDGET_CATALOG.filter((w) => w.id !== "separator" && w.id !== "lineBreak");
   const layoutHelpers = WIDGET_CATALOG.filter((w) => w.id === "separator" || w.id === "lineBreak");
+  const styles = styleClasses();
   const sentence = (text) => {
     const s = String(text || "");
     return s ? `${s[0].toUpperCase()}${s.slice(1)}${/[.!?]$/.test(s) ? "" : "."}` : "";
@@ -568,8 +598,8 @@ function widgetsPage() {
       return `<section class="widget" aria-labelledby="${esc(w.id)}">
           <h2 id="${esc(w.id)}">${tag.icon ? `<span aria-hidden="true">${esc(tag.icon)}</span> ` : ""}${esc(w.label)} <code>${esc(w.id)}</code></h2>
           <p>${esc(sentence(w.description))}</p>
-          ${widgetPreview(w.id)}
-          <pre><code>{ "id": "${esc(w.id)}"${esc(options)} }</code></pre>
+          ${widgetPreview(w.id, styles)}
+          <pre tabindex="0"><code>{ "id": "${esc(w.id)}"${esc(options)} }</code></pre>
         </section>`;
     })
     .join("\n        ");
@@ -604,7 +634,8 @@ function widgetsPage() {
       }
       .widget .term {
         padding: 10px 12px;
-      }`,
+      }
+${styles.css()}`,
     }),
   };
 }
@@ -950,6 +981,7 @@ function buildSite(outDir) {
     if (page.markdown) write(path.join(page.path, "index.html.md"), page.markdown);
   }
   write("404.html", build404Html());
+  write(STYLESHEET_URL.slice(1), buildStylesheet());
 
   const sitemap = pages.filter(isIndexable).map((p) => ({
     path: p.path,

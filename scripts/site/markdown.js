@@ -7,7 +7,9 @@
 // from the same files as the docs on GitHub. It covers what our own Markdown
 // uses: headings, paragraphs, nested lists, fenced code, tables, blockquotes,
 // a raw HTML block, and inline code, links, images, bold and italic. The input
-// is always the repo's own files, never visitor text.
+// is always the repo's own files, never visitor text. Code blocks can take
+// keyboard focus, so a block wider than the page can be scrolled without a
+// mouse, and tables are named for screen readers by the heading above them.
 
 const esc = (s) =>
   String(s ?? "")
@@ -52,7 +54,10 @@ function inline(md, ctx) {
   text = esc(text);
   text = text.replace(/!\[([^\]]*)\]\(([^)\s]+)\)/g, (_m, alt, src) => {
     const url = ctx.resolveImage ? ctx.resolveImage(src) : src;
-    return `<img src="${esc(url)}" alt="${alt}" loading="lazy" />`;
+    // The size lets the browser keep the image's space before it loads.
+    const size = ctx.imageSize ? ctx.imageSize(src) : null;
+    const dims = size ? ` width="${size.width}" height="${size.height}"` : "";
+    return `<img src="${esc(url)}" alt="${alt}"${dims} loading="lazy" />`;
   });
   text = text.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (_m, label, href) => {
     const url = ctx.resolveLink ? ctx.resolveLink(href.replace(/&amp;/g, "&")) : href;
@@ -99,6 +104,7 @@ function heading(level, md, ctx) {
   ctx.slugs.set(base, count + 1);
   const id = count ? `${base}-${count}` : base;
   ctx.headings.push({ level, id, text: plainText(md) });
+  ctx.section = plainText(md);
   return `<h${level} id="${esc(id)}">${inline(md, ctx)}</h${level}>`;
 }
 
@@ -148,7 +154,7 @@ function renderBlocks(lines, ctx) {
       }
       i++;
       const lang = fence[3] ? ` class="language-${esc(fence[3])}"` : "";
-      out.push(`<pre><code${lang}>${esc(body.join("\n"))}</code></pre>`);
+      out.push(`<pre tabindex="0"><code${lang}>${esc(body.join("\n"))}</code></pre>`);
       continue;
     }
 
@@ -158,7 +164,9 @@ function renderBlocks(lines, ctx) {
         body.push(lines[i]);
         i++;
       }
-      const html = body.join("\n");
+      // GitHub needs align="center" to center a block; the site uses a class,
+      // since align is obsolete in HTML.
+      const html = body.join("\n").replace(/<p align="center">/g, '<p class="center">');
       out.push(ctx.resolveHtml ? ctx.resolveHtml(html) : html);
       continue;
     }
@@ -185,9 +193,12 @@ function renderBlocks(lines, ctx) {
         i++;
       }
       const cell = (tag, text, n) =>
-        `<${tag}${aligns[n] ? ` style="text-align:${aligns[n]}"` : ""}>${inline(text, ctx)}</${tag}>`;
+        `<${tag}${tag === "th" ? ' scope="col"' : ""}${aligns[n] ? ` class="align-${aligns[n]}"` : ""}>${inline(text, ctx)}</${tag}>`;
+      // Named after the heading it sits under, or its columns when it has none;
+      // hidden, since the heading already says it on screen.
+      const caption = ctx.section || head.map(plainText).join(", ");
       out.push(
-        `<div class="table-wrap"><table><thead><tr>${head.map((c, n) => cell("th", c, n)).join("")}</tr></thead><tbody>${rows
+        `<div class="table-wrap"><table><caption class="sr-only">${esc(caption)}</caption><thead><tr>${head.map((c, n) => cell("th", c, n)).join("")}</tr></thead><tbody>${rows
           .map((r) => `<tr>${head.map((_c, n) => cell("td", r[n] || "", n)).join("")}</tr>`)
           .join("")}</tbody></table></div>`
       );
@@ -272,7 +283,8 @@ function renderBlocks(lines, ctx) {
 }
 
 // options.resolveLink(href) and options.resolveImage(src) map repo-relative
-// links to site URLs; options.resolveHtml(html) rewrites a raw HTML block.
+// links to site URLs; options.imageSize(src) gives an image's { width, height }
+// or null; options.resolveHtml(html) rewrites a raw HTML block.
 // options.shift moves every heading down by that many levels.
 function renderMarkdown(md, options = {}) {
   const ctx = { ...options, slugs: new Map(), headings: [] };

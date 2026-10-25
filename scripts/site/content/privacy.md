@@ -5,7 +5,7 @@ This site collects nothing about you, and neither does agy-powerline itself.
 ## This website
 
 - **No cookies, no analytics, no tracking.** The site has no analytics script and sets no cookies.
-- **Nothing loads from other sites.** Every page carries its own styles and scripts, and a Content Security Policy stops it from loading anything from another domain: no web fonts, no images, no scripts from elsewhere. Links to GitHub and npm open those sites only when you click them.
+- **Nothing loads from other sites.** Every page carries its own scripts and uses the site's own stylesheet, and a Content Security Policy stops it from loading anything from another domain: no web fonts, no images, no scripts from elsewhere. Links to GitHub and npm open those sites only when you click them.
 - **One setting in your browser, if you choose one.** When you press System, Light or Dark at the top of a page, your browser stores that choice under `agy-powerline-theme` (local storage), so the next page opens the same way. It never leaves your browser. Clear it with your browser's site data.
 - **The configurator works in your browser.** The bar you build, and a config you paste or load, stay on the page. A share link keeps your config after the `#` in the address, a part browsers never send to a server. Downloading the config writes a file on your computer and sends nothing.
 - **The quota calculator** works in your browser too, and stores nothing.

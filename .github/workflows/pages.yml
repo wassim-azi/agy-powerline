@@ -37,6 +37,9 @@ jobs:
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24.x
+          # The site deploys from this job's output, so a cache restored from
+          # another run must not be able to change it; nothing is installed anyway.
+          package-manager-cache: false
 
       # The pages use only the repo's own code, so nothing is installed.
       - name: Build the site
@@ -55,8 +58,8 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     permissions:
-      pages: write
-      id-token: write
+      pages: write # publishes the built site to GitHub Pages
+      id-token: write # proves to Pages that the deployment comes from this run
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}

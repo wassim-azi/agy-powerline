@@ -10,6 +10,11 @@ on:
 
 permissions: {}
 
+# One thank-you per pull request; a second run waits rather than cancel a comment.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
 jobs:
   thanks:
     name: Thanks
@@ -19,7 +24,7 @@ jobs:
       github.event.pull_request.user.login != github.repository_owner
     runs-on: ubuntu-latest
     permissions:
-      pull-requests: write
+      pull-requests: write # comments on the merged pull request
     steps:
       - name: Comment on the pull request
         env:

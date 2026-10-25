@@ -122,6 +122,91 @@ async function run() {
       noCsp.join(", ")
     );
 
+    // A page runs only the inline scripts it was built with: its CSP lists each
+    // one's SHA-256 (as the browser computes it) instead of 'unsafe-inline'.
+    const sha256 = (text) =>
+      require("crypto").createHash("sha256").update(text.replace(/\r\n?/g, "\n")).digest("base64");
+    const unhashed = files.filter((file) => {
+      const html = pages[file];
+      const scriptSrc = (html.match(/Content-Security-Policy" content="[^"]*script-src ([^;"]*)/) ||
+        [])[1];
+      const scripts = [...html.matchAll(/<script>([\s\S]*?)<\/script[^>]*>/gi)].map((m) => m[1]);
+      return (
+        !scriptSrc ||
+        scriptSrc.includes("'unsafe-inline'") ||
+        scripts.length === 0 ||
+        !scripts.every((body) => scriptSrc.includes(`'sha256-${sha256(body)}'`)) ||
+        /\son[a-z]+="/.test(html) ||
+        /href="javascript:/i.test(html)
+      );
+    });
+    record(
+      "every page's CSP names its inline scripts by hash, with no 'unsafe-inline' and no inline handlers",
+      unhashed.length === 0,
+      unhashed.join(", ")
+    );
+
+    record(
+      "every page links the shared stylesheet",
+      files.every((file) => pages[file].includes('<link rel="stylesheet" href="/site.css" />')) &&
+        fs.readFileSync(path.join(out, "site.css"), "utf8").includes("@font-face"),
+      files.filter((file) => !pages[file].includes('href="/site.css"')).join(", ")
+    );
+
+    // The bars and swatches take their colors from classes of the page's own
+    // stylesheet. The configurator redraws its preview in the browser, where
+    // style attributes are the only way.
+    const styled = files.filter(
+      (file) => file !== "configure/index.html" && /\sstyle="/.test(pages[file])
+    );
+    record(
+      "no page but the configurator has style attributes",
+      styled.length === 0,
+      styled.join(", ")
+    );
+
+    // Headings make the page's outline: the h1 comes first and no level is
+    // skipped (the sidebar, "On this page" and the footer use none).
+    const badOutline = files.filter((file) => {
+      const levels = [...pages[file].matchAll(/<h([1-6])[\s>]/g)].map((m) => Number(m[1]));
+      return levels[0] !== 1 || levels.some((level, i) => i > 0 && level > levels[i - 1] + 1);
+    });
+    record(
+      "on every page the first heading is the h1, and no heading skips a level",
+      badOutline.length === 0,
+      badOutline.join(", ")
+    );
+
+    // Accessibility of the Markdown pages: tables are named and their header
+    // cells say they head columns; a code block wider than the page can be
+    // scrolled with the keyboard; images keep their space while they load.
+    const a11y = files.flatMap((file) => {
+      const html = pages[file];
+      const problems = [];
+      if (
+        (html.match(/<table>/g) || []).length !==
+        (html.match(/<table><caption[^>]*>[^<]+</g) || []).length
+      )
+        problems.push("table without caption");
+      if (/<th(?![^>]*\bscope="col")[\s>]/.test(html)) problems.push("th without scope");
+      if (/<pre(?![^>]*\btabindex="0")[\s>]/.test(html)) problems.push("pre without tabindex");
+      if (/<div class="cmd[^"]*"><code(?! tabindex="0")/.test(html))
+        problems.push("command without tabindex");
+      if (
+        [...html.matchAll(/<img\b[^>]*>/g)].some(
+          ([tag]) => !/\bwidth="\d+"/.test(tag) || !/\bheight="\d+"/.test(tag)
+        )
+      )
+        problems.push("img without width and height");
+      if (/\salign="/.test(html)) problems.push("align attribute");
+      return problems.map((p) => `${file}: ${p}`);
+    });
+    record(
+      "tables have captions and column headers, code scrolls by keyboard, images have a size",
+      a11y.length === 0,
+      a11y.slice(0, 8).join(", ")
+    );
+
     const loads = files.flatMap((file) =>
       externalLoads(pages[file]).map((url) => `${file}: ${url}`)
     );
@@ -410,14 +495,17 @@ async function run() {
         heavy.length === 0,
       heavy.join(", ")
     );
+    // The icons are decoration (each repeats its tile's heading), so they are
+    // CSS backgrounds rather than images with an empty alt.
     const icons = Object.keys(ART_PROMPTS).filter((name) => name.startsWith("icon-"));
     record(
-      "every feature icon has a 56 px copy, used as the 1x image",
+      "every feature icon is a background with a 56 px copy for 1x screens",
       icons.every(
         (name) =>
           fs.existsSync(path.join(out, "img", `${name}-56.webp`)) &&
-          home.includes(`src="/img/${name}-56.webp" srcset="/img/${name}-56.webp 1x`)
-      )
+          fs.existsSync(path.join(out, "img", `${name}.webp`)) &&
+          home.includes(`image-set(url("/img/${name}-56.webp") 1x,url("/img/${name}.webp") 2x)`)
+      ) && !/<img[^>]*tile-icon/.test(home)
     );
 
     // The hero artwork is the home page's LCP element: both themes' versions
@@ -570,7 +658,8 @@ async function run() {
     );
 
     const md = renderMarkdown(
-      "# Hello world\n\nSome `<b>` and **bold**.\n\n## Hello world\n\n| a | b |\n| - | - |\n| 1 | 2 |\n"
+      '# Hello world\n\nSome `<b>` and **bold**.\n\n## Hello world\n\n| a | b |\n| - | -: |\n| 1 | 2 |\n\n```js\nx\n```\n\n![shot](a.png)\n\n<p align="center">\n<img src="b.png">\n</p>\n',
+      { imageSize: (src) => (src === "a.png" ? { width: 10, height: 5 } : null) }
     );
     record(
       "the Markdown renderer slugs headings like GitHub, escapes code and builds tables",
@@ -578,7 +667,14 @@ async function run() {
         md.html.includes('id="hello-world-1"') &&
         md.html.includes("<code>&lt;b&gt;</code>") &&
         md.html.includes("<strong>bold</strong>") &&
-        /<table>[\s\S]*<td>1<\/td>[\s\S]*<\/table>/.test(md.html),
+        /<table><caption class="sr-only">Hello world<\/caption>[\s\S]*<td>1<\/td>[\s\S]*<\/table>/.test(
+          md.html
+        ) &&
+        md.html.includes('<th scope="col">a</th><th scope="col" class="align-right">b</th>') &&
+        md.html.includes('<td class="align-right">2</td>') &&
+        md.html.includes('<pre tabindex="0"><code class="language-js">x</code></pre>') &&
+        md.html.includes('<img src="a.png" alt="shot" width="10" height="5" loading="lazy" />') &&
+        md.html.includes('<p class="center">'),
       md.html
     );
   } finally {
