@@ -736,7 +736,7 @@ const SHARED_CSS = `
         margin: 0;
         color: var(--muted);
       }
-      .tile code,
+      .tile p code,
       .section-head code {
         font-family: var(--font-mono);
         font-size: 0.88em;
