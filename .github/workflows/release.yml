@@ -35,12 +35,12 @@ jobs:
           persist-credentials: false
           fetch-depth: 0 # full history, to check the tag is on main
 
-      # Releases are cut from main only. A tag on develop or any other branch
-      # is refused before anything is published.
+      # Releases are cut from main only. A tag on any other branch is refused
+      # before anything is published.
       - name: Check the release commit is on main
         run: |
           if ! git merge-base --is-ancestor "$GITHUB_SHA" origin/main; then
-            echo "::error::The release tag points to a commit that is not on main. Merge develop into main first, then tag main."
+            echo "::error::The release tag points to a commit that is not on main. Merge the release pull request into main first, then tag main."
             exit 1
           fi
 

@@ -19,7 +19,6 @@ Prefer not to install Node locally? Use the badge above, or clone the repository
    ```bash
    git clone https://github.com/wassim-azi/agy-powerline.git
    cd agy-powerline
-   git checkout develop
    ```
 
 2. **Install dependencies:**
@@ -309,7 +308,7 @@ Every change must keep the bar cross-platform and fast:
 2. Save the payload as `tests/fixtures/<short-name>.json`. Dumps from `AGY_POWERLINE_DEBUG` are already free of personal data; a payload pasted by hand may not be, so replace `email`, `session_id`, `conversation_id` and any paths with neutral values first.
 3. Reproduce: `node src/index.js render < tests/fixtures/<short-name>.json`.
 4. Fix the bug, then run `npm run test:update`. The new fixture gets its own snapshot file, which locks the fix in.
-5. Open the PR against `develop` and link the issue with `Fixes #<number>`.
+5. Open the PR against `main` and link the issue with `Fixes #<number>`.
 
 ---
 
@@ -326,9 +325,9 @@ We follow [Conventional Commits](https://www.conventionalcommits.org/). The firs
 
 Types: `feat`, `fix`, `docs`, `style`, `refactor`, `perf`, `test`, `build`, `ci`, `chore`, `revert`.
 
-The `commit-msg` hook checks this locally. CI checks every commit in your PR and the PR title too, so `--no-verify` only postpones the error. To check a range yourself: `npm run lint:commits -- origin/develop..HEAD`.
+The `commit-msg` hook checks this locally. CI checks every commit in your PR and the PR title too, so `--no-verify` only postpones the error. To check a range yourself: `npm run lint:commits -- origin/main..HEAD`.
 
-Pull requests are **squash-merged**: your PR becomes one commit on `develop`, and the PR title is its message. Give the PR a title that describes the whole change.
+Pull requests are **squash-merged**: your PR becomes one commit on `main`, and the PR title is its message. Give the PR a title that describes the whole change.
 
 ---
 
@@ -346,14 +345,13 @@ At release time the maintainer renames `## [Unreleased]` to the new version and 
 
 ## 🌿 Branches
 
-| Branch    | What it is                                                 | Who changes it                                              |
-| --------- | ---------------------------------------------------------- | ----------------------------------------------------------- |
-| `develop` | Where all work lands. Open your pull requests here.        | Anyone, through a reviewed pull request                     |
-| `main`    | Released code. Every npm release is published from `main`. | Only the maintainer, by fast-forwarding `main` to `develop` |
+`main` is the only long-lived branch. All work lands there through pull requests from short-lived branches (`feat/…`, `fix/…`, `docs/…`), squash-merged once their checks pass. Nobody pushes to `main` directly, the maintainer included, and history is linear: no merge commits.
 
-Nobody pushes to either branch directly, the maintainer included: every change to `develop` is a pull request, squash-merged once its checks pass. At release time the maintainer opens a pull request from `develop` into `main` and, once its checks pass, completes it by fast-forwarding `main`, so both branches keep the same commits.
+Releases are the maintainer's job:
 
-History is linear on both branches: no merge commits. A pull request into `main` from any other branch or author fails a required CI check and can't be merged. If you opened one by mistake, change its base branch to `develop` ("Edit" next to the PR title).
+1. A `release/X.Y.Z` pull request into `main` sets the version (`npm version X.Y.Z --no-git-tag-version`, which updates `package.json` and `package-lock.json`) and renames `## [Unreleased]` in `CHANGELOG.md` to `## [X.Y.Z] - YYYY-MM-DD`. It's squash-merged once CI passes.
+2. The maintainer publishes a GitHub release `vX.Y.Z` on `main`, with that changelog section as its notes. This runs `.github/workflows/release.yml`: it checks the tag is on `main` and matches `package.json`, runs the tests, signs the release files, and publishes to npm after the maintainer approves the `npm-publish` environment.
+3. The same release deploys agy-powerline.com, so the site always shows the released version: docs merged into `main` go live with the next release.
 
 ---
 
@@ -377,14 +375,13 @@ A change is acceptable when all of these hold and every required CI check passes
 ## 🚀 Submitting a Pull Request
 
 1. Pick an issue, for example one labelled [good first issue](https://github.com/wassim-azi/agy-powerline/labels/good%20first%20issue). Read its comments and the open pull requests first, and pick another one if someone has already claimed it; then comment on it before you start, so two people don't do the same work. One issue per pull request.
-2. Fork the repo and create your branch from `develop`:
+2. Fork the repo and create your branch from `main`:
    ```bash
-   git checkout develop
    git checkout -b feat/my-new-feature
    ```
 3. Make your changes and write tests.
 4. Verify that `npm test` passes with 100% success.
-5. Rebase on the latest `develop`, push your branch and open a Pull Request against **`develop`** (not `main`). Push later fixes to the same pull request.
+5. Rebase on the latest `main`, push your branch and open a Pull Request against `main`. Push later fixes to the same pull request.
 6. Attach a screenshot or terminal capture for visual changes!
 
 Bugs go in [GitHub issues](https://github.com/wassim-azi/agy-powerline/issues) (with the output of `npx agy-powerline report`); questions and ideas go in [Discussions](https://github.com/wassim-azi/agy-powerline/discussions).

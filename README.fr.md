@@ -219,7 +219,7 @@ Pour plus de détails, consultez [SECURITY.md](SECURITY.md).
 
 ## Contribution
 
-Les contributions sont les bienvenues. Commencez par lire [CONTRIBUTING.md](CONTRIBUTING.md) (installation de l’environnement de développement, architecture, ajout d’un widget ou d’un thème) et le [Code de conduite](CODE_OF_CONDUCT.md). Ouvrez vos pull requests vers la branche `develop`. Signalez les bogues dans les [issues GitHub](https://github.com/wassim-azi/agy-powerline/issues) ou partagez vos idées et commentaires dans les [discussions](https://github.com/wassim-azi/agy-powerline/discussions).
+Les contributions sont les bienvenues. Commencez par lire [CONTRIBUTING.md](CONTRIBUTING.md) (installation de l’environnement de développement, architecture, ajout d’un widget ou d’un thème) et le [Code de conduite](CODE_OF_CONDUCT.md). Ouvrez vos pull requests vers la branche `main`. Signalez les bogues dans les [issues GitHub](https://github.com/wassim-azi/agy-powerline/issues) ou partagez vos idées et commentaires dans les [discussions](https://github.com/wassim-azi/agy-powerline/discussions).
 
 Merci à toutes les personnes ayant contribué au projet :
 
