@@ -164,4 +164,4 @@ Why the measures above are enough for what agy-powerline does.
 | Resource exhaustion and hangs (CWE-400)              | Every process the statusline starts has a timeout, and the runtime exits quickly on any input.                                                                                                                     |
 | Untrusted dependencies and build tampering (CWE-829) | No runtime dependencies, actions pinned to commits, signed provenance for each release.                                                                                                                            |
 
-The tests check these properties on every change (the `security`, `robustness` and `install safety` suites, among others), and CodeQL and OpenSSF Scorecard scan the repository.
+The tests check these properties on every change (the `security`, `robustness` and `install safety` suites, among others), and CodeQL and OpenSSF Scorecard scan the repository. The latest security review and its findings are in [SECURITY-REVIEW.md](SECURITY-REVIEW.md).

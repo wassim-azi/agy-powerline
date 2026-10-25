@@ -355,6 +355,23 @@ History is linear on both branches: no merge commits. A pull request into `main`
 
 ---
 
+## 🔍 Code Review
+
+Every pull request is reviewed before it's merged; `.github/CODEOWNERS` requests the maintainer's review. A review is done on GitHub: the reviewer reads the whole diff, runs anything the CI can't check (a visual change in a real terminal, the `configure` TUI), and approves or asks for changes in comments. Pull requests are squash-merged once approved and green.
+
+The reviewer checks that:
+
+1. **The hard rules hold** ([AGENTS.md](AGENTS.md#hard-rules)): no runtime dependency, no network call, no shell, no config read from the current directory, `exec` only from the trusted install dir, untrusted text cleaned before it's printed, user settings written only through the safe helpers.
+2. **The statusline can't crash or hang**: new runtime code exits quickly on any input, and new failure paths are covered in the `robustness` suite.
+3. **Tests come with the change**: a feature has tests, a bug fix has a test that fails without it, and a snapshot diff shows only the intended change.
+4. **It works everywhere**: Linux, macOS, Windows (`cmd` and PowerShell) and WSL, with `--ascii` and `--color none`.
+5. **The docs match**: the READMEs' tables, `docs/`, `llms.txt`, `SECURITY.md` for a new process, file write or network call, and a `CHANGELOG.md` line for a user-visible change.
+6. **The pull request is one issue's worth**: no unrelated refactors or formatting, a Conventional Commits title, and the template filled in with the commands that were really run.
+
+A change is acceptable when all of these hold and every required CI check passes. Security-sensitive changes (anything in the list in point 1, `src/runtime/`, `src/lib/exec.js`, `src/lib/paths.js` or `.github/workflows/`) get a line-by-line read, not a skim.
+
+---
+
 ## 🚀 Submitting a Pull Request
 
 1. Pick an issue, for example one labelled [good first issue](https://github.com/wassim-azi/agy-powerline/labels/good%20first%20issue). Read its comments and the open pull requests first, and pick another one if someone has already claimed it; then comment on it before you start, so two people don't do the same work. One issue per pull request.
