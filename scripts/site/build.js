@@ -51,7 +51,7 @@ const {
   pngSize,
 } = require("../gallery/build");
 const { HOME_TEXT } = require("./home-text");
-const { buildConfiguratorHtml } = require("../configurator/build");
+const { buildConfiguratorPage } = require("../configurator/build");
 
 // IndexNow (Bing, Yandex, Naver, Seznam): the key file at the site root proves
 // the site is ours when .github/workflows/pages.yml announces changed pages.
@@ -948,18 +948,24 @@ function sitePages() {
       html: buildThemesHtml(),
       card: { title: "Themes for the agy statusline", label: "Themes" },
     },
-    {
-      path: "configure/",
-      sources: ["scripts/configurator/template.html", "scripts/configurator/page.js"],
-      html: buildConfiguratorHtml(),
-      card: { title: "Build your agy statusline in the browser", label: "Configurator" },
-    },
+    configuratorPage(),
     docsIndexPage(),
     guidesIndexPage(),
     widgetsPage(),
     calculatorPage(),
     ...markdownPages,
   ];
+}
+
+function configuratorPage() {
+  const { html, script } = buildConfiguratorPage();
+  return {
+    path: "configure/",
+    sources: ["scripts/configurator/template.html", "scripts/configurator/page.js"],
+    html,
+    files: { [script.path]: script.code },
+    card: { title: "Build your agy statusline in the browser", label: "Configurator" },
+  };
 }
 
 const isIndexable = (page) => !/<meta name="robots" content="noindex/.test(page.html);
@@ -986,6 +992,7 @@ function buildSite(outDir) {
   for (const page of pages) {
     write(path.join(page.path, "index.html"), page.html);
     if (page.markdown) write(path.join(page.path, "index.html.md"), page.markdown);
+    for (const [rel, content] of Object.entries(page.files || {})) write(rel, content);
   }
   write("404.html", build404Html());
   write(STYLESHEET_URL.slice(1), buildStylesheet());
