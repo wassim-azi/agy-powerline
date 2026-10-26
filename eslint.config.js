@@ -8,7 +8,7 @@ const globals = require("globals");
 
 module.exports = [
   {
-    ignores: ["node_modules/", "gallery.html", "coverage/"],
+    ignores: ["node_modules/", "gallery.html", "_site/", "coverage/"],
   },
   js.configs.recommended,
   {

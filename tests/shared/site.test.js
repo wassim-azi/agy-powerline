@@ -104,7 +104,7 @@ async function run() {
     );
 
     const unfilled = files.filter((file) =>
-      /\{\{\w+\}\}|<!--(SITE_\w+|PREVIEW|INTRO|CARDS|HERO_BAR|PALETTE_ITEMS|\w+_OPTIONS)-->|\/\* SITE_\w+ \*\//.test(
+      /\{\{\w+\}\}|<!--(SITE_\w+|PREVIEW|INTRO|CARDS|HERO_BAR|PALETTE_ITEMS|APP_SCRIPT|\w+_OPTIONS)-->|\/\* SITE_\w+ \*\//.test(
         pages[file]
       )
     );
@@ -144,6 +144,31 @@ async function run() {
       "every page's CSP names its inline scripts by hash, with no 'unsafe-inline' and no inline handlers",
       unhashed.length === 0,
       unhashed.join(", ")
+    );
+
+    // A script file a page loads is on the site, under the page's own folder
+    // (which robots.txt keeps crawlers off), with an integrity hash that matches it.
+    const badScripts = files.flatMap((file) =>
+      [...pages[file].matchAll(/<script\b[^>]*\ssrc="([^"]*)"[^>]*>/g)]
+        .filter(([tag, src]) => {
+          const target = path.join(out, src);
+          const integrity = (tag.match(/\sintegrity="sha384-([^"]+)"/) || [])[1];
+          return (
+            !/^\/configure\/[\w-]+\.js$/.test(src) ||
+            !fs.existsSync(target) ||
+            integrity !==
+              require("crypto")
+                .createHash("sha384")
+                .update(fs.readFileSync(target))
+                .digest("base64")
+          );
+        })
+        .map(([, src]) => `${file}: ${src}`)
+    );
+    record(
+      "every script file a page loads is on the site and matches its integrity hash",
+      badScripts.length === 0,
+      badScripts.join(", ")
     );
 
     record(
@@ -395,11 +420,13 @@ async function run() {
     );
 
     const robots = fs.readFileSync(path.join(out, "robots.txt"), "utf8");
+    const disallowed = [...robots.matchAll(/^Disallow: (.*)$/gm)].map((m) => m[1]);
     record(
-      "robots.txt allows everything and points to the sitemap",
+      "robots.txt allows every page, keeps crawlers off the configurator's script, and points to the sitemap",
       /^User-agent: \*$/m.test(robots) &&
-        !/^Disallow: \/\s*$/m.test(robots) &&
-        robots.includes(`Sitemap: ${SITE_URL}sitemap.xml`)
+        disallowed.join() === "/configure/*.js$" &&
+        robots.includes(`Sitemap: ${SITE_URL}sitemap.xml`),
+      disallowed.join(", ")
     );
 
     const feed = fs.readFileSync(path.join(out, "changelog.xml"), "utf8");

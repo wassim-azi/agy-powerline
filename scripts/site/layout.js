@@ -1584,12 +1584,15 @@ function injectSiteChrome(html, options) {
 // script, so a script that got into a page through a build bug wouldn't run.
 // JSON-LD isn't run and needs none. The browser hashes a script's text with its
 // line breaks read as \n, so that's what is hashed here. Tags match in any case,
-// and end tags with trailing text, the way the browser reads them.
+// and end tags with trailing text, the way the browser reads them. A page that
+// loads a script file from the site (the configurator) also allows 'self'; the
+// file's integrity attribute pins its content.
 function finishPage(html) {
   const hashes = [...html.matchAll(/<script>([\s\S]*?)<\/script[^>]*>/gi)].map(
     ([, body]) =>
       `'sha256-${crypto.createHash("sha256").update(body.replace(/\r\n?/g, "\n")).digest("base64")}'`
   );
+  if (/<script src="\/[^/]/.test(html)) hashes.push("'self'");
   const scripts = [...new Set(hashes)].join(" ") || "'none'";
   return html.replace(SITE_CSP, () =>
     SITE_CSP.replace("script-src 'unsafe-inline'", `script-src ${scripts}`)
@@ -1701,10 +1704,13 @@ ${urls}
 }
 
 // The changelog feed doubles as a second sitemap: search engines crawl feeds
-// often, which brings new releases in sooner.
+// often, which brings new releases in sooner. Crawlers stay off the
+// configurator's script: they would read the paths in it as links to pages
+// that don't exist. The page itself shows its content without it.
 function buildRobotsTxt() {
   return `User-agent: *
 Allow: /
+Disallow: /configure/*.js$
 
 Sitemap: ${SITE_URL}sitemap.xml
 Sitemap: ${SITE_URL}changelog.xml

@@ -3,13 +3,13 @@
 
 "use strict";
 
-// Builds the standalone web configurator HTML page for GitHub Pages.
-// Inlines the browser bundle, page logic and styles so the page has zero external
-// runtime requests and complies with the strict Content Security Policy.
+// Builds the web configurator page for GitHub Pages, and the script file it
+// loads from the site: the browser bundle and the page logic.
 // Usage: node scripts/configurator/build.js [output.html]
 
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 const { buildBrowserBundle } = require("./bundle");
 const { injectSiteChrome, finishPage, SITE_URL } = require("../site/layout");
 const { breadcrumbData } = require("../site/doc-page");
@@ -79,9 +79,25 @@ function buildLanguageOptions() {
   }).join("\n");
 }
 
-function buildConfiguratorHtml() {
+// The renderer and the page logic, in a file of their own rather than inline:
+// search engines read the module paths and sample paths in an inline script
+// ("./themes", "/proc/version") as links, then report them as missing pages.
+// robots.txt keeps them off this file. Its name carries a hash of its content,
+// so a cached page never loads another build's script, and the integrity
+// attribute makes the browser refuse any other content.
+function buildConfiguratorScript() {
+  // The page logic goes first: its "use strict" then covers the whole file.
+  const code = `${fs.readFileSync(path.join(__dirname, "page.js"), "utf8")}\n${buildBrowserBundle()}`;
+  const hash = (algorithm) => crypto.createHash(algorithm).update(code);
+  return {
+    path: `configure/app-${hash("sha256").digest("hex").slice(0, 12)}.js`,
+    code,
+    integrity: `sha384-${hash("sha384").digest("base64")}`,
+  };
+}
+
+function buildConfiguratorPage() {
   const templatePath = path.join(__dirname, "template.html");
-  const pageLogicPath = path.join(__dirname, "page.js");
 
   const rawTemplate = fs.readFileSync(templatePath, "utf8");
   const description =
@@ -109,8 +125,7 @@ function buildConfiguratorHtml() {
       },
     ],
   });
-  const bundleCode = buildBrowserBundle();
-  const pageLogicCode = fs.readFileSync(pageLogicPath, "utf8");
+  const script = buildConfiguratorScript();
   // The default bar, drawn at build time: crawlers see a real bar, and the
   // page doesn't shift when the script draws it again.
   const preview = renderPreview(defaultConfig(), {
@@ -119,7 +134,7 @@ function buildConfiguratorHtml() {
     colorDepth: "truecolor",
   }).html;
 
-  return finishPage(
+  const html = finishPage(
     template
       .replace("<!--PREVIEW-->", preview)
       .replace("<!--PALETTE_ITEMS-->", buildPaletteItems())
@@ -128,15 +143,20 @@ function buildConfiguratorHtml() {
       .replace("<!--CAP_OPTIONS-->", buildCapOptions())
       .replace("<!--GRADIENT_OPTIONS-->", buildGradientOptions())
       .replace("<!--LANGUAGE_OPTIONS-->", buildLanguageOptions())
-      .replace("/* BUNDLE_PLACEHOLDER */", bundleCode)
-      .replace("/* PAGE_LOGIC_PLACEHOLDER */", pageLogicCode)
+      .replace(
+        "<!--APP_SCRIPT-->",
+        `<script src="/${script.path}" integrity="${script.integrity}"></script>`
+      )
   );
+  return { html, script };
 }
 
+// Writes the page to dest and its script next to it, where /configure/ serves it.
 function buildConfigurator(dest = out) {
-  const html = buildConfiguratorHtml();
+  const { html, script } = buildConfiguratorPage();
   fs.mkdirSync(path.dirname(dest), { recursive: true });
   fs.writeFileSync(dest, html, "utf8");
+  fs.writeFileSync(path.join(path.dirname(dest), path.basename(script.path)), script.code, "utf8");
   const sizeKb = (fs.statSync(dest).size / 1024).toFixed(0);
   console.log(`wrote ${dest} (${sizeKb} KB)`);
   return dest;
@@ -148,7 +168,8 @@ if (require.main === module) {
 
 module.exports = {
   buildConfigurator,
-  buildConfiguratorHtml,
+  buildConfiguratorPage,
+  buildConfiguratorScript,
   buildPaletteItems,
   buildThemeOptions,
   buildPresetOptions,

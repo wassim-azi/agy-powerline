@@ -77,6 +77,24 @@ async function run() {
         /<footer class="site-footer">/.test(html)
     );
 
+    // Search engines read paths in an inline script as links to pages: the
+    // renderer and its sample paths stay in the script file.
+    const scriptFile = (html.match(/<script src="\/configure\/(app-[\da-f]+\.js)"/) || [])[1];
+    record(
+      "the configurator loads its script from a file next to the page",
+      Boolean(scriptFile) && fs.existsSync(path.join(path.dirname(out), scriptFile)),
+      scriptFile
+    );
+    const inlineScripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+    const pathLike = inlineScripts
+      .join("\n")
+      .match(/["'`](?:\.\.?\/|\/(?:home|proc|tmp)\b)[^"'`]*/g);
+    record(
+      "the configurator's inline scripts name no module or file paths",
+      !pathLike,
+      (pathLike || []).join(", ")
+    );
+
     record(
       "the configurator shows the default bar before its script runs",
       /<div class="screen" id="previewOutput">\s*\S/.test(html)

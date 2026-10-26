@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Search engines no longer report missing pages such as agy-powerline.com/configure/widget-style or /proc/version: the configurator's script, whose module and sample paths they read as links, is now a file of its own that robots.txt keeps them off
+
 ## [1.9.0] - 2026-10-25
 
 ### Added
