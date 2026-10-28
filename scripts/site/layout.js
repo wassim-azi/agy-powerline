@@ -441,10 +441,28 @@ const SHARED_CSS = `
         color: var(--fg);
         background: var(--surface-2);
       }
+      /* Flags are backgrounds, not images: the link's text already names the
+         language. Chrome fetches the backgrounds of a closed <details> unless
+         its panel is display: none (below). */
       .flag {
         display: block;
+        flex: none;
         width: 20px;
         height: 20px;
+        background-size: 100% 100%;
+        background-repeat: no-repeat;
+      }
+      .flag-en {
+        background-image: url("/img/flag-en.png");
+      }
+      .flag-fr {
+        background-image: url("/img/flag-fr.png");
+      }
+      .flag-es {
+        background-image: url("/img/flag-es.png");
+      }
+      .lang-menu:not([open]) > .lang-menu-panel {
+        display: none;
       }
       .lang-menu-panel {
         position: absolute;
@@ -1386,7 +1404,7 @@ function buildHeader({ currentPage = "", lang = "en" } = {}) {
       )
       .join("\n            ");
   const current = siteLanguage(lang);
-  const flag = (l) => `<img class="flag" src="/img/flag-${l}.png" width="20" height="20" alt="" />`;
+  const flag = (l) => `<span class="flag flag-${l}" aria-hidden="true"></span>`;
   const languageLinks = SITE_LANGUAGES.map(
     (l) =>
       `<a class="lang-link" href="${l.href}" hreflang="${l.lang}" lang="${l.lang}"${l.lang === current.lang ? ' aria-current="true"' : ""}>${flag(l.lang)}${esc(l.label)}</a>`

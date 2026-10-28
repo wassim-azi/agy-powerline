@@ -540,6 +540,7 @@ function docsIndexPage() {
 function guidesIndexPage() {
   const body = `<h1>Guides</h1>
         <p class="lede">Step-by-step guides for Antigravity CLI's status bar: reading your quotas, setting up a status line, fixing symbols, and running a workshop.</p>
+        <h2 id="all-guides">All guides</h2>
         ${cardList(GUIDES.map((g) => [`/${g.path}`, g.name, g.description]))}
         <p>Looking for every setting instead? See the <a href="/docs/">docs</a>.</p>`;
   return {

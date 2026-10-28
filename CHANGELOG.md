@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Site audits no longer report missing alt text and offscreen images to defer on every page of agy-powerline.com: the language menu's flags are drawn by the stylesheet, and a closed menu doesn't load them
+- agy-powerline.com's guides page has a section heading over its list of guides, which site audits reported missing
 - Search engines no longer report missing pages such as agy-powerline.com/configure/widget-style or /proc/version: the configurator's script, whose module and sample paths they read as links, is now a file of its own that robots.txt keeps them off
 
 ## [1.9.0] - 2026-10-25
