@@ -202,6 +202,10 @@ async function run() {
       badOutline.join(", ")
     );
 
+    // Site audits report an indexable page with no h2 as missing a section.
+    const noH2 = indexable.filter((file) => !/<h2[\s>]/.test(pages[file]));
+    record("every indexable page has an h2", noH2.length === 0, noH2.join(", "));
+
     // Accessibility of the Markdown pages: tables are named and their header
     // cells say they head columns; a code block wider than the page can be
     // scrolled with the keyboard; images keep their space while they load.

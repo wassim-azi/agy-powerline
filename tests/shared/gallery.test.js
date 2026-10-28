@@ -16,6 +16,7 @@ const { ansiToHtml, ansiRuns } = require("../../scripts/site/ansi");
 const { styleClasses } = require("../../scripts/site/style-classes");
 const { stripTags } = require("../../scripts/site/markdown");
 const { HOME_TEXT } = require("../../scripts/site/home-text");
+const { SHARED_CSS } = require("../../scripts/site/layout");
 const { renderStatusline, sampleData, defaultConfig } = require("../../src/lib/shared");
 const { FLEX_GAP_START, FLEX_GAP_END } = require("../../src/lib/layouts/pills");
 
@@ -220,15 +221,19 @@ async function run() {
   );
 
   // The header's language menu lists every home page, with a flag, and marks
-  // the page's own language.
+  // the page's own language. The flags are CSS backgrounds: an <img> with an
+  // empty alt inside a link is what site audits report as missing alt text.
   const langMenu = (page) =>
     (page.match(/<details class="lang-menu">([\s\S]*?)<\/details>/) || [])[1] || "";
   const menuOk = (page, lang) =>
     ["en", "fr", "es"].every(
       (l) =>
         langMenu(page).includes(`hreflang="${l}" lang="${l}"`) &&
-        langMenu(page).includes(`src="/img/flag-${l}.png"`)
-    ) && new RegExp(`hreflang="${lang}" lang="${lang}" aria-current="true"`).test(langMenu(page));
+        langMenu(page).includes(`class="flag flag-${l}"`) &&
+        SHARED_CSS.includes(`.flag-${l} {\n        background-image: url("/img/flag-${l}.png");`)
+    ) &&
+    !langMenu(page).includes("<img") &&
+    new RegExp(`hreflang="${lang}" lang="${lang}" aria-current="true"`).test(langMenu(page));
   record(
     "every home page has a language menu in its header, with its own language marked",
     menuOk(html, "en") && menuOk(fr, "fr") && menuOk(es, "es")
