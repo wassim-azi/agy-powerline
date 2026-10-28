@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Pills' meter dots stand out on every pill: filled dots take the pill's text color and empty ones a fainter shade of it, at 3:1 contrast or more, where light dots used to fade on the bright pills of dark themes and dark dots on the deep pills of light themes (#168)
+
 ## [1.9.1] - 2026-10-28
 
 ### Fixed

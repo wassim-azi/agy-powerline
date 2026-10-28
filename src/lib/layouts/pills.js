@@ -17,6 +17,7 @@ const {
   getActiveDepth,
   gradientColors,
   readableText,
+  withContrast,
 } = require("../colors");
 const { gradientStops } = require("../themes");
 const { pickGlyph, glyphChar } = require("../powerline");
@@ -79,7 +80,8 @@ function fillMeter(pct, width, fillColor, emptyColor, segmentColor, pace = {}) {
   // pips, the default, needs a Unicode font: ASCII mode keeps the cells.
   const pips = pace.style === "pips";
   if (pips && !pace.ascii && getActiveDepth() !== "none") {
-    return pipMeter(used, marker, width, fillColor, emptyColor) + bg(segmentColor);
+    const track = withContrast(segmentColor, segmentColor, PIP_CONTRAST, pace.textColor);
+    return pipMeter(used, marker, width, pace.textColor, track) + bg(segmentColor);
   }
   if (METER_STYLES[pace.style] && !(pips && pace.ascii)) {
     return glyphMeter(used, marker, width, METER_STYLES[pace.style], pace);
@@ -101,9 +103,14 @@ function fillMeter(pct, width, fillColor, emptyColor, segmentColor, pace = {}) {
   return meter + bg(segmentColor);
 }
 
-// Small dots on the pill's own color: the filled ones in the light fill color,
-// the rest in the dark track color, the same pair cells use. The pace marker
-// is a larger dot in the other color, so nothing in the meter is a line.
+// Small dots on the pill's own color: the filled ones in the pill's text color,
+// the rest in the pill's color moved toward it until they reach 3:1 (WCAG's
+// minimum for graphics). A light fill and a dark track can't both stand out
+// on every pill: on a bright one the light dots fade, on a deep one the dark
+// ones do. The pace marker is a larger dot in the other color, so nothing in
+// the meter is a line.
+const PIP_CONTRAST = 3;
+
 function pipMeter(used, marker, width, fillColor, emptyColor) {
   let meter = "";
   let color = null;
