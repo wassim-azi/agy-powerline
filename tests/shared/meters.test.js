@@ -14,7 +14,13 @@ const {
 const { METER_STYLES, METER_STYLE_IDS } = require("../../src/lib/widget-style");
 const { fillMeter } = require("../../src/lib/layouts/pills");
 const { renderDotMeter } = require("../../src/lib/layouts/lines");
-const { getActiveDepth, setActiveDepth } = require("../../src/lib/colors");
+const {
+  getActiveDepth,
+  setActiveDepth,
+  contrastRatio,
+  withContrast,
+} = require("../../src/lib/colors");
+const { THEME_ORDER, GRADIENT_ORDER } = require("../../src/lib/themes");
 const { visibleWidth } = require("../../src/lib/formatters");
 
 const METER_WIDGETS = [
@@ -126,17 +132,50 @@ async function run() {
   const previousDepth = getActiveDepth();
   setActiveDepth("truecolor");
   try {
-    // 50% filled, marker in cell 10: light dots, then dark ones, a larger light dot.
-    const pips = fillMeter(50, 12, [1, 1, 1], [2, 2, 2], [3, 3, 3], {
+    // 50% filled, marker in cell 10, on a bright pill with dark text: dots in
+    // the text color, then track dots, a larger dot in the text color.
+    const pill = [204, 167, 0];
+    const text = [22, 22, 28];
+    const track = withContrast(pill, pill, 3, text);
+    const pips = fillMeter(50, 12, [1, 1, 1], [2, 2, 2], pill, {
       style: "pips",
       elapsedPct: 75,
+      textColor: text,
     });
+    const t = (c) => `\x1b[38;2;${c.join(";")}m`;
     record(
-      "Pills' default meter is small dots in the fill and track colors, the marker a larger dot",
-      pips.startsWith(
-        "\x1b[38;2;1;1;1m••••••\x1b[38;2;2;2;2m•••\x1b[38;2;1;1;1m●\x1b[38;2;2;2;2m••"
-      ) && !/\x1b\[48;2;[12];/.test(pips),
+      "Pills' default meter is small dots in the text and track colors, the marker a larger dot",
+      pips.startsWith(`${t(text)}••••••${t(track)}•••${t(text)}●${t(track)}••`) &&
+        contrastRatio(track, pill) >= 3 &&
+        !/\x1b\[48;2;[12];/.test(pips),
       pips.replace(/\x1b/g, "\\e")
+    );
+
+    // Every pip, filled or not, stands out from its pill (3:1, WCAG's minimum
+    // for graphics) with every theme and gradient: a light fill fades on the
+    // bright pills of dark themes and a dark track on the deep ones of light themes.
+    const faint = [];
+    for (const gradient of [undefined, ...GRADIENT_ORDER]) {
+      for (const theme of THEME_ORDER) {
+        const config = { ...defaultConfig(), theme, ...(gradient && { gradient }) };
+        const out = renderStatusline(sampleData(), config, { color: "truecolor", env: {} });
+        let pillColor = null;
+        let dotColor = null;
+        for (const m of out.matchAll(/\x1b\[(48|38);2;(\d+);(\d+);(\d+)m|[•●]/g)) {
+          if (m[1] === "48") {
+            pillColor = m.slice(2, 5).map(Number);
+          } else if (m[1] === "38") {
+            dotColor = m.slice(2, 5).map(Number);
+          } else if (contrastRatio(dotColor, pillColor) < 3) {
+            faint.push(`${gradient || "-"} ${theme}: ${dotColor} on ${pillColor}`);
+          }
+        }
+      }
+    }
+    record(
+      "every Pills pip reaches 3:1 against its pill with every theme and gradient",
+      faint.length === 0,
+      [...new Set(faint)].slice(0, 5).join("; ")
     );
   } finally {
     setActiveDepth(previousDepth);

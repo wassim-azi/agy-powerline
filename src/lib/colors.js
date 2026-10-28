@@ -303,12 +303,17 @@ function readableText(background, preferred, fallbacks) {
 }
 
 // The color moved toward white (on a dark background) or black (on a light
-// one) just far enough to reach the minimum contrast.
-function withContrast(color, background, min = MIN_CONTRAST) {
+// one), or toward the given target, just far enough to reach the minimum
+// contrast.
+function withContrast(
+  color,
+  background,
+  min = MIN_CONTRAST,
+  target = luminance(background) < 0.5 ? [255, 255, 255] : [0, 0, 0]
+) {
   if (contrastRatio(color, background) >= min) {
     return color;
   }
-  const target = luminance(background) < 0.5 ? [255, 255, 255] : [0, 0, 0];
   for (let step = 1; step <= 20; step++) {
     const moved = mix(color, target, step / 20);
     if (contrastRatio(moved, background) >= min) {

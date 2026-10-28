@@ -148,7 +148,7 @@ Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"m
 
 | Id                  | Filled                       | Empty                  | Example (50%)           |
 | ------------------- | ---------------------------- | ---------------------- | ----------------------- |
-| `pips` (Pills' own) | `•` in a light color         | `•` in a dark color    | the default Pills meter |
+| `pips` (Pills' own) | `•` in the pill's text color | `•` in a fainter color | the default Pills meter |
 | `cells`             | background color             | darker background      | solid colored blocks    |
 | `dots` (Lines' own) | `●`                          | `●` in a track color   | the default Lines meter |
 | `blocks`            | `█`                          | `░`                    | `█████░░░░░`            |
@@ -162,7 +162,7 @@ Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"m
 | `ramp`              | `█`, ok to caution to danger | `░` in the track color | `█████░░░░░`            |
 
 - `cells` exists only in Pills; Lines draws `dots` and Classic `blocks` instead. ASCII mode draws `pips` as `cells`. An unknown id is ignored and each layout draws its own.
-- `pips` marks the pace with a larger dot `●` instead of `┃`. In Pills it draws on the pill's color with the light fill and dark track colors `cells` uses.
+- `pips` marks the pace with a larger dot `●` instead of `┃`. In Pills it draws on the pill's color: filled dots in the pill's text color, empty ones in the pill's color moved toward it until they reach a 3:1 contrast, so both show on bright and deep pills alike.
 - `ramp` shades each filled cell by its place along the meter, from the theme's ok color through caution to danger, so a fuller meter ends in a warmer color; `rings` keeps the fill's color and fades the empty rings toward the track. Both show their colors in Lines and Classic.
 - In Pills the other glyph styles draw on the pill's color: filled glyphs in the pill's text color, empty ones dimmed. In Lines the filled part keeps its ok, caution or danger color and the empty part the track color.
 - In Classic every style draws its empty part in the same color as the fill, with a thin `│` as the pace marker.
