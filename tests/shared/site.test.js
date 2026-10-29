@@ -35,13 +35,14 @@ function htmlFiles(dir, prefix = "") {
 }
 
 // What a page loads from elsewhere: src/srcset, stylesheets and icons, CSS
-// url() and @import. Links people click (<a href>) and the canonical and
-// alternate URLs only name pages, so they don't count.
+// url() and @import. Google Analytics (gtag.js) is allowed on the site;
+// links people click (<a href>) and the canonical and alternate URLs only name
+// pages, so they don't count.
 function externalLoads(html) {
   const remote = (url) => /^(?:https?:)?\/\//i.test(url.trim());
   const found = [];
   for (const m of html.matchAll(/\s(?:src|srcset)="([^"]*)"/g)) {
-    if (remote(m[1])) found.push(m[1]);
+    if (remote(m[1]) && !m[1].startsWith("https://www.googletagmanager.com/")) found.push(m[1]);
   }
   for (const m of html.matchAll(/<link\b[^>]*>/g)) {
     const rel = (m[0].match(/\brel="([^"]*)"/) || [])[1] || "";
@@ -112,7 +113,7 @@ async function run() {
 
     const noCsp = files.filter(
       (file) =>
-        !/<meta http-equiv="Content-Security-Policy" content="default-src 'none';[^"]*img-src 'self' data:; font-src 'self';/.test(
+        !/<meta http-equiv="Content-Security-Policy" content="default-src 'none';[^"]*img-src 'self' data:(?: https:\/\/\*\.(?:google-analytics|googletagmanager)\.com)*; font-src 'self';/.test(
           pages[file]
         )
     );
@@ -147,10 +148,12 @@ async function run() {
     );
 
     // A script file a page loads is on the site, under the page's own folder
-    // (which robots.txt keeps crawlers off), with an integrity hash that matches it.
+    // (which robots.txt keeps crawlers off), with an integrity hash that matches it,
+    // or Google Analytics' gtag.js from www.googletagmanager.com.
     const badScripts = files.flatMap((file) =>
       [...pages[file].matchAll(/<script\b[^>]*\ssrc="([^"]*)"[^>]*>/g)]
         .filter(([tag, src]) => {
+          if (/^https:\/\/www\.googletagmanager\.com\//.test(src)) return false;
           const target = path.join(out, src);
           const integrity = (tag.match(/\sintegrity="sha384-([^"]+)"/) || [])[1];
           return (
