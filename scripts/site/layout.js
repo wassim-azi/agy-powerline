@@ -1657,7 +1657,7 @@ function build404Html() {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Nothing loads from other sites: the page is its own inline style and script. -->
+    <!-- Only Google Analytics loads from another site: the rest is the page's own inline style and script. -->
     <!--SITE_CSP-->
     <!--SITE_HEAD-->
     <style>

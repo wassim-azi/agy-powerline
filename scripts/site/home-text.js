@@ -163,7 +163,7 @@ const HOME_TEXT = {
       ],
       [
         "Does it send any data anywhere?",
-        'No. agy-powerline makes no network requests and has no telemetry or analytics. Problems go to a local log you can read, clear or turn off. <a href="/security/">Security &amp; Privacy</a> lists every file it reads and writes.',
+        'No. agy-powerline makes no network requests and has no telemetry or analytics. Problems go to a local log you can read, clear or turn off. <a href="/security/">Security &amp; Privacy</a> lists every file it reads and writes. Only this website uses Google Analytics, to count visits (<a href="/privacy/">Privacy</a>).',
       ],
       [
         "Does it slow agy down?",
@@ -347,7 +347,7 @@ const HOME_TEXT = {
       ],
       [
         "Envoie-t-elle des données quelque part ?",
-        'Non. agy-powerline ne fait aucune requête réseau et n\'a ni télémétrie ni analytics. Les problèmes vont dans un journal local que vous pouvez lire, vider ou désactiver. <a href="/security/">Sécurité et confidentialité</a> (en anglais) liste chaque fichier lu et écrit.',
+        'Non. agy-powerline ne fait aucune requête réseau et n\'a ni télémétrie ni analytics. Les problèmes vont dans un journal local que vous pouvez lire, vider ou désactiver. <a href="/security/">Sécurité et confidentialité</a> (en anglais) liste chaque fichier lu et écrit. Seul ce site utilise Google Analytics, pour compter les visites (<a href="/privacy/">Confidentialité</a>, en anglais).',
       ],
       [
         "Ralentit-elle agy ?",
@@ -531,7 +531,7 @@ const HOME_TEXT = {
       ],
       [
         "¿Envía datos a algún sitio?",
-        'No. agy-powerline no hace ninguna petición de red y no tiene telemetría ni analíticas. Los problemas van a un registro local que puedes leer, vaciar o desactivar. <a href="/security/">Seguridad y privacidad</a> (en inglés) enumera cada archivo que lee y escribe.',
+        'No. agy-powerline no hace ninguna petición de red y no tiene telemetría ni analíticas. Los problemas van a un registro local que puedes leer, vaciar o desactivar. <a href="/security/">Seguridad y privacidad</a> (en inglés) enumera cada archivo que lee y escribe. Solo este sitio usa Google Analytics, para contar las visitas (<a href="/privacy/">Privacidad</a>, en inglés).',
       ],
       [
         "¿Hace más lento a agy?",
