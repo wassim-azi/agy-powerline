@@ -140,13 +140,13 @@ const MARKDOWN_PAGES = [
   },
   {
     source: "scripts/site/content/privacy.md",
-    card: { title: "No cookies, no analytics, no telemetry", label: "Privacy" },
+    card: { title: "Analytics on the website, none in the tool", label: "Privacy" },
     path: "privacy/",
     name: "Privacy",
     edit: false,
     title: "Privacy - agy-powerline",
     description:
-      "agy-powerline.com sets no cookies, has no analytics and loads nothing from other sites, and the statusline makes no network calls. What is stored, and where.",
+      "agy-powerline.com uses Google Analytics to count visits; the statusline and the CLI make no network calls and have no analytics. What is collected, and where.",
   },
 ];
 
@@ -203,7 +203,7 @@ const LINKS = {
   "docs/payload/": ["Payload reference", "What agy sends to a status line."],
   "faq/": ["FAQ", "Short answers to the common questions."],
   "security/": ["Security", "What runs on your machine."],
-  "privacy/": ["Privacy", "No cookies, analytics or telemetry."],
+  "privacy/": ["Privacy", "Site analytics only, no telemetry in the tool."],
   "changelog/": ["Changelog", "Release notes for every version."],
   "about/": ["About", "Who builds it, and why."],
   "configure/": ["Configurator", "Build your bar in the browser."],

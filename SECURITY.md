@@ -6,7 +6,7 @@ This page lists exactly what `agy-powerline` does on your machine, so you can ch
 
 ## No network, no telemetry
 
-- No analytics, tracking or remote crash reporting. The code makes no network requests.
+- No analytics, tracking or remote crash reporting in the package (the statusline and the CLI). The code makes no network requests. Only the website uses analytics ([The website](#the-website)).
 - Problems are written to a local log file (below) that you can read, clear or turn off. It only leaves your machine if you attach it to an issue yourself.
 - The only outbound action is opening the project's GitHub page in your browser, and only when you press `g` in `configure`.
 
@@ -32,7 +32,7 @@ The CLI itself (`npx agy-powerline ...`) additionally:
 
 ## The website
 
-[agy-powerline.com](https://agy-powerline.com/) is a static site built from this repo (`scripts/site/`) and served by GitHub Pages. Its pages load nothing from other sites (a Content Security Policy allows only the scripts each page was built with, named by their hash; the configurator's script is a file on the site whose content its integrity hash pins, the site's own stylesheet and inline styles, and images and the Inter font served from the site itself), set no cookies and run no analytics. The browser configurator and the quota calculator work in your browser and send nothing; the only thing a page stores is your System / Light / Dark choice, in your browser's local storage. Details: [Privacy](https://agy-powerline.com/privacy/).
+[agy-powerline.com](https://agy-powerline.com/) is a static site built from this repo (`scripts/site/`) and served by GitHub Pages. It uses Google Analytics 4: every page loads Google's `gtag.js` from `www.googletagmanager.com`, which sets Google Analytics cookies and sends page views to Google Analytics. This is only on the website; the package never loads it and makes no network calls. Apart from Google Analytics, the pages load nothing from other sites (a Content Security Policy allows only the scripts each page was built with, named by their hash, and Google Analytics' hosts; the configurator's script is a file on the site whose content its integrity hash pins, the site's own stylesheet and inline styles, and images and the Inter font served from the site itself). The browser configurator and the quota calculator work in your browser and send nothing; besides the Google Analytics cookies, the only thing a page stores is your System / Light / Dark choice, in your browser's local storage. Details: [Privacy](https://agy-powerline.com/privacy/).
 
 After each deploy, the Pages workflow (`.github/workflows/pages.yml`) sends the site's page addresses to IndexNow (`api.indexnow.org`), so search engines that use it see changed pages sooner. That runs in GitHub Actions, sends only those public addresses, and is not part of the package.
 

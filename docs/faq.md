@@ -20,7 +20,7 @@ Once, after `init`, so agy reads the new `statusLine` setting. After that, chang
 
 ## Does it send any data anywhere?
 
-No. agy-powerline makes no network requests and has no telemetry or analytics. Problems are written to a local log you can read, clear or turn off; it only leaves your computer if you attach it to an issue yourself. [Security & Privacy](../SECURITY.md) lists every file it reads and writes.
+No. agy-powerline makes no network requests and has no telemetry or analytics. Problems are written to a local log you can read, clear or turn off; it only leaves your computer if you attach it to an issue yourself. [Security & Privacy](../SECURITY.md) lists every file it reads and writes. Only the website, agy-powerline.com, uses Google Analytics to count visits ([Privacy](https://agy-powerline.com/privacy/)).
 
 ## Does it slow agy down?
 

@@ -24,13 +24,23 @@ const AUTHOR_URL = "https://github.com/wassim-azi";
 // Every indexable page has its own 1200×630 share card, drawn by
 // scripts/site/images.js into assets/site/og/<slug>.jpg.
 const OG_SIZE = { width: 1200, height: 630 };
-// Nothing loads from other sites. 'self' lets the stylesheet, the font, the
-// icons, the manifest and tools that read robots.txt or llms.txt from inside the
-// page reach this site. finishPage() swaps 'unsafe-inline' in script-src for the
-// hashes of the page's own scripts. Styles stay inline-able: the configurator
-// draws its preview with style attributes in the browser.
-const SITE_CSP =
-  "default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; manifest-src 'self'; base-uri 'none'; form-action 'none'";
+// Google Analytics 4 for agy-powerline.com (stream "agy-powerline.com", ID
+// 16232023254). Only the website loads it; the statusline and the CLI make no
+// network calls.
+const GA_MEASUREMENT_ID = "G-Z5XFJVH00H";
+// The hosts Google lists for a GA4 tag behind a CSP: gtag.js comes from
+// googletagmanager.com, and hits go to (region1.)google-analytics.com and
+// analytics.google.com, by fetch/sendBeacon or, as a fallback, an image.
+const GA_SCRIPT_SRC = "https://www.googletagmanager.com";
+const GA_CONNECT_SRC =
+  "https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com";
+const GA_IMG_SRC = "https://*.google-analytics.com https://*.googletagmanager.com";
+// Everything else loads from the site only. 'self' lets the stylesheet, the
+// font, the icons, the manifest and tools that read robots.txt or llms.txt from
+// inside the page reach this site. finishPage() swaps 'unsafe-inline' in
+// script-src for the hashes of the page's own scripts. Styles stay inline-able:
+// the configurator draws its preview with style attributes in the browser.
+const SITE_CSP = `default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'unsafe-inline' ${GA_SCRIPT_SRC}; img-src 'self' data: ${GA_IMG_SRC}; font-src 'self'; connect-src 'self' ${GA_CONNECT_SRC}; manifest-src 'self'; base-uri 'none'; form-action 'none'`;
 const FONT_URL = "/fonts/inter-latin.woff2";
 // The styles every page shares (SHARED_CSS), in one file the browser keeps
 // between pages.
@@ -1381,6 +1391,22 @@ function buildHead({
           }
         } catch {}
       })();
+    </script>${standalone ? "" : analyticsTags()}`;
+}
+
+// The Google Analytics tag, on every page of the site. A standalone page is a
+// local file (npm run gallery), not a visit, so it gets none. The inline part
+// is hashed into the page's CSP by finishPage() like the site's other scripts.
+function analyticsTags() {
+  return `
+    <script async src="${GA_SCRIPT_SRC}/gtag/js?id=${GA_MEASUREMENT_ID}"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag("js", new Date());
+      gtag("config", "${GA_MEASUREMENT_ID}");
     </script>`;
 }
 
@@ -1631,7 +1657,7 @@ function build404Html() {
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- Nothing loads from other sites: the page is its own inline style and script. -->
+    <!-- Only Google Analytics loads from another site: the rest is the page's own inline style and script. -->
     <!--SITE_CSP-->
     <!--SITE_HEAD-->
     <style>
