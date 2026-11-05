@@ -79,12 +79,12 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 ### 主题
 
-| 终端背景   | 主题                                                                                                                                                                                    |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 深色       | `dark-aurora`（默认）、`dark-ocean`、`dark-ember`、`dark-forest`、`dark-neon`、`dark-mono`、`dark-nocturne`、`dark-onyx`、`dark-metro`、`dark-macchiato`、`dark-nord`、`dark-rose-pine` |
-| 浅色       | `light-paper`、`light-sky`、`light-sunset`、`light-cream`、`light-gruvbox`、`light-tokyo-night`                                                                                         |
-| 色盲友好   | `colorblind-dark`、`colorblind-light`                                                                                                                                                   |
-| 自定义颜色 | `custom`（[方法](docs/configuration.md#custom-theme)）                                                                                                                                  |
+| 终端背景   | 主题                                                                                                                                                                                                                                       |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| 深色       | `dark-aurora`（默认）、`dark-ocean`、`dark-ember`、`dark-forest`、`dark-neon`、`dark-mono`、`dark-nocturne`、`dark-onyx`、`dark-metro`、`dark-macchiato`、`dark-catppuccin-frappe`、`dark-catppuccin-mocha`、`dark-nord`、`dark-rose-pine` |
+| 浅色       | `light-paper`、`light-sky`、`light-sunset`、`light-cream`、`light-gruvbox`、`light-tokyo-night`                                                                                                                                            |
+| 色盲友好   | `colorblind-dark`、`colorblind-light`                                                                                                                                                                                                      |
+| 自定义颜色 | `custom`（[方法](docs/configuration.md#custom-theme)）                                                                                                                                                                                     |
 
 用 `npx agy-powerline theme --gallery` 预览所有主题。
 
