@@ -92,12 +92,12 @@ Comienza desde un preajuste y luego ajústalo:
 
 ### Temas
 
-| Fondo de la terminal | Temas                                                                                                                                                                                            |
-| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Oscuro               | `dark-aurora` (predeterminado), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro`, `dark-macchiato`, `dark-nord`, `dark-rose-pine` |
-| Claro                | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`, `light-tokyo-night`                                                                                                  |
-| Apto para daltonismo | `colorblind-dark`, `colorblind-light`                                                                                                                                                            |
-| Tus propios colores  | `custom` ([cómo hacerlo](docs/configuration.md#custom-theme))                                                                                                                                    |
+| Fondo de la terminal | Temas                                                                                                                                                                                                                                               |
+| -------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Oscuro               | `dark-aurora` (predeterminado), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro`, `dark-macchiato`, `dark-catppuccin-frappe`, `dark-catppuccin-mocha`, `dark-nord`, `dark-rose-pine` |
+| Claro                | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`, `light-tokyo-night`                                                                                                                                                     |
+| Apto para daltonismo | `colorblind-dark`, `colorblind-light`                                                                                                                                                                                                               |
+| Tus propios colores  | `custom` ([cómo hacerlo](docs/configuration.md#custom-theme))                                                                                                                                                                                       |
 
 Previsualízalos todos en la [galería de temas](https://agy-powerline.com/themes/) o con `npx agy-powerline theme --gallery`. Para un degradado de color continuo en cada fila, añade un gradiente: `npx agy-powerline gradient <name>` con `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono` o tus propios colores ([cómo hacerlo](docs/configuration.md#gradients)).
 

@@ -12,7 +12,7 @@ const { parseColor, parseGradientStops, luminance } = require("./colors");
 //                 protanopia, deuteranopia and tritanopia
 // Most dark-* and light-* colors come from VS Code's default themes (Dark+
 // and Light+ syntax, git decorations, warning/error and terminal colors);
-// nocturne, onyx, metro, macchiato, nord, rose-pine, cream, gruvbox and tokyo-night take their
+// nocturne, onyx, metro, macchiato, frappé, mocha, nord, rose-pine, cream, gruvbox and tokyo-night take their
 // palettes from community themes (credited below). A few colors are adjusted where the
 // checks below need it: darkened or lightened for contrast, and gitDirty
 // moved toward orange so a dirty branch never looks like the caution state.
@@ -193,6 +193,48 @@ const THEMES = {
     caution: "#eed49f",
     warn: "#ed8796",
   }),
+
+  // Palette from Catppuccin Frappé (catppuccin.com, MIT).
+  "dark-catppuccin-frappe": theme(
+    "dark",
+    "Dark Catppuccin Frappe",
+    "Pastel mauve, teal, peach and green",
+    {
+      text: DARK_TEXT,
+      track: "#51576d",
+      model: "#ca9ee6",
+      fiveHour: "#a6d189",
+      weekly: "#85c1dc",
+      thirdParty: "#ef9f76",
+      context: "#8caaee",
+      git: "#81c8be",
+      gitDirty: "#eebebe",
+      meta: "#b5bfe2",
+      caution: "#e5c890",
+      warn: "#e78284",
+    }
+  ),
+
+  // Palette from Catppuccin Mocha (catppuccin.com, MIT).
+  "dark-catppuccin-mocha": theme(
+    "dark",
+    "Dark Catppuccin Mocha",
+    "Pastel mauve, teal, peach and green",
+    {
+      text: DARK_TEXT,
+      track: "#45475a",
+      model: "#cba6f7",
+      fiveHour: "#a6e3a1",
+      weekly: "#74c7ec",
+      thirdParty: "#fab387",
+      context: "#89b4fa",
+      git: "#94e2d5",
+      gitDirty: "#f2cdcd",
+      meta: "#bac2de",
+      caution: "#f9e2af",
+      warn: "#f38ba8",
+    }
+  ),
 
   // Palette from Nord (nordtheme.com, MIT).
   "dark-nord": theme("dark", "Dark Nord", "Arctic frost blues with aurora accents", {
@@ -395,6 +437,8 @@ const THEME_ORDER = [
   "dark-onyx",
   "dark-metro",
   "dark-macchiato",
+  "dark-catppuccin-frappe",
+  "dark-catppuccin-mocha",
   "dark-nord",
   "dark-rose-pine",
   "light-paper",

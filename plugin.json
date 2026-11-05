@@ -1,5 +1,5 @@
 {
   "$schema": "https://antigravity.google/schemas/v1/plugin.json",
   "name": "agy-powerline",
-  "description": "Powerline statusline for agy: quotas, context, git and more, with 44 widgets and 20 themes"
+  "description": "Powerline statusline for agy: quotas, context, git and more, with 44 widgets and 22 themes"
 }

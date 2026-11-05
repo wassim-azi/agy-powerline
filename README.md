@@ -90,12 +90,12 @@ Start from a preset, then adjust:
 
 ### Themes
 
-| Terminal background | Themes                                                                                                                                                                                    |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Dark                | `dark-aurora` (default), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro`, `dark-macchiato`, `dark-nord`, `dark-rose-pine` |
-| Light               | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`, `light-tokyo-night`                                                                                           |
-| Color-blind safe    | `colorblind-dark`, `colorblind-light`                                                                                                                                                     |
-| Your own colors     | `custom` ([how](docs/configuration.md#custom-theme))                                                                                                                                      |
+| Terminal background | Themes                                                                                                                                                                                                                                       |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Dark                | `dark-aurora` (default), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro`, `dark-macchiato`, `dark-catppuccin-frappe`, `dark-catppuccin-mocha`, `dark-nord`, `dark-rose-pine` |
+| Light               | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`, `light-tokyo-night`                                                                                                                                              |
+| Color-blind safe    | `colorblind-dark`, `colorblind-light`                                                                                                                                                                                                        |
+| Your own colors     | `custom` ([how](docs/configuration.md#custom-theme))                                                                                                                                                                                         |
 
 Preview them all in the [theme gallery](https://agy-powerline.com/themes/) or with `npx agy-powerline theme --gallery`. For one color sweep across each row, add a gradient: `npx agy-powerline gradient <name>` with `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono` or your own colors ([how](docs/configuration.md#gradients)).
 
