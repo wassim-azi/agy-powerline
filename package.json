@@ -77,9 +77,9 @@
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",
-    "eslint": "10.13.0",
+    "eslint": "10.14.0",
     "fast-check": "4.10.2",
-    "globals": "17.13.0",
+    "globals": "17.14.0",
     "prettier": "3.9.10"
   }
 }
