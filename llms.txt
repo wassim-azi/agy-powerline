@@ -41,6 +41,8 @@
 - `dark-onyx`
 - `dark-metro`
 - `dark-macchiato`
+- `dark-catppuccin-frappe`
+- `dark-catppuccin-mocha`
 - `dark-nord`
 - `dark-rose-pine`
 - `light-paper`

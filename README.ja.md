@@ -79,12 +79,12 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 
 ### テーマ
 
-| ターミナルの背景 | テーマ                                                                                                                                                                                        |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ダーク           | `dark-aurora`（デフォルト）、`dark-ocean`、`dark-ember`、`dark-forest`、`dark-neon`、`dark-mono`、`dark-nocturne`、`dark-onyx`、`dark-metro`、`dark-macchiato`、`dark-nord`、`dark-rose-pine` |
-| ライト           | `light-paper`、`light-sky`、`light-sunset`、`light-cream`、`light-gruvbox`、`light-tokyo-night`                                                                                               |
-| 色覚多様性に配慮 | `colorblind-dark`、`colorblind-light`                                                                                                                                                         |
-| 独自の配色       | `custom`（[方法](docs/configuration.md#custom-theme)）                                                                                                                                        |
+| ターミナルの背景 | テーマ                                                                                                                                                                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ダーク           | `dark-aurora`（デフォルト）、`dark-ocean`、`dark-ember`、`dark-forest`、`dark-neon`、`dark-mono`、`dark-nocturne`、`dark-onyx`、`dark-metro`、`dark-macchiato`、`dark-catppuccin-frappe`、`dark-catppuccin-mocha`、`dark-nord`、`dark-rose-pine` |
+| ライト           | `light-paper`、`light-sky`、`light-sunset`、`light-cream`、`light-gruvbox`、`light-tokyo-night`                                                                                                                                                  |
+| 色覚多様性に配慮 | `colorblind-dark`、`colorblind-light`                                                                                                                                                                                                            |
+| 独自の配色       | `custom`（[方法](docs/configuration.md#custom-theme)）                                                                                                                                                                                           |
 
 すべてのテーマは `npx agy-powerline theme --gallery` でプレビューできます。
 
