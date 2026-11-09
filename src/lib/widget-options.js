@@ -12,6 +12,7 @@ const {
 const {
   METER_STYLE_IDS,
   QUOTA_WIDGETS,
+  PACE_DELTA_WIDGETS,
   CONTEXT_WIDGETS,
   RESET_WIDGETS,
   isVisibilityThreshold,
@@ -265,6 +266,15 @@ function editFields(widget, config = {}, options = {}) {
       show: (value) =>
         value === undefined ? `default (${onOff(config.pacing !== false)})` : onOff(value),
       help: "Marks where usage would be if it were spread evenly over the window. Default follows r.",
+    });
+  }
+  if (PACE_DELTA_WIDGETS.has(widget.id)) {
+    fields.push({
+      key: "paceDelta",
+      label: "Pace delta",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help: "Adds how far usage is ahead of (⇡) or behind (⇣) an even pace over the window, in points.",
     });
   }
   return fields;

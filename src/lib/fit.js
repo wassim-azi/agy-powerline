@@ -109,8 +109,8 @@ function fitRow(row, width, measure) {
     LAYOUT_IDS.has(widget.id) ? widget : { ...widget, raw: true }
   );
 
-  // A shorter model name ("3.8 Flash·High") and shorter meters (12 dots in
-  // Lines) before any widget has to go.
+  // A shorter model name ("3.8 Flash·High"), shorter meters (12 dots in
+  // Lines) and no pace delta before any widget has to go.
   if (measure(current) > width) {
     current = current.map((widget) =>
       widget.id === "model" ? { ...widget, short: true } : { ...widget, compact: true }

@@ -233,6 +233,26 @@ function paceIndex(elapsedPct, width) {
 function paceGlyph(ascii) {
   return ascii ? "|" : "┃";
 }
+
+// Used % minus elapsed %, in whole points: "⇡15%" is 15 points faster than a
+// pace that lasts until the reset, "⇣10%" is 10 points of headroom. Empty on
+// pace, or when the window length is unknown.
+function formatPaceDelta(quota, ascii = false) {
+  const elapsed = Number(quota?.elapsedPct);
+  const remaining = Number(quota?.remaining);
+
+  if (quota?.elapsedPct == null || !Number.isFinite(elapsed) || !Number.isFinite(remaining)) {
+    return "";
+  }
+
+  const delta = Math.round(100 - remaining - elapsed);
+
+  if (delta === 0) {
+    return "";
+  }
+
+  return `${delta > 0 ? (ascii ? "^" : "⇡") : ascii ? "v" : "⇣"}${Math.abs(delta)}%`;
+}
 function resetInSeconds(quota) {
   const seconds = Number(quota?.reset_in_seconds);
 
@@ -758,6 +778,7 @@ module.exports = {
   normalizeClock,
   paceIndex,
   paceGlyph,
+  formatPaceDelta,
   resetInSeconds,
   formatTokens,
   formatContextTokens,

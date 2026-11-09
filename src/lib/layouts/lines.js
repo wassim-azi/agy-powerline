@@ -23,6 +23,7 @@ const {
   formatClockTime,
   paceIndex,
   paceGlyph,
+  formatPaceDelta,
   formatGitSync,
   formatGitOperation,
   gitChangeParts,
@@ -51,6 +52,7 @@ const {
   OS_ICONS,
   isRaw,
   isPaced,
+  showsPaceDelta,
   METER_STYLES,
   meterStyle,
   hiddenByThreshold,
@@ -221,6 +223,11 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
   const over200k = session.exceeds200k ? ` ${t("over_200k", session.lang)}` : "";
   const remWord = t("rem", session.lang);
 
+  const paceDelta = (quota) => {
+    const delta = showsPaceDelta(widget) ? formatPaceDelta(quota, ascii) : "";
+    return delta ? ` ${delta}` : "";
+  };
+
   function quotaState(quota) {
     const thresh = resolveQuotaThresholds(widget, config);
     const rem = quota.remaining;
@@ -248,7 +255,12 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
   function quotaPct(quota) {
     const { rem, blinkSeq, color } = quotaState(quota);
     return (
-      blinkSeq + fg(palette.text) + tag() + fg(color) + `${rem.toFixed(1)}% ${remWord}` + RESET
+      blinkSeq +
+      fg(palette.text) +
+      tag() +
+      fg(color) +
+      `${rem.toFixed(1)}% ${remWord}${paceDelta(quota)}` +
+      RESET
     );
   }
 
@@ -314,7 +326,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         tag() +
         `${quota.label} ` +
         fg(color) +
-        `${rem.toFixed(1)}% ${remWord}` +
+        `${rem.toFixed(1)}% ${remWord}${paceDelta(quota)}` +
         fg(palette.text) +
         reset +
         RESET

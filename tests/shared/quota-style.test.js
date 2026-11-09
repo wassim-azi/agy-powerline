@@ -5,7 +5,14 @@
 
 const { record, stripAnsi, PAYLOAD } = require("../helpers");
 const { renderStatusline, defaultConfig, mergeConfig } = require("../../src/lib/shared");
-const { visibleWidth, normalizeClock, formatClockTime } = require("../../src/lib/formatters");
+const {
+  visibleWidth,
+  normalizeClock,
+  formatClockTime,
+  formatPaceDelta,
+} = require("../../src/lib/formatters");
+const { editFields } = require("../../src/lib/widget-options");
+const { buildConfigSchema } = require("../../scripts/site/config-schema");
 const { resolveColor } = require("../../src/lib/widget-style");
 
 const RESET_AT = "2026-10-08T18:33:00Z";
@@ -45,6 +52,94 @@ function plain(config, data = payload(), overrides = {}) {
 
 function colored(config, data = payload()) {
   return renderStatusline(data, { ...defaultConfig(), ...config }, { color: "truecolor", env: {} });
+}
+
+// 5h: 28% used, 44% of the window gone -> 16 points behind. Weekly: 79% used,
+// 76% gone -> 3 points ahead.
+function testPaceDelta() {
+  const on = (id, extra = {}) => [{ id, paceDelta: true, ...extra }];
+  const layouts = ["pills", "lines", "classic"];
+
+  record(
+    "the pace delta is off unless the widget asks for it",
+    layouts.every(
+      (layout) =>
+        !/[⇡⇣]/.test(
+          plain({ layout, widgets: [{ id: "fiveHourPct" }, { id: "weeklyPct" }, { id: "quota" }] })
+        )
+    )
+  );
+  record(
+    "fiveHourPct shows the headroom behind an even pace in every layout",
+    layouts.every((layout) =>
+      plain({ layout, widgets: on("fiveHourPct") }).includes("72.0% rem ⇣16%")
+    )
+  );
+  record(
+    "weeklyPct shows how far ahead of an even pace it is in every layout",
+    layouts.every((layout) => plain({ layout, widgets: on("weeklyPct") }).includes("21.0% rem ⇡3%"))
+  );
+  record(
+    "quota puts the delta of the tightest quota before its reset",
+    layouts.every((layout) => /21\.0% rem ⇡3% · /.test(plain({ layout, widgets: on("quota") })))
+  );
+  record(
+    "ASCII mode draws the arrows as ^ and v",
+    plain({ ascii: true, widgets: on("fiveHourPct") }).includes("72.0% rem v16%") &&
+      plain({ ascii: true, layout: "lines", widgets: on("weeklyPct") }).includes("21.0% rem ^3%")
+  );
+  record(
+    "the delta follows neither pacing nor pace, and only true turns it on",
+    plain({ pacing: false, widgets: on("fiveHourPct", { pace: false }) }).includes("⇣16%") &&
+      !/[⇡⇣]/.test(plain({ widgets: [{ id: "fiveHourPct", paceDelta: "yes" }] }))
+  );
+  record(
+    "the meters, which carry the marker, take no delta",
+    !/[⇡⇣]/.test(plain({ widgets: on("fiveHourBar") }))
+  );
+
+  const onPace = payload();
+  onPace.quota["gemini-5h"].remaining_fraction = 0.557;
+  const unknown = payload();
+  unknown.quota["gemini-5h"].reset_in_seconds = 9 * 3600;
+  record(
+    "nothing is added on pace, or when the window length is unknown",
+    plain({ widgets: on("fiveHourPct") }, onPace)
+      .trim()
+      .endsWith("55.7% rem") &&
+      plain({ widgets: on("fiveHourPct") }, unknown)
+        .trim()
+        .endsWith("72.0% rem")
+  );
+  record(
+    "formatPaceDelta ignores a quota without numbers",
+    formatPaceDelta(null) === "" &&
+      formatPaceDelta({ remaining: 50, elapsedPct: null }) === "" &&
+      formatPaceDelta({ remaining: "x", elapsedPct: 10 }) === "" &&
+      formatPaceDelta({ remaining: 0, elapsedPct: 0 }) === "⇡100%" &&
+      formatPaceDelta({ remaining: 100, elapsedPct: 100 }, true) === "v100%"
+  );
+
+  // Too narrow for both widgets with their deltas: the deltas go, the widgets stay.
+  const narrow = payload({ terminal_width: 26 });
+  const fitted = plain({ widgets: [...on("fiveHourPct"), ...on("weeklyPct")] }, narrow);
+  record(
+    "a row too wide for the terminal loses the delta before a widget",
+    fitted.includes("72.0%") && fitted.includes("21.0%") && !/[⇡⇣]/.test(fitted),
+    fitted
+  );
+
+  const fields = (id) => editFields({ id }, defaultConfig()).map((field) => field.key);
+  record(
+    "configure offers the pace delta on the three percentage widgets only",
+    ["fiveHourPct", "weeklyPct", "quota"].every((id) => fields(id).includes("paceDelta")) &&
+      !fields("fiveHourBar").includes("paceDelta") &&
+      !fields("contextPct").includes("paceDelta")
+  );
+  record(
+    "the config schema knows paceDelta",
+    buildConfigSchema().definitions.widget.properties.paceDelta?.type === "boolean"
+  );
 }
 
 function testPacing() {
@@ -255,6 +350,7 @@ function testMinimalist() {
 
 async function run() {
   testPacing();
+  testPaceDelta();
   testResetTimes();
   testStyling();
   testMinimalist();
