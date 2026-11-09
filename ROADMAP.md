@@ -10,7 +10,6 @@ What agy-powerline plans for the year to October 2027. Plans can change; the [is
 - **Pace delta** on the same widgets: how far ahead of or behind a sustainable pace you are, e.g. `⇡15%` faster than sustainable or `⇣10%` of headroom.
 - **Themes named after their palettes**, so they're easy to find: `dark-dracula`, `dark-tokyo-night` and `dark-catppuccin-macchiato` (the current ids keep working), and the other Catppuccin flavors (Latte, Frappé, Mocha), each passing the contrast tests.
 - **Bar labels in more languages**: Japanese ([#147](https://github.com/wassim-azi/agy-powerline/issues/147)), Korean ([#150](https://github.com/wassim-azi/agy-powerline/issues/150)) and Simplified Chinese ([#122](https://github.com/wassim-azi/agy-powerline/issues/122)), each reviewed by a native or fluent speaker.
-- **Clickable folder and branch links** (OSC 8 hyperlinks) in terminals that support them ([#101](https://github.com/wassim-azi/agy-powerline/issues/101)).
 
 ### Reliability and contributors
 
