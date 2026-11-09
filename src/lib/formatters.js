@@ -643,12 +643,24 @@ function formatGitOperation(op) {
     : name;
 }
 
-// "2 subagents, 1 task", or "" when nothing runs.
-function formatTasks(subagents, tasks, lang) {
+// "2 subagents, 1 task", or "" when nothing runs. `detail` ("research: List
+// the files…") stands in for the count of a lone running subagent.
+function formatTasks(subagents, tasks, lang, detail = "") {
   const part = (n, one, many) => (n > 0 ? `${n} ${t(n === 1 ? one : many, lang)}` : "");
-  return [part(subagents, "subagent", "subagents"), part(tasks, "task", "tasks")]
+  return [
+    (subagents === 1 && detail) || part(subagents, "subagent", "subagents"),
+    part(tasks, "task", "tasks"),
+  ]
     .filter(Boolean)
     .join(", ");
+}
+
+// "research: List the files…" for the one running subagent, or "" when it
+// has neither a name nor a role. Both are cut: a role is a whole prompt
+// sentence, and must not push other widgets off the row.
+function formatSubagent(subagent, nameMax, roleMax, ascii = false) {
+  const cut = (value, max) => (value ? clipText(value, max, ascii) : "");
+  return [cut(subagent?.name, nameMax), cut(subagent?.role, roleMax)].filter(Boolean).join(": ");
 }
 
 // "accept-edits, NORMAL", or "" in the default mode with Vim editing off.
@@ -792,6 +804,7 @@ module.exports = {
   formatTasks,
   formatMode,
   clipText,
+  formatSubagent,
   limitWidth,
   isValidMaxWidth,
   shortenPath,

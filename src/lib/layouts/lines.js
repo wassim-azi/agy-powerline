@@ -60,6 +60,7 @@ const {
   RAM_CAUTION,
   RAM_DANGER,
   TITLE_MAX,
+  subagentDetail,
 } = require("../widget-style");
 const { t } = require("../i18n");
 
@@ -538,7 +539,12 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       return fg(palette.text) + tag() + String(session.artifacts) + RESET;
 
     case "tasks": {
-      const text = formatTasks(session.subagents, session.tasks, session.lang);
+      const text = formatTasks(
+        session.subagents,
+        session.tasks,
+        session.lang,
+        subagentDetail(session, widget, ascii)
+      );
       if (!text) {
         return null;
       }

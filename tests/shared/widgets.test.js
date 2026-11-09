@@ -668,14 +668,94 @@ function testTasks() {
   const real = fixture("antigravity-1.3.3-subagents.json");
   const tasks = [{ id: "tasks" }];
 
-  record(
-    "tasks shows running subagents and background tasks",
-    /1 subagent, 1 task/.test(render(real, tasks))
+  // One running subagent: its name and role stand in for the count.
+  for (const layout of ["pills", "lines"]) {
+    const one = render(real, tasks, { layout });
+    record(
+      `${layout} tasks names the one running subagent`,
+      /👥 research: List the files in the project…, 1 task/.test(one) && !/subagent/.test(one),
+      one
+    );
+  }
+
+  const withAgents = (...subagents) => ({ ...real, subagents, task_count: 0 });
+  const two = render(
+    withAgents(
+      { name: "research", role: "List the files.", status: "running" },
+      { name: "review", role: "Check the errors.", status: "running" }
+    ),
+    tasks
+  );
+  record("tasks counts two running subagents", /👥 2 subagents /.test(two), two);
+
+  const finished = render(
+    withAgents(
+      { name: "research", role: "List the files.", status: "running" },
+      { name: "review", role: "Check the errors.", status: "completed" }
+    ),
+    tasks
   );
   record(
-    "lines tasks shows running subagents and background tasks",
-    /1 subagent, 1 task/.test(render(real, tasks, { layout: "lines" }))
+    "tasks names the running subagent, not a finished one",
+    /👥 research: List the files\. /.test(finished) && !/review/.test(finished),
+    finished
   );
+
+  const long = render(
+    withAgents({ name: "n".repeat(60), role: "word ".repeat(80), status: "running" }),
+    tasks
+  );
+  record(
+    "tasks cuts a very long subagent name and role",
+    visibleWidth(long.trim()) <= 3 + 16 + 2 + 30 && (long.match(/…/g) || []).length === 2,
+    long
+  );
+
+  // Only the bar's own SGR codes may be left once the payload text is cleaned.
+  const hostile = render(
+    withAgents({
+      name: "re\x1b]52;c;AAAA\x07search",
+      role: "List\nthe \x1b[31mfiles\x1b[0m\u202e.\x07",
+      status: "running",
+    }),
+    tasks
+  );
+  record(
+    "tasks cleans control characters from a subagent's name and role",
+    /research: List the files\./.test(hostile) && !/[\x00-\x1f\x7f\u202e]/.test(hostile),
+    JSON.stringify(hostile)
+  );
+
+  const typed = render(withAgents({ name: { a: 1 }, role: ["x"], status: "running" }), tasks);
+  record(
+    "tasks counts a subagent with no usable name or role",
+    /👥 1 subagent /.test(typed),
+    typed
+  );
+
+  const nameOnly = render(withAgents({ name: "research", status: "running" }), tasks);
+  record("tasks shows a subagent's name alone", /👥 research /.test(nameOnly), nameOnly);
+
+  const ascii = render(
+    withAgents({ name: "research", role: "word ".repeat(80), status: "running" }),
+    tasks,
+    { ascii: true }
+  );
+  record(
+    "tasks stays plain ASCII in ASCII mode",
+    /research: .*\.\.\./.test(ascii) && !/[^\x00-\x7f]/.test(ascii),
+    ascii
+  );
+
+  // Fitting a narrow row falls back to the count before the widget is dropped.
+  for (const layout of ["pills", "lines"]) {
+    const narrow = render(real, [{ id: "model" }, ...tasks], { layout, width: 50 });
+    record(
+      `${layout} tasks shortens to the count on a narrow terminal`,
+      /1 subagent, 1 task/.test(narrow) && !/research/.test(narrow) && visibleWidth(narrow) <= 50,
+      narrow
+    );
+  }
 
   // Finished subagents stay in the payload's list; they must not count.
   const mixed = {
