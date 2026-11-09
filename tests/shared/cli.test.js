@@ -37,6 +37,21 @@ async function run() {
       `exit ${setTheme.code}`
     );
 
+    // Ids three themes shipped under in 1.x (#172).
+    const setOldId = runCli(["theme", "dark-nocturne"], { env });
+    cfg = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, "utf8")) : {};
+    const listOldIds = runCli(["theme", "--list"], { env });
+    record(
+      "theme <old id> still works and --list shows it as an alias (dark-nocturne -> dark-dracula)",
+      setOldId.code === 0 &&
+        cfg.theme === "dark-dracula" &&
+        /Theme set to.*Dark Dracula/i.test(setOldId.stdout) &&
+        /dark-dracula.*alias: dark-nocturne/.test(listOldIds.stdout) &&
+        /dark-tokyo-night.*alias: dark-metro/.test(listOldIds.stdout) &&
+        /dark-catppuccin-macchiato.*alias: dark-macchiato/.test(listOldIds.stdout),
+      `exit ${setOldId.code}: ${setOldId.stdout}`
+    );
+
     const setAlias = runCli(["theme", "light"], { env });
     cfg = fs.existsSync(configPath) ? JSON.parse(fs.readFileSync(configPath, "utf8")) : {};
     record(

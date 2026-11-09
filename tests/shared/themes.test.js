@@ -14,6 +14,7 @@ const {
   defaultConfig,
   sampleData,
 } = require("../../src/lib/shared");
+const { mergeConfig, applyRenderOverrides } = require("../../src/lib/config");
 const { THEMES, THEME_ORDER, COLOR_KEYS, resolveThemeId } = require("../../src/lib/themes");
 
 // Typical terminal backgrounds, slightly toward the hard side: a lighter
@@ -160,6 +161,25 @@ function checkThemeQuality() {
       resolveThemeId("colorblind") === "colorblind-dark" &&
       resolveThemeId("oasis") === "dark-aurora" &&
       resolveThemeId("does-not-exist") === "dark-aurora"
+  );
+
+  // These ids shipped in 1.x; a saved config that names one must keep its theme.
+  const renamed = {
+    "dark-nocturne": "dark-dracula",
+    "dark-metro": "dark-tokyo-night",
+    "dark-macchiato": "dark-catppuccin-macchiato",
+  };
+  record(
+    "renamed themes keep their old ids as aliases",
+    Object.entries(renamed).every(
+      ([oldId, newId]) =>
+        !THEMES[oldId] &&
+        THEMES[newId] &&
+        THEME_ORDER.includes(newId) &&
+        resolveThemeId(oldId) === newId &&
+        mergeConfig({ theme: oldId }).theme === newId &&
+        applyRenderOverrides(defaultConfig(), { theme: oldId }).config.theme === newId
+    )
   );
 }
 

@@ -131,7 +131,7 @@ const THEMES = {
   }),
 
   // Palette from Dracula (draculatheme.com, MIT).
-  "dark-nocturne": theme("dark", "Dark Nocturne", "Vivid purple, pink, cyan and green", {
+  "dark-dracula": theme("dark", "Dark Dracula", "Vivid purple, pink, cyan and green", {
     text: DARK_TEXT,
     track: "#44475a",
     model: "#bd93f9",
@@ -163,7 +163,7 @@ const THEMES = {
   }),
 
   // Palette from Tokyo Night (enkia/tokyo-night-vscode-theme, MIT).
-  "dark-metro": theme("dark", "Dark Metro", "Night-city blues, violet and teal", {
+  "dark-tokyo-night": theme("dark", "Dark Tokyo Night", "Night-city blues, violet and teal", {
     text: DARK_TEXT,
     track: "#414868",
     model: "#bb9af7",
@@ -179,20 +179,25 @@ const THEMES = {
   }),
 
   // Palette from Catppuccin Macchiato (catppuccin.com, MIT).
-  "dark-macchiato": theme("dark", "Dark Macchiato", "Pastel mauve, teal, peach and green", {
-    text: DARK_TEXT,
-    track: "#494d64",
-    model: "#c6a0f6",
-    fiveHour: "#a6da95",
-    weekly: "#7dc4e4",
-    thirdParty: "#f5a97f",
-    context: "#8aadf4",
-    git: "#8bd5ca",
-    gitDirty: "#f0c6c6",
-    meta: "#b8c0e0",
-    caution: "#eed49f",
-    warn: "#ed8796",
-  }),
+  "dark-catppuccin-macchiato": theme(
+    "dark",
+    "Dark Catppuccin Macchiato",
+    "Pastel mauve, teal, peach and green",
+    {
+      text: DARK_TEXT,
+      track: "#494d64",
+      model: "#c6a0f6",
+      fiveHour: "#a6da95",
+      weekly: "#7dc4e4",
+      thirdParty: "#f5a97f",
+      context: "#8aadf4",
+      git: "#8bd5ca",
+      gitDirty: "#f0c6c6",
+      meta: "#b8c0e0",
+      caution: "#eed49f",
+      warn: "#ed8796",
+    }
+  ),
 
   // Palette from Catppuccin Frappé (catppuccin.com, MIT).
   "dark-catppuccin-frappe": theme(
@@ -433,10 +438,10 @@ const THEME_ORDER = [
   "dark-forest",
   "dark-neon",
   "dark-mono",
-  "dark-nocturne",
+  "dark-dracula",
   "dark-onyx",
-  "dark-metro",
-  "dark-macchiato",
+  "dark-tokyo-night",
+  "dark-catppuccin-macchiato",
   "dark-catppuccin-frappe",
   "dark-catppuccin-mocha",
   "dark-nord",
@@ -452,11 +457,16 @@ const THEME_ORDER = [
   "custom",
 ];
 
-// Short names shown in `theme --list`.
+// Other names a theme answers to, shown in `theme --list`: the short names,
+// and the ids three themes shipped under in 1.x, so a saved config or a
+// script that names one keeps working.
 const THEME_ALIASES = {
   dark: "dark-aurora",
   light: "light-paper",
   colorblind: "colorblind-dark",
+  "dark-nocturne": "dark-dracula",
+  "dark-metro": "dark-tokyo-night",
+  "dark-macchiato": "dark-catppuccin-macchiato",
 };
 
 const COLOR_KEYS = [

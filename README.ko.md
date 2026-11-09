@@ -92,12 +92,12 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에�
 
 ### 테마
 
-| 터미널 배경 | 테마                                                                                                                                                                                                                                        |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 다크        | `dark-aurora` (기본값), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-nocturne`, `dark-onyx`, `dark-metro`, `dark-macchiato`, `dark-catppuccin-frappe`, `dark-catppuccin-mocha`, `dark-nord`, `dark-rose-pine` |
-| 라이트      | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`, `light-tokyo-night`                                                                                                                                             |
-| 색약 친화   | `colorblind-dark`, `colorblind-light`                                                                                                                                                                                                       |
-| 직접 지정   | `custom` ([방법](docs/configuration.md#custom-theme))                                                                                                                                                                                       |
+| 터미널 배경 | 테마                                                                                                                                                                                                                                                        |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 다크        | `dark-aurora` (기본값), `dark-ocean`, `dark-ember`, `dark-forest`, `dark-neon`, `dark-mono`, `dark-dracula`, `dark-onyx`, `dark-tokyo-night`, `dark-catppuccin-macchiato`, `dark-catppuccin-frappe`, `dark-catppuccin-mocha`, `dark-nord`, `dark-rose-pine` |
+| 라이트      | `light-paper`, `light-sky`, `light-sunset`, `light-cream`, `light-gruvbox`, `light-tokyo-night`                                                                                                                                                             |
+| 색약 친화   | `colorblind-dark`, `colorblind-light`                                                                                                                                                                                                                       |
+| 직접 지정   | `custom` ([방법](docs/configuration.md#custom-theme))                                                                                                                                                                                                       |
 
 모든 테마는 [테마 갤러리](https://agy-powerline.com/themes/) 또는 `npx agy-powerline theme --gallery`에서 미리 볼 수 있습니다. 각 행에 걸쳐 색이 이어지는 그라데이션을 넣으려면 `npx agy-powerline gradient <이름>`을 사용하세요. `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono` 또는 직접 지정한 색을 쓸 수 있습니다([방법](docs/configuration.md#gradients)).
 
