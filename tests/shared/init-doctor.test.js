@@ -63,6 +63,107 @@ async function run() {
   testUpgradeFromSeparateFiles();
   testChoiceFlags();
   await testChoose();
+  await testSymbolsQuestion();
+}
+
+// A fake readline that answers from a list and counts the questions.
+function fakeRl(answers) {
+  const asked = [];
+  return {
+    asked,
+    question: (query, callback) => {
+      asked.push(query);
+      callback(answers.shift() ?? "");
+    },
+  };
+}
+
+// init's first question: do the bar's symbols look right?
+async function testSymbolsQuestion() {
+  const { askSymbols, askChoices } = require("../../src/cli/init");
+  const saved = process.env.AGY_POWERLINE_ASCII;
+  delete process.env.AGY_POWERLINE_ASCII;
+  const log = console.log;
+  try {
+    const ask = async (answer) => {
+      const rl = fakeRl([answer]);
+      const printed = [];
+      const ascii = await askSymbols(rl, (line) => printed.push(stripAnsi(line)));
+      return { ascii, asked: rl.asked.map(stripAnsi), printed };
+    };
+    const enter = await ask("");
+    const yes = await ask("y");
+    const no = await ask("n");
+    record(
+      "init shows a sample of the bar and asks whether its shapes look right",
+      enter.asked.length === 1 &&
+        /Do these shapes look right\? \(Y\/n\)/.test(enter.asked[0]) &&
+        enter.printed.length === 1 &&
+        enter.printed[0].includes("\uE0B4"),
+      JSON.stringify(enter)
+    );
+    record(
+      "Enter or yes keeps the symbols and prints nothing more",
+      enter.ascii === false && yes.ascii === false && yes.printed.length === 1,
+      JSON.stringify(yes)
+    );
+    record(
+      "no turns on ASCII mode, shows the sample in ASCII and says how to change it",
+      no.ascii === true &&
+        no.printed[1].includes("[ 3.8 Flash High ]") &&
+        !no.printed[1].includes("\uE0B4") &&
+        /ASCII mode is on/.test(no.printed[2]) &&
+        /configure.*"ascii": false/.test(no.printed[3]),
+      JSON.stringify(no)
+    );
+
+    process.env.AGY_POWERLINE_ASCII = "1";
+    const forced = await ask("n");
+    delete process.env.AGY_POWERLINE_ASCII;
+    record(
+      "with AGY_POWERLINE_ASCII set, the question is skipped",
+      forced.ascii === false && forced.asked.length === 0 && forced.printed.length === 0,
+      JSON.stringify(forced)
+    );
+
+    // The whole first-install flow: symbols first, then preset, layout, theme.
+    console.log = () => {};
+    const declined = await askChoices(fakeRl(["n"]), {});
+    const accepted = await askChoices(fakeRl([]), {});
+    console.log = log;
+    record(
+      "a no carries ascii into the first install's choices; a yes leaves it out",
+      declined.ascii === true &&
+        declined.preset === "default" &&
+        declined.theme === "dark-aurora" &&
+        !("ascii" in accepted),
+      JSON.stringify({ declined, accepted })
+    );
+  } finally {
+    console.log = log;
+    if (saved === undefined) {
+      delete process.env.AGY_POWERLINE_ASCII;
+    } else {
+      process.env.AGY_POWERLINE_ASCII = saved;
+    }
+  }
+
+  withBox("symbols-cli", (box) => {
+    const file = path.join(box.installDir, "statusline.config.json");
+    const res = runCli(["init", "--yes"], { env: box.env });
+    const fresh = readJson(file);
+    fs.writeFileSync(file, JSON.stringify({ ...fresh, ascii: true }, null, 2));
+    const again = runCli(["init", "--yes"], { env: box.env });
+    record(
+      "init --yes doesn't ask about symbols, leaves ASCII off and keeps an existing config's ascii",
+      res.code === 0 &&
+        again.code === 0 &&
+        fresh?.ascii === false &&
+        readJson(file)?.ascii === true &&
+        !/shapes look right/.test(res.stdout + again.stdout),
+      res.stderr + again.stderr
+    );
+  });
 }
 
 function testChoiceFlags() {
@@ -160,7 +261,8 @@ function testChoiceFlags() {
     record(
       "without a terminal, init asks nothing and installs the default bar",
       res.code === 0 &&
-        !/Which widgets|Choose 1-/.test(stripAnsi(res.stdout)) &&
+        !/Which widgets|Choose 1-|shapes look right/.test(stripAnsi(res.stdout)) &&
+        config?.ascii === false &&
         config?.theme === "dark-aurora" &&
         config?.layout === "pills",
       res.stdout + res.stderr

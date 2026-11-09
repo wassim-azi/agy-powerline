@@ -45,6 +45,7 @@ const { printInvalidConfig } = require("./config-guard");
 const { buildRuntimeBundle } = require("./bundle");
 const { REPO_URL } = require("./repo-url");
 const { CONFIG_SCHEMA_URL } = require("../lib/config");
+const { isTruthyFlag } = require("../lib/colors");
 const { homepage: SITE_URL } = require("../../package.json");
 
 const DIM = "\x1b[2m";
@@ -141,6 +142,9 @@ function applyChoices(config, choices) {
   if (choices.language) {
     next.language = choices.language;
   }
+  if (choices.ascii) {
+    next.ascii = true;
+  }
   return next;
 }
 
@@ -161,9 +165,33 @@ const BACKGROUNDS = [
   ["colorblind", "color-blind"],
 ];
 
+// A font without the Powerline symbols can't be detected, so the user is shown
+// the default bar's first row and asked. Returns true when ASCII mode is wanted.
+async function askSymbols(rl, print = console.log) {
+  // AGY_POWERLINE_ASCII already draws the sample in ASCII: nothing to compare.
+  if (isTruthyFlag(process.env.AGY_POWERLINE_ASCII)) {
+    return false;
+  }
+  const sample = { ...defaultConfig(), layout: "pills" };
+  print(`\n ${preview(sample, 1)}`);
+  if (await confirm(rl, `${BOLD} Do these shapes look right?${RESET}`, true)) {
+    return false;
+  }
+  print(`\n ${preview({ ...sample, ascii: true }, 1)}`);
+  print(` ASCII mode is on: plain-text shapes, no emojis. To change it later, press`);
+  print(
+    ` ${CYAN}i${RESET} in ${CYAN}npx agy-powerline configure${RESET} or set "ascii": false in the config.`
+  );
+  return true;
+}
+
 // The questions of a first install in a terminal, for what the flags left open.
 async function askChoices(rl, given) {
   const choices = { ...given };
+  // Asked first, so the previews of the next questions are readable too.
+  if (await askSymbols(rl)) {
+    choices.ascii = true;
+  }
   const base = defaultConfig();
   const option = (id, description, config, rows) =>
     `${id}${description ? `  ${DIM}${description}${RESET}` : ""}\n${preview(config, rows)}`;
@@ -447,4 +475,5 @@ async function updateAgySettings(command, { exists, settings }, { yes, rl, stack
 module.exports = {
   initCommand,
   askChoices,
+  askSymbols,
 };

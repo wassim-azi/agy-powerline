@@ -34,7 +34,7 @@ npx agy-powerline configure   # optional: pick widgets, theme and layout
 agy                           # start Antigravity
 ```
 
-On a first install `init` asks for a preset, a layout and a theme, with a preview of each; add `--yes` to skip the questions. It asks before replacing anything and backs up Antigravity's `settings.json` first. Restart `agy` once after `init`. Details: [what `init` does](docs/install.md).
+On a first install `init` asks whether the bar's symbols look right (and turns on ASCII mode if they don't), then for a preset, a layout and a theme, with a preview of each; add `--yes` to skip the questions. It asks before replacing anything and backs up Antigravity's `settings.json` first. Restart `agy` once after `init`. Details: [what `init` does](docs/install.md).
 
 <details>
 <summary>Screenshot: the bar in a real agy session (Windows Terminal)</summary>
