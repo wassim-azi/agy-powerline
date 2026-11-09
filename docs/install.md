@@ -16,13 +16,14 @@ What `npx agy-powerline init` does, where files go, and how to set things up by 
 
 `init` copies the scripts to `~/.agy-powerline` and adds a `statusLine` entry to Antigravity's `settings.json`. It asks before overwriting existing scripts or another `statusLine`; pass `--yes` to skip the prompts (required without a TTY). Restart `agy` (or open a new session) after `init` so it reloads settings.
 
-On a first install in a terminal (no `statusline.config.json` yet, no `--yes`), `init` asks three questions, each with a preview of the bar it gives:
+On a first install in a terminal (no `statusline.config.json` yet, no `--yes`), `init` asks four questions, each with a preview of the bar it gives:
 
-1. **Preset:** `default`, `compact`, `agent`, `git`, `tokens`, `quotas` or `full`. Enter keeps `default`.
-2. **Layout:** `pills` or `lines`. Enter keeps `pills`.
-3. **Terminal background:** dark, light or color-blind, then the themes for it (Enter keeps `dark-aurora`, `light-paper` or `colorblind-dark`).
+1. **Symbols:** a sample of the bar and "Do these shapes look right? (Y/n)". Answer `n` if you see boxes or question marks: your terminal's font lacks the Powerline symbols, so `init` turns on [ASCII mode](configuration.md#terminals-ascii-mode-colors-narrow-windows) (`"ascii": true`) and shows the sample again in plain text. Enter keeps the symbols. `i` in `configure` changes it later.
+2. **Preset:** `default`, `compact`, `agent`, `git`, `tokens`, `quotas` or `full`. Enter keeps `default`.
+3. **Layout:** `pills` or `lines`. Enter keeps `pills`.
+4. **Terminal background:** dark, light or color-blind, then the themes for it (Enter keeps `dark-aurora`, `light-paper` or `colorblind-dark`).
 
-Answer with the number of a choice. `npx agy-powerline preset`, `layout`, `theme` and `configure` change your choice later. Without a terminal, or with `--yes`, nothing is asked and you get the default bar. Running `init` again never replaces your config.
+Answer the last three with the number of a choice. `npx agy-powerline preset`, `layout`, `theme` and `configure` change your choice later. Without a terminal, or with `--yes`, nothing is asked and you get the default bar, with ASCII mode off. Running `init` again never replaces your config.
 
 For scripted installs, `--preset <id>`, `--layout <id>` and `--theme <id>` set those choices and skip their question, with or without `--yes`. The theme also takes `dark`, `light` and `colorblind`. `--language <code>` sets the [language](configuration.md#language) of the bar's own words. Each value is checked before anything is written: an unknown one stops `init` with the list of valid ids. With an existing config, the flags change only those settings in it, and `init` says so.
 
