@@ -37,10 +37,10 @@
 - `dark-forest`
 - `dark-neon`
 - `dark-mono`
-- `dark-nocturne`
+- `dark-dracula`
 - `dark-onyx`
-- `dark-metro`
-- `dark-macchiato`
+- `dark-tokyo-night`
+- `dark-catppuccin-macchiato`
 - `dark-catppuccin-frappe`
 - `dark-catppuccin-mocha`
 - `dark-nord`

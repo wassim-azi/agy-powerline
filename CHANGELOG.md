@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pace delta on the percentage quota widgets: `"paceDelta": true` on `fiveHourPct`, `weeklyPct` or `quota` (or **Pace delta** in the widget's options in `configure`) adds how far you are ahead of (`⇡15%`) or behind (`⇣10%`) a pace that lasts until the reset (#175)
 - `tasks` shows what a lone running subagent is doing, by name and role: `👥 research: List the files…`; with two or more it keeps the count (#173)
 
+### Changed
+
+- Three themes are named after their palettes: `dark-nocturne` is now `dark-dracula`, `dark-metro` is `dark-tokyo-night` and `dark-macchiato` is `dark-catppuccin-macchiato`. The colors are the same, and the old names keep working in a saved config, `theme <name>` and `--theme` (#172)
+
 ## [1.10.0] - 2026-11-08
 
 ### Added
