@@ -97,9 +97,10 @@ function tidySeparators(row) {
   return out;
 }
 
-// Values only first (labels go, every widget stays), then a short model name
-// and short quota meters, then the least useful widgets go one by one until
-// the row fits or one widget is left.
+// Values only first (labels go, every widget stays), then the count in place
+// of a lone subagent's name and role, then a short model name and short quota
+// meters, then the least useful widgets go one by one until the row fits or
+// one widget is left.
 function fitRow(row, width, measure) {
   if (measure(row) <= width) {
     return row;
@@ -108,6 +109,14 @@ function fitRow(row, width, measure) {
   let current = row.map((widget) =>
     LAYOUT_IDS.has(widget.id) ? widget : { ...widget, raw: true }
   );
+
+  // "1 subagent" for "research: List the files…" on its own first, so a long
+  // role never costs the row its model name or meters.
+  if (measure(current) > width && current.some((widget) => widget.id === "tasks")) {
+    current = current.map((widget) =>
+      widget.id === "tasks" ? { ...widget, compact: true } : widget
+    );
+  }
 
   // A shorter model name ("3.8 Flash·High"), shorter meters (12 dots in
   // Lines) and no pace delta before any widget has to go.

@@ -4,7 +4,7 @@
 "use strict";
 
 const { parseColor } = require("./colors");
-const { clipText, stripControl, visibleWidth } = require("./formatters");
+const { clipText, formatSubagent, stripControl, visibleWidth } = require("./formatters");
 const { DEFAULT_LANGUAGE, t } = require("./i18n");
 
 // Basic names the exec widget's color option always accepted; the Lines
@@ -223,6 +223,19 @@ function meterStyle(widget, config, layout) {
 // Longest conversation title shown, in terminal columns.
 const TITLE_MAX = 30;
 
+// Longest subagent name and role the tasks widget shows, in terminal columns.
+const SUBAGENT_NAME_MAX = 16;
+const SUBAGENT_ROLE_MAX = 30;
+
+// What the tasks widget says about a lone running subagent, or "" to show the
+// count: when the row is fitted to a narrow terminal (compact), the count is
+// the short form.
+function subagentDetail(session, widget, ascii) {
+  return widget?.compact
+    ? ""
+    : formatSubagent(session.subagent, SUBAGENT_NAME_MAX, SUBAGENT_ROLE_MAX, ascii);
+}
+
 // RAM use (%) that turns the ram widget to the caution, then danger color.
 const RAM_CAUTION = 80;
 const RAM_DANGER = 90;
@@ -323,4 +336,5 @@ module.exports = {
   RAM_CAUTION,
   RAM_DANGER,
   TITLE_MAX,
+  subagentDetail,
 };

@@ -354,6 +354,10 @@ function extractSession(data, config, options = {}) {
   const cacheHitPct = cacheTotal > 0 ? Math.round((cacheReadTokens * 100) / cacheTotal) : 0;
 
   const modelName = firstText(data.model?.display_name, data.model?.id);
+  const running = Array.isArray(data.subagents)
+    ? data.subagents.filter((agent) => agent?.status === "running")
+    : [];
+  const oneLine = (value) => stripControl(firstText(value).replace(/\s+/g, " ")).trim();
   const uses = (id) => Boolean(config?.widgets?.some((widget) => widget?.id === id));
   const osName = uses("os") ? currentOsName() : "";
   const { username, hostname } = uses("host") ? currentUserAndHost() : {};
@@ -399,9 +403,12 @@ function extractSession(data, config, options = {}) {
     agentState: firstText(data.agent_state),
     artifacts: Math.floor(count(data.artifact_count)),
     // Finished subagents stay in the list Antigravity sends; only running ones count.
-    subagents: Array.isArray(data.subagents)
-      ? data.subagents.filter((agent) => agent?.status === "running").length
-      : 0,
+    subagents: running.length,
+    // A lone running subagent is shown by name and role, both kept to one line.
+    subagent:
+      running.length === 1
+        ? { name: oneLine(running[0].name), role: oneLine(running[0].role) }
+        : null,
     tasks: Math.floor(count(data.task_count)),
     // Left out in the default mode, and with Vim editing off.
     approvalMode: firstText(data.cycle_mode),

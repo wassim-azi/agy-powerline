@@ -67,6 +67,7 @@ const {
   RAM_CAUTION,
   RAM_DANGER,
   TITLE_MAX,
+  subagentDetail,
 } = require("../widget-style");
 const { t } = require("../i18n");
 
@@ -626,7 +627,12 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       return pill(colors.meta, lbl(String(session.artifacts)));
 
     case "tasks": {
-      const text = formatTasks(session.subagents, session.tasks, session.lang);
+      const text = formatTasks(
+        session.subagents,
+        session.tasks,
+        session.lang,
+        subagentDetail(session, widget, ascii)
+      );
       if (!text) {
         return null;
       }
