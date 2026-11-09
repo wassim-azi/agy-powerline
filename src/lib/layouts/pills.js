@@ -49,6 +49,7 @@ const {
   formatResetText,
   paceIndex,
   paceGlyph,
+  formatPaceDelta,
 } = require("../formatters");
 const { execWidgetOutput, restoreAfterReset } = require("../exec");
 const {
@@ -58,6 +59,7 @@ const {
   OS_ICONS,
   isRaw,
   isPaced,
+  showsPaceDelta,
   METER_STYLES,
   meterStyle,
   hiddenByThreshold,
@@ -192,6 +194,10 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
   const close = ascii ? "]" : "";
   const meterLabel = () => ` ${tag()}${open}`;
   const pace = (quota) => (isPaced(widget, config) ? quota.elapsedPct : null);
+  const paceDelta = (quota) => {
+    const delta = showsPaceDelta(widget) ? formatPaceDelta(quota, ascii) : "";
+    return delta ? ` ${delta}` : "";
+  };
   const over200k = session.exceeds200k ? ` ${t("over_200k", session.lang)}` : "";
   const remWord = t("rem", session.lang);
 
@@ -234,7 +240,11 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         warnColor: colors.caution,
       });
       const reset = quota.reset ? `${ascii ? ", " : " · "}${quota.reset}` : "";
-      return pill(color, lbl(`${quota.label} ${rem.toFixed(1)}% ${remWord}${reset}`), blink);
+      return pill(
+        color,
+        lbl(`${quota.label} ${rem.toFixed(1)}% ${remWord}${paceDelta(quota)}${reset}`),
+        blink
+      );
     }
 
     case "fiveHourBar": {
@@ -276,7 +286,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         critColor: colors.warn,
         warnColor: colors.caution,
       });
-      return pill(color, lbl(`${rem.toFixed(1)}% ${remWord}`), blink);
+      return pill(color, lbl(`${rem.toFixed(1)}% ${remWord}${paceDelta(session.fiveHour)}`), blink);
     }
 
     case "fiveHourReset": {
@@ -333,7 +343,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         critColor: colors.warn,
         warnColor: colors.caution,
       });
-      return pill(color, lbl(`${rem.toFixed(1)}% ${remWord}`), blink);
+      return pill(color, lbl(`${rem.toFixed(1)}% ${remWord}${paceDelta(session.weekly)}`), blink);
     }
 
     case "weeklyReset": {

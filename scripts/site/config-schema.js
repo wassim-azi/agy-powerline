@@ -150,6 +150,11 @@ function buildConfigSchema() {
           showBelow: percent("Quota widgets: hide while more than this % is left."),
           showAbove: percent("Context widgets: hide while less than this % is used."),
           pace: { type: "boolean", description: "Quota meters: show the pace marker." },
+          paceDelta: {
+            type: "boolean",
+            description:
+              "quota, fiveHourPct, weeklyPct: show how far usage is ahead of or behind an even pace.",
+          },
           meterStyle: { enum: [...METER_STYLE_IDS] },
           format: { enum: ["countdown", "time", "both"], description: "Reset widgets." },
           short: { type: "boolean", description: "model: the short model name." },

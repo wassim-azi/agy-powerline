@@ -85,6 +85,12 @@ function isPaced(widget, config) {
   return config?.pacing !== false;
 }
 
+// The pace delta is opt-in per widget, and the first thing to go when the row
+// is fitted to a narrow terminal (compact).
+function showsPaceDelta(widget) {
+  return widget?.paceDelta === true && !widget.compact;
+}
+
 // Each widget's icon and label, shared by both layouts so Pills and Lines
 // read the same. name is the English label (configure shows it), key its
 // message in i18n.js. iconOnly: with emojis on, the icon stands in for the label
@@ -233,6 +239,8 @@ const QUOTA_WIDGETS = new Set([
   "thirdPartyWeekly",
   "argonWeekly",
 ]);
+// The percentage widgets have no meter to carry the pace marker.
+const PACE_DELTA_WIDGETS = new Set(["quota", "fiveHourPct", "weeklyPct"]);
 const CONTEXT_WIDGETS = new Set(["context", "contextPct", "contextTokens"]);
 const RESET_WIDGETS = new Set(["fiveHourReset", "weeklyReset", "argonReset"]);
 const SHOW_BELOW_SESSION_KEYS = {
@@ -300,11 +308,13 @@ module.exports = {
   LABEL_MAX,
   isRaw,
   isPaced,
+  showsPaceDelta,
   METER_STYLES,
   METER_STYLE_IDS,
   isMeterStyle,
   meterStyle,
   QUOTA_WIDGETS,
+  PACE_DELTA_WIDGETS,
   CONTEXT_WIDGETS,
   RESET_WIDGETS,
   isVisibilityThreshold,

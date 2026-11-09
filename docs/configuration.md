@@ -31,7 +31,7 @@ Tabs at the top lead to Widgets (`w`), Presets (`o`), Themes (`t`), Layout (`l`)
 
 The editor fits your window. It fills the full width, so the preview has the room your bar gets in agy. From 80 columns the descriptions line up in a column; from 140 columns the list and a details panel share the width evenly, and the details show the selected item: a widget drawn on its own with its options and presets, a preset's rows, a theme's colors, or what a Powerline setting does. In a short window the tagline, blank lines, notes and preview chips make way first, then long lists scroll inside their panel, with the rows out of view counted in its border (`↑ 4 more`, `↓ 12 more`). Resizing the window redraws it.
 
-Enter on a widget opens its options: color, label (shown or value only), and what that widget takes, such as the short model name, the reset timers' format, the custom badge's text, the caution and danger levels, blink, the pace marker and the meter style. `↑` `↓` pick an option, `←` `→` or Enter change it, `x` sets it back to its default, and Esc returns to the list. Each change is saved right away and shows in the preview. A Shell Command's `cmd` is shown but edited only in the config file. The preview title says when it shows a theme, preset or layout you haven't applied yet, and the preset that matches your widgets is marked `current`.
+Enter on a widget opens its options: color, label (shown or value only), and what that widget takes, such as the short model name, the reset timers' format, the custom badge's text, the caution and danger levels, blink, the pace marker, the pace delta and the meter style. `↑` `↓` pick an option, `←` `→` or Enter change it, `x` sets it back to its default, and Esc returns to the list. Each change is saved right away and shows in the preview. A Shell Command's `cmd` is shown but edited only in the config file. The preview title says when it shows a theme, preset or layout you haven't applied yet, and the preset that matches your widgets is marked `current`.
 
 | Key                    | Action                                                                            |
 | ---------------------- | --------------------------------------------------------------------------------- |
@@ -137,6 +137,32 @@ Every 5h, 7d, third-party and Argon quota meter carries a marker, a larger dot `
 ```
 
 The marker needs no extra data: it comes from the reset time Antigravity already sends and the fixed 5-hour and 7-day window lengths. It's hidden when the reset is further away than the window itself. Turn it off with `"pacing": false` (or `r` in `configure`), or per widget with `"pace": false`.
+
+### Pace delta
+
+The percentage widgets (`fiveHourPct`, `weeklyPct` and `quota`) have no meter, so they have no marker. They can show the same thing as a number instead, the share used minus the share of the window gone, in whole points:
+
+```
+⏳ 5h: 72.0% rem ⇣16%    16 points of headroom: you're using quota slower than time passes
+📅 7d: 21.0% rem ⇡3%     3 points faster than sustainable: at this rate the quota runs out before it resets
+```
+
+It's off by default. Turn it on per widget with `"paceDelta": true`, or with **Pace delta** in the widget's options in `configure`:
+
+```json
+{
+  "widgets": [
+    { "id": "fiveHourPct", "paceDelta": true },
+    { "id": "weeklyPct", "paceDelta": true }
+  ]
+}
+```
+
+- The arrows are `^` and `v` in ASCII mode, the ones the git widget uses for ahead and behind.
+- Nothing is added when you're on pace (less than half a point either way), or when the window length is unknown (a reset further away than the window, or a quota the `quota` widget doesn't know the window of).
+- The delta keeps the widget's color, which follows the share left (`warn`, `crit`); it doesn't turn to the danger color on its own.
+- It's independent of `"pacing"` and `"pace"`, which only set the meters' marker.
+- On a terminal too narrow for the row, the delta goes before any widget is dropped.
 
 ## Meter styles
 
