@@ -135,6 +135,16 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 
 </details>
 
+### バーの言語
+
+バー自体の言葉（`リセット`、`残`、`コンテキスト` などのラベル）は日本語で表示できます：
+
+```sh
+npx agy-powerline init --language ja
+```
+
+または `statusline.config.json` に `"language": "ja"` と書きます（`configure` では `u` キー）。モデル名、ブランチなど agy から届く内容はそのまま表示され、`2h 47m` の単位は幅を抑えるため英字のままです。コマンドと `configure` は英語のままです。詳しくは[設定のドキュメント](docs/configuration.md#language)をご覧ください。
+
 ## ウィジェット
 
 | ウィジェット                                                  | 表示内容                                                                                                 |
