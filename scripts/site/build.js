@@ -4,8 +4,8 @@
 "use strict";
 
 // Builds the whole agy-powerline.com site into one folder: the home page (in
-// English, French and Spanish), the theme gallery, the configurator, the docs and
-// guides from the repo's Markdown, the widget list, the quota calculator, the
+// English, French, Spanish and Japanese), the theme gallery, the configurator, the
+// docs and guides from the repo's Markdown, the widget list, the quota calculator, the
 // trust pages, and the files around them (sitemap, robots.txt, feed,
 // llms.txt, font, images, share cards, schema). The sitemap lists exactly the
 // indexable pages this build writes.
@@ -941,6 +941,13 @@ function sitePages() {
       sources: HOME_SOURCES,
       html: buildHomeHtml({ lang: "es" }),
       card: { title: stripTags(HOME_TEXT.es.heroTitle), label: "Antigravity CLI", lang: "es" },
+      images: SCREENSHOTS.map((name) => screenshotUrl(name)),
+    },
+    {
+      path: "ja/",
+      sources: HOME_SOURCES,
+      html: buildHomeHtml({ lang: "ja" }),
+      card: { title: stripTags(HOME_TEXT.ja.heroTitle), label: "Antigravity CLI", lang: "ja" },
       images: SCREENSHOTS.map((name) => screenshotUrl(name)),
     },
     {

@@ -3,7 +3,7 @@
 
 "use strict";
 
-// The home page (/, /fr/ and /es/) and the theme gallery (/themes/) of
+// The home page (/, /fr/, /es/ and /ja/) and the theme gallery (/themes/) of
 // agy-powerline.com. What every page of the site must do (CSP, no outside
 // loads, sitemap, share cards, links that resolve) is checked in
 // tests/shared/site.test.js.
@@ -44,6 +44,7 @@ async function run() {
   const html = buildHomeHtml();
   const fr = buildHomeHtml({ lang: "fr" });
   const es = buildHomeHtml({ lang: "es" });
+  const ja = buildHomeHtml({ lang: "ja" });
   const themes = buildThemesHtml();
   const galleryThemes = THEME_ORDER.filter((id) => id !== "custom");
 
@@ -209,6 +210,18 @@ async function run() {
       !/\{\{\w+\}\}|<!--[A-Z_]+-->/.test(es)
   );
 
+  record(
+    "the Japanese home page is in Japanese and links back to the English one",
+    /^<!doctype html>\s*<html lang="ja">/i.test(ja) &&
+      /<title>[^<]*agy[^<]*<\/title>/.test(ja) &&
+      ja.includes(`<link rel="canonical" href="${SITE_URL}ja/" />`) &&
+      ja.includes(`hreflang="en" href="${SITE_URL}"`) &&
+      ja.includes(`<meta property="og:locale" content="ja_JP" />`) &&
+      ja.includes("コピー") &&
+      ja.includes("リセット") &&
+      !/\{\{\w+\}\}|<!--[A-Z_]+-->/.test(ja)
+  );
+
   // Each home page's footer links to the home page in every other language.
   const footerLangs = (page) =>
     (page.match(/<span class="footer-langs">([\s\S]*?)<\/span>/) || [])[1] || "";
@@ -216,8 +229,11 @@ async function run() {
     [...footerLangs(page).matchAll(/href="([^"]+)" hreflang="(\w+)"/g)].map((m) => m[2]).join(",");
   record(
     "every home page links to the home page in each other language",
-    langLinks(html) === "fr,es" && langLinks(fr) === "en,es" && langLinks(es) === "en,fr",
-    [langLinks(html), langLinks(fr), langLinks(es)].join(" | ")
+    langLinks(html) === "fr,es,ja" &&
+      langLinks(fr) === "en,es,ja" &&
+      langLinks(es) === "en,fr,ja" &&
+      langLinks(ja) === "en,fr,es",
+    [langLinks(html), langLinks(fr), langLinks(es), langLinks(ja)].join(" | ")
   );
 
   // The header's language menu lists every home page, with a flag, and marks
@@ -226,7 +242,7 @@ async function run() {
   const langMenu = (page) =>
     (page.match(/<details class="lang-menu">([\s\S]*?)<\/details>/) || [])[1] || "";
   const menuOk = (page, lang) =>
-    ["en", "fr", "es"].every(
+    ["en", "fr", "es", "ja"].every(
       (l) =>
         langMenu(page).includes(`hreflang="${l}" lang="${l}"`) &&
         langMenu(page).includes(`class="flag flag-${l}"`) &&
@@ -236,7 +252,7 @@ async function run() {
     new RegExp(`hreflang="${lang}" lang="${lang}" aria-current="true"`).test(langMenu(page));
   record(
     "every home page has a language menu in its header, with its own language marked",
-    menuOk(html, "en") && menuOk(fr, "fr") && menuOk(es, "es")
+    menuOk(html, "en") && menuOk(fr, "fr") && menuOk(es, "es") && menuOk(ja, "ja")
   );
 
   const keys = (obj) => Object.keys(obj).sort().join(",");

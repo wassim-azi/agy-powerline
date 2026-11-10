@@ -257,6 +257,11 @@ const SHARED_CSS = `
         line-height: 1.2;
         letter-spacing: -0.02em;
       }
+      /* Japanese has no spaces: a heading wraps between phrases, not inside a
+         word (browsers without auto-phrase wrap as before). */
+      :lang(ja) :is(h1, h2, h3) {
+        word-break: auto-phrase;
+      }
 
       .sr-only {
         position: absolute;
@@ -470,6 +475,9 @@ const SHARED_CSS = `
       }
       .flag-es {
         background-image: url("/img/flag-es.png");
+      }
+      .flag-ja {
+        background-image: url("/img/flag-ja.png");
       }
       .lang-menu:not([open]) > .lang-menu-panel {
         display: none;
@@ -1143,6 +1151,7 @@ const SITE_LANGUAGES = [
   { lang: "en", href: "/", label: "English", locale: "en_US" },
   { lang: "fr", href: "/fr/", label: "Français", locale: "fr_FR" },
   { lang: "es", href: "/es/", label: "Español", locale: "es_ES" },
+  { lang: "ja", href: "/ja/", label: "日本語", locale: "ja_JP" },
 ];
 const siteLanguage = (lang) => SITE_LANGUAGES.find((l) => l.lang === lang) || SITE_LANGUAGES[0];
 
@@ -1223,6 +1232,34 @@ const CHROME_TEXT = {
     copied: "Copiado",
     copiedStatus: "Copiado al portapapeles",
     copyCode: "Copiar el código",
+  },
+  ja: {
+    skip: "本文へスキップ",
+    pageTheme: "ページのテーマ",
+    language: "言語",
+    system: "システム",
+    light: "ライト",
+    dark: "ダーク",
+    menu: "メニュー",
+    nav: {
+      install: "インストール",
+      docs: "Docs",
+      themes: "テーマ",
+      configurator: "設定",
+    },
+    getStarted: "はじめる",
+    github: "GitHub の agy-powerline",
+    tagline:
+      "Google Antigravity CLI 向けの agy ステータスライン。無料のオープンソースで、テレメトリはありません。",
+    product: "プロダクト",
+    docs: "ドキュメント",
+    project: "プロジェクト",
+    footerNote:
+      "MIT ライセンス · このサイトのバーはすべて実際のステータスラインのコードで描画しています",
+    copy: "コピー",
+    copied: "コピーしました",
+    copiedStatus: "クリップボードにコピーしました",
+    copyCode: "コードをコピー",
   },
 };
 

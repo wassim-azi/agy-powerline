@@ -547,6 +547,182 @@ const HOME_TEXT = {
     ctaLead: "Instálala con un solo comando, o crea primero tu barra en el navegador.",
     viewOnGithub: "Ver en GitHub",
   },
+  ja: {
+    lang: "ja",
+    title: "Google Antigravity CLI 向け agy ステータスライン - agy-powerline",
+    description:
+      "agy-powerline は Google Antigravity CLI（agy）向けのステータスラインです。Gemini、Claude/GPT、Argon のクォータをペースマーカー付きで、コンテキストや git と一緒に agy のステータスバーに表示します。",
+    imageAlt:
+      "agy-powerline：クォータが最後までもつかがわかる agy のステータスラインと、デフォルトのバー",
+    eyebrow: "Google Antigravity CLI 向けステータスライン",
+    heroTitle:
+      'クォータが<span class="grad-text">最後までもつか</span>がわかる agy のステータスライン',
+    heroLead:
+      "モデル、コンテキストウィンドウ、git、そして Antigravity のすべてのクォータをペースマーカー付きで、agy の入力欄の下の powerline バーに表示します。セットアップは<strong>コマンドひとつ</strong>です。",
+    copy: "コピー",
+    copyCommand: "コピー：",
+    copyInstall: "インストールコマンドをコピー",
+    buildInBrowser: "ブラウザでバーを作る",
+    heroFacts: ["Node.js 20+", "依存パッケージ 0", "テレメトリなし", "MIT ライセンス"],
+    askAgy: "agy に何でも質問…",
+    heroBarCaption:
+      "agy の入力欄の下に表示される agy-powerline のライブプレビューです。テーマとレイアウトを選ぶと切り替わります。このページのバーはすべて、実際のステータスラインのコードで描画しています。",
+    demoThemes: "テーマ",
+    demoLayouts: "レイアウト",
+    allThemes: (n) => `全 ${n} 種 →`,
+    anatomyEyebrow: "ひと目でわかる",
+    anatomyTitle: "agy のステータスラインを 10 秒で読む",
+    anatomyLead:
+      "デフォルトのバーは 2 行です。上の行は今使っているもの、下の行はクォータの残りを示します。",
+    anatomy: [
+      ["model", "モデル", "agy が今使っているモデル。"],
+      [
+        "context",
+        "コンテキストウィンドウ",
+        "agy が会話を圧縮しなければならなくなるまでに、会話がどれだけ埋まっているか。",
+      ],
+      ["git", "Git", "ブランチ、未コミットの変更、upstream より進んでいる・遅れているコミット数。"],
+      [
+        "fiveHour",
+        "5 時間クォータ",
+        "Gemini の 5 時間クォータの残りと、それがいつリセットされるか。",
+      ],
+      [
+        "pace",
+        "ペースマーカー",
+        "クォータの期間のうち、今どこにいるかを示します。メーターがマーカーを越えていれば、時間の経過より速くクォータを使っていて、リセットの前に使い切ることになります。",
+      ],
+      ["weekly", "7 日間クォータ", "週間クォータ。専用のペースマーカーとリセット時刻が付きます。"],
+    ],
+    paceGuide: "ペースマーカーの仕組み（英語）→",
+    stepsEyebrow: "はじめる",
+    stepsTitle: "1 分で使い始められます",
+    steps: [
+      [
+        "インストール",
+        "Node.js 20 以上と Antigravity CLI が必要です。<code>init</code> は agy の <code>settings.json</code> を変更する前にバックアップします。",
+        "npx agy-powerline init",
+      ],
+      [
+        "見た目を選ぶ",
+        "<code>init</code> の質問に沿って、プリセット、レイアウト、テーマをプレビューを見ながら選びます。あとからいつでも変更できます。",
+        "npx agy-powerline configure",
+      ],
+      [
+        "agy を一度再起動",
+        "バーが入力欄の下に表示され、agy に合わせて更新されます。その後の変更は再起動なしで反映されます。",
+        "agy",
+      ],
+    ],
+    installGuide: "インストールの詳細（英語）→",
+    featuresEyebrow: "機能",
+    featuresTitle: "Antigravity CLI のステータスバーで見たいものすべて",
+    featuresLead:
+      "Antigravity CLI の実際のステータスラインのデータをもとに作られていて、一日中動かしたままでも安全です。",
+    features: (n) => [
+      [
+        "pace",
+        "クォータのペースマーカー",
+        "どのクォータのメーターも期間内の現在位置を示すので、クォータが尽きそうなことを事前に把握できます。残り 30% で注意、10% で危険を示します。",
+        "/guides/antigravity-quota/",
+      ],
+      [
+        "themes",
+        `${n.themes} 種類のテーマ`,
+        "ダーク、ライト、色覚多様性に配慮した配色。どれも対象のターミナル背景で WCAG AA のコントラストを確認しています。",
+        "/themes/",
+      ],
+      [
+        "layouts",
+        "3 種類のレイアウト",
+        "Pills、Lines、Classic を好きな行数で。各行はターミナルの幅に合わせて縮みます。",
+        "/docs/configuration/",
+      ],
+      [
+        "widgets",
+        `${n.widgets} 種類のウィジェット`,
+        "モデル、コンテキスト、git、クォータ、トークン、セッション時間、エージェントの状態、自分のシェルコマンドなど。",
+        "/widgets/",
+      ],
+      [
+        "configure",
+        "好きな方法で設定",
+        "ライブプレビュー付きのターミナルエディター、ブラウザのコンフィギュレーター、プリセット、またはスキーマ付きの JSON。",
+        "/configure/",
+      ],
+      [
+        "platforms",
+        "Windows, macOS, Linux, WSL",
+        "実行時の依存パッケージはゼロ、Node.js 20 以上で動作します。ネットワーク通信もテレメトリもありません。",
+        "/install/",
+      ],
+    ],
+    shotsEyebrow: "実際のスクリーンショット",
+    shotsTitle: "実際のターミナルで",
+    shotsLead: "agy のセッションで撮影したもので、モックアップではありません。",
+    shots: {
+      windows: [
+        "agy のセッション",
+        "Windows Terminal で agy の入力欄の下に表示された agy-powerline：上に短い会話、下に 3 行の Pills バー",
+      ],
+      "pills-dark": [
+        "Pills",
+        "dark-aurora テーマの agy-powerline Pills レイアウト：モデル、コンテキスト、プロジェクト、git；ペースマーカーとリセットまでの時間付きの Gemini 5h と 7d のクォータ；Claude/GPT と Argon の週間クォータ",
+      ],
+      "lines-light": [
+        "Lines",
+        "明るいターミナルでの light-paper テーマの agy-powerline Lines レイアウト",
+      ],
+      "classic-dark": [
+        "Classic",
+        "暗いターミナルでの dark-aurora テーマの agy-powerline Classic レイアウト、ブロックメーター付き",
+      ],
+    },
+    themesEyebrow: "テーマ",
+    themesTitle: (n) => `ダーク、ライト、色覚多様性に配慮した ${n} 種類のテーマ`,
+    themesLead:
+      "テーマのページ（英語）では、すべてのテーマを想定するターミナル背景の上に描画し、色覚のシミュレーションも見られます。",
+    seeAllThemes: (n) => `全 ${n} テーマを見る`,
+    trustEyebrow: "安心して実行できる",
+    trustTitle: "更新のたびに実行されるので、小さく保っています",
+    trustBody:
+      '実行時の依存パッケージなし、ネットワーク通信なし。設定は自分のインストールフォルダーからのみ読み込むので、クローンしたリポジトリがバーを変えたりコマンドを実行したりすることはできません。<a href="/security/">マシン上で何をするか</a>（英語）。',
+    trust: [
+      [
+        "https://scorecard.dev/viewer/?uri=github.com/wassim-azi/agy-powerline",
+        "OpenSSF Scorecard",
+      ],
+      ["https://www.bestpractices.dev/projects/15655", "OpenSSF Best Practices"],
+      ["https://www.npmjs.com/package/agy-powerline", "npm provenance"],
+      ["/security/", "依存パッケージ 0"],
+      ["/privacy/", "テレメトリなし"],
+      ["https://github.com/wassim-azi/agy-powerline/blob/main/LICENSE", "MIT ライセンス"],
+    ],
+    faqEyebrow: "よくある質問",
+    faqTitle: "最初によく聞かれること",
+    faq: [
+      [
+        "Windows で動きますか？",
+        'はい。Windows、macOS、Linux、WSL で動作します。Windows では agy がバーを <code>cmd /c</code> 経由で実行し、その設定は <code>init</code> が行います。WSL では、WSL 内の Linux 版 Node.js でインストールしてください（<a href="/install/#wsl">WSL についての注意</a>、英語）。',
+      ],
+      [
+        "データをどこかに送信しますか？",
+        'いいえ。agy-powerline はネットワークリクエストを一切行わず、テレメトリもアナリティクスもありません。問題はローカルのログに記録され、そのログは読むことも、消去することも、無効にすることもできます。<a href="/security/">セキュリティとプライバシー</a>（英語）に、読み書きするすべてのファイルを記載しています。Google Analytics を使うのはこのウェブサイトだけで、訪問数を数えるためです（<a href="/privacy/">プライバシー</a>、英語）。',
+      ],
+      [
+        "agy が遅くなりますか？",
+        "Windows 11 のノート PC では、1 回の更新にかかる agy-powerline 自体の処理は約 0.1 秒です。Windows では <code>cmd</code> と Node の起動に約 0.1～0.25 秒が加わりますが、これはどのステータスラインコマンドでも同じです。",
+      ],
+      [
+        "どのクォータを表示しますか？",
+        'Gemini の 5 時間と 7 日間のクォータ、サードパーティ（Claude と GPT）の 5 時間と 7 日間のクォータ、Google AI Pro での Gemini 4 Argon の週間クォータを、それぞれのリセット時刻とともに表示します。メーターの見方は<a href="/guides/antigravity-quota/">クォータのガイド</a>（英語）で説明しています。',
+      ],
+    ],
+    allQuestions: "すべての質問（英語）→",
+    ctaTitle: "クォータが尽きる前に気づく",
+    ctaLead: "コマンドひとつでインストールするか、先にブラウザでバーを作ってみてください。",
+    viewOnGithub: "GitHub で見る",
+  },
 };
 
 module.exports = { HOME_TEXT };
