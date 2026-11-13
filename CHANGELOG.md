@@ -5,12 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [1.11.2] - 2026-11-13
 
 ### Fixed
 
-- Disable Google Signals and ad personalization in the agy-powerline.com `gtag` config so it does not request the `/ads/ga-audiences` pixel blocked by the site CSP
-- Remove `loading="lazy"` from the home page's screenshot gallery images on agy-powerline.com so browsers do not flag lazy-loaded images with `height: auto`
+- Disable Google Signals and ad personalization in the agy-powerline.com `gtag` config so it does not request the `/ads/ga-audiences` pixel blocked by the site CSP (#195)
+- Remove `loading="lazy"` from the home page's screenshot gallery images on agy-powerline.com so browsers do not flag lazy-loaded images with `height: auto` (#195)
 
 ## [1.11.1] - 2026-11-13
 
