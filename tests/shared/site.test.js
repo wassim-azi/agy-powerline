@@ -22,6 +22,12 @@ const { decodePng, resizePng, encodePng } = require("../../scripts/site/png");
 const { cardSlug } = require("../../scripts/site/layout");
 const { quotaPace, formatDuration } = require("../../scripts/site/quota-pace");
 const { renderMarkdown } = require("../../scripts/site/markdown");
+const {
+  rateVital,
+  createClsTracker,
+  createInpTracker,
+  initWebVitals,
+} = require("../../scripts/site/web-vitals");
 
 const SITE_URL = "https://agy-powerline.com/";
 
@@ -720,6 +726,107 @@ async function run() {
         md.html.includes('<img src="a.png" alt="shot" width="10" height="5" loading="lazy" />') &&
         md.html.includes('<p class="center">'),
       md.html
+    );
+
+    record(
+      "every site page reports Core Web Vitals via the site collector",
+      files.every((file) => pages[file].includes("AgySiteVitals.initWebVitals()")),
+      files.filter((file) => !pages[file].includes("AgySiteVitals.initWebVitals()")).join(", ")
+    );
+
+    const cls = createClsTracker();
+    cls.add({ value: 0.05, startTime: 100, hadRecentInput: false });
+    cls.add({ value: 0.4, startTime: 200, hadRecentInput: true });
+    cls.add({ value: 0.03, startTime: 300, hadRecentInput: false });
+    cls.add({ value: 0.06, startTime: 1500, hadRecentInput: false });
+    const inp = createInpTracker();
+    inp.add({ interactionId: 0, duration: 999 });
+    inp.add({ interactionId: 1, duration: 48 });
+    inp.add({ interactionId: 1, duration: 120 });
+    inp.add({ interactionId: 2, duration: 84 });
+
+    const observed = {};
+    const disconnected = [];
+    class MockObserver {
+      constructor(cb) {
+        this.cb = cb;
+      }
+      observe({ type }) {
+        observed[type] = this.cb;
+      }
+      disconnect() {
+        disconnected.push(this.cb);
+      }
+    }
+    MockObserver.supportedEntryTypes = ["largest-contentful-paint", "layout-shift", "event"];
+
+    const listeners = {};
+    const doc = {
+      visibilityState: "visible",
+      addEventListener(type, fn) {
+        listeners[`doc:${type}`] = fn;
+      },
+    };
+    const win = {
+      addEventListener(type, fn) {
+        listeners[`win:${type}`] = fn;
+      },
+    };
+    const events = [];
+    const vitals = initWebVitals({
+      Observer: MockObserver,
+      doc,
+      win,
+      report: (...args) => events.push(args),
+    });
+
+    observed["largest-contentful-paint"]({ getEntries: () => [{ startTime: 1234.6 }] });
+    observed["layout-shift"]({
+      getEntries: () => [
+        { value: 0.02, startTime: 200, hadRecentInput: false },
+        { value: 0.5, startTime: 300, hadRecentInput: true },
+        { value: 0.03, startTime: 500, hadRecentInput: false },
+      ],
+    });
+    observed.event({
+      getEntries: () => [
+        { interactionId: 0, duration: 400 },
+        { interactionId: 10, duration: 185.4 },
+      ],
+    });
+
+    doc.visibilityState = "hidden";
+    listeners["doc:visibilitychange"]();
+    listeners["win:pagehide"]();
+
+    const byName = Object.fromEntries(events.map(([, name, payload]) => [name, payload]));
+    const noopVitals = initWebVitals({
+      Observer: null,
+      doc: null,
+      win: null,
+      report: () => {},
+    });
+    record(
+      "the Core Web Vitals collector tracks LCP, CLS, and INP and reports once on hide",
+      rateVital("LCP", 2500) === "good" &&
+        rateVital("LCP", 3000) === "needs-improvement" &&
+        rateVital("LCP", 4500) === "poor" &&
+        Math.abs(cls.value() - 0.08) < 1e-9 &&
+        inp.value() === 120 &&
+        events.length === 3 &&
+        byName.LCP.value === 1235 &&
+        byName.LCP.metric_rating === "good" &&
+        byName.CLS.value === 50 &&
+        byName.CLS.metric_value === 0.05 &&
+        byName.CLS.metric_rating === "good" &&
+        byName.INP.value === 185 &&
+        byName.INP.metric_rating === "good" &&
+        vitals.getSnapshot().INP === 185.4 &&
+        disconnected.length === 3 &&
+        noopVitals.getSnapshot().LCP === null &&
+        noopVitals.getSnapshot().CLS === null &&
+        noopVitals.getSnapshot().INP === null,
+      JSON.stringify({ events, cls: cls.value(), inp: inp.value() })
     );
   } finally {
     fs.rmSync(root, { recursive: true, force: true });
