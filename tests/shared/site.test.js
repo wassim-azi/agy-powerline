@@ -735,19 +735,41 @@ async function run() {
     );
 
     record(
-      "every site page disables Google Signals and ad personalization in gtag config",
+      "every site page sets default GA consent with ad signals denied",
       files.every(
         (file) =>
+          pages[file].includes('gtag("consent", "default"') &&
+          pages[file].includes('ad_storage: "denied"') &&
+          pages[file].includes('ad_user_data: "denied"') &&
+          pages[file].includes('ad_personalization: "denied"') &&
           pages[file].includes("allow_google_signals: false") &&
           pages[file].includes("allow_ad_personalization_signals: false")
       ),
       files
         .filter(
           (file) =>
+            !pages[file].includes('gtag("consent", "default"') ||
+            !pages[file].includes('ad_storage: "denied"') ||
+            !pages[file].includes('ad_user_data: "denied"') ||
+            !pages[file].includes('ad_personalization: "denied"') ||
             !pages[file].includes("allow_google_signals: false") ||
             !pages[file].includes("allow_ad_personalization_signals: false")
         )
         .join(", ")
+    );
+
+    const langButtonMatches = files
+      .map((file) => {
+        const match = pages[file].match(
+          /<summary class="lang-btn"[^>]*aria-label="([^"]+)"[^>]*>[\s\S]*?<span class="lang-code">([^<]+)<\/span>/
+        );
+        return { file, match };
+      })
+      .filter(({ match }) => !match || !match[1].toUpperCase().includes(match[2].toUpperCase()));
+    record(
+      "language selector accessible name includes its visible language code",
+      langButtonMatches.length === 0,
+      langButtonMatches.map(({ file }) => file).join(", ")
     );
 
     const homeShotMatches =

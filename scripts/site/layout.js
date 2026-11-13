@@ -1449,6 +1449,11 @@ function analyticsTags() {
       function gtag() {
         dataLayer.push(arguments);
       }
+      gtag("consent", "default", {
+        ad_storage: "denied",
+        ad_user_data: "denied",
+        ad_personalization: "denied",
+      });
       gtag("js", new Date());
       gtag("config", "${GA_MEASUREMENT_ID}", {
         allow_google_signals: false,
@@ -1505,7 +1510,7 @@ function buildHeader({ currentPage = "", lang = "en" } = {}) {
         <div class="header-actions">
           <a class="icon-btn header-github" href="${REPO_URL}" aria-label="${esc(text.github)}" title="GitHub">${brandIcon("github", 19)}</a>
           <details class="lang-menu">
-            <summary class="lang-btn" aria-label="${esc(text.language)}: ${esc(current.label)}" title="${esc(text.language)}">${flag(current.lang)}<span class="lang-code">${current.lang.toUpperCase()}</span></summary>
+            <summary class="lang-btn" aria-label="${current.lang.toUpperCase()} — ${esc(text.language)}: ${esc(current.label)}" title="${esc(text.language)}">${flag(current.lang)}<span class="lang-code">${current.lang.toUpperCase()}</span></summary>
             <nav class="lang-menu-panel" aria-label="${esc(text.language)}">
               ${languageLinks}
             </nav>
