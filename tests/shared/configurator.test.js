@@ -85,7 +85,9 @@ async function run() {
       Boolean(scriptFile) && fs.existsSync(path.join(path.dirname(out), scriptFile)),
       scriptFile
     );
-    const inlineScripts = [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map((m) => m[1]);
+    const inlineScripts = [...html.matchAll(/<script>([\s\S]*?)<\/script[^>]*>/gi)].map(
+      (m) => m[1]
+    );
     const pathLike = inlineScripts
       .join("\n")
       .match(/["'`](?:\.\.?\/|\/(?:home|proc|tmp)\b)[^"'`]*/g);
