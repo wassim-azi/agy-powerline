@@ -21,7 +21,7 @@ const { WIDGET_TAGS } = require(path.join(repo, "src/lib/widget-style"));
 const { ansiToHtml } = require("./ansi");
 const { styleClasses } = require("./style-classes");
 const { renderMarkdown, stripTags } = require("./markdown");
-const { buildDocPage } = require("./doc-page");
+const { buildDocPage, faqPageData } = require("./doc-page");
 const { buildConfigSchema } = require("./config-schema");
 const {
   REPO_URL,
@@ -67,6 +67,7 @@ const MARKDOWN_PAGES = [
     path: "install/",
     nav: "install",
     parent: "docs",
+    schema: "TechArticle",
     name: "Install",
     title: "Install agy-powerline - agy statusline setup",
     description:
@@ -77,6 +78,7 @@ const MARKDOWN_PAGES = [
     card: { title: "Every agy-powerline setting, explained", label: "Docs" },
     path: "docs/configuration/",
     parent: "docs",
+    schema: "TechArticle",
     name: "Configuration",
     title: "agy-powerline configuration - widgets, themes and options",
     description:
@@ -86,6 +88,7 @@ const MARKDOWN_PAGES = [
     source: "docs/troubleshooting.md",
     path: "troubleshooting/",
     parent: "docs",
+    schema: "TechArticle",
     name: "Troubleshooting",
     title: "Troubleshooting the agy statusline - agy-powerline",
     description:
@@ -96,6 +99,7 @@ const MARKDOWN_PAGES = [
     card: { title: "What Antigravity CLI sends to your status line", label: "Reference" },
     path: "docs/payload/",
     parent: "docs",
+    schema: "TechArticle",
     name: "Payload reference",
     title: "What Antigravity CLI sends to a status line (payload)",
     description:
@@ -105,6 +109,7 @@ const MARKDOWN_PAGES = [
     source: "docs/faq.md",
     card: { title: "agy statusline questions, answered", label: "FAQ" },
     path: "faq/",
+    schema: "FAQPage",
     name: "FAQ",
     title: "agy-powerline FAQ - agy statusline questions",
     description:
@@ -114,6 +119,7 @@ const MARKDOWN_PAGES = [
     source: "SECURITY.md",
     card: { title: "What agy-powerline does on your machine", label: "Security" },
     path: "security/",
+    schema: "TechArticle",
     name: "Security",
     title: "Security and privacy of agy-powerline",
     description:
@@ -124,6 +130,7 @@ const MARKDOWN_PAGES = [
     card: { title: "What's new in agy-powerline", label: "Changelog" },
     path: "changelog/",
     parent: "docs",
+    schema: "WebPage",
     name: "Changelog",
     title: "agy-powerline changelog - release notes",
     description:
@@ -132,6 +139,7 @@ const MARKDOWN_PAGES = [
   {
     source: "scripts/site/content/about.md",
     path: "about/",
+    schema: "ProfilePage",
     name: "About",
     edit: false,
     title: "About agy-powerline",
@@ -142,6 +150,7 @@ const MARKDOWN_PAGES = [
     source: "scripts/site/content/privacy.md",
     card: { title: "Analytics on the website, none in the tool", label: "Privacy" },
     path: "privacy/",
+    schema: "WebPage",
     name: "Privacy",
     edit: false,
     title: "Privacy - agy-powerline",
@@ -385,6 +394,87 @@ function versionedSections(html) {
   });
 }
 
+function extractFaqPairs(html) {
+  return html
+    .split(/<h2\b[^>]*>/i)
+    .slice(1)
+    .map((sec) => {
+      const end = sec.indexOf("</h2>");
+      return end === -1 ? null : [sec.slice(0, end), sec.slice(end + "</h2>".length)];
+    })
+    .filter(Boolean);
+}
+
+function articleStructuredData(page, { published, modified } = {}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "TechArticle",
+    headline: page.name,
+    description: page.description,
+    url: absoluteUrl(page.path),
+    image: absoluteUrl(cardPath(page.path)),
+    inLanguage: "en",
+    author: { "@type": "Person", name: "Wassim AZI", url: AUTHOR_URL },
+    publisher: { "@type": "Person", name: "Wassim AZI", url: AUTHOR_URL },
+    isPartOf: { "@id": `${SITE_URL}#website` },
+    about: { "@id": `${SITE_URL}#app` },
+    ...(published ? { datePublished: published } : {}),
+    ...(modified ? { dateModified: modified } : {}),
+  };
+}
+
+function webPageStructuredData(page, { published, modified } = {}) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    name: page.name,
+    description: page.description,
+    url: absoluteUrl(page.path),
+    inLanguage: "en",
+    isPartOf: { "@id": `${SITE_URL}#website` },
+    about: { "@id": `${SITE_URL}#app` },
+    ...(published ? { datePublished: published } : {}),
+    ...(modified ? { dateModified: modified } : {}),
+  };
+}
+
+function collectionStructuredData({ name, description, path: pagePath, items }) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    name,
+    description,
+    url: absoluteUrl(pagePath),
+    inLanguage: "en",
+    isPartOf: { "@id": `${SITE_URL}#website` },
+    about: { "@id": `${SITE_URL}#app` },
+    ...(items
+      ? {
+          mainEntity: {
+            "@type": "ItemList",
+            numberOfItems: items.length,
+            itemListElement: items.map((item, i) => ({
+              "@type": "ListItem",
+              position: i + 1,
+              name: item.name,
+              url: item.url,
+            })),
+          },
+        }
+      : {}),
+  };
+}
+
+function pageStructuredData(page, body, { published, modified } = {}) {
+  if (page.schema === "ProfilePage") return aboutStructuredData();
+  if (page.schema === "FAQPage") {
+    return faqPageData(extractFaqPairs(body), { url: absoluteUrl(page.path), lang: "en" });
+  }
+  if (page.schema === "TechArticle") return articleStructuredData(page, { published, modified });
+  if (page.schema === "WebPage") return webPageStructuredData(page, { published, modified });
+  return undefined;
+}
+
 function markdownPage(page, { crumbs, ogType, structuredData, article, label } = {}) {
   const { html, headings } = renderSource(page.source);
   const body =
@@ -394,6 +484,8 @@ function markdownPage(page, { crumbs, ogType, structuredData, article, label } =
         ? versionedSections(html)
         : html;
   const lastmod = lastCommitDate([page.source]);
+  const published =
+    page.schema && page.schema !== "ProfilePage" ? firstCommitDate(page.source) : "";
   return {
     path: page.path,
     sources: [page.source],
@@ -413,8 +505,9 @@ function markdownPage(page, { crumbs, ogType, structuredData, article, label } =
       source: page.edit === false ? "" : page.source,
       lastmod,
       ogType,
+      alternateMarkdown: `${page.path}index.html.md`,
       structuredData:
-        page.source === "scripts/site/content/about.md" ? aboutStructuredData() : structuredData,
+        structuredData || pageStructuredData(page, body, { published, modified: lastmod }),
       article,
     }),
   };
@@ -440,23 +533,10 @@ function aboutStructuredData() {
 function guidePage(guide) {
   const published = firstCommitDate(guide.source);
   const modified = lastCommitDate([guide.source]);
-  const article = {
-    "@context": "https://schema.org",
-    "@type": "TechArticle",
-    headline: guide.name,
-    description: guide.description,
-    url: absoluteUrl(guide.path),
-    image: absoluteUrl(cardPath(guide.path)),
-    inLanguage: "en",
-    author: { "@type": "Person", name: "Wassim AZI", url: AUTHOR_URL },
-    publisher: { "@type": "Person", name: "Wassim AZI", url: AUTHOR_URL },
-    ...(published ? { datePublished: published } : {}),
-    ...(modified ? { dateModified: modified } : {}),
-  };
   return markdownPage(guide, {
     crumbs: [CRUMB_HOME, CRUMB_GUIDES, guide],
     ogType: "article",
-    structuredData: article,
+    structuredData: articleStructuredData(guide, { published, modified }),
     article: { published, modified },
     label: "Guide",
   });
@@ -510,6 +590,8 @@ function docsIndexPage() {
             "Config schema",
             "JSON Schema for statusline.config.json, for editors.",
           ],
+          ["/llms.txt", "llms.txt", "Site index and assistant rules in Markdown."],
+          ["/llms-full.txt", "llms-full.txt", "All documentation in a single Markdown file."],
         ])}
         <h2 id="guides">Guides</h2>
         ${cardList(GUIDES.map((g) => [`/${g.path}`, g.name, g.description]))}
@@ -519,6 +601,8 @@ function docsIndexPage() {
           ["/quota-calculator/", "Quota pace calculator", "Will your quota last until it resets?"],
           ["/themes/", "Theme gallery", "Every theme on dark and light terminals."],
         ])}`;
+  const description =
+    "Documentation for agy-powerline, the agy statusline for Google Antigravity CLI: install, configuration, widgets, troubleshooting, payload reference and guides.";
   return {
     path: "docs/",
     sources: ["scripts/site/build.js"],
@@ -526,13 +610,17 @@ function docsIndexPage() {
     html: docPage({
       path: "docs/",
       title: "agy-powerline docs - agy statusline documentation",
-      description:
-        "Documentation for agy-powerline, the agy statusline for Google Antigravity CLI: install, configuration, widgets, troubleshooting, payload reference and guides.",
+      description,
       bodyHtml: body,
       headings: [],
       crumbs: [CRUMB_HOME, CRUMB_DOCS],
       currentPage: "docs",
       toc: false,
+      structuredData: collectionStructuredData({
+        name: "agy-powerline docs",
+        description,
+        path: "docs/",
+      }),
     }),
   };
 }
@@ -543,6 +631,8 @@ function guidesIndexPage() {
         <h2 id="all-guides">All guides</h2>
         ${cardList(GUIDES.map((g) => [`/${g.path}`, g.name, g.description]))}
         <p>Looking for every setting instead? See the <a href="/docs/">docs</a>.</p>`;
+  const description =
+    "Guides for Antigravity CLI's status bar: see your quota while you work, add a status line to agy, fix powerline symbols, move from Gemini CLI, run a workshop.";
   return {
     path: "guides/",
     sources: GUIDES.map((g) => g.source),
@@ -550,13 +640,18 @@ function guidesIndexPage() {
     html: docPage({
       path: "guides/",
       title: "agy statusline guides - agy-powerline",
-      description:
-        "Guides for Antigravity CLI's status bar: see your quota while you work, add a status line to agy, fix powerline symbols, move from Gemini CLI, run a workshop.",
+      description,
       bodyHtml: body,
       headings: [],
       crumbs: [CRUMB_HOME, CRUMB_GUIDES],
       currentPage: "docs",
       toc: false,
+      structuredData: collectionStructuredData({
+        name: "agy statusline guides",
+        description,
+        path: "guides/",
+        items: GUIDES.map((g) => ({ name: g.name, url: absoluteUrl(g.path) })),
+      }),
     }),
   };
 }
@@ -612,6 +707,8 @@ function widgetsPage() {
           <h2 id="layout-helpers">Layout helpers</h2>
           <ul>${layoutHelpers.map((w) => `<li><code>${esc(w.id)}</code>: ${esc(w.description)}</li>`).join("")}</ul>
         </section>`;
+  const description =
+    "Every widget of the agy-powerline statusline for Antigravity CLI, with a live preview: model, quotas with pace markers, context, git, tokens and more.";
   return {
     path: "widgets/",
     sources: ["src/lib/catalog.js", "src/lib/widget-style.js"],
@@ -622,13 +719,18 @@ function widgetsPage() {
     html: docPage({
       path: "widgets/",
       title: "agy statusline widgets - every agy-powerline widget",
-      description:
-        "Every widget of the agy-powerline statusline for Antigravity CLI, with a live preview: model, quotas with pace markers, context, git, tokens and more.",
+      description,
       bodyHtml: body,
       headings: [],
       crumbs: [CRUMB_HOME, CRUMB_DOCS, { name: "Widgets", path: "widgets/" }],
       currentPage: "docs",
       toc: false,
+      structuredData: collectionStructuredData({
+        name: "agy statusline widgets",
+        description,
+        path: "widgets/",
+        items: widgets.map((w) => ({ name: w.id, url: absoluteUrl(`widgets/#${w.id}`) })),
+      }),
       extraCss: `
       .widget pre {
         margin-top: 0;

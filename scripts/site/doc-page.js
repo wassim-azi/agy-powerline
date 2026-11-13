@@ -9,6 +9,7 @@
 // rendered Markdown. The site script adds a copy button to each code block.
 
 const { injectSiteChrome, finishPage, absoluteUrl, esc, REPO_URL } = require("./layout");
+const { stripTags } = require("./markdown");
 
 const PROSE_CSS = `
       /* Text reads best at about 80 characters a line: the sidebar on the
@@ -375,6 +376,32 @@ function breadcrumbData(crumbs) {
   };
 }
 
+const decodeEntities = (html) =>
+  String(html ?? "")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'");
+
+function faqPageData(items, { url, lang = "en", id, context = true } = {}) {
+  return {
+    ...(context ? { "@context": "https://schema.org" } : {}),
+    "@type": "FAQPage",
+    ...(id ? { "@id": id } : {}),
+    ...(url ? { url } : {}),
+    inLanguage: lang,
+    mainEntity: items.map(([question, answer]) => ({
+      "@type": "Question",
+      name: decodeEntities(stripTags(question)).replace(/\s+/g, " ").trim(),
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: decodeEntities(stripTags(answer)).replace(/\s+/g, " ").trim(),
+      },
+    })),
+  };
+}
+
 function breadcrumbHtml(crumbs) {
   return `<nav class="breadcrumb" aria-label="Breadcrumb"><ol>${crumbs
     .map((crumb, i) =>
@@ -389,7 +416,7 @@ function tocHtml(headings) {
   const items = headings.filter((h) => h.level === 2);
   if (items.length < 3) return "";
   return `<aside class="doc-toc" aria-label="On this page">
-        <p class="doc-side-title">On this page</p>
+        <div class="doc-side-title">On this page</div>
         <ul>
           ${items.map((h) => `<li><a href="#${esc(h.id)}">${esc(h.text)}</a></li>`).join("\n          ")}
         </ul>
@@ -397,15 +424,15 @@ function tocHtml(headings) {
 }
 
 // sidebar: [{ title, links: [[href, label]] }]. The group titles aren't
-// headings: the sidebar comes before the page's h1, and the nav's label already
-// names it for screen readers.
+// headings or prose paragraphs: using div avoids polluting either heading
+// outlines or Answer-First paragraph extractors inside <main>.
 function sidebarHtml(sidebar, pagePath) {
   if (!sidebar || !sidebar.length) return "";
   const current = `/${pagePath}`;
   return `<nav class="doc-side" aria-label="Docs">
         ${sidebar
           .map(
-            (group) => `<p class="doc-side-title">${esc(group.title)}</p>
+            (group) => `<div class="doc-side-title">${esc(group.title)}</div>
         <ul>
           ${group.links
             .map(
@@ -506,8 +533,9 @@ ${PROSE_CSS}${page.extraCss || ""}
       structuredData,
       ogType: page.ogType,
       article: page.article,
+      alternateMarkdown: page.alternateMarkdown,
     })
   );
 }
 
-module.exports = { buildDocPage, breadcrumbData, PROSE_CSS, formatDate };
+module.exports = { buildDocPage, breadcrumbData, faqPageData, PROSE_CSS, formatDate };

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- JSON-LD structured data across the remaining pages of agy-powerline.com: localized `SoftwareApplication` and `FAQPage` on `/fr/`, `/es/`, and `/ja/`; `FAQPage` on `/` and `/faq/`; `TechArticle` on core documentation pages (`/install/`, `/docs/configuration/`, `/docs/payload/`, `/troubleshooting/`, `/security/`); `CollectionPage` on `/docs/`, `/guides/`, and `/widgets/`; and `WebPage` on `/changelog/` and `/privacy/`
+- HTML `<link rel="alternate">` discovery tags on agy-powerline.com for `/changelog.xml`, `/llms.txt`, `/llms-full.txt`, and per-page `index.html.md` copies, plus visible `/llms.txt` and `/llms-full.txt` links in `/docs/` and the footer
+
+### Changed
+
+- Docs sidebar and "On this page" group titles on agy-powerline.com use `<div>` instead of `<p>` so paragraph extractors inside `<main>` start with the article's Answer-First summary
+
 ## [1.11.3] - 2026-11-13
 
 ### Fixed

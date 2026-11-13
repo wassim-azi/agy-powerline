@@ -359,18 +359,65 @@ async function run() {
     );
 
     const badJsonLd = [];
+    const pageSchemas = {};
     for (const file of files) {
+      pageSchemas[file] = [];
       for (const m of pages[file].matchAll(
         /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g
       )) {
         try {
-          JSON.parse(m[1]);
+          const parsed = JSON.parse(m[1]);
+          const nodes = Array.isArray(parsed["@graph"]) ? parsed["@graph"] : [parsed];
+          pageSchemas[file].push(...nodes.map((node) => node["@type"]).filter(Boolean));
         } catch {
           badJsonLd.push(file);
         }
       }
     }
     record("every JSON-LD block is valid JSON", badJsonLd.length === 0, badJsonLd.join(", "));
+
+    const missingRichSchema = indexable.filter(
+      (file) => !pageSchemas[file].some((t) => t !== "BreadcrumbList")
+    );
+    const faqJson = (
+      pages["faq/index.html"].match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g) ||
+      []
+    )
+      .map((tag) => JSON.parse(tag.replace(/<\/?script[^>]*>/g, "")))
+      .find((obj) => obj["@type"] === "FAQPage");
+    record(
+      "every indexable page has page-level JSON-LD beyond BreadcrumbList, and /faq/ has FAQPage",
+      missingRichSchema.length === 0 &&
+        Boolean(faqJson) &&
+        Array.isArray(faqJson.mainEntity) &&
+        faqJson.mainEntity.length >= 10,
+      missingRichSchema.join(", ")
+    );
+
+    const missingDiscovery = indexable.filter((file) => {
+      const html = pages[file];
+      return !(
+        html.includes(`type="application/atom+xml"`) &&
+        html.includes(`href="${SITE_URL}changelog.xml"`) &&
+        html.includes(`href="${SITE_URL}llms.txt"`) &&
+        html.includes('href="/llms.txt"')
+      );
+    });
+    record(
+      "every indexable page exposes Atom feed and llms.txt discovery links",
+      missingDiscovery.length === 0,
+      missingDiscovery.join(", ")
+    );
+
+    const sidebarParagraphs = files.filter((file) => {
+      const nav = (pages[file].match(/<nav class="doc-side"[\s\S]*?<\/nav>/) || [])[0] || "";
+      return /<p\b/.test(nav);
+    });
+    record(
+      "docs sidebar uses no <p> tags before the article body",
+      sidebarParagraphs.length === 0,
+      sidebarParagraphs.join(", ")
+    );
 
     // Root-relative links and images must reach a file this build wrote.
     const broken = new Set();

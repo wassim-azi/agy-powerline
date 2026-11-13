@@ -51,8 +51,9 @@ async function run() {
   const graph = (jsonLd(html)[0] || {})["@graph"] || [];
   const app = graph.find((node) => node["@type"] === "SoftwareApplication");
   const author = graph.find((node) => node["@type"] === "Person");
+  const homeFaq = graph.find((node) => node["@type"] === "FAQPage");
   record(
-    "the home page describes the site, its author and the app in JSON-LD",
+    "the home page describes the site, its author, the app and its FAQ in JSON-LD",
     graph.some((node) => node["@type"] === "WebSite" && node.url === SITE_URL) &&
       Boolean(app) &&
       app.url === SITE_URL &&
@@ -61,7 +62,31 @@ async function run() {
       Boolean(author) &&
       ["https://x.com/wassim_azi", "https://www.linkedin.com/in/wassim-azi"].every((url) =>
         author.sameAs.some((link) => link === url)
-      )
+      ) &&
+      Boolean(homeFaq) &&
+      homeFaq.mainEntity.length === HOME_TEXT.en.faq.length
+  );
+  record(
+    "localized home pages also emit localized SoftwareApplication and FAQPage JSON-LD",
+    [
+      ["fr", fr],
+      ["es", es],
+      ["ja", ja],
+    ].every(([lang, markup]) => {
+      const g = (jsonLd(markup)[0] || {})["@graph"] || [];
+      const localizedApp = g.find((node) => node["@type"] === "SoftwareApplication");
+      const localizedFaq = g.find((node) => node["@type"] === "FAQPage");
+      return (
+        g.some((node) => node["@type"] === "WebSite") &&
+        g.some((node) => node["@type"] === "Person") &&
+        Boolean(localizedApp) &&
+        localizedApp.url === `${SITE_URL}${lang}/` &&
+        localizedApp.inLanguage === lang &&
+        Boolean(localizedFaq) &&
+        localizedFaq.inLanguage === lang &&
+        localizedFaq.mainEntity.length === HOME_TEXT[lang].faq.length
+      );
+    })
   );
   record(
     'the home page title and heading say "agy statusline", the phrase people search for',
