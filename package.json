@@ -65,7 +65,9 @@
     "gemini",
     "quota",
     "nerd-fonts",
-    "windows"
+    "windows",
+    "quota-monitor",
+    "developer-tools"
   ],
   "license": "MIT",
   "engines": {
