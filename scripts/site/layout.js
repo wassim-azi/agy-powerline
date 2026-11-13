@@ -1450,7 +1450,10 @@ function analyticsTags() {
         dataLayer.push(arguments);
       }
       gtag("js", new Date());
-      gtag("config", "${GA_MEASUREMENT_ID}");
+      gtag("config", "${GA_MEASUREMENT_ID}", {
+        allow_google_signals: false,
+        allow_ad_personalization_signals: false,
+      });
     </script>
     <script>
 ${webVitalsScript()}
