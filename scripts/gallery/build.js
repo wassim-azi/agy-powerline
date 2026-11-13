@@ -37,7 +37,7 @@ const {
   cardPath,
   SITE_LANGUAGES,
 } = require("../site/layout");
-const { breadcrumbData } = require("../site/doc-page");
+const { breadcrumbData, faqPageData } = require("../site/doc-page");
 const { HOME_TEXT } = require("../site/home-text");
 const { encodeConfig } = require("../configurator/page");
 
@@ -251,49 +251,52 @@ function card(t, styles) {
 // The site's structured data: the site (for the site name in search
 // results), its author and the app. No rating: Google wants real reviews for
 // software rich results, and invented ones break its rules.
-function homeStructuredData(description) {
-  return {
-    "@context": "https://schema.org",
-    "@graph": [
-      {
-        "@type": "WebSite",
-        "@id": `${SITE_URL}#website`,
-        name: "agy-powerline",
-        alternateName: ["agy powerline", "agy statusline", "agy-powerline.com"],
-        url: SITE_URL,
-        inLanguage: SITE_LANGUAGES.map((l) => l.lang),
-        publisher: { "@id": `${SITE_URL}#author` },
-      },
-      {
-        "@type": "Person",
-        "@id": `${SITE_URL}#author`,
-        name: "Wassim AZI",
-        url: AUTHOR_URL,
-        sameAs: [AUTHOR_URL, X_URL, LINKEDIN_URL],
-      },
-      {
-        "@type": "SoftwareApplication",
-        "@id": `${SITE_URL}#app`,
-        name: "agy-powerline",
-        description,
-        url: SITE_URL,
-        image: absoluteUrl(cardPath("")),
-        screenshot: SCREENSHOTS.map((name) => absoluteUrl(screenshotUrl(name))),
-        applicationCategory: "DeveloperApplication",
-        applicationSubCategory: "Terminal statusline",
-        operatingSystem: "Windows, macOS, Linux",
-        softwareVersion: version,
-        softwareRequirements: "Node.js 20+, Antigravity CLI (agy)",
-        downloadUrl: NPM_URL,
-        installUrl: `${SITE_URL}install/`,
-        license: "https://opensource.org/licenses/MIT",
-        isAccessibleForFree: true,
-        author: { "@id": `${SITE_URL}#author` },
-        sameAs: [REPO_URL, NPM_URL],
-        offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
-      },
-    ],
-  };
+function homeStructuredData(description, { lang = "en", pagePath = "", faq = [] } = {}) {
+  const pageUrl = absoluteUrl(pagePath);
+  const graph = [
+    {
+      "@type": "WebSite",
+      "@id": `${SITE_URL}#website`,
+      name: "agy-powerline",
+      alternateName: ["agy powerline", "agy statusline", "agy-powerline.com"],
+      url: SITE_URL,
+      inLanguage: SITE_LANGUAGES.map((l) => l.lang),
+      publisher: { "@id": `${SITE_URL}#author` },
+    },
+    {
+      "@type": "Person",
+      "@id": `${SITE_URL}#author`,
+      name: "Wassim AZI",
+      url: AUTHOR_URL,
+      sameAs: [AUTHOR_URL, X_URL, LINKEDIN_URL],
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": `${pageUrl}#app`,
+      name: "agy-powerline",
+      description,
+      url: pageUrl,
+      inLanguage: lang,
+      image: absoluteUrl(cardPath(pagePath)),
+      screenshot: SCREENSHOTS.map((name) => absoluteUrl(screenshotUrl(name))),
+      applicationCategory: "DeveloperApplication",
+      applicationSubCategory: "Terminal statusline",
+      operatingSystem: "Windows, macOS, Linux",
+      softwareVersion: version,
+      softwareRequirements: "Node.js 20+, Antigravity CLI (agy)",
+      downloadUrl: NPM_URL,
+      installUrl: `${SITE_URL}install/`,
+      license: "https://opensource.org/licenses/MIT",
+      isAccessibleForFree: true,
+      author: { "@id": `${SITE_URL}#author` },
+      sameAs: [REPO_URL, NPM_URL],
+      offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
+    },
+  ];
+  if (faq.length) {
+    graph.push(faqPageData(faq, { url: pageUrl, lang, id: `${pageUrl}#faq`, context: false }));
+  }
+  return { "@context": "https://schema.org", "@graph": graph };
 }
 
 // --- Home page ----------------------------------------------------------------
@@ -462,18 +465,19 @@ function buildHomeHtml({ lang = "en" } = {}) {
   const filled = template.replace(/\{\{(\w+)\}\}/g, (match, key) =>
     key in values ? values[key] : typeof text[key] === "string" ? text[key] : match
   );
+  const pagePath = lang === "en" ? "" : `${lang}/`;
   const page = injectSiteChrome(filled, {
     title: text.title,
     description: text.description,
     currentPage: "home",
-    pagePath: lang === "en" ? "" : `${lang}/`,
+    pagePath,
     lang,
     alternates: [
       ...SITE_LANGUAGES.map((l) => ({ hreflang: l.lang, path: l.href.slice(1) })),
       { hreflang: "x-default", path: "" },
     ],
     imageAlt: text.imageAlt,
-    structuredData: lang === "en" ? homeStructuredData(text.description) : undefined,
+    structuredData: homeStructuredData(text.description, { lang, pagePath, faq: text.faq }),
     pageCss: styles.css(),
   });
   return finishPage(

@@ -1288,6 +1288,7 @@ const FOOTER_COLUMNS = [
       ["Payload reference", "/docs/payload/"],
       ["Guides", "/guides/"],
       ["FAQ", "/faq/"],
+      ["llms.txt", "/llms.txt"],
     ],
   },
   {
@@ -1329,6 +1330,7 @@ function buildHead({
   ogType = "website",
   imageAlt,
   article,
+  alternateMarkdown = "",
   standalone = false,
 }) {
   const safeTitle = esc(title);
@@ -1348,6 +1350,18 @@ function buildHead({
     <link rel="alternate" hreflang="${esc(alt.hreflang)}" href="${esc(absoluteUrl(alt.path))}" />`
     )
     .join("");
+  const discoveryTags =
+    !noindex && !standalone
+      ? `
+    <link rel="alternate" type="application/atom+xml" title="agy-powerline releases" href="${esc(absoluteUrl("changelog.xml"))}" />
+    <link rel="alternate" type="text/plain" title="llms.txt" href="${esc(absoluteUrl("llms.txt"))}" />
+    <link rel="alternate" type="text/plain" title="llms-full.txt" href="${esc(absoluteUrl("llms-full.txt"))}" />${
+      alternateMarkdown
+        ? `
+    <link rel="alternate" type="text/markdown" href="${esc(absoluteUrl(alternateMarkdown))}" />`
+        : ""
+    }`
+      : "";
   const locale = siteLanguage(lang).locale;
   const otherLocales = alternates
     .filter((alt) => alt.hreflang !== lang && alt.hreflang !== "x-default")
@@ -1388,7 +1402,7 @@ function buildHead({
     />
     <meta name="robots" content="${robots}" />
     <meta name="author" content="Wassim AZI" />
-    <meta name="application-name" content="agy-powerline" />${urlTags}${alternateTags}
+    <meta name="application-name" content="agy-powerline" />${urlTags}${alternateTags}${discoveryTags}
     <meta name="color-scheme" content="light dark" />
     <meta name="theme-color" content="#f7f8fb" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#0b0d12" media="(prefers-color-scheme: dark)" />
