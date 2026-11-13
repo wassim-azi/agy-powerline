@@ -24,6 +24,17 @@ See your model, Gemini 5h/7d, Claude/GPT and Argon quotas, context window, git b
   <img src="assets/demo.gif" alt="agy-powerline configure: add Argon's weekly quota by typing argon, then browse the presets, themes and layouts with a live preview of the bar, and open the Powerline tab" width="850">
 </p>
 
+## Why agy-powerline?
+
+| Feature                   | What you get                                                                                           | Learn more                                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| Quota pacing              | Pace markers on quota meters show whether your 5h or 7d quota lasts until reset                        | [Quota guide](docs/guides/antigravity-quota.md) · [Calculator](https://agy-powerline.com/quota-calculator/) |
+| Multi-provider quotas     | Track Gemini 5h/7d, third-party (Claude/GPT), and Gemini 4 Argon quotas side by side                   | [Payload reference](docs/payload.md#quota-buckets)                                                          |
+| Themes & layouts          | 22 WCAG AA themes (including dark, light, and color-blind safe) across `pills`, `lines`, and `classic` | [Theme gallery](https://agy-powerline.com/themes/)                                                          |
+| Interactive configurators | Live preview editor in your terminal (`npx agy-powerline configure`) or in your browser                | [Web configurator](https://agy-powerline.com/configure/)                                                    |
+| Security & privacy        | Zero runtime dependencies, no network calls, no telemetry, automatic `settings.json` backups           | [Security](SECURITY.md)                                                                                     |
+| Cross-platform            | Works on Windows, macOS, Linux, and WSL with built-in diagnostics (`doctor`)                           | [Install](docs/install.md) · [Troubleshooting](docs/troubleshooting.md)                                     |
+
 ## Install
 
 You need [Node.js](https://nodejs.org/) 20+ and the [Antigravity CLI](https://antigravity.google/docs/cli/overview). Works on Windows, macOS, Linux and WSL ([WSL notes](docs/install.md#wsl)).
