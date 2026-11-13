@@ -401,7 +401,7 @@ function shotsHtml(text) {
   const panels = SCREENSHOTS.map((name, i) => {
     const { width, height } = pngSize(path.join(repo, "assets", "screenshots", `${name}.png`));
     return `<figure class="shot" role="tabpanel" id="shot-${name}" aria-labelledby="tab-${name}"${i === 0 ? "" : " hidden"}>
-              <img ${screenshotAttrs(name, 1000)} alt="${attr(text.shots[name][1])}" width="${width}" height="${height}" loading="lazy" decoding="async" />
+              <img ${screenshotAttrs(name, 1000)} alt="${attr(text.shots[name][1])}" width="${width}" height="${height}" decoding="async" />
             </figure>`;
   }).join("\n            ");
   return `<div class="tabs shot-tabs" role="tablist" aria-label="${text.shotsTitle}">${tabs}</div>

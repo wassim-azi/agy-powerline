@@ -734,6 +734,35 @@ async function run() {
       files.filter((file) => !pages[file].includes("AgySiteVitals.initWebVitals()")).join(", ")
     );
 
+    record(
+      "every site page disables Google Signals and ad personalization in gtag config",
+      files.every(
+        (file) =>
+          pages[file].includes("allow_google_signals: false") &&
+          pages[file].includes("allow_ad_personalization_signals: false")
+      ),
+      files
+        .filter(
+          (file) =>
+            !pages[file].includes("allow_google_signals: false") ||
+            !pages[file].includes("allow_ad_personalization_signals: false")
+        )
+        .join(", ")
+    );
+
+    const homeShotMatches =
+      pages["index.html"].match(
+        /<figure class="shot"[^>]*id="shot-(windows|pills-dark|lines-light|classic-dark)"[\s\S]*?<\/figure>/g
+      ) || [];
+    record(
+      'home page screenshots keep explicit dimensions and omit loading="lazy"',
+      homeShotMatches.length === 4 &&
+        homeShotMatches.every(
+          (shot) => /width="\d+"\s+height="\d+"/.test(shot) && !shot.includes('loading="lazy"')
+        ),
+      `matched=${homeShotMatches.length}`
+    );
+
     const cls = createClsTracker();
     cls.add({ value: 0.05, startTime: 100, hadRecentInput: false });
     cls.add({ value: 0.4, startTime: 200, hadRecentInput: true });
