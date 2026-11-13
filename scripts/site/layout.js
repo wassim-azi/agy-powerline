@@ -47,6 +47,7 @@ const FONT_URL = "/fonts/inter-latin.woff2";
 const STYLESHEET_URL = "/site.css";
 const FAVICON_PATH = path.join(__dirname, "favicon.svg");
 const THEME_TOGGLE_PATH = path.join(__dirname, "theme-toggle.js");
+const WEB_VITALS_PATH = path.join(__dirname, "web-vitals.js");
 
 const esc = (s) =>
   String(s ?? "")
@@ -1431,9 +1432,15 @@ function buildHead({
     </script>${standalone ? "" : analyticsTags()}`;
 }
 
-// The Google Analytics tag, on every page of the site. A standalone page is a
-// local file (npm run gallery), not a visit, so it gets none. The inline part
-// is hashed into the page's CSP by finishPage() like the site's other scripts.
+function webVitalsScript() {
+  const code = fs.readFileSync(WEB_VITALS_PATH, "utf8");
+  return `${code}\n(function () {\n  if (typeof globalThis !== "undefined" && globalThis.AgySiteVitals) {\n    globalThis.AgySiteVitals.initWebVitals();\n  }\n})();`;
+}
+
+// The Google Analytics tag and Core Web Vitals collector, on every page of the
+// site. A standalone page is a local file (npm run gallery), not a visit, so it
+// gets neither. Each inline script is hashed into the page's CSP by
+// finishPage() like the site's other scripts.
 function analyticsTags() {
   return `
     <script async src="${GA_SCRIPT_SRC}/gtag/js?id=${GA_MEASUREMENT_ID}"></script>
@@ -1444,6 +1451,9 @@ function analyticsTags() {
       }
       gtag("js", new Date());
       gtag("config", "${GA_MEASUREMENT_ID}");
+    </script>
+    <script>
+${webVitalsScript()}
     </script>`;
 }
 
