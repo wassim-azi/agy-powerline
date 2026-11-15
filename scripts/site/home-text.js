@@ -56,12 +56,12 @@ const HOME_TEXT = {
     steps: [
       [
         "Install",
-        "Needs Node.js 20 or newer and Antigravity CLI. <code>init</code> backs up agy's <code>settings.json</code> before changing it.",
-        "npx agy-powerline init",
+        "Needs Node.js 20 or newer and Antigravity CLI. Backs up agy's <code>settings.json</code> before changing it, then opens the live editor.",
+        "npx agy-powerline",
       ],
       [
         "Pick a look",
-        "Choose a preset, a layout and a theme when <code>init</code> asks, with a preview of each. Change them any time.",
+        "Browse presets, layouts, themes and widgets with a live preview during setup, or reopen the editor any time.",
         "npx agy-powerline configure",
       ],
       [
@@ -240,12 +240,12 @@ const HOME_TEXT = {
     steps: [
       [
         "Installer",
-        "Il faut Node.js 20 ou plus récent et Antigravity CLI. <code>init</code> sauvegarde le <code>settings.json</code> d'agy avant de le modifier.",
-        "npx agy-powerline init",
+        "Il faut Node.js 20 ou plus récent et Antigravity CLI. Sauvegarde le <code>settings.json</code> d'agy avant de le modifier, puis ouvre l'éditeur en direct.",
+        "npx agy-powerline",
       ],
       [
         "Choisir un style",
-        "Choisissez un préréglage, une disposition et un thème quand <code>init</code> le demande, avec un aperçu de chacun. Modifiables à tout moment.",
+        "Parcourez préréglages, dispositions, thèmes et widgets avec un aperçu en direct lors de l'installation, ou rouvrez l'éditeur à tout moment.",
         "npx agy-powerline configure",
       ],
       [
@@ -424,12 +424,12 @@ const HOME_TEXT = {
     steps: [
       [
         "Instalar",
-        "Necesita Node.js 20 o más reciente y Antigravity CLI. <code>init</code> guarda una copia del <code>settings.json</code> de agy antes de cambiarlo.",
-        "npx agy-powerline init",
+        "Necesita Node.js 20 o más reciente y Antigravity CLI. Guarda una copia del <code>settings.json</code> de agy antes de cambiarlo y abre el editor en vivo.",
+        "npx agy-powerline",
       ],
       [
         "Elegir un estilo",
-        "Elige un preajuste, un diseño y un tema cuando <code>init</code> te lo pida, con una vista previa de cada uno. Puedes cambiarlos cuando quieras.",
+        "Explora preajustes, diseños, temas y widgets con vista previa en vivo al instalar, o vuelve a abrir el editor cuando quieras.",
         "npx agy-powerline configure",
       ],
       [
@@ -600,12 +600,12 @@ const HOME_TEXT = {
     steps: [
       [
         "インストール",
-        "Node.js 20 以上と Antigravity CLI が必要です。<code>init</code> は agy の <code>settings.json</code> を変更する前にバックアップします。",
-        "npx agy-powerline init",
+        "Node.js 20 以上と Antigravity CLI が必要です。agy の <code>settings.json</code> を変更する前にバックアップし、ライブエディタを開きます。",
+        "npx agy-powerline",
       ],
       [
         "見た目を選ぶ",
-        "<code>init</code> の質問に沿って、プリセット、レイアウト、テーマをプレビューを見ながら選びます。あとからいつでも変更できます。",
+        "セットアップ中にプリセット、レイアウト、テーマ、ウィジェットをプレビューしながら選べます。あとからいつでも開き直せます。",
         "npx agy-powerline configure",
       ],
       [

@@ -16,10 +16,10 @@ agy keeps its settings in `~/.gemini/antigravity-cli/settings.json` (on Windows,
 You need Node.js 20 or newer.
 
 ```bash
-npx agy-powerline init
+npx agy-powerline
 ```
 
-`init` asks three questions, each with a preview of the bar it gives: a preset (which widgets), a layout (powerline pills, plain lines or classic text) and a theme for your terminal's background. Then restart agy once.
+It installs the status bar, wires `settings.json` with a backup, and opens the live-preview editor so you can pick a preset (which widgets), a layout (powerline pills, plain lines or classic text) and a theme for your terminal's background. Then restart agy once.
 
 Prefer to stay inside agy? Install agy-powerline as a plugin and run its setup skill:
 

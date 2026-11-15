@@ -42,13 +42,13 @@ Set Framerate 15
 #   GIF shows the next release before it's on npm.
 # - One warm-up run, so configure opens quickly on camera.
 Hide
-Type `$env:npm_config_progress='false'; Set-PSReadLineOption -PredictionSource None; $env:AGY_POWERLINE_HOME = Join-Path ([IO.Path]::GetTempPath()) ('agy-powerline-demo-' + [Guid]::NewGuid()); New-Item -ItemType Directory $env:AGY_POWERLINE_HOME | Out-Null; Copy-Item scripts/demo/demo-config.json (Join-Path $env:AGY_POWERLINE_HOME 'statusline.config.json'); function npx { node src/index.js @($args | Select-Object -Skip 1) }; npx agy-powerline --version; function prompt { [Environment]::NewLine + '> ' }; Clear-Host`
+Type `$env:npm_config_progress='false'; Set-PSReadLineOption -PredictionSource None; $d = Join-Path ([IO.Path]::GetTempPath()) ('agy-powerline-demo-' + [Guid]::NewGuid()); $env:HOME = $d; $env:USERPROFILE = $d; $env:AGY_POWERLINE_HOME = Join-Path $d '.agy-powerline'; New-Item -ItemType Directory $env:AGY_POWERLINE_HOME | Out-Null; Copy-Item scripts/demo/demo-config.json (Join-Path $env:AGY_POWERLINE_HOME 'statusline.config.json'); function npx { node src/index.js @($args | Select-Object -Skip 1) }; npx agy-powerline --version; function prompt { [Environment]::NewLine + '> ' }; Clear-Host`
 Enter
 Wait@30s
 Show
 Sleep 800ms
 
-Type "npx agy-powerline configure"
+Type "npx agy-powerline"
 Sleep 500ms
 Enter
 Wait+Screen@60s /Live preview/

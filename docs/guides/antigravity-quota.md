@@ -1,6 +1,6 @@
 # See your Antigravity quota while you work
 
-Antigravity CLI limits how much you can use each model over a 5-hour window and over a 7-day window. agy-powerline shows how much of each quota is left, when it resets and whether you are using it faster than time passes, in agy's status bar, on every refresh. Install it with `npx agy-powerline init` and restart agy once.
+Antigravity CLI limits how much you can use each model over a 5-hour window and over a 7-day window. agy-powerline shows how much of each quota is left, when it resets and whether you are using it faster than time passes, in agy's status bar, on every refresh. Install it with `npx agy-powerline` and restart agy once.
 
 - [The quota windows](#the-quota-windows)
 - [Read the quota meters](#read-the-quota-meters)

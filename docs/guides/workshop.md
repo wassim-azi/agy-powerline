@@ -38,10 +38,10 @@ npx agy-powerline render --demo
 **Run:**
 
 ```bash
-npx agy-powerline init
+npx agy-powerline
 ```
 
-`init` asks for a preset, a layout and a theme, each with a preview. Enter keeps the default. Then everyone restarts agy and sends it a message, to see the bar under the input box.
+It installs the status bar and opens a live-preview editor where everyone picks a preset, a layout and a theme. Then everyone restarts agy and sends it a message, to see the bar under the input box.
 
 **If it doesn't show:** `npx agy-powerline doctor` checks the install and says what's wrong.
 

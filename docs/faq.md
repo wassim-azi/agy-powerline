@@ -8,15 +8,15 @@ A status line for Google Antigravity CLI (`agy`): a small Node.js script that ag
 
 ## How do I install it?
 
-Run `npx agy-powerline init` with Node.js 20 or newer, then restart agy once. `init` asks for a preset, a layout and a theme, and backs up agy's `settings.json` before changing it. See [Installation details](install.md).
+Run `npx agy-powerline` with Node.js 20 or newer, then restart agy once. It backs up agy's `settings.json` before changing it and opens the live editor to pick a preset, a layout and a theme. See [Installation details](install.md).
 
 ## Does it work on Windows?
 
-Yes: Windows, macOS, Linux and WSL. On Windows agy runs the bar through `cmd /c`, which `init` sets up for you. For WSL, install it with a Linux Node.js inside WSL ([WSL notes](install.md#wsl)).
+Yes: Windows, macOS, Linux and WSL. On Windows agy runs the bar through `cmd /c`, which `npx agy-powerline` sets up for you. For WSL, install it with a Linux Node.js inside WSL ([WSL notes](install.md#wsl)).
 
 ## Do I need to restart agy?
 
-Once, after `init`, so agy reads the new `statusLine` setting. After that, changes you make with `configure`, `theme`, `layout` or the other commands show on the bar's next refresh, without a restart.
+Once, after installing, so agy reads the new `statusLine` setting. After that, changes you make with `configure`, `theme`, `layout` or the other commands show on the bar's next refresh, without a restart.
 
 ## Does it send any data anywhere?
 
@@ -44,7 +44,7 @@ No. agy-powerline reads its config only from `~/.agy-powerline` (or the folder i
 
 ## How do I update it?
 
-Run `npx agy-powerline init --yes`, then restart agy. Your config is kept. `npx agy-powerline doctor` tells you when the installed scripts are older than the CLI. See [Upgrading](install.md#upgrading).
+Run `npx agy-powerline` (or `npx agy-powerline init --yes` without the editor), then restart agy. Your config is kept. `npx agy-powerline doctor` tells you when the installed scripts are older than the CLI. See [Upgrading](install.md#upgrading).
 
 ## Can I install it without npm?
 
@@ -52,7 +52,7 @@ Yes. Each [GitHub release](https://github.com/wassim-azi/agy-powerline/releases)
 
 ## How do I remove it?
 
-`npx agy-powerline uninstall` puts agy's own bar back; add `--delete` to remove the files `init` installed. See [Uninstalling](install.md#uninstalling).
+`npx agy-powerline uninstall` puts agy's own bar back; add `--delete` to remove the files it installed. See [Uninstalling](install.md#uninstalling).
 
 ## Where do I report a bug or ask for a feature?
 
