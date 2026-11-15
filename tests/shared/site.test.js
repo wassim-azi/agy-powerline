@@ -95,7 +95,7 @@ async function run() {
     const incomplete = files.filter((file) => {
       const html = pages[file];
       return !(
-        /^<!doctype html>\s*<html lang="(en|fr|es|ja|zh-CN)">\s*<head>/i.test(html) &&
+        /^<!doctype html>\s*<html lang="(en|fr|es|ja|zh-CN|ko)">\s*<head>/i.test(html) &&
         /<meta charset="utf-8"/i.test(html) &&
         /<meta name="viewport" content="width=device-width, initial-scale=1"/.test(html) &&
         /<title>[^<]+<\/title>/.test(html) &&
@@ -438,24 +438,28 @@ async function run() {
     const es = pages["es/index.html"] || "";
     const ja = pages["ja/index.html"] || "";
     const zhCn = pages["zh-cn/index.html"] || "";
+    const ko = pages["ko/index.html"] || "";
     const alternates = (html) =>
       html.includes(`<link rel="alternate" hreflang="en" href="${SITE_URL}" />`) &&
       html.includes(`<link rel="alternate" hreflang="fr" href="${SITE_URL}fr/" />`) &&
       html.includes(`<link rel="alternate" hreflang="es" href="${SITE_URL}es/" />`) &&
       html.includes(`<link rel="alternate" hreflang="ja" href="${SITE_URL}ja/" />`) &&
       html.includes(`<link rel="alternate" hreflang="zh-CN" href="${SITE_URL}zh-cn/" />`) &&
+      html.includes(`<link rel="alternate" hreflang="ko" href="${SITE_URL}ko/" />`) &&
       html.includes(`<link rel="alternate" hreflang="x-default" href="${SITE_URL}" />`);
     record(
-      "the English, French, Spanish, Japanese and Simplified Chinese home pages name each other with hreflang",
+      "the English, French, Spanish, Japanese, Simplified Chinese and Korean home pages name each other with hreflang",
       /<html lang="fr">/.test(fr) &&
         /<html lang="es">/.test(es) &&
         /<html lang="ja">/.test(ja) &&
         /<html lang="zh-CN">/.test(zhCn) &&
+        /<html lang="ko">/.test(ko) &&
         alternates(home) &&
         alternates(fr) &&
         alternates(es) &&
         alternates(ja) &&
-        alternates(zhCn)
+        alternates(zhCn) &&
+        alternates(ko)
     );
 
     const sitemap = fs.readFileSync(path.join(out, "sitemap.xml"), "utf8");

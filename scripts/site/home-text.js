@@ -159,7 +159,7 @@ const HOME_TEXT = {
     faq: [
       [
         "Does it work on Windows?",
-        'Yes: Windows, macOS, Linux and WSL. On Windows agy runs the bar through <code>cmd /c</code>, which <code>init</code> sets up for you. For WSL, install it with a Linux Node.js inside WSL (<a href="/install/#wsl">WSL notes</a>).',
+        'Yes: Windows, macOS, Linux and WSL. On Windows agy runs the bar through <code>cmd /c</code>, which the installer sets up for you. For WSL, install it with a Linux Node.js inside WSL (<a href="/install/#wsl">WSL notes</a>).',
       ],
       [
         "Does it send any data anywhere?",
@@ -343,7 +343,7 @@ const HOME_TEXT = {
     faq: [
       [
         "Fonctionne-t-elle sous Windows ?",
-        'Oui : Windows, macOS, Linux et WSL. Sous Windows, agy lance la barre via <code>cmd /c</code>, ce que <code>init</code> configure pour vous. Pour WSL, installez-la avec un Node.js Linux dans WSL (<a href="/install/#wsl">notes WSL</a>, en anglais).',
+        'Oui : Windows, macOS, Linux et WSL. Sous Windows, agy lance la barre via <code>cmd /c</code>, ce que le programme d\'installation configure pour vous. Pour WSL, installez-la avec un Node.js Linux dans WSL (<a href="/install/#wsl">notes WSL</a>, en anglais).',
       ],
       [
         "Envoie-t-elle des données quelque part ?",
@@ -527,7 +527,7 @@ const HOME_TEXT = {
     faq: [
       [
         "¿Funciona en Windows?",
-        'Sí: Windows, macOS, Linux y WSL. En Windows, agy ejecuta la barra con <code>cmd /c</code>, y <code>init</code> lo configura por ti. Para WSL, instálala con un Node.js de Linux dentro de WSL (<a href="/install/#wsl">notas sobre WSL</a>, en inglés).',
+        'Sí: Windows, macOS, Linux y WSL. En Windows, agy ejecuta la barra con <code>cmd /c</code>, y el instalador lo configura por ti. Para WSL, instálala con un Node.js de Linux dentro de WSL (<a href="/install/#wsl">notas sobre WSL</a>, en inglés).',
       ],
       [
         "¿Envía datos a algún sitio?",
@@ -703,7 +703,7 @@ const HOME_TEXT = {
     faq: [
       [
         "Windows で動きますか？",
-        'はい。Windows、macOS、Linux、WSL で動作します。Windows では agy がバーを <code>cmd /c</code> 経由で実行し、その設定は <code>init</code> が行います。WSL では、WSL 内の Linux 版 Node.js でインストールしてください（<a href="/install/#wsl">WSL についての注意</a>、英語）。',
+        'はい。Windows、macOS、Linux、WSL で動作します。Windows では agy がバーを <code>cmd /c</code> 経由で実行し、その設定はインストーラーが行います。WSL では、WSL 内の Linux 版 Node.js でインストールしてください（<a href="/install/#wsl">WSL についての注意</a>、英語）。',
       ],
       [
         "データをどこかに送信しますか？",
@@ -882,6 +882,169 @@ const HOME_TEXT = {
     ctaTitle: "在配额耗尽前提前掌握余量",
     ctaLead: "一条命令即可安装，也可以先在浏览器里搭好你的状态栏。",
     viewOnGithub: "在 GitHub 上查看",
+  },
+  ko: {
+    lang: "ko",
+    title: "Google Antigravity CLI용 agy 상태바 - agy-powerline",
+    description:
+      "agy-powerline은 Google Antigravity CLI(agy)용 상태바입니다. 현재 모델, 컨텍스트 창, Git 상태와 소비 속도 마커가 포함된 Gemini, Claude/GPT 및 Argon 할당량을 보여줍니다. 의존성과 텔레메트리가 없습니다.",
+    imageAlt: "agy-powerline: 할당량이 리셋 전까지 남을지 미리 알려주는 agy 상태바와 기본 스타일",
+    eyebrow: "Google Antigravity CLI 상태바",
+    heroTitle: '리셋 전에 <span class="grad-text">할당량이 남는지</span> 미리 보는 agy 상태바',
+    heroLead:
+      "agy 입력창 아래 한 줄(또는 여러 줄)의 powerline 상태바에서 모델, 컨텍스트 창, Git, 그리고 소비 속도 마커가 포함된 모든 Antigravity 할당량을 확인하세요. <strong>명령어 하나</strong>로 설치됩니다.",
+    copy: "복사",
+    copyCommand: "복사:",
+    copyInstall: "설치 명령어 복사",
+    buildInBrowser: "브라우저에서 직접 꾸미기",
+    heroFacts: ["Node.js 20+", "의존성 0개", "텔레메트리 없음", "MIT 라이선스"],
+    askAgy: "agy에게 무엇이든 물어보세요…",
+    heroBarCaption:
+      "agy 입력창 아래에 표시되는 agy-powerline의 실제 모습입니다. 테마와 레이아웃을 바꿔 확인해 보세요. 이 페이지의 모든 상태바는 실제 상태바 코드로 렌더링됩니다.",
+    demoThemes: "테마",
+    demoLayouts: "레이아웃",
+    allThemes: (n) => `전체 ${n}개 →`,
+    anatomyEyebrow: "구성 살펴보기",
+    anatomyTitle: "10초 만에 읽는 agy 상태바",
+    anatomyLead:
+      "기본 상태바는 위 줄에 현재 작업 상태를, 아래 줄에 각 할당량의 잔여량을 표시합니다.",
+    anatomy: [
+      ["model", "모델", "agy가 현재 사용 중인 모델입니다."],
+      ["context", "컨텍스트 창", "agy가 대화를 압축하기 전까지 남은 컨텍스트 사용 비율입니다."],
+      ["git", "Git", "현재 브랜치, 커밋되지 않은 변경 사항, 업스트림과의 앞/뒤 커밋 수입니다."],
+      ["fiveHour", "5시간 할당량", "Gemini 5시간 할당량의 잔여량과 리셋 시간입니다."],
+      [
+        "pace",
+        "소비 속도 마커",
+        "할당량 주기에서 현재 경과한 시간 위치입니다. 막대가 이 마커를 넘으면 시간보다 빠르게 소비 중이므로 리셋 전에 소진됩니다.",
+      ],
+      ["weekly", "7일 할당량", "독립적인 소비 속도 마커와 리셋 시간을 갖춘 주간 할당량입니다."],
+    ],
+    paceGuide: "속도 마커 원리 보기 (영어) →",
+    stepsEyebrow: "시작하기",
+    stepsTitle: "1분 만에 설치 완료",
+    steps: [
+      [
+        "설치",
+        "Node.js 20 이상과 Antigravity CLI가 필요합니다. 변경 전 agy의 <code>settings.json</code>을 백업하고 실시간 미리보기 편집기를 엽니다.",
+        "npx agy-powerline",
+      ],
+      [
+        "스타일 고르기",
+        "설치 과정이나 언제든 다시 열어 실시간 미리보기를 보며 프리셋, 레이아웃, 테마, 위젯을 선택할 수 있습니다.",
+        "npx agy-powerline configure",
+      ],
+      [
+        "agy 한 번 재시작",
+        "입력창 아래에 상태바가 나타나며 agy와 함께 갱신됩니다. 이후 설정 변경에는 재시작이 필요 없습니다.",
+        "agy",
+      ],
+    ],
+    installGuide: "설치 가이드 자세히 보기 (영어) →",
+    featuresEyebrow: "주요 기능",
+    featuresTitle: "Antigravity CLI 상태바에서 보고 싶던 모든 정보",
+    featuresLead:
+      "Antigravity CLI의 실제 상태바 데이터를 기반으로 하루 종일 가볍고 안전하게 동작합니다.",
+    features: (n) => [
+      [
+        "pace",
+        "할당량 소비 속도 마커",
+        "모든 할당량 막대에 주기 내 현재 시간 위치를 표시해 고갈 전에 미리 파악할 수 있습니다. 잔여 30%에서 주의, 10%에서 경고 색상으로 바뀝니다.",
+        "/guides/antigravity-quota/",
+      ],
+      [
+        "themes",
+        `${n.themes}가지 테마`,
+        "다크, 라이트, 색각 이상 친화 테마를 제공하며 각 대상 터미널 배경에서 WCAG AA 대비 검사를 통과했습니다.",
+        "/themes/",
+      ],
+      [
+        "layouts",
+        "3가지 레이아웃",
+        "Pills, Lines, Classic 레이아웃과 원하는 줄 구성으로 배치되며 터미널 너비에 맞춰 자동으로 조정됩니다.",
+        "/docs/configuration/",
+      ],
+      [
+        "widgets",
+        `${n.widgets}가지 위젯`,
+        "모델, 컨텍스트, Git, 할당량, 토큰, 세션 시간, 에이전트 상태, 사용자 지정 셸 명령어 등을 지원합니다.",
+        "/widgets/",
+      ],
+      [
+        "configure",
+        "원하는 대로 커스터마이즈",
+        "실시간 미리보기 터미널 편집기, 브라우저 설정기, 프리셋, JSON 스키마 기반 설정 파일을 모두 지원합니다.",
+        "/configure/",
+      ],
+      [
+        "platforms",
+        "Windows, macOS, Linux, WSL",
+        "런타임 의존성 없이 Node.js 20 이상에서 실행됩니다. 네트워크 호출도, 텔레메트리도 전혀 없습니다.",
+        "/install/",
+      ],
+    ],
+    shotsEyebrow: "실제 화면",
+    shotsTitle: "실제 터미널에서 동작하는 모습",
+    shotsLead: "디자인 시안이 아닌 실제 agy 세션에서 촬영한 화면입니다.",
+    shots: {
+      windows: [
+        "agy 세션",
+        "Windows Terminal의 agy 입력창 아래 agy-powerline: 위에는 짧은 대화, 아래에는 3줄 Pills 상태바",
+      ],
+      "pills-dark": [
+        "Pills",
+        "dark-aurora 테마의 agy-powerline Pills 레이아웃: 모델, 컨텍스트, 프로젝트, Git; 속도 마커와 리셋 카운트다운이 있는 Gemini 5시간 및 7일 할당량; Claude/GPT 및 Argon 주간 할당량",
+      ],
+      "lines-light": ["Lines", "밝은 터미널 위의 light-paper 테마 agy-powerline Lines 레이아웃"],
+      "classic-dark": [
+        "Classic",
+        "어두운 터미널 위 dark-aurora 테마와 블록 진행 막대를 사용한 agy-powerline Classic 레이아웃",
+      ],
+    },
+    themesEyebrow: "테마",
+    themesTitle: (n) => `다크, 라이트, 색각 친화 터미널을 위한 ${n}가지 테마`,
+    themesLead:
+      "전체 테마 갤러리(영어)에서 각 터미널 배경에 직접 렌더링된 모습과 색각 시뮬레이션을 비교해 보세요.",
+    seeAllThemes: (n) => `전체 ${n}개 테마 보기`,
+    trustEyebrow: "안전한 설계",
+    trustTitle: "매 갱신마다 실행되므로 작고 단순하게",
+    trustBody:
+      '런타임 의존성도, 네트워크 요청도 없으며 로컬 설치 디렉터리의 설정만 읽습니다. 복제한 외부 저장소가 상태바를 바꾸거나 명령을 실행할 수 없습니다. <a href="/security/">로컬 동작 방식 보기</a> (영어).',
+    trust: [
+      [
+        "https://scorecard.dev/viewer/?uri=github.com/wassim-azi/agy-powerline",
+        "OpenSSF Scorecard",
+      ],
+      ["https://www.bestpractices.dev/projects/15655", "OpenSSF Best Practices"],
+      ["https://www.npmjs.com/package/agy-powerline", "npm provenance"],
+      ["/security/", "의존성 0개"],
+      ["/privacy/", "텔레메트리 없음"],
+      ["https://github.com/wassim-azi/agy-powerline/blob/main/LICENSE", "MIT 라이선스"],
+    ],
+    faqEyebrow: "자주 묻는 질문",
+    faqTitle: "사용자들이 가장 먼저 묻는 질문",
+    faq: [
+      [
+        "Windows에서도 동작하나요?",
+        '네, Windows, macOS, Linux, WSL을 모두 지원합니다. Windows에서는 agy가 <code>cmd /c</code>를 통해 상태바를 실행하며 설치 프로그램이 이를 자동으로 설정합니다. WSL에서는 WSL 내부의 Linux용 Node.js로 설치하세요 (<a href="/install/#wsl">WSL 안내</a>, 영어).',
+      ],
+      [
+        "외부로 데이터를 전송하나요?",
+        '아니요. agy-powerline은 네트워크 요청을 전혀 하지 않으며 텔레메트리나 분석 코드가 없습니다. 오류는 로컬 로그 파일에만 기록되며 언제든 확인하거나 비우고 끌 수 있습니다. 읽고 쓰는 모든 파일 목록은 <a href="/security/">보안 페이지</a> (영어)에서 확인할 수 있습니다. 이 웹사이트 자체만 방문 통계용으로 Google Analytics를 사용합니다 (<a href="/privacy/">개인정보 처리방침</a>, 영어).',
+      ],
+      [
+        "agy가 느려지지는 않나요?",
+        "Windows 11 노트북 기준 매 갱신 시 agy-powerline 실행 자체는 약 0.1초 걸립니다. Windows에서는 <code>cmd</code>와 Node 시작에 약 0.1–0.25초가 추가되며 이는 모든 외부 상태바 명령에 동일합니다.",
+      ],
+      [
+        "어떤 할당량이 표시되나요?",
+        'Gemini 5시간 및 7일 할당량, 타사 모델(Claude 및 GPT) 5시간 및 7일 할당량, Google AI Pro의 Gemini 4 Argon 주간 할당량을 각각 리셋 시간과 함께 표시합니다. 막대 읽는 법은 <a href="/guides/antigravity-quota/">할당량 가이드</a> (영어)를 참고하세요.',
+      ],
+    ],
+    allQuestions: "모든 질문 보기 (영어) →",
+    ctaTitle: "할당량이 바닥나기 전에 미리 확인하세요",
+    ctaLead: "명령어 하나로 설치하거나 브라우저에서 나만의 상태바를 구성해 보세요.",
+    viewOnGithub: "GitHub에서 보기",
   },
 };
 
