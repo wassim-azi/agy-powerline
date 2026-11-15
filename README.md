@@ -74,11 +74,11 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 `--yes` skips the prompts, which agy can't answer, and replaces any existing `statusLine` after backing up `settings.json`.
 
-For a Nerd Font–free terminal, turn on ASCII mode (`i` in `configure`).
+For a Nerd Font–free terminal, turn on ASCII mode (`Settings` via `i` in `configure`).
 
 ## Customize
 
-`npx agy-powerline configure` opens an editor with a live preview of your bar. Use `←` `→` to switch between Widgets, Presets, Themes, Layout and Powerline, `↑` `↓` to move, Enter to pick, `q` to save and quit. The keys for each screen are shown at the bottom; the full list is in [Configuration](docs/configuration.md#configurator-keys).
+`npx agy-powerline configure` opens an editor with a live preview of your bar. Use `←` `→` to switch between Widgets, Presets, Themes, Layout, Powerline and Settings, `↑` `↓` to move, Enter to pick, `q` to save and quit. The keys for each screen are shown at the bottom; the full list is in [Configuration](docs/configuration.md#configurator-keys).
 
 Prefer a browser? [Build your bar in the browser](https://agy-powerline.com/configure/) with live previews, then download or import it.
 

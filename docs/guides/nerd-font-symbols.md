@@ -44,4 +44,4 @@ You can also keep a Nerd Font–free look without ASCII mode: the **flat** power
 
 ## Emojis and wide characters
 
-Widget icons are emojis. If they show as boxes or push the bar out of line, your terminal's emoji support is the cause, not the font. Turn icons off with `e` in `configure` (or `"emojis": false`), or turn on minimalist mode (`m`) to show values only. More on colors, narrow windows and ASCII mode: [Terminals](../configuration.md#terminals-ascii-mode-colors-narrow-windows).
+Widget icons are emojis. If they show as boxes or push the bar out of line, your terminal's emoji support is the cause, not the font. Turn icons off via **Emojis** in the Settings tab (`i`) in `configure` (or `"emojis": false`), or turn on **Minimalist mode** there to show values only. More on colors, narrow windows and ASCII mode: [Terminals](../configuration.md#terminals-ascii-mode-colors-narrow-windows).

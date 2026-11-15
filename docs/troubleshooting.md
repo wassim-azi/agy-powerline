@@ -17,7 +17,7 @@ It then reports: Windows Node on WSL, stale installed scripts (fix: `npx agy-pow
 
 ## Common problems
 
-- **Broken glyphs (boxes or question marks):** your terminal font has no Nerd Font glyphs. Install a [Nerd Font](https://www.nerdfonts.com/), or turn on ASCII mode (`i` in `configure`). See [Terminals](configuration.md#terminals-ascii-mode-colors-narrow-windows).
+- **Broken glyphs (boxes or question marks):** your terminal font has no Nerd Font glyphs. Install a [Nerd Font](https://www.nerdfonts.com/), or turn on **ASCII mode** in the Settings tab (`i`) in `configure`. See [Terminals](configuration.md#terminals-ascii-mode-colors-narrow-windows).
 - **The bar disappeared after you upgraded or removed Node** (nvm, Homebrew, ...): `init` saves the exact Node binary it ran with, and that one is gone. Run `npx agy-powerline init --yes` again; `doctor` shows the saved path in `command` and a failed `spawn` until then. See [What `init` does](install.md#what-init-does).
 - **The bar doesn't change after an update:** run `npx agy-powerline init --yes`, then restart `agy`. See [Upgrading](install.md#upgrading).
 - **`[agy-powerline: invalid statusline.config.json, showing defaults]`:** your config has a JSON error (often a trailing comma). The bar uses the defaults until you fix or delete the file; `doctor` prints the exact error. `configure`, `import` and the `theme`/`gradient`/`layout`/`preset`/`caps` commands refuse to save until then, and `export` refuses to export the defaults in its place, so your widgets are never overwritten.

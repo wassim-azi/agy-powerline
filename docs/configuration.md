@@ -27,38 +27,31 @@ Editors that read JSON Schema, such as VS Code and JetBrains IDEs, complete sett
 
 ## Configurator keys
 
-Tabs at the top lead to Widgets (`w`), Presets (`o`), Themes (`t`), Layout (`l`) and Powerline (`p`); a tab's letter opens it from any other tab, and `←` `→` or Tab / Shift+Tab move between them. Each screen shows its list, a live preview of your bar with on/off chips for the toggles (with their keys, on the widget list), and its keys at the bottom. In ASCII mode it uses plain `+-|` boxes, and without color it stays readable.
+Tabs at the top lead to Widgets (`w`), Presets (`o`), Themes (`t`), Layout (`l`), Powerline (`p`) and Settings (`i`); a tab's letter opens it from any other tab, and `←` `→` or Tab / Shift+Tab move between them. Each screen shows its list, a live preview of your bar, and its keys at the bottom. In ASCII mode it uses plain `+-|` boxes, and without color it stays readable.
 
-The editor fits your window. It fills the full width, so the preview has the room your bar gets in agy. From 80 columns the descriptions line up in a column; from 140 columns the list and a details panel share the width evenly, and the details show the selected item: a widget drawn on its own with its options and presets, a preset's rows, a theme's colors, or what a Powerline setting does. In a short window the tagline, blank lines, notes and preview chips make way first, then long lists scroll inside their panel, with the rows out of view counted in its border (`↑ 4 more`, `↓ 12 more`). Resizing the window redraws it.
+The editor fits your window. It fills the full width, so the preview has the room your bar gets in agy. From 80 columns the descriptions line up in a column; from 140 columns the list and a details panel share the width evenly, and the details show the selected item: a widget drawn on its own with its options and presets, a preset's rows, a theme's colors, or what a Powerline setting or global setting does. In a short window the tagline, blank lines and notes make way first, then long lists scroll inside their panel, with the rows out of view counted in its border (`↑ 4 more`, `↓ 12 more`). Resizing the window redraws it.
 
 Enter on a widget opens its options: color, label (shown or value only), and what that widget takes, such as the short model name, the reset timers' format, the custom badge's text, the caution and danger levels, blink, the pace marker, the pace delta and the meter style. `↑` `↓` pick an option, `←` `→` or Enter change it, `x` sets it back to its default, and Esc returns to the list. Each change is saved right away and shows in the preview. A Shell Command's `cmd` is shown but edited only in the config file. The preview title says when it shows a theme, preset or layout you haven't applied yet, and the preset that matches your widgets is marked `current`.
 
 | Key                    | Action                                                                            |
 | ---------------------- | --------------------------------------------------------------------------------- |
 | ↑↓                     | Move cursor (with circular wrap-around at top/bottom; theme preview updates live) |
-| ←→, Tab, Shift+Tab     | Switch tab (Widgets, Presets, Themes, Layout, Powerline)                          |
+| ←→, Tab, Shift+Tab     | Switch tab (Widgets, Presets, Themes, Layout, Powerline, Settings)                |
 | `w`                    | Widgets (your widget list)                                                        |
 | Shift+↑↓               | Reorder widgets                                                                   |
 | Enter                  | Edit the selected widget's options (see below)                                    |
 | `a`                    | Add widget (includes live type-to-filter search across catalog)                   |
 | `s`                    | Insert Flex Separator after the current item                                      |
 | `n`                    | Insert New Line (next widgets go on the next row)                                 |
-| `x`, Delete, Backspace | Remove                                                                            |
+| `x`, Delete, Backspace | Remove widget, or reset option/setting to default (in Edit / Settings)            |
 | `o`                    | Presets (`default`, `compact`, `agent`, `git`, `tokens`, `quotas`, `full`)        |
 | `t`                    | Themes (select `Custom` or press `c`/`e` to open in-TUI color editor)             |
 | `l`                    | Layout (Pills, Lines or Classic)                                                  |
-| `p`                    | Powerline (style, separators, start and end caps)                                 |
-| `j`                    | Toggle joins (adjacent widgets share one pill, Pills layout)                      |
-| `v`                    | Toggle space between rows (a blank line between rows)                             |
-| `e`                    | Toggle emojis                                                                     |
-| `m`                    | Toggle minimalist mode (values only, no icons or labels)                          |
-| `r`                    | Toggle the quota pace marker                                                      |
-| `b`                    | Toggle alert blink (flash on critical quota/context breaches)                     |
-| `i`                    | Toggle ASCII mode (plain-text caps/joins, no emojis)                              |
-| `u`                    | Switch the bar's language (when more than one is available)                       |
+| `p`                    | Powerline (joins, style, separators, start and end caps)                          |
+| `i`                    | Settings (bar language, emojis, minimalist mode, pace marker, blink, gaps, ASCII) |
 | `d`                    | Reset configuration to defaults                                                   |
 | `g`                    | Open GitHub repository in browser (⭐ Repo)                                       |
-| Enter                  | Confirm selection in Add/Themes/Presets/Layout/Powerline lists                    |
+| Enter                  | Confirm selection or toggle/cycle setting in lists                                |
 | Esc                    | Back to previous list / widget list                                               |
 | `q` or Ctrl-C          | Save and quit (`q` doesn't quit while typing in the Add search or a code point)   |
 
@@ -126,7 +119,7 @@ Any widget accepts these options:
 | Folder depth  | `{ "id": "cwd", "depth": 2 }`     | `~/Documents/repos/app/src` → `~/…/app/src`                            |
 | Maximum width | `{ "id": "git", "maxWidth": 10 }` | `feature-with-a-long-name` → `feature-w…` (`feature...` in ASCII mode) |
 
-**Minimalist mode** turns `raw` on for every widget, which makes the bar much narrower on small terminals. Set `"minimalist": true` or press `m` in `configure`. A widget with `"raw": false` keeps its label even then.
+**Minimalist mode** turns `raw` on for every widget, which makes the bar much narrower on small terminals. Set `"minimalist": true` or toggle **Minimalist mode** in the Settings tab (`i`) in `configure`. A widget with `"raw": false` keeps its label even then.
 
 ## Quota pace marker
 
@@ -137,7 +130,7 @@ Every 5h, 7d, third-party and Argon quota meter carries a marker, a larger dot `
 📅 •••••••••●••  21.0% rem    fill past the marker: at this rate the quota runs out before it resets
 ```
 
-The marker needs no extra data: it comes from the reset time Antigravity already sends and the fixed 5-hour and 7-day window lengths. It's hidden when the reset is further away than the window itself. Turn it off with `"pacing": false` (or `r` in `configure`), or per widget with `"pace": false`.
+The marker needs no extra data: it comes from the reset time Antigravity already sends and the fixed 5-hour and 7-day window lengths. It's hidden when the reset is further away than the window itself. Turn it off with `"pacing": false` (or **Quota pace marker** in the Settings tab (`i`) in `configure`), or per widget with `"pace": false`.
 
 ### Pace delta
 
@@ -229,7 +222,7 @@ The bar's own words follow `"language"`: widget labels (`Reset`, `Context`), `re
 - **Codes:** `en` (English, the default), `fr` (French), `es` (Spanish), `ja` (Japanese), `zh-CN` (Simplified Chinese) and `ko` (Korean).
 - **Fallback:** a region code uses its language (`en-GB` gives `en`). A code without messages shows English, and `doctor` says so.
 - **What stays as it is:** model names, branches, folders and everything else agy sends, git operation names (`REBASE`), and numbers (`72.0%`). Dates and times follow `clock.locale` (above). A widget's own `label` is shown as you wrote it. The CLI, `configure` and `doctor` stay in English.
-- **Setting it:** `init --language <code>`, or `render --language <code>` to [try one without saving it](#try-a-look-without-saving-it). In `configure`, `u` switches between languages when there is more than one.
+- **Setting it:** `init --language <code>`, or `render --language <code>` to [try one without saving it](#try-a-look-without-saving-it). In `configure`, open the Settings tab (`i`) and cycle **Bar language**.
 
 ## Alerts and thresholds
 
@@ -251,7 +244,7 @@ Quota and context widgets change color as they get low or full: the theme's ok c
 - **`quotaCrit`** _(default: `10`%)_: remaining quota at which they turn to the danger color.
 - **`contextWarn`** _(default: `70`%)_: used context at which the context widgets turn to the caution color.
 - **`contextCrit`** _(default: `90`%)_: used context at which they turn to the danger color. Antigravity's `exceeds_200k_tokens` also triggers it.
-- **`blink`** _(default: `false`)_: `true` makes danger-level widgets blink; `"warn"` makes caution-level ones blink too. ASCII mode never blinks. `b` in `configure` turns it on or off.
+- **`blink`** _(default: `false`)_: `true` makes danger-level widgets blink; `"warn"` makes caution-level ones blink too. ASCII mode never blinks. Toggle **Alert blink** in the Settings tab (`i`) in `configure`.
 - **Per widget**: any quota or context widget takes its own `warn`, `crit` and `blink` (e.g. `{"id": "fiveHourBar", "warn": 20, "crit": 10, "blink": true}`).
 - **Visibility per widget**: quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) and their reset widgets (`fiveHourReset`, `weeklyReset`, `argonReset`) take `showBelow`, a remaining-quota percentage from 0 to 100. The widget hides while more remains and appears at or below the threshold. A reset widget uses its own quota window. Context widgets (`context`, `contextPct`, `contextTokens`) take `showAbove`, a used-context percentage from 0 to 100; they hide below the threshold and appear at or above it, or as soon as Antigravity reports `exceeds_200k_tokens` (the danger color). Both options are unset by default (`always` in `configure`); values that aren't numbers from 0 to 100 are ignored.
 
@@ -418,7 +411,7 @@ In the TUI, press `p`, then Enter on **Separators**, **Start caps** or **End cap
 
 ### Space between rows
 
-Pills fill the whole height of a terminal line, so stacked rows touch. `"rowGap": true` puts a blank line between rows, in every layout (in Lines and Classic it gives the text more air); it's off by default because the bar then takes more lines (three rows become five). Toggle it with `v` in `configure`, or **Space between rows** in the Powerline tab (`p`).
+Pills fill the whole height of a terminal line, so stacked rows touch. `"rowGap": true` puts a blank line between rows, in every layout (in Lines and Classic it gives the text more air); it's off by default because the bar then takes more lines (three rows become five). Toggle **Space between rows** in the Settings tab (`i`) in `configure`.
 
 ## Custom theme
 
@@ -485,7 +478,7 @@ npx agy-powerline import my-bar.json
 
 ## Terminals: ASCII mode, colors, narrow windows
 
-**No Nerd Font?** Enable ASCII mode: caps and separators become plain text (`[` `]`, `<` `>`, `/`; joins default to `>`), dot meters become `#`/`-`, markers become `*`, and emojis turn off. Toggle with `i` in the TUI, set `"ascii": true`, pass `render --ascii`, or export `AGY_POWERLINE_ASCII=1`.
+**No Nerd Font?** Enable ASCII mode: caps and separators become plain text (`[` `]`, `<` `>`, `/`; joins default to `>`), dot meters become `#`/`-`, markers become `*`, and emojis turn off. Toggle **ASCII mode** in the Settings tab (`i`) in `configure`, set `"ascii": true`, pass `render --ascii`, or export `AGY_POWERLINE_ASCII=1`.
 
 **Narrow terminals**: the bar never runs past the `terminal_width` Antigravity reports. A row that is too wide first drops icons and labels (values only, as in [minimalist mode](#widget-options)), then shortens the model name (`3.8 Flash·High`) and the Lines meters (12 dots instead of 25), then hides its least important widgets one by one (custom text, version and cache counters first; the model and the 5h quota last), and as a last resort is cut with `…`. Widths count wide emojis and East Asian characters as two columns.
 

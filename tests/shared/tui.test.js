@@ -23,6 +23,7 @@ const SCREENS = [
   "layout",
   "powerline",
   "glyphs",
+  "settings",
   "edit",
 ];
 
@@ -402,18 +403,29 @@ function testScreenContent() {
   record(
     "main screen shows the brand, tabs, widgets, live preview and keys",
     /agy-powerline \ue0b6v\d/.test(main) &&
-      /Widgets.*Presets.*Themes.*Layout.*Powerline/.test(main) &&
+      /Widgets.*Presets.*Themes.*Layout.*Powerline.*Settings/.test(main) &&
       /Your widgets · 7 widgets/.test(main) &&
       /flex space/.test(main) &&
       /Live preview/.test(main) &&
       /save & quit/.test(main) &&
-      /joins j .* gaps v .* emojis e .* minimal m .* pace r .* blink b .* ascii i/.test(main)
+      !/● emojis/.test(main) &&
+      !/emojis e/.test(main)
   );
 
-  const themes = strip(renderFrame({ config: defaultConfig(), screen: "themes" }));
+  const settings = strip(
+    renderFrame({ config: defaultConfig(), screen: "settings", columns: 160 })
+  );
   record(
-    "toggle chips name their keys only on the widget list, where the keys work",
-    /● emojis/.test(themes) && !/emojis e/.test(themes)
+    "settings screen shows bar-wide options, values and details instead of preview chips",
+    /Bar language.? +English \(en\)/.test(settings) &&
+      /Emojis.? +on/.test(settings) &&
+      /Minimalist mode.? +off/.test(settings) &&
+      /Quota pace marker.? +on/.test(settings) &&
+      /Alert blink.? +off/.test(settings) &&
+      /Space between rows.? +off/.test(settings) &&
+      /ASCII mode.? +off/.test(settings) &&
+      /English \(en\)/.test(settings) &&
+      /toggle \/ cycle/.test(settings)
   );
 
   const search = strip(renderFrame({ config: defaultConfig(), screen: "add", search: "quo" }));
@@ -454,19 +466,21 @@ function testTabKeys() {
     "right arrow and Tab move to the next tab, wrapping around",
     tabAfter("main", right) === "presets" &&
       tabAfter("presets", { name: "tab" }) === "themes" &&
-      tabAfter("powerline", right) === "main"
+      tabAfter("powerline", right) === "settings" &&
+      tabAfter("settings", right) === "main"
   );
   record(
     "left arrow and Shift+Tab move to the previous tab, wrapping around",
     tabAfter("themes", left) === "presets" &&
       tabAfter("layout", { name: "tab", shift: true }) === "themes" &&
-      tabAfter("main", left) === "powerline"
+      tabAfter("main", left) === "settings"
   );
   record(
     "a tab's letter opens it from any tab, and does nothing on its own tab",
     tabAfter("main", { name: "t" }) === "themes" &&
       tabAfter("presets", { name: "w" }) === "main" &&
       tabAfter("powerline", { name: "o" }) === "presets" &&
+      tabAfter("main", { name: "i" }) === "settings" &&
       tabAfter("main", { name: "w" }) === null &&
       tabAfter("main", { name: "p", ctrl: true }) === null
   );

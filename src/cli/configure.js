@@ -95,7 +95,6 @@ const CURATED_HEX_PALETTE = [
 // Rows of the Powerline screen; rows with a slot open the glyph editor.
 const POWERLINE_ROWS = [
   { id: "enabled", label: "Join adjacent widgets" },
-  { id: "rowGap", label: "Space between rows" },
   { id: "style", label: "Style" },
   { id: "separators", label: "Separators", slot: "separator" },
   { id: "startCaps", label: "Start caps", slot: "startCap" },
@@ -290,6 +289,7 @@ const TABS = [
   { id: "themes", label: "Themes", key: "t" },
   { id: "layout", label: "Layout", key: "l" },
   { id: "powerline", label: "Powerline", key: "p" },
+  { id: "settings", label: "Settings", key: "i" },
 ];
 
 const TAB_OF_SCREEN = {
@@ -302,6 +302,7 @@ const TAB_OF_SCREEN = {
   layout: "layout",
   powerline: "powerline",
   glyphs: "powerline",
+  settings: "settings",
 };
 
 const PRESET_ICONS = {
@@ -327,13 +328,12 @@ const WIDE = 140;
 // A list taller than the window scrolls, but keeps at least this many rows
 // before the editor gives up its spacing and the preview's toggles.
 const MIN_LIST_ROWS = 6;
-// What a short window gives up, one step at a time, so the list keeps rows.
+// Wait for a short window to give up, one step at a time, so the list keeps rows.
 const COMPACT_STEPS = [
-  { tagline: true, gaps: true, notes: true, chips: true },
-  { tagline: false, gaps: true, notes: true, chips: true },
-  { tagline: false, gaps: false, notes: true, chips: true },
-  { tagline: false, gaps: false, notes: false, chips: true },
-  { tagline: false, gaps: false, notes: false, chips: false },
+  { tagline: true, gaps: true, notes: true },
+  { tagline: false, gaps: true, notes: true },
+  { tagline: false, gaps: false, notes: true },
+  { tagline: false, gaps: false, notes: false },
 ];
 
 // First visible row of a scrolled list, kept between frames so the list only
@@ -404,7 +404,7 @@ function currentPreset() {
   return PRESET_ORDER.find((id) => JSON.stringify(applyPreset(config, id).widgets) === mine);
 }
 
-// The bar's rows and the toggle chips under them.
+// The bar's rendered rows for the live preview panel.
 function previewParts(width) {
   const preview = previewConfig();
   const { dot } = ui.glyph;
@@ -423,25 +423,8 @@ function previewParts(width) {
   const pending = previewPending();
   const note = pending ? ` ${ui.accentText(`${dot} ${pending} preview, enter to apply`)}` : "";
   const title = `Live preview ${dim(`${dot} ${layout} ${dot} ${preview.theme}${style}`)}${note}`;
-  // The toggle keys work on the widget list, so only that screen names them.
-  const key = (letter) => (screen === "main" ? letter : "");
-  const chips = [
-    ui.chip("gaps", preview.rowGap, key("v")),
-    ui.chip("emojis", preview.emojis, key("e")),
-    ui.chip("minimal", preview.minimalist, key("m")),
-    ui.chip("pace", preview.pacing, key("r")),
-    ui.chip("blink", Boolean(preview.thresholds?.blink), key("b")),
-    ui.chip("ascii", preview.ascii, key("i")),
-  ];
-  if (preview.layout === "pills") {
-    chips.unshift(ui.chip("joins", preview.powerline.enabled, key("j")));
-  }
-  // Only worth a chip once there is a language to switch to.
-  if (SUPPORTED_LANGUAGES.length > 1) {
-    chips.push(ui.chip(`lang ${resolveLanguage(preview.language)}`, true, key("u")));
-  }
 
-  return { title, bar: String(rendered).split("\n"), chips: chips.join("   ") };
+  return { title, bar: String(rendered).split("\n") };
 }
 
 // Keeps the cursor's row inside a window of `space` rows; returns the slice
@@ -533,8 +516,8 @@ function anchor(top, bottom, tall) {
 // beside it on a wide window, both as tall as the longer one, notes at the
 // bottom), the live preview and the keys. Panels fit their content rather
 // than the window, so a tall window doesn't get rows of empty boxes. A short
-// window gives up blank lines, the tagline, the notes and the preview's
-// toggles before the list starts to scroll.
+// window gives up blank lines, the tagline and the notes before the list
+// starts to scroll.
 function screenFrame({ title, head = [], items, selected = cursor, notes = [], keys, details }) {
   const width = frameWidth();
   const height = frameHeight();
@@ -564,7 +547,7 @@ function screenFrame({ title, head = [], items, selected = cursor, notes = [], k
     (step.tagline ? 1 : 0) -
     2 -
     2 -
-    (2 + preview.bar.length + (step.chips ? 2 : 0)) -
+    (2 + preview.bar.length) -
     hints.length;
   const listSpace = (step) => bodySpace(step) - head.length - (wide ? 0 : noteLines(step).length);
   const fits = (step) =>
@@ -612,7 +595,7 @@ function screenFrame({ title, head = [], items, selected = cursor, notes = [], k
     ui.tabs(TABS, TAB_OF_SCREEN[screen]),
     ...gap,
     ...body,
-    ...ui.panel(preview.title, [...preview.bar, ...(step.chips ? ["", preview.chips] : [])], width),
+    ...ui.panel(preview.title, preview.bar, width),
     ...hints,
   ];
 }
@@ -1218,10 +1201,6 @@ function powerlineRowValue(row) {
     return config.powerline.enabled ? "on" : "off";
   }
 
-  if (row.id === "rowGap") {
-    return config.rowGap ? "on" : "off";
-  }
-
   if (row.id === "style") {
     const style = detectStyle(config.powerline);
     return style ? STYLES[style].name : "custom";
@@ -1237,8 +1216,6 @@ function powerlineRowValue(row) {
 const POWERLINE_HELP = {
   enabled:
     "On: adjacent widgets share one pill, with a separator between them. Off: every widget gets its own pill.",
-  rowGap:
-    "Puts a blank line between rows, in every layout, so stacked pills don't touch and text rows get more air. The bar takes more lines (three rows become five).",
   style: "Sets start caps, end caps and separators in one go. Enter cycles the styles.",
   separators: "Glyphs between widgets of a pill. With several, they cycle per join, left to right.",
   startCaps: "Glyphs that open each pill. With several, they cycle per pill, left to right.",
@@ -1358,17 +1335,17 @@ const LAYOUT_HELP = {
   pills: [
     "Widgets sit in colored pills, joined by powerline caps and separators.",
     "Meters draw as small dots on the pill's color, with a larger dot as the pace marker.",
-    "The Powerline tab sets the caps, separators, joins and the space between rows.",
+    "The Powerline tab sets caps, separators and joins; Settings sets row spacing.",
   ],
   lines: [
     "Colored text on the terminal background, with thin │ dividers between widgets.",
     "Meters draw as dots in the ok, caution or danger color, over a dim track.",
-    "Powerline shapes don't apply; the theme, widgets and space between rows do.",
+    "Powerline shapes don't apply; the theme, widgets and Settings do.",
   ],
   classic: [
     "Colored text on the terminal background, with | dividers between widgets.",
     "Meters draw as blocks in one color: █ filled, ░ empty and │ as the pace marker.",
-    "Powerline shapes don't apply; the theme, widgets and space between rows do.",
+    "Powerline shapes don't apply; the theme, widgets and Settings do.",
   ],
 };
 
@@ -1395,6 +1372,122 @@ function drawLayout() {
   });
 }
 
+const LANGUAGE_LABELS = {
+  en: "English (en)",
+  fr: "French (fr)",
+  es: "Spanish (es)",
+  ja: "Japanese (ja)",
+  "zh-CN": "Simplified Chinese (zh-CN)",
+  ko: "Korean (ko)",
+};
+
+const SETTINGS_ROWS = [
+  {
+    id: "language",
+    label: "Bar language",
+    help: "Language used for labels, units and captions inside the statusline bar. Payload values and dates keep their own format.",
+  },
+  {
+    id: "emojis",
+    label: "Emojis",
+    help: "Show icons next to widget values across the bar. Turned off automatically while ASCII mode is on.",
+  },
+  {
+    id: "minimalist",
+    label: "Minimalist mode",
+    help: "Show widget values only, hiding labels and icons unless a widget sets its own Label option.",
+  },
+  {
+    id: "pacing",
+    label: "Quota pace marker",
+    help: "Draw the current-time tick mark on quota meters so you can tell whether usage runs ahead of time before reset.",
+  },
+  {
+    id: "blink",
+    label: "Alert blink",
+    help: "Flash critical warning widgets (below 10% quota left or above 90% context used) when your terminal supports blink.",
+  },
+  {
+    id: "rowGap",
+    label: "Space between rows",
+    help: "Put a blank line between statusline rows in every layout so stacked pills don't touch and text rows get more air.",
+  },
+  {
+    id: "ascii",
+    label: "ASCII mode",
+    help: "Draw plain ASCII glyphs and boxes instead of Nerd Font caps, emojis and Unicode box-drawing characters.",
+  },
+];
+
+function settingValue(row) {
+  if (row.id === "language") {
+    const code = resolveLanguage(config.language);
+    return LANGUAGE_LABELS[code] || code;
+  }
+
+  if (row.id === "emojis") {
+    return config.emojis !== false ? (config.ascii ? "on (off in ASCII)" : "on") : "off";
+  }
+
+  if (row.id === "minimalist") {
+    return config.minimalist ? "on (values only)" : "off";
+  }
+
+  if (row.id === "pacing") {
+    return config.pacing !== false ? "on" : "off";
+  }
+
+  if (row.id === "blink") {
+    return config.thresholds?.blink ? "on" : "off";
+  }
+
+  if (row.id === "rowGap") {
+    return config.rowGap ? "on" : "off";
+  }
+
+  return config.ascii ? "on" : "off";
+}
+
+function settingsDetails(row) {
+  if (!row) {
+    return null;
+  }
+
+  const lines = [row.help];
+  if (row.id === "language") {
+    const active = resolveLanguage(config.language);
+    lines.push(
+      "",
+      ...SUPPORTED_LANGUAGES.map((code) => {
+        const mark = code === active ? ui.glyph.on : ui.glyph.off;
+        const label = LANGUAGE_LABELS[code] || code;
+        return code === active
+          ? { raw: ui.accentText(`${mark} ${label}`) }
+          : { dim: `${mark} ${label}` };
+      })
+    );
+  }
+  lines.push("", "Enter cycles or toggles; x resets to default.");
+  return { title: row.label, lines };
+}
+
+function drawSettings() {
+  const items = SETTINGS_ROWS.map((row) => ({ text: row.label, value: settingValue(row) }));
+
+  return screenFrame({
+    title: "Settings",
+    items,
+    notes: ["Bar-wide defaults that apply across layouts and presets."],
+    details: settingsDetails(SETTINGS_ROWS[cursor]),
+    keys: [
+      [ui.glyph.upDown, "move"],
+      ["enter", "toggle / cycle"],
+      ["x", "reset"],
+      ["esc", "back"],
+    ],
+  });
+}
+
 function frameLines() {
   const shown = previewConfig();
   ui = makeUi(themeColors(shown.theme, shown.customTheme), {
@@ -1410,6 +1503,7 @@ function frameLines() {
   if (screen === "powerline") return drawPowerline();
   if (screen === "glyphs") return drawGlyphs();
   if (screen === "layout") return drawLayout();
+  if (screen === "settings") return drawSettings();
   return drawMain();
 }
 
@@ -1490,6 +1584,11 @@ function openLayout() {
   cursor = Math.max(0, LAYOUT_ORDER.indexOf(config.layout));
 }
 
+function openSettings() {
+  screen = "settings";
+  cursor = 0;
+}
+
 function backToMain() {
   screen = "main";
   clampCursor(config.widgets.length);
@@ -1504,6 +1603,7 @@ const TAB_OPENERS = {
   themes: () => openThemes(),
   layout: () => openLayout(),
   powerline: () => openPowerline(),
+  settings: () => openSettings(),
 };
 
 // ← → and Tab / Shift+Tab move between the tabs, and each tab's letter opens
@@ -1564,12 +1664,6 @@ function onMain(key) {
     return;
   }
 
-  if (key.name === "i") {
-    config.ascii = !config.ascii;
-    persist();
-    return;
-  }
-
   if (key.name === "return") {
     openEdit();
     return;
@@ -1601,56 +1695,6 @@ function onMain(key) {
       flashMessage = "Reset to default configuration.";
     }
     clampCursor(config.widgets.length);
-    return;
-  }
-
-  if (key.name === "b") {
-    config.thresholds = config.thresholds || {};
-    config.thresholds.blink = !config.thresholds.blink;
-    if (persist()) {
-      flashMessage = `Alert blink: ${config.thresholds.blink ? "on" : "off"}`;
-    }
-    return;
-  }
-
-  if (key.name === "j") {
-    setPowerline({ enabled: !config.powerline.enabled });
-    return;
-  }
-
-  if (key.name === "v") {
-    toggleRowGap();
-    return;
-  }
-
-  if (key.name === "e") {
-    config.emojis = !config.emojis;
-    persist();
-    return;
-  }
-
-  if (key.name === "m") {
-    config.minimalist = !config.minimalist;
-    if (persist()) {
-      flashMessage = `Minimalist: ${config.minimalist ? "on (values only)" : "off"}`;
-    }
-    return;
-  }
-
-  if (key.name === "r") {
-    config.pacing = !config.pacing;
-    if (persist()) {
-      flashMessage = `Pace marker: ${config.pacing ? "on" : "off"}`;
-    }
-    return;
-  }
-
-  if (key.name === "u" && SUPPORTED_LANGUAGES.length > 1) {
-    const next = SUPPORTED_LANGUAGES.indexOf(resolveLanguage(config.language)) + 1;
-    config.language = SUPPORTED_LANGUAGES[next % SUPPORTED_LANGUAGES.length];
-    if (persist()) {
-      flashMessage = `Bar language: ${config.language}`;
-    }
   }
 }
 
@@ -1875,8 +1919,6 @@ function onPowerline(key) {
 
   if (row.id === "enabled") {
     setPowerline({ enabled: !config.powerline.enabled });
-  } else if (row.id === "rowGap") {
-    toggleRowGap();
   } else if (row.id === "style") {
     // A customized setup restarts the cycle at the first style.
     const current = STYLE_ORDER.indexOf(detectStyle(config.powerline));
@@ -1887,6 +1929,106 @@ function onPowerline(key) {
     openGlyphs(row.slot);
   } else {
     openThemes();
+  }
+}
+
+function toggleOrCycleSetting(row) {
+  if (row.id === "language") {
+    const next = SUPPORTED_LANGUAGES.indexOf(resolveLanguage(config.language)) + 1;
+    config.language = SUPPORTED_LANGUAGES[next % SUPPORTED_LANGUAGES.length];
+    if (persist()) {
+      flashMessage = `Bar language: ${LANGUAGE_LABELS[config.language] || config.language}`;
+    }
+    return;
+  }
+
+  if (row.id === "emojis") {
+    config.emojis = config.emojis === false;
+    if (persist()) {
+      flashMessage = `Emojis: ${config.emojis ? "on" : "off"}`;
+    }
+    return;
+  }
+
+  if (row.id === "minimalist") {
+    config.minimalist = !config.minimalist;
+    if (persist()) {
+      flashMessage = `Minimalist mode: ${config.minimalist ? "on (values only)" : "off"}`;
+    }
+    return;
+  }
+
+  if (row.id === "pacing") {
+    config.pacing = config.pacing === false;
+    if (persist()) {
+      flashMessage = `Quota pace marker: ${config.pacing ? "on" : "off"}`;
+    }
+    return;
+  }
+
+  if (row.id === "blink") {
+    config.thresholds = config.thresholds || {};
+    config.thresholds.blink = !config.thresholds.blink;
+    if (persist()) {
+      flashMessage = `Alert blink: ${config.thresholds.blink ? "on" : "off"}`;
+    }
+    return;
+  }
+
+  if (row.id === "rowGap") {
+    toggleRowGap();
+    return;
+  }
+
+  config.ascii = !config.ascii;
+  if (persist()) {
+    flashMessage = `ASCII mode: ${config.ascii ? "on" : "off"}`;
+  }
+}
+
+function resetSetting(row) {
+  const defaults = defaultConfig();
+  if (row.id === "language") {
+    config.language = defaults.language;
+  } else if (row.id === "blink") {
+    config.thresholds = config.thresholds || {};
+    config.thresholds.blink = defaults.thresholds.blink;
+  } else {
+    config[row.id] = defaults[row.id];
+  }
+  if (persist()) {
+    flashMessage = `Reset ${row.label.toLowerCase()} to default.`;
+  }
+}
+
+function onSettings(key) {
+  if (key.name === "escape") {
+    backToMain();
+    return;
+  }
+
+  if (key.name === "up") {
+    moveCursor(-1, SETTINGS_ROWS.length);
+    return;
+  }
+
+  if (key.name === "down") {
+    moveCursor(1, SETTINGS_ROWS.length);
+    return;
+  }
+
+  const row = SETTINGS_ROWS[cursor];
+  if (!row) {
+    return;
+  }
+
+  if (key.name === "return" || key.name === "space") {
+    toggleOrCycleSetting(row);
+    return;
+  }
+
+  if (key.name === "x" || key.name === "delete" || key.name === "backspace") {
+    resetSetting(row);
   }
 }
 
@@ -2066,6 +2208,8 @@ function onKey(_str, key) {
     onGlyphs(key);
   } else if (screen === "layout") {
     onLayout(key);
+  } else if (screen === "settings") {
+    onSettings(key);
   } else {
     onMain(key);
   }

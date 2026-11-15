@@ -32,7 +32,7 @@ The Gemini 5-hour and 7-day quotas, the third-party (Claude and GPT) 5-hour and 
 
 ## The bar shows boxes or question marks. How do I fix it?
 
-Your terminal font lacks the powerline glyphs. Install a [Nerd Font](https://www.nerdfonts.com/), or turn on ASCII mode with `i` in `configure`. See [Fix broken powerline symbols](guides/nerd-font-symbols.md).
+Your terminal font lacks the powerline glyphs. Install a [Nerd Font](https://www.nerdfonts.com/), or turn on **ASCII mode** in the Settings tab (`i`) in `configure`. See [Fix broken powerline symbols](guides/nerd-font-symbols.md).
 
 ## Why does `render --demo` show widgets my live bar doesn't?
 

@@ -54,11 +54,11 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 `--yes` 会跳过 agy 无法回答的确认提示，并在备份 `settings.json` 后替换已有的 `statusLine`。
 
-如果终端没有 Nerd Font，可以开启 ASCII 模式（在 `configure` 中按 `i`）。
+如果终端没有 Nerd Font，可以开启 ASCII 模式（在 `configure` 中按 `i` 打开 `Settings`）。
 
 ## 自定义
 
-`npx agy-powerline configure` 会打开一个带有状态栏实时预览的编辑器。用 `←` `→` 在 Widgets、Presets、Themes、Layout 和 Powerline 之间切换，`↑` `↓` 移动，Enter 选择，`q` 保存并退出。每个界面的按键都显示在底部；完整列表见 [Configuration](docs/configuration.md#configurator-keys)。
+`npx agy-powerline configure` 会打开一个带有状态栏实时预览的编辑器。用 `←` `→` 在 Widgets、Presets、Themes、Layout、Powerline 和 Settings 之间切换，`↑` `↓` 移动，Enter 选择，`q` 保存并退出。每个界面的按键都显示在底部；完整列表见 [Configuration](docs/configuration.md#configurator-keys)。
 
 正在运行的 `agy` 会在下次刷新时应用更改。
 
