@@ -18,6 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Running `npx agy-powerline` with no arguments in an interactive terminal now installs (or repairs/refreshes outdated scripts while keeping your config and render flags) and launches the live-preview `configure` TUI directly, printing a post-exit summary with a reminder to restart `agy`; pass `--help` for command usage, while piped stdin still renders the statusline and `init --yes` remains unchanged for scripted installs
 - `configure` now restores terminal state, detaches event listeners, and resolves cleanly instead of calling `process.exit(0)` mid-caller
 
+### Fixed
+
+- Kill the full process tree (`taskkill /T /F` on Windows, process group `SIGKILL` on macOS/Linux) when an `exec` widget command times out so child and grandchild processes don't outlive the refresh (#177)
+
 ## [1.11.4] - 2026-11-13
 
 ### Added

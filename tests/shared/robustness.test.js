@@ -377,6 +377,96 @@ function testExecPayloadFailures() {
     );
   }
   clearExecCache();
+  testBundledExecTreeTimeout();
+}
+
+function isPidAlive(pid) {
+  if (!pid) {
+    return false;
+  }
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    return err.code === "EPERM";
+  }
+}
+
+// A bundled statusline refresh must not stall on grandchildren that keep stdout
+// open or leave those children alive after timeout.
+function testBundledExecTreeTimeout() {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "agy-exec-tree-runtime-"));
+  const installDir = path.join(root, ".agy-powerline");
+  const script = path.join(root, "spawn-tree.js");
+  const pidFile = path.join(root, "pids.json");
+  let pids = [];
+
+  try {
+    stageInstall(installDir);
+    fs.writeFileSync(
+      script,
+      [
+        'const fs = require("fs");',
+        'const { spawn } = require("child_process");',
+        'const child = spawn(process.execPath, ["-e", "setTimeout(() => {}, 30000)"], { stdio: ["ignore", "inherit", "ignore"], windowsHide: true });',
+        `fs.writeFileSync(${JSON.stringify(pidFile)}, JSON.stringify([process.pid, child.pid]));`,
+        "setTimeout(() => {}, 30000);",
+      ].join("\n")
+    );
+    fs.writeFileSync(
+      path.join(installDir, "statusline.config.json"),
+      JSON.stringify({
+        layout: "pills",
+        widgets: [
+          { id: "model" },
+          { id: "exec", cmd: `"${NODE}" "${script}"`, payload: true, interval: 0, timeout: 800 },
+        ],
+      })
+    );
+
+    const env = {
+      ...process.env,
+      HOME: root,
+      USERPROFILE: root,
+      AGY_POWERLINE_HOME: installDir,
+    };
+    const started = Date.now();
+    const res = spawnSync(NODE, [path.join(installDir, "statusline.js")], {
+      input: JSON.stringify({ ...JSON.parse(PAYLOAD), cwd: root }),
+      encoding: "utf8",
+      env,
+      windowsHide: true,
+      timeout: 10000,
+    });
+    const elapsed = Date.now() - started;
+
+    const recorded = fs.existsSync(pidFile);
+    if (recorded) {
+      pids = JSON.parse(fs.readFileSync(pidFile, "utf8"));
+    }
+    const stillRunning = pids.filter((pid) => isPidAlive(pid));
+    const entries = readLog(path.join(installDir, LOG_NAME));
+
+    record(
+      "bundled runtime kills timed-out exec child trees that inherit stdout and logs EXEC_TIMEOUT",
+      res.status === 0 &&
+        /Gemini/.test(res.stdout) &&
+        recorded &&
+        elapsed < 5000 &&
+        stillRunning.length === 0 &&
+        entries.some((entry) => entry.code === "EXEC_TIMEOUT"),
+      `status=${res.status}, elapsed=${elapsed}ms, recorded=${recorded}, alive=${JSON.stringify(stillRunning)}`
+    );
+  } finally {
+    for (const pid of pids) {
+      try {
+        process.kill(pid, "SIGKILL");
+      } catch {
+        // Already exited.
+      }
+    }
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 }
 
 // A gradient of the wrong shape renders the plain theme, never an error.

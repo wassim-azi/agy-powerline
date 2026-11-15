@@ -6,7 +6,7 @@
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const childProcess = require("child_process");
+const workerThreads = require("worker_threads");
 const { record } = require("../helpers");
 const { setLogDir, readLog, LOG_NAME } = require("../../src/lib/log");
 
@@ -17,13 +17,24 @@ async function run() {
   const previousModule = require.cache[modulePath];
   const envKeys = ["HOME", "USERPROFILE", "AGY_POWERLINE_HOME"];
   const previousEnv = envKeys.map((key) => process.env[key]);
-  const previousExec = childProcess.execSync;
+  const previousWorker = workerThreads.Worker;
   const previousTmpdir = os.tmpdir;
   const previousUserInfo = os.userInfo;
   let calls = 0;
-  childProcess.execSync = () => {
-    calls++;
-    return "fresh output\n";
+  let mockOutcome = () => ({ status: 0, signal: null, timedOut: false, stdout: "fresh output\n" });
+  workerThreads.Worker = class MockWorker {
+    constructor(_filename, { workerData }) {
+      calls++;
+      const result = mockOutcome(workerData);
+      workerData.port.postMessage(result);
+      workerData.port.close();
+      Atomics.store(workerData.sab, 0, 1);
+      Atomics.notify(workerData.sab, 0, 1);
+    }
+    unref() {}
+    terminate() {
+      return Promise.resolve(0);
+    }
   };
   const fresh = () => {
     delete require.cache[modulePath];
@@ -92,11 +103,7 @@ async function run() {
     );
 
     setLogDir(installDir);
-    childProcess.execSync = () => {
-      const error = new Error(cmd);
-      error.status = 127;
-      throw error;
-    };
+    mockOutcome = () => ({ status: 127, signal: null, timedOut: false, stdout: "" });
     exec = fresh();
     exec.runExecWidget({ cmd: "missing-private-command" }, session);
     const entries = readLog(path.join(installDir, LOG_NAME));
@@ -107,7 +114,7 @@ async function run() {
     );
   } finally {
     setLogDir(null);
-    childProcess.execSync = previousExec;
+    workerThreads.Worker = previousWorker;
     os.tmpdir = previousTmpdir;
     os.userInfo = previousUserInfo;
     delete require.cache[modulePath];
