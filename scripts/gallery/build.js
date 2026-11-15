@@ -440,7 +440,7 @@ function buildHomeHtml({ lang = "en" } = {}) {
   const n = counts();
   const styles = styleClasses();
   const sections = {
-    INSTALL_CMD: commandBox("npx agy-powerline init", {
+    INSTALL_CMD: commandBox("npx agy-powerline", {
       label: text.copyInstall,
       copy: text.copy,
       large: true,

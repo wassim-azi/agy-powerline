@@ -194,7 +194,7 @@ h1 { margin: 0; align-self: center; font-size: ${size}px; font-weight: 750; line
   <div class="top">${logo}<span class="brand">agy-powerline</span><span class="label">${esc(label)}</span></div>
   <h1>${esc(title)}</h1>
   <div class="term-frame" data-bg="dark"><div class="term" data-bg="dark"><div class="screen">${bar(78, lang)}</div></div></div>
-  <div class="foot"><span class="cmd"><code><span class="prompt">$ </span>npx agy-powerline init</code></span><span class="facts">${facts}</span></div>
+  <div class="foot"><span class="cmd"><code><span class="prompt">$ </span>npx agy-powerline</code></span><span class="facts">${facts}</span></div>
 </div>
 </body>
 </html>`;

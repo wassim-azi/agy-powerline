@@ -1,6 +1,6 @@
 # How to add a status line to Antigravity CLI
 
-Antigravity CLI (`agy`) can run a command of your choice to draw its status bar. You set it under `statusLine` in `~/.gemini/antigravity-cli/settings.json`; agy runs it on every refresh, pipes the session as JSON on its standard input, and shows what it prints. The quickest way to set one up is `npx agy-powerline init`, then one restart of agy.
+Antigravity CLI (`agy`) can run a command of your choice to draw its status bar. You set it under `statusLine` in `~/.gemini/antigravity-cli/settings.json`; agy runs it on every refresh, pipes the session as JSON on its standard input, and shows what it prints. The quickest way to set one up is `npx agy-powerline`, then one restart of agy.
 
 - [The one-command setup](#the-one-command-setup)
 - [The statusLine setting](#the-statusline-setting)
@@ -13,10 +13,10 @@ Antigravity CLI (`agy`) can run a command of your choice to draw its status bar.
 You need Node.js 20 or newer and agy.
 
 ```bash
-npx agy-powerline init
+npx agy-powerline
 ```
 
-`init` copies the status line script to `~/.agy-powerline`, adds the `statusLine` entry to agy's `settings.json`, and asks for a preset, a layout and a theme with a preview of each. It asks before replacing anything and keeps a backup of `settings.json`. Restart agy once so it reads the new setting. [What `init` does](../install.md#what-init-does) covers every step.
+It copies the status line script to `~/.agy-powerline`, adds the `statusLine` entry to agy's `settings.json`, and opens the live-preview editor so you can pick a preset, a layout and a theme. It asks before replacing anything and keeps a backup of `settings.json`. Restart agy once so it reads the new setting. [What setup does](../install.md#what-init-does) covers every step.
 
 From inside agy you can also install agy-powerline as a plugin and let its setup skill run `init` for you ([Install from inside agy](../install.md#install-from-inside-agy-plugin)).
 

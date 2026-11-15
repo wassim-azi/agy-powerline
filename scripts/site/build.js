@@ -71,7 +71,7 @@ const MARKDOWN_PAGES = [
     name: "Install",
     title: "Install agy-powerline - agy statusline setup",
     description:
-      "Install the agy statusline with npx agy-powerline init: what init changes, the agy plugin route, installing without npm, WSL, upgrading and removing it.",
+      "Install the agy statusline with npx agy-powerline: what setup changes, the agy plugin route, installing without npm, WSL, upgrading and removing it.",
   },
   {
     source: "docs/configuration.md",
@@ -561,7 +561,7 @@ function docsIndexPage() {
           [
             "/install/",
             "Install",
-            "What npx agy-powerline init does, the plugin route, no-npm installs, WSL, upgrades.",
+            "What npx agy-powerline does, the plugin route, no-npm installs, WSL, upgrades.",
           ],
           [
             "/docs/configuration/",
@@ -772,7 +772,7 @@ function calculatorPage() {
         <p>A quota window has a fixed length: 5 hours or 7 days. The time left until the reset tells how far into the window you are; with 2 hours left of a 5-hour window, 60% of it has passed. If you've used more of the quota than that share of time, you're using it faster than time passes, and at that pace it runs out before it resets.</p>
         <p>The calculator assumes you keep the pace you've had since the window started. The bar below the inputs is the same as agy-powerline's quota meter: the filled part is the quota used, and the marker is where you are in the window. Fill past the marker means trouble.</p>
         <h2 id="in-your-terminal">See it live in your terminal</h2>
-        <p>agy-powerline draws this meter for every quota in agy's status bar and keeps it up to date while you work, with a caution color at 30% left and a danger color at 10%. Install it with <code>npx agy-powerline init</code> and read the <a href="/guides/antigravity-quota/">quota guide</a>.</p>`;
+        <p>agy-powerline draws this meter for every quota in agy's status bar and keeps it up to date while you work, with a caution color at 30% left and a danger color at 10%. Install it with <code>npx agy-powerline</code> and read the <a href="/guides/antigravity-quota/">quota guide</a>.</p>`;
   const script = `${paceCode}
 (function () {
   const P = window.AgyQuotaPace;

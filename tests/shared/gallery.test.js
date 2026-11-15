@@ -96,7 +96,7 @@ async function run() {
 
   record(
     "the home page leads with the install command and the configurator",
-    /<div class="cmd cmd-lg"><code tabindex="0"><span class="prompt" aria-hidden="true">\$ <\/span>npx agy-powerline init<\/code>/.test(
+    /<div class="cmd cmd-lg"><code tabindex="0"><span class="prompt" aria-hidden="true">\$ <\/span>npx agy-powerline<\/code>/.test(
       html
     ) && html.includes('href="/configure/"')
   );
