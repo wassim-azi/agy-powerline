@@ -1,7 +1,8 @@
 # Installation details
 
-What `npx agy-powerline init` does, where files go, and how to set things up by hand. For the quick version, see the [README](../README.md#install).
+What `npx agy-powerline` and `npx agy-powerline init` do, where files go, and how to set things up by hand. For the quick version, see the [README](../README.md#install).
 
+- [What `npx agy-powerline` does](#what-npx-agy-powerline-does)
 - [What `init` does](#what-init-does)
 - [Install from inside agy (plugin)](#install-from-inside-agy-plugin)
 - [Install without npm](#install-without-npm)
@@ -11,6 +12,15 @@ What `npx agy-powerline init` does, where files go, and how to set things up by 
 - [Setting it up by hand](#setting-it-up-by-hand)
 - [WSL](#wsl)
 - [Performance](#performance)
+
+## What `npx agy-powerline` does
+
+In an interactive terminal, running `npx agy-powerline` with no arguments handles both installation and configuration in one step:
+
+- **First install:** checks Node/WSL and Windows path safety, verifies `settings.json` is valid JSON, copies the runtime scripts to `~/.agy-powerline`, writes a default `statusline.config.json` (with `$schema`), backs up and wires `settings.json` (asking before replacing an existing `statusLine`), and opens `configure` right away. After you quit the editor, it prints where files were written and reminds you to restart `agy`.
+- **Already installed:** verifies the scripts and `settings.json` entry, refreshes `statusline.js`, `statusline.cmd` (on Windows), and `install.json` if the CLI version is newer (without touching `statusline.config.json` or any appended render flags), aborts cleanly if `statusline.config.json` has a JSON error, and opens `configure`.
+- **Partial or broken install:** repairs missing scripts or `settings.json` wiring (respecting existing `statusline.config.json` and `settings.json` prompts) before opening `configure`.
+- **Non-TTY / piped input:** when stdin is piped JSON, `npx agy-powerline` renders the bar and exits; when stdout is redirected (not a TTY), it prints `--help` instead of starting the TUI. Pass `--help` (or `-h` / `help`) to view all commands and options.
 
 ## What `init` does
 
@@ -134,7 +144,7 @@ npx agy-powerline uninstall --delete   # also remove the files init installed
 
 ## Setting it up by hand
 
-If you skip the settings step in `init`, add `statusLine` to `~/.gemini/antigravity-cli/settings.json` (Windows: `%USERPROFILE%\.gemini\antigravity-cli\settings.json`). Use absolute paths: Antigravity does not expand `~`. Prefer forward slashes. Restart `agy` after editing this file.
+If you skip the settings step in `init`, add `statusLine` to `~/.gemini/antigravity-cli/settings.json` (Windows: `%USERPROFILE%\.gemini\antigravity-cli\settings.json`). Antigravity expands a leading `~` in `command`, though `init` writes full paths so Node and Windows `cmd /c` resolve reliably without shell expansion. Prefer forward slashes. Restart `agy` after editing this file.
 
 **Linux**
 
@@ -173,7 +183,7 @@ Point at the `statusline.cmd` launcher `init` writes. Do not quote the path: Ant
 }
 ```
 
-Inside agy you can also use `/statusline <command>`, or go back to the built-in bar with `/statusline reset`.
+Inside agy you can also use `/statusline <command>`, toggle with `/statusline` (`on`/`enable`, `off`/`disable`), or go back to the built-in bar with `/statusline delete` (or `/statusline reset`).
 
 ## WSL
 

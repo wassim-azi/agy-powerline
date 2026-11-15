@@ -15,6 +15,7 @@ const {
   STATUS_CACHE_NAME,
   clearGitDetailsCache,
   hasRiskyRepoConfig,
+  resolveGit,
   setGitTimeouts,
 } = require("../../src/lib/git");
 
@@ -580,12 +581,34 @@ async function run() {
     );
     testGitDetails(root, git);
     testGitOperations(root, git);
+    testHgBranchFallback(root);
   } catch (err) {
     record("git suite ran without errors", false, String(err.stderr || err.message));
   } finally {
     setGitTimeouts(previousTimeouts);
     fs.rmSync(root, { recursive: true, force: true });
   }
+}
+
+function testHgBranchFallback(root) {
+  const hgRepo = path.join(root, "hg-repo");
+  const nested = path.join(hgRepo, "sub", "dir");
+  fs.mkdirSync(path.join(hgRepo, ".hg"), { recursive: true });
+  fs.mkdirSync(nested, { recursive: true });
+  fs.writeFileSync(path.join(hgRepo, ".hg", "branch"), "feature-hg\n");
+
+  const config = { layout: "pills", widgets: [{ id: "git" }] };
+  const branchRes = resolveGit({ cwd: nested, vcs: { type: "hg" } }, config);
+  fs.rmSync(path.join(hgRepo, ".hg", "branch"));
+  const defaultRes = resolveGit({ cwd: nested, vcs: { type: "hg", dirty: true } }, config);
+
+  record(
+    "vcs.type hg reads .hg/branch and defaults to default when branch file is absent",
+    branchRes?.branch === "feature-hg" &&
+      defaultRes?.branch === "default" &&
+      defaultRes?.dirty === true,
+    JSON.stringify({ branchRes, defaultRes })
+  );
 }
 
 module.exports = { run };

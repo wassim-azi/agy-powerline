@@ -157,12 +157,41 @@ function testFailedWrite() {
   });
 }
 
+function testLatestPayloadFieldsPreserved() {
+  const payload = safePayload({
+    email: "user@example.com",
+    model: { id: "Gemini 4 Argon", display_name: "Gemini 4 Argon (Medium)", effort: "medium" },
+    agent: { name: "reviewer", session_id: "secret-session" },
+    quota: { "gemini-5h": { remaining_fraction: 0.5, remaining_amount: 42 } },
+    cost: { total_usd: 0.4213, subagent_usd: 0.1, estimated: true, conversation_id: "secret-conv" },
+    pending_input_count: 2,
+    tool_confirmation_pending: true,
+  });
+
+  record(
+    "payload dumps keep documented non-PII fields while omitting email and IDs",
+    payload.model?.effort === "medium" &&
+      payload.agent?.name === "reviewer" &&
+      !("session_id" in payload.agent) &&
+      payload.quota?.["gemini-5h"]?.remaining_amount === 42 &&
+      payload.cost?.total_usd === 0.4213 &&
+      payload.cost?.subagent_usd === 0.1 &&
+      payload.cost?.estimated === true &&
+      !("conversation_id" in payload.cost) &&
+      payload.pending_input_count === 2 &&
+      payload.tool_confirmation_pending === true &&
+      !("email" in payload),
+    JSON.stringify(payload)
+  );
+}
+
 async function run() {
   testWrongTypes();
   testDumpTarget();
   testPrivatePayloadDump();
   testInvalidJsonDump();
   testFailedWrite();
+  testLatestPayloadFieldsPreserved();
 }
 
 module.exports = { run };

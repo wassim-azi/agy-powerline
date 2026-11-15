@@ -30,6 +30,7 @@ const {
   gitFileParts,
   formatTasks,
   formatMode,
+  formatCost,
   limitWidth,
   shortenPath,
   formatTokens,
@@ -334,13 +335,31 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       );
     }
 
-    case "agentState": {
-      if (!session.agentState) {
+    case "agent":
+      if (!session.agentName) {
         return null;
       }
-      const idle = session.agentState === "idle";
-      const color = idle ? DIM : fg(palette.agent || palette.magenta || LINES.magenta);
-      return color + tag(idle ? "🟢" : undefined) + session.agentState.replace(/_/g, " ") + RESET;
+      return fg(palette.text) + tag() + limitWidth(session.agentName, widget, ascii) + RESET;
+
+    case "agentState": {
+      if (!session.agentState && !session.toolConfirmation) {
+        return null;
+      }
+      const state = session.agentState ? session.agentState.replace(/_/g, " ") : "";
+      const text = session.toolConfirmation
+        ? state
+          ? `${state} (${t("confirm", session.lang)})`
+          : t("confirm", session.lang)
+        : state;
+      const idle = session.agentState === "idle" && !session.toolConfirmation;
+      const color = idle
+        ? DIM
+        : fg(
+            session.toolConfirmation || session.agentState === "error"
+              ? palette.quotaCrit || palette.agent || palette.magenta || LINES.magenta
+              : palette.agent || palette.magenta || LINES.magenta
+          );
+      return color + tag(idle ? "🟢" : undefined) + text + RESET;
     }
 
     case "fiveHourBar":
@@ -538,6 +557,12 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       }
       return fg(palette.text) + tag() + String(session.artifacts) + RESET;
 
+    case "queue":
+      if (!session.pendingInputs) {
+        return null;
+      }
+      return fg(palette.text) + tag() + String(session.pendingInputs) + RESET;
+
     case "tasks": {
       const text = formatTasks(
         session.subagents,
@@ -637,6 +662,14 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
           : formatTokens(session.totalTokens)) +
         RESET
       );
+
+    case "cost": {
+      const text = formatCost(session.cost);
+      if (!text) {
+        return null;
+      }
+      return fg(palette.text) + tag() + text + RESET;
+    }
 
     case "tokensToday":
     case "tokensWeek": {

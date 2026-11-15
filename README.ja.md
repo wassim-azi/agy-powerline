@@ -31,12 +31,11 @@
 [Node.js](https://nodejs.org/) 20 以上と [Antigravity CLI](https://antigravity.google/docs/cli/overview) が必要です。Windows、macOS、Linux、WSL で動作します（[WSL についての注意](docs/install.md#wsl)）。
 
 ```bash
-npx agy-powerline init        # agy にステータスラインをインストール
-npx agy-powerline configure   # 任意：ウィジェット、テーマ、レイアウトを選ぶ
+npx agy-powerline             # ステータスラインをインストールしてエディターを開く
 agy                           # Antigravity を起動
 ```
 
-`init` は何かを置き換える前に確認し、先に Antigravity の `settings.json` をバックアップします。`init` の後に `agy` を一度再起動してください。詳細：[`init` が行うこと](docs/install.md)。
+ターミナルで `npx agy-powerline` を実行すると、スクリプトをインストール（または設定を保ったまま古いスクリプトを更新）し、`settings.json` をバックアップして設定したうえで、ライブプレビュー付きエディターを開きます。完了後に `agy` を一度再起動してください。スクリプトでの自動インストールには `npx agy-powerline init --yes` を使います。詳細：[インストールの仕組み](docs/install.md)。
 
 <details>
 <summary>スクリーンショット：実際の agy セッションでのバー（Windows Terminal）</summary>
@@ -147,31 +146,31 @@ npx agy-powerline init --language ja
 
 ## ウィジェット
 
-| ウィジェット                                                  | 表示内容                                                                                                 |
-| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `model`                                                       | 使用中のモデル                                                                                           |
-| `clock`                                                       | Current local time (12/24-hour format set under `clock`)                                                 |
-| `fiveHourBar`、`weeklyBar`                                    | 5h / 7d クォータの残りをメーターで表示（[ペースマーカー](docs/configuration.md#quota-pace-marker)付き）  |
-| `fiveHourPct`、`weeklyPct`                                    | 5h / 7d クォータの残りをパーセントで表示                                                                 |
-| `fiveHourReset`、`weeklyReset`                                | クォータがリセットされるまでの時間、またはリセット時刻                                                   |
-| `quota`                                                       | 最も早く尽きそうなクォータとそのリセット                                                                 |
-| `thirdPartyFiveHour`、`thirdPartyWeekly`                      | サードパーティモデルのクォータ                                                                           |
-| `argonWeekly`、`argonReset`                                   | Gemini 4 Argon 専用の週間クォータ（Google AI Pro）とそのリセット                                         |
-| `context`、`contextPct`、`contextTokens`                      | 使用中のコンテキストウィンドウ：メーター、パーセント、またはトークン数                                   |
-| `git`                                                         | ブランチ、未コミットの変更、ahead/behind                                                                 |
-| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree` | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree |
-| `project`、`cwd`                                              | プロジェクトのフォルダー、現在のフォルダー                                                               |
-| `agentState`、`plan`、`sandbox`、`artifacts`、`version`       | エージェントの動作状況、プラン、サンドボックス、アーティファクト、CLI のバージョン                       |
-| `tasks`                                                       | 実行中のサブエージェントとバックグラウンドタスク                                                         |
-| `mode`                                                        | 承認モード（例：accept-edits）と Vim モード                                                              |
-| `title`                                                       | 会話のタイトル                                                                                           |
-| `sessionTime`                                                 | Time since the active conversation started                                                               |
-| `totalTokens`、`cacheHit`、`cacheRead`、`cacheCreate`         | セッションのトークン数とプロンプトキャッシュの使用状況                                                   |
-| `tokensToday`、`tokensWeek`                                   | 今日と過去 7 日間のトークン使用量（すべての会話、Node 22.13 以降）                                       |
-| `ram`                                                         | マシンのメモリ使用量                                                                                     |
-| `os`                                                          | System agy runs on: Windows, macOS, Linux or WSL                                                         |
-| `host`                                                        | Current user and short hostname from the OS (`alex@devbox`)                                              |
-| `customText`、`exec`                                          | 任意のテキスト、または [シェルコマンド](docs/configuration.md#shell-command-widget-exec)の出力           |
+| ウィジェット                                                     | 表示内容                                                                                                 |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `model`                                                          | 使用中のモデル                                                                                           |
+| `clock`                                                          | Current local time (12/24-hour format set under `clock`)                                                 |
+| `fiveHourBar`、`weeklyBar`                                       | 5h / 7d クォータの残りをメーターで表示（[ペースマーカー](docs/configuration.md#quota-pace-marker)付き）  |
+| `fiveHourPct`、`weeklyPct`                                       | 5h / 7d クォータの残りをパーセントで表示                                                                 |
+| `fiveHourReset`、`weeklyReset`                                   | クォータがリセットされるまでの時間、またはリセット時刻                                                   |
+| `quota`                                                          | 最も早く尽きそうなクォータとそのリセット                                                                 |
+| `thirdPartyFiveHour`、`thirdPartyWeekly`                         | サードパーティモデルのクォータ                                                                           |
+| `argonWeekly`、`argonReset`                                      | Gemini 4 Argon 専用の週間クォータ（Google AI Pro）とそのリセット                                         |
+| `context`、`contextPct`、`contextTokens`                         | 使用中のコンテキストウィンドウ：メーター、パーセント、またはトークン数                                   |
+| `git`                                                            | ブランチ、未コミットの変更、ahead/behind                                                                 |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree |
+| `project`、`cwd`                                                 | プロジェクトのフォルダー、現在のフォルダー                                                               |
+| `agent`、`agentState`、`plan`、`sandbox`、`artifacts`、`version` | アクティブなエージェント、エージェントの状態、プラン、サンドボックス、成果物、CLI のバージョン           |
+| `tasks`、`queue`                                                 | 実行中のサブエージェント、バックグラウンドタスク、待機中のユーザーメッセージ                             |
+| `mode`                                                           | 承認モード（例：accept-edits）と Vim モード                                                              |
+| `title`                                                          | 会話のタイトル                                                                                           |
+| `sessionTime`                                                    | Time since the active conversation started                                                               |
+| `totalTokens`、`cost`、`cacheHit`、`cacheRead`、`cacheCreate`    | セッションのトークン数、推定コスト（USD）、プロンプトキャッシュの使用状況                                |
+| `tokensToday`、`tokensWeek`                                      | 今日と過去 7 日間のトークン使用量（すべての会話、Node 22.13 以降）                                       |
+| `ram`                                                            | マシンのメモリ使用量                                                                                     |
+| `os`                                                             | System agy runs on: Windows, macOS, Linux or WSL                                                         |
+| `host`                                                           | Current user and short hostname from the OS (`alex@devbox`)                                              |
+| `customText`、`exec`                                             | 任意のテキスト、または [シェルコマンド](docs/configuration.md#shell-command-widget-exec)の出力           |
 
 表示する内容のないウィジェットは自動的に隠れます。ウィジェットごとに色を変えたり、ラベルを外したり、独自の警告しきい値を設定したりできます。詳しくは [Configuration](docs/configuration.md) を参照してください。
 
@@ -179,6 +178,7 @@ npx agy-powerline init --language ja
 
 | コマンド                                           | 内容                                                         |
 | -------------------------------------------------- | ------------------------------------------------------------ |
+| `npx agy-powerline`                                | インストール（必要時）、スクリプト更新、エディター起動       |
 | `npx agy-powerline init [--yes]`                   | ステータスラインをインストールまたは更新                     |
 | `npx agy-powerline configure`                      | エディターを開く（別名 `config`）                            |
 | `npx agy-powerline preset <name>`                  | プリセットを適用（一覧は `--list`）                          |

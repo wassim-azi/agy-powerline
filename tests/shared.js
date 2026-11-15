@@ -37,6 +37,7 @@ registerSuite("security", "./shared/security.test");
 registerSuite("fuzz", "./shared/fuzz.test");
 registerSuite("install safety", "./shared/install-safety.test");
 registerSuite("init and doctor", "./shared/init-doctor.test");
+registerSuite("default command", "./shared/default-command.test");
 registerSuite("snapshots", "./shared/snapshots.test");
 registerSuite("commit messages", "./shared/commit-message.test");
 registerSuite("license", "./shared/license.test");

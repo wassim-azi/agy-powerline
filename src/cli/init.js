@@ -237,6 +237,46 @@ async function askChoices(rl, given) {
   return choices;
 }
 
+function looksLikeOurStatusline(filePath) {
+  try {
+    const text = fs.readFileSync(filePath, "utf8");
+    return (
+      /__require\("statusline\.js", "\.\/statusline"\)/.test(text) ||
+      (text.includes("agy-powerline") && text.includes("renderStatusline"))
+    );
+  } catch {
+    return false;
+  }
+}
+
+function installScripts(installDir, { writeScripts = true } = {}) {
+  fs.mkdirSync(installDir, { recursive: true });
+  restrictPrivateFiles(installDir);
+
+  const destStatusline = path.join(installDir, "statusline.js");
+
+  if (writeScripts) {
+    fs.writeFileSync(destStatusline, buildRuntimeBundle(), "utf8");
+    removeSeparateRuntimeFiles(installDir);
+
+    if (process.platform !== "win32") {
+      try {
+        fs.chmodSync(destStatusline, 0o755);
+      } catch {
+        // Still runnable via `node script.js`.
+      }
+    }
+  }
+
+  // Antigravity runs the bar through cmd on Windows, which needs a .cmd
+  // launcher; macOS and Linux settings run node statusline.js directly.
+  if (process.platform === "win32") {
+    writeWindowsLauncher(installDir);
+  }
+
+  writeInstallMeta(installDir);
+}
+
 function reportUnreadableSettings(error, command) {
   console.error(`${RED}error${RESET} ${AGY_SETTINGS} is not valid JSON, so it was left untouched.`);
   console.error(`  ${error}`);
@@ -309,9 +349,6 @@ async function initCommand(options = {}) {
       console.log();
     }
 
-    fs.mkdirSync(installDir, { recursive: true });
-    restrictPrivateFiles(installDir);
-
     const destStatusline = path.join(installDir, "statusline.js");
 
     let writeScripts = true;
@@ -330,26 +367,7 @@ async function initCommand(options = {}) {
       );
     }
 
-    if (writeScripts) {
-      fs.writeFileSync(destStatusline, buildRuntimeBundle(), "utf8");
-      removeSeparateRuntimeFiles(installDir);
-
-      if (process.platform !== "win32") {
-        try {
-          fs.chmodSync(destStatusline, 0o755);
-        } catch {
-          // Still runnable via `node script.js`.
-        }
-      }
-    }
-
-    // Antigravity runs the bar through cmd on Windows, which needs a .cmd
-    // launcher; macOS and Linux settings run node statusline.js directly.
-    if (process.platform === "win32") {
-      writeWindowsLauncher(installDir);
-    }
-
-    writeInstallMeta(installDir);
+    installScripts(installDir, { writeScripts });
 
     setConfigDir(installDir);
     if (firstInstall) {
@@ -476,4 +494,9 @@ module.exports = {
   initCommand,
   askChoices,
   askSymbols,
+  assertUnixNode,
+  reportUnreadableSettings,
+  installScripts,
+  updateAgySettings,
+  looksLikeOurStatusline,
 };

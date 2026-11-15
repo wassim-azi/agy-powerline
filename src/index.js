@@ -9,6 +9,7 @@ const path = require("path");
 const { parseArgs } = require("util");
 const { initCommand } = require("./cli/init");
 const { configureCommand } = require("./cli/configure");
+const { defaultInteractiveCommand } = require("./cli/default");
 const { themeCommand } = require("./cli/theme");
 const { layoutCommand } = require("./cli/layout");
 const { presetCommand } = require("./cli/preset");
@@ -280,6 +281,7 @@ function programHelp() {
     `Usage: ${NAME} [options] [command]`,
     "",
     DESCRIPTION,
+    "Run without arguments in a terminal to install and configure interactively.",
     "",
     "Options:",
     formatRows([
@@ -475,7 +477,13 @@ function logCliCrash(err, first) {
 const args = process.argv.slice(2);
 
 if (!args.length) {
-  if (process.stdin.isTTY) {
+  if (process.stdin.isTTY && process.stdout.isTTY) {
+    defaultInteractiveCommand().catch((err) => {
+      logCliCrash(err, "default");
+      console.error(err);
+      process.exit(1);
+    });
+  } else if (process.stdin.isTTY) {
     process.stdout.write(programHelp());
   } else {
     renderFromStdin();

@@ -35,6 +35,7 @@ const MAX_WIDTH_WIDGETS = new Set([
   "git",
   "title",
   "model",
+  "agent",
   "customText",
   "exec",
   "gitWorktree",

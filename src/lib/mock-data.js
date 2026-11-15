@@ -62,6 +62,7 @@ function sampleData() {
         reset_in_seconds: 4 * 86400 + 9 * 3600,
       },
     },
+    agent: { name: "reviewer" },
     agent_state: "thinking",
     vcs: {
       type: "git",
@@ -75,6 +76,13 @@ function sampleData() {
       { name: "review", role: "Check the error messages", status: "completed" },
     ],
     task_count: 1,
+    pending_input_count: 2,
+    tool_confirmation_pending: false,
+    cost: {
+      total_usd: 0.4213,
+      subagent_usd: 0,
+      estimated: false,
+    },
     cycle_mode: "accept-edits",
     conversation_title: "Fix the config loader",
     plan_tier: "Pro",

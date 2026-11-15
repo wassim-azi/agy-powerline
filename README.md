@@ -40,12 +40,11 @@ See your model, Gemini 5h/7d, Claude/GPT and Argon quotas, context window, git b
 You need [Node.js](https://nodejs.org/) 20+ and the [Antigravity CLI](https://antigravity.google/docs/cli/overview). Works on Windows, macOS, Linux and WSL ([WSL notes](docs/install.md#wsl)).
 
 ```bash
-npx agy-powerline init        # install the statusline into agy
-npx agy-powerline configure   # optional: pick widgets, theme and layout
+npx agy-powerline             # install the statusline and open the editor
 agy                           # start Antigravity
 ```
 
-On a first install `init` asks whether the bar's symbols look right (and turns on ASCII mode if they don't), then for a preset, a layout and a theme, with a preview of each; add `--yes` to skip the questions. It asks before replacing anything and backs up Antigravity's `settings.json` first. Restart `agy` once after `init`. Details: [what `init` does](docs/install.md).
+In a terminal, `npx agy-powerline` installs the scripts (or updates outdated ones while keeping your config), wires Antigravity's `settings.json` (after backing it up and asking before replacing an existing `statusLine`), and opens the live-preview editor right away. Restart `agy` once afterwards. For non-interactive or scripted installs, use `npx agy-powerline init --yes`. Details: [how installation works](docs/install.md).
 
 <details>
 <summary>Screenshot: the bar in a real agy session (Windows Terminal)</summary>
@@ -159,51 +158,52 @@ Preview them all in the [theme gallery](https://agy-powerline.com/themes/) or wi
 
 ## Widgets
 
-| Widget                                                        | Shows                                                                                                    |
-| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `model`                                                       | The model in use                                                                                         |
-| `clock`                                                       | The current local time (12/24-hour format set under `clock`)                                             |
-| `fiveHourBar`, `weeklyBar`                                    | 5h / 7d quota left as a meter, with a [pace marker](docs/configuration.md#quota-pace-marker)             |
-| `fiveHourPct`, `weeklyPct`                                    | 5h / 7d quota left as a percentage                                                                       |
-| `fiveHourReset`, `weeklyReset`                                | Time until the quota resets, or the reset time                                                           |
-| `quota`                                                       | The quota closest to running out, with its reset                                                         |
-| `thirdPartyFiveHour`, `thirdPartyWeekly`                      | Third-party model quotas                                                                                 |
-| `argonWeekly`, `argonReset`                                   | Gemini 4 Argon's own weekly quota (Google AI Pro) and its reset                                          |
-| `context`, `contextPct`, `contextTokens`                      | Context window used: meter, percentage or token counts                                                   |
-| `git`                                                         | Branch, uncommitted changes and ahead/behind                                                             |
-| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree` | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree |
-| `project`, `cwd`                                              | Project folder, current folder                                                                           |
-| `agentState`, `plan`, `sandbox`, `artifacts`, `version`       | What the agent is doing, your plan, sandbox, artifacts, CLI version                                      |
-| `tasks`                                                       | Running subagents and background tasks                                                                   |
-| `mode`                                                        | Approval mode (e.g. accept-edits) and Vim mode                                                           |
-| `title`                                                       | The conversation's title                                                                                 |
-| `sessionTime`                                                 | Time since the active conversation started                                                               |
-| `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Session tokens and prompt cache usage                                                                    |
-| `tokensToday`, `tokensWeek`                                   | Tokens used today and over the last 7 days, all conversations (Node 22.13+)                              |
-| `ram`                                                         | Memory used on your machine                                                                              |
-| `os`                                                          | System agy runs on: Windows, macOS, Linux or WSL                                                         |
-| `host`                                                        | Current user and short hostname from the OS (`alex@devbox`)                                              |
-| `customText`, `exec`                                          | Your own text, or the output of a [shell command](docs/configuration.md#shell-command-widget-exec)       |
+| Widget                                                           | Shows                                                                                                    |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `model`                                                          | The model in use                                                                                         |
+| `clock`                                                          | The current local time (12/24-hour format set under `clock`)                                             |
+| `fiveHourBar`, `weeklyBar`                                       | 5h / 7d quota left as a meter, with a [pace marker](docs/configuration.md#quota-pace-marker)             |
+| `fiveHourPct`, `weeklyPct`                                       | 5h / 7d quota left as a percentage                                                                       |
+| `fiveHourReset`, `weeklyReset`                                   | Time until the quota resets, or the reset time                                                           |
+| `quota`                                                          | The quota closest to running out, with its reset                                                         |
+| `thirdPartyFiveHour`, `thirdPartyWeekly`                         | Third-party model quotas                                                                                 |
+| `argonWeekly`, `argonReset`                                      | Gemini 4 Argon's own weekly quota (Google AI Pro) and its reset                                          |
+| `context`, `contextPct`, `contextTokens`                         | Context window used: meter, percentage or token counts                                                   |
+| `git`                                                            | Branch, uncommitted changes and ahead/behind                                                             |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree |
+| `project`, `cwd`                                                 | Project folder, current folder                                                                           |
+| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | Active agent, agent state (with confirmation flag), plan, sandbox, artifacts, CLI version                |
+| `tasks`, `queue`                                                 | Running subagents, background tasks, queued user messages                                                |
+| `mode`                                                           | Approval mode (e.g. accept-edits) and Vim mode                                                           |
+| `title`                                                          | The conversation's title                                                                                 |
+| `sessionTime`                                                    | Time since the active conversation started                                                               |
+| `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | Session tokens, estimated cost (USD), and prompt cache usage                                             |
+| `tokensToday`, `tokensWeek`                                      | Tokens used today and over the last 7 days, all conversations (Node 22.13+)                              |
+| `ram`                                                            | Memory used on your machine                                                                              |
+| `os`                                                             | System agy runs on: Windows, macOS, Linux or WSL                                                         |
+| `host`                                                           | Current user and short hostname from the OS (`alex@devbox`)                                              |
+| `customText`, `exec`                                             | Your own text, or the output of a [shell command](docs/configuration.md#shell-command-widget-exec)       |
 
 A widget with nothing to show hides itself. Widgets can be recolored, renamed, given another icon, made label-free or given their own alert thresholds: see [Configuration](docs/configuration.md).
 
 ## Commands
 
-| Command                                            | What it does                                                |
-| -------------------------------------------------- | ----------------------------------------------------------- |
-| `npx agy-powerline init [--yes]`                   | Install or update the statusline                            |
-| `npx agy-powerline configure`                      | Open the editor (alias `config`)                            |
-| `npx agy-powerline preset <name>`                  | Apply a preset (`--list` to see them)                       |
-| `npx agy-powerline theme <name>`                   | Switch theme (`--list`, `--gallery`)                        |
-| `npx agy-powerline gradient <name>`                | Color each row with a gradient (`--list`, `off`)            |
-| `npx agy-powerline layout <pills\|lines\|classic>` | Switch layout                                               |
-| `npx agy-powerline caps <style>`                   | Switch the pill shape: `round`, `angled`, `slanted`, `flat` |
-| `npx agy-powerline export [file]`                  | Save your config to a file, to back it up or share it       |
-| `npx agy-powerline import <file>`                  | Load a config, after showing what changes (`--merge`)       |
-| `npx agy-powerline doctor`                         | Check the install and explain what's wrong                  |
-| `npx agy-powerline report`                         | Write a privacy-safe bug report                             |
-| `npx agy-powerline uninstall [--delete]`           | Remove it from agy (`--delete` also removes its files)      |
-| `npx agy-powerline render --demo`                  | Print the bar with sample data                              |
+| Command                                            | What it does                                                       |
+| -------------------------------------------------- | ------------------------------------------------------------------ |
+| `npx agy-powerline`                                | Install (if needed), update outdated scripts, and open the editor  |
+| `npx agy-powerline init [--yes]`                   | Install or update the statusline (supports `--preset`, `--yes`, …) |
+| `npx agy-powerline configure`                      | Open the editor (alias `config`)                                   |
+| `npx agy-powerline preset <name>`                  | Apply a preset (`--list` to see them)                              |
+| `npx agy-powerline theme <name>`                   | Switch theme (`--list`, `--gallery`)                               |
+| `npx agy-powerline gradient <name>`                | Color each row with a gradient (`--list`, `off`)                   |
+| `npx agy-powerline layout <pills\|lines\|classic>` | Switch layout                                                      |
+| `npx agy-powerline caps <style>`                   | Switch the pill shape: `round`, `angled`, `slanted`, `flat`        |
+| `npx agy-powerline export [file]`                  | Save your config to a file, to back it up or share it              |
+| `npx agy-powerline import <file>`                  | Load a config, after showing what changes (`--merge`)              |
+| `npx agy-powerline doctor`                         | Check the install and explain what's wrong                         |
+| `npx agy-powerline report`                         | Write a privacy-safe bug report                                    |
+| `npx agy-powerline uninstall [--delete]`           | Remove it from agy (`--delete` also removes its files)             |
+| `npx agy-powerline render --demo`                  | Print the bar with sample data                                     |
 
 Run any command with `--help` for its options.
 

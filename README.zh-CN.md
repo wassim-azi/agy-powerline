@@ -31,12 +31,11 @@
 需要 [Node.js](https://nodejs.org/) 20+ 和 [Antigravity CLI](https://antigravity.google/docs/cli/overview)。支持 Windows、macOS、Linux 和 WSL（[WSL 说明](docs/install.md#wsl)）。
 
 ```bash
-npx agy-powerline init        # 将状态栏安装到 agy
-npx agy-powerline configure   # 可选：挑选组件、主题和布局
+npx agy-powerline             # 安装状态栏并打开编辑器
 agy                           # 启动 Antigravity
 ```
 
-`init` 在替换任何内容之前都会先询问，并会先备份 Antigravity 的 `settings.json`。运行 `init` 后需重启一次 `agy`。详情：[`init` 做了什么](docs/install.md)。
+在终端中运行 `npx agy-powerline` 会自动安装脚本（或在保留现有配置的同时更新旧版本脚本）、在备份后写入 `settings.json`，并立即打开带实时预览的编辑器。完成后请重启一次 `agy`。用于脚本或自动化安装时，可使用 `npx agy-powerline init --yes`。详情：[安装说明](docs/install.md)。
 
 <details>
 <summary>截图：真实 agy 会话中的状态栏（Windows Terminal）</summary>
@@ -137,31 +136,31 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 ## 组件
 
-| 组件                                                          | 显示内容                                                                                                 |
-| ------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `model`                                                       | 当前使用的模型                                                                                           |
-| `clock`                                                       | Current local time (12/24-hour format set under `clock`)                                                 |
-| `fiveHourBar`、`weeklyBar`                                    | 以进度条显示 5h / 7d 剩余配额，带[进度标记](docs/configuration.md#quota-pace-marker)                     |
-| `fiveHourPct`、`weeklyPct`                                    | 以百分比显示 5h / 7d 剩余配额                                                                            |
-| `fiveHourReset`、`weeklyReset`                                | 距配额重置的时间，或重置时刻                                                                             |
-| `quota`                                                       | 最接近用完的配额及其重置时间                                                                             |
-| `thirdPartyFiveHour`、`thirdPartyWeekly`                      | 第三方模型的配额                                                                                         |
-| `argonWeekly`、`argonReset`                                   | Gemini 4 Argon 独立的每周配额（Google AI Pro）及其重置时间                                               |
-| `context`、`contextPct`、`contextTokens`                      | 已用的上下文窗口：进度条、百分比或 token 数                                                              |
-| `git`                                                         | 分支、未提交的更改以及领先/落后的提交数                                                                  |
-| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree` | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree |
-| `project`、`cwd`                                              | 项目文件夹、当前文件夹                                                                                   |
-| `agentState`、`plan`、`sandbox`、`artifacts`、`version`       | 代理正在做什么、你的套餐、沙箱、产物、CLI 版本                                                           |
-| `tasks`                                                       | 正在运行的子代理和后台任务                                                                               |
-| `mode`                                                        | 审批模式（如 accept-edits）和 Vim 模式                                                                   |
-| `title`                                                       | 对话标题                                                                                                 |
-| `sessionTime`                                                 | Time since the active conversation started                                                               |
-| `totalTokens`、`cacheHit`、`cacheRead`、`cacheCreate`         | 会话 token 数和提示缓存的使用情况                                                                        |
-| `tokensToday`、`tokensWeek`                                   | 今天和过去 7 天的 token 用量（所有对话，Node 22.13+）                                                    |
-| `ram`                                                         | 本机已用内存                                                                                             |
-| `os`                                                          | System agy runs on: Windows, macOS, Linux or WSL                                                         |
-| `host`                                                        | Current user and short hostname from the OS (`alex@devbox`)                                              |
-| `customText`、`exec`                                          | 你自己的文本，或 [shell 命令](docs/configuration.md#shell-command-widget-exec)的输出                     |
+| 组件                                                             | 显示内容                                                                                                 |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `model`                                                          | 当前使用的模型                                                                                           |
+| `clock`                                                          | Current local time (12/24-hour format set under `clock`)                                                 |
+| `fiveHourBar`、`weeklyBar`                                       | 以进度条显示 5h / 7d 剩余配额，带[进度标记](docs/configuration.md#quota-pace-marker)                     |
+| `fiveHourPct`、`weeklyPct`                                       | 以百分比显示 5h / 7d 剩余配额                                                                            |
+| `fiveHourReset`、`weeklyReset`                                   | 距配额重置的时间，或重置时刻                                                                             |
+| `quota`                                                          | 最接近用完的配额及其重置时间                                                                             |
+| `thirdPartyFiveHour`、`thirdPartyWeekly`                         | 第三方模型的配额                                                                                         |
+| `argonWeekly`、`argonReset`                                      | Gemini 4 Argon 独立的每周配额（Google AI Pro）及其重置时间                                               |
+| `context`、`contextPct`、`contextTokens`                         | 已用的上下文窗口：进度条、百分比或 token 数                                                              |
+| `git`                                                            | 分支、未提交的更改以及领先/落后的提交数                                                                  |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree |
+| `project`、`cwd`                                                 | 项目文件夹、当前文件夹                                                                                   |
+| `agent`、`agentState`、`plan`、`sandbox`、`artifacts`、`version` | 当前代理、代理状态、你的套餐、沙箱、产物、CLI 版本                                                       |
+| `tasks`、`queue`                                                 | 正在运行的子代理、后台任务和排队等待的用户消息                                                           |
+| `mode`                                                           | 审批模式（如 accept-edits）和 Vim 模式                                                                   |
+| `title`                                                          | 对话标题                                                                                                 |
+| `sessionTime`                                                    | Time since the active conversation started                                                               |
+| `totalTokens`、`cost`、`cacheHit`、`cacheRead`、`cacheCreate`    | 会话 token 数、估算费用（USD）和提示缓存使用情况                                                         |
+| `tokensToday`、`tokensWeek`                                      | 今天和过去 7 天的 token 用量（所有对话，Node 22.13+）                                                    |
+| `ram`                                                            | 本机已用内存                                                                                             |
+| `os`                                                             | System agy runs on: Windows, macOS, Linux or WSL                                                         |
+| `host`                                                           | Current user and short hostname from the OS (`alex@devbox`)                                              |
+| `customText`、`exec`                                             | 你自己的文本，或 [shell 命令](docs/configuration.md#shell-command-widget-exec)的输出                     |
 
 没有内容可显示的组件会自动隐藏。组件可以更改颜色、去掉标签，或设置自己的告警阈值：见 [Configuration](docs/configuration.md)。
 
@@ -169,6 +168,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 | 命令                                               | 作用                                                  |
 | -------------------------------------------------- | ----------------------------------------------------- |
+| `npx agy-powerline`                                | 安装（如有需要）、更新旧脚本并打开编辑器              |
 | `npx agy-powerline init [--yes]`                   | 安装或更新状态栏                                      |
 | `npx agy-powerline configure`                      | 打开编辑器（别名 `config`）                           |
 | `npx agy-powerline preset <name>`                  | 应用预设（`--list` 查看全部）                         |

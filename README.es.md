@@ -31,12 +31,11 @@ Consulta de un vistazo tu modelo, las cuotas de Gemini (5h/7d), Claude/GPT y Arg
 Necesitas [Node.js](https://nodejs.org/) 20 o superior y la [CLI de Antigravity](https://antigravity.google/docs/cli/overview). Funciona en Windows, macOS, Linux y WSL ([notas sobre WSL](docs/install.md#wsl)).
 
 ```bash
-npx agy-powerline init        # instala la barra de estado en agy
-npx agy-powerline configure   # opcional: elige widgets, tema y diseño
+npx agy-powerline             # instala la barra de estado y abre el editor
 agy                           # inicia Antigravity
 ```
 
-En la primera instalación, `init` te solicita un preajuste, un diseño y un tema, con una vista previa de cada uno; añade `--yes` para omitir las preguntas. Pide confirmación antes de reemplazar cualquier elemento y crea primero una copia de seguridad del archivo `settings.json` de Antigravity. Reinicia `agy` una vez tras ejecutar `init`. Detalles: [lo que hace `init`](docs/install.md).
+En una terminal, `npx agy-powerline` instala los scripts (o actualiza los antiguos conservando tu configuración), enlaza `settings.json` tras crear una copia de seguridad y abre el editor con vista previa en vivo. Reinicia `agy` una vez después. Para instalaciones automatizadas, usa `npx agy-powerline init --yes`. Detalles: [cómo funciona la instalación](docs/install.md).
 
 <details>
 <summary>Captura de pantalla: la barra en una sesión real de agy (Windows Terminal)</summary>
@@ -160,31 +159,31 @@ o `"language": "es"` en `statusline.config.json` (tecla `u` en `configure`). El 
 
 ## Widgets
 
-| Widget                                                        | Muestra                                                                                                                               |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `model`                                                       | El modelo en uso                                                                                                                      |
-| `clock`                                                       | La hora local actual (formato de 12/24 horas configurado bajo `clock`)                                                                |
-| `fiveHourBar`, `weeklyBar`                                    | Cuota restante de 5h / 7d en formato de medidor, con un [marcador de ritmo](docs/configuration.md#quota-pace-marker)                  |
-| `fiveHourPct`, `weeklyPct`                                    | Cuota restante de 5h / 7d como porcentaje                                                                                             |
-| `fiveHourReset`, `weeklyReset`                                | Tiempo hasta que se reinicia la cuota, o la hora de reinicio                                                                          |
-| `quota`                                                       | La cuota más próxima a agotarse, junto con su reinicio                                                                                |
-| `thirdPartyFiveHour`, `thirdPartyWeekly`                      | Cuotas de modelos de terceros                                                                                                         |
-| `argonWeekly`, `argonReset`                                   | La cuota semanal propia de Gemini 4 Argon (Google AI Pro) y su reinicio                                                               |
-| `context`, `contextPct`, `contextTokens`                      | Ventana de contexto utilizada: medidor, porcentaje o recuento de tokens                                                               |
-| `git`                                                         | Rama, cambios no confirmados y commits por delante o por detrás (ahead/behind)                                                        |
-| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree` | Líneas añadidas y eliminadas, archivos preparados/modificados/sin seguimiento/en conflicto, ID de commit, stashes, worktree vinculado |
-| `project`, `cwd`                                              | Directorio del proyecto, directorio actual                                                                                            |
-| `agentState`, `plan`, `sandbox`, `artifacts`, `version`       | Qué está haciendo el agente, tu plan, sandbox, artefactos, versión de la CLI                                                          |
-| `tasks`                                                       | Subagentes en ejecución y tareas en segundo plano                                                                                     |
-| `mode`                                                        | Modo de aprobación (p. ej., accept-edits) y modo Vim                                                                                  |
-| `title`                                                       | El título de la conversación                                                                                                          |
-| `sessionTime`                                                 | Tiempo desde que comenzó la conversación activa                                                                                       |
-| `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | Tokens de sesión y uso de caché de prompts                                                                                            |
-| `tokensToday`, `tokensWeek`                                   | Tokens utilizados hoy y en los últimos 7 días, todas las conversaciones (Node 22.13+)                                                 |
-| `ram`                                                         | Memoria utilizada en tu equipo                                                                                                        |
-| `os`                                                          | Sistema en el que se ejecuta agy: Windows, macOS, Linux o WSL                                                                         |
-| `host`                                                        | Usuario actual y nombre de host corto del sistema operativo (`alex@devbox`)                                                           |
-| `customText`, `exec`                                          | Tu propio texto personalizado o la salida de un [comando de shell](docs/configuration.md#shell-command-widget-exec)                   |
+| Widget                                                           | Muestra                                                                                                                               |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `model`                                                          | El modelo en uso                                                                                                                      |
+| `clock`                                                          | La hora local actual (formato de 12/24 horas configurado bajo `clock`)                                                                |
+| `fiveHourBar`, `weeklyBar`                                       | Cuota restante de 5h / 7d en formato de medidor, con un [marcador de ritmo](docs/configuration.md#quota-pace-marker)                  |
+| `fiveHourPct`, `weeklyPct`                                       | Cuota restante de 5h / 7d como porcentaje                                                                                             |
+| `fiveHourReset`, `weeklyReset`                                   | Tiempo hasta que se reinicia la cuota, o la hora de reinicio                                                                          |
+| `quota`                                                          | La cuota más próxima a agotarse, junto con su reinicio                                                                                |
+| `thirdPartyFiveHour`, `thirdPartyWeekly`                         | Cuotas de modelos de terceros                                                                                                         |
+| `argonWeekly`, `argonReset`                                      | La cuota semanal propia de Gemini 4 Argon (Google AI Pro) y su reinicio                                                               |
+| `context`, `contextPct`, `contextTokens`                         | Ventana de contexto utilizada: medidor, porcentaje o recuento de tokens                                                               |
+| `git`                                                            | Rama, cambios no confirmados y commits por delante o por detrás (ahead/behind)                                                        |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Líneas añadidas y eliminadas, archivos preparados/modificados/sin seguimiento/en conflicto, ID de commit, stashes, worktree vinculado |
+| `project`, `cwd`                                                 | Directorio del proyecto, directorio actual                                                                                            |
+| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | Agente activo, estado del agente, plan, sandbox, artefactos, versión de la CLI                                                        |
+| `tasks`, `queue`                                                 | Subagentes en ejecución, tareas en segundo plano y mensajes en cola                                                                   |
+| `mode`                                                           | Modo de aprobación (p. ej., accept-edits) y modo Vim                                                                                  |
+| `title`                                                          | El título de la conversación                                                                                                          |
+| `sessionTime`                                                    | Tiempo desde que comenzó la conversación activa                                                                                       |
+| `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | Tokens de sesión, coste estimado (USD) y uso de caché de prompts                                                                      |
+| `tokensToday`, `tokensWeek`                                      | Tokens utilizados hoy y en los últimos 7 días, todas las conversaciones (Node 22.13+)                                                 |
+| `ram`                                                            | Memoria utilizada en tu equipo                                                                                                        |
+| `os`                                                             | Sistema en el que se ejecuta agy: Windows, macOS, Linux o WSL                                                                         |
+| `host`                                                           | Usuario actual y nombre de host corto del sistema operativo (`alex@devbox`)                                                           |
+| `customText`, `exec`                                             | Tu propio texto personalizado o la salida de un [comando de shell](docs/configuration.md#shell-command-widget-exec)                   |
 
 Un widget sin nada que mostrar se oculta automáticamente. Los widgets se pueden recolorear, renombrar, asignar otro icono, dejar sin etiqueta o configurar con sus propios umbrales de alerta: consulta [Configuración](docs/configuration.md).
 
@@ -192,6 +191,7 @@ Un widget sin nada que mostrar se oculta automáticamente. Los widgets se pueden
 
 | Comando                                            | Qué hace                                                               |
 | -------------------------------------------------- | ---------------------------------------------------------------------- |
+| `npx agy-powerline`                                | Instala (si hace falta), actualiza scripts y abre el editor            |
 | `npx agy-powerline init [--yes]`                   | Instala o actualiza la barra de estado                                 |
 | `npx agy-powerline configure`                      | Abre el editor (alias `config`)                                        |
 | `npx agy-powerline preset <name>`                  | Aplica un preajuste (`--list` para verlos)                             |

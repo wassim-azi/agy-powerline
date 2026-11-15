@@ -40,6 +40,7 @@ const {
   gitFileParts,
   formatTasks,
   formatMode,
+  formatCost,
   limitWidth,
   shortenPath,
   homePath,
@@ -611,20 +612,37 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       }
       return pill(colors.meta, lbl(session.plan));
 
-    case "agentState":
-      if (!session.agentState) {
+    case "agent":
+      if (!session.agentName) {
         return null;
       }
-      return pill(
-        session.agentState === "idle" ? colors.meta : colors.warn,
-        lbl(session.agentState.replace(/_/g, " "), session.agentState === "idle" ? "🟢" : undefined)
-      );
+      return pill(colors.meta, lbl(limitWidth(session.agentName, widget, ascii)));
+
+    case "agentState": {
+      if (!session.agentState && !session.toolConfirmation) {
+        return null;
+      }
+      const state = session.agentState ? session.agentState.replace(/_/g, " ") : "";
+      const text = session.toolConfirmation
+        ? state
+          ? `${state} (${t("confirm", session.lang)})`
+          : t("confirm", session.lang)
+        : state;
+      const idle = session.agentState === "idle" && !session.toolConfirmation;
+      return pill(idle ? colors.meta : colors.warn, lbl(text, idle ? "🟢" : undefined));
+    }
 
     case "artifacts":
       if (!session.artifacts) {
         return null;
       }
       return pill(colors.meta, lbl(String(session.artifacts)));
+
+    case "queue":
+      if (!session.pendingInputs) {
+        return null;
+      }
+      return pill(colors.meta, lbl(String(session.pendingInputs)));
 
     case "tasks": {
       const text = formatTasks(
@@ -716,6 +734,14 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
             : formatTokens(session.totalTokens)
         )
       );
+
+    case "cost": {
+      const text = formatCost(session.cost);
+      if (!text) {
+        return null;
+      }
+      return pill(colors.meta, lbl(text));
+    }
 
     case "tokensToday":
     case "tokensWeek": {
