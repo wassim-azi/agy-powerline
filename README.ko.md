@@ -31,12 +31,11 @@
 [Node.js](https://nodejs.org/) 20 이상과 [Antigravity CLI](https://antigravity.google/docs/cli/overview)가 필요합니다. Windows, macOS, Linux, WSL에서 동작합니다([WSL 관련 참고](docs/install.md#wsl)).
 
 ```bash
-npx agy-powerline init        # 스테이터스라인을 agy에 설치
-npx agy-powerline configure   # 선택 사항: 위젯, 테마, 레이아웃 선택
+npx agy-powerline             # 스테이터스라인을 설치하고 에디터 열기
 agy                           # Antigravity 시작
 ```
 
-처음 설치하면 `init`이 각각의 미리보기와 함께 프리셋, 레이아웃, 테마를 물어봅니다. 질문을 건너뛰려면 `--yes`를 붙이세요. 무언가를 교체하기 전에 확인을 받고, Antigravity의 `settings.json`을 먼저 백업합니다. `init` 후에 `agy`를 한 번 재시작하세요. 자세한 내용: [`init`이 하는 일](docs/install.md).
+터미널에서 `npx agy-powerline`을 실행하면 스크립트를 설치(또는 설정을 유지한 채 오래된 스크립트를 업데이트)하고, `settings.json`을 백업한 뒤 연결한 다음 실시간 미리보기 에디터를 엽니다. 이후 `agy`를 한 번 재시작하세요. 스크립트 자동 설치에는 `npx agy-powerline init --yes`를 사용하세요. 자세한 내용: [설치 동작 방식](docs/install.md).
 
 <details>
 <summary>스크린샷: 실제 agy 세션의 바 (Windows Terminal)</summary>
@@ -150,31 +149,31 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에�
 
 ## 위젯
 
-| 위젯                                                          | 표시 내용                                                                                        |
-| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `model`                                                       | 사용 중인 모델                                                                                   |
-| `clock`                                                       | 현재 현지 시각(12/24시간 형식은 `clock`에서 설정)                                                |
-| `fiveHourBar`, `weeklyBar`                                    | 남은 5시간/7일 할당량을 미터로 표시, [페이스 마커](docs/configuration.md#quota-pace-marker) 포함 |
-| `fiveHourPct`, `weeklyPct`                                    | 남은 5시간/7일 할당량을 백분율로 표시                                                            |
-| `fiveHourReset`, `weeklyReset`                                | 할당량이 리셋되기까지 남은 시간 또는 리셋 시각                                                   |
-| `quota`                                                       | 가장 먼저 소진될 가능성이 높은 할당량과 리셋 시각                                                |
-| `thirdPartyFiveHour`, `thirdPartyWeekly`                      | 서드파티 모델 할당량                                                                             |
-| `argonWeekly`, `argonReset`                                   | Gemini 4 Argon 자체 주간 할당량(Google AI Pro)과 리셋                                            |
-| `context`, `contextPct`, `contextTokens`                      | 사용 중인 컨텍스트 창: 미터, 백분율 또는 토큰 수                                                 |
-| `git`                                                         | 브랜치, 커밋되지 않은 변경, ahead/behind                                                         |
-| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree` | 추가/삭제된 줄, 스테이지/수정/추적 안 됨/충돌 파일 수, 커밋 ID, 스태시, 연결된 워크트리          |
-| `project`, `cwd`                                              | 프로젝트 폴더, 현재 폴더                                                                         |
-| `agentState`, `plan`, `sandbox`, `artifacts`, `version`       | 에이전트가 하는 일, 요금제, 샌드박스, 아티팩트, CLI 버전                                         |
-| `tasks`                                                       | 실행 중인 서브에이전트와 백그라운드 작업                                                         |
-| `mode`                                                        | 승인 모드(예: accept-edits)와 Vim 모드                                                           |
-| `title`                                                       | 대화 제목                                                                                        |
-| `sessionTime`                                                 | 활성 대화가 시작된 이후 경과 시간                                                                |
-| `totalTokens`, `cacheHit`, `cacheRead`, `cacheCreate`         | 세션 토큰과 프롬프트 캐시 사용량                                                                 |
-| `tokensToday`, `tokensWeek`                                   | 오늘 및 최근 7일간 사용한 토큰, 모든 대화 포함(Node 22.13+)                                      |
-| `ram`                                                         | 시스템 메모리 사용량                                                                             |
-| `os`                                                          | agy가 동작하는 시스템: Windows, macOS, Linux 또는 WSL                                            |
-| `host`                                                        | OS의 현재 사용자와 짧은 호스트명(`alex@devbox`)                                                  |
-| `customText`, `exec`                                          | 직접 입력한 텍스트 또는 [셸 명령](docs/configuration.md#shell-command-widget-exec)의 출력        |
+| 위젯                                                             | 표시 내용                                                                                        |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| `model`                                                          | 사용 중인 모델                                                                                   |
+| `clock`                                                          | 현재 현지 시각(12/24시간 형식은 `clock`에서 설정)                                                |
+| `fiveHourBar`, `weeklyBar`                                       | 남은 5시간/7일 할당량을 미터로 표시, [페이스 마커](docs/configuration.md#quota-pace-marker) 포함 |
+| `fiveHourPct`, `weeklyPct`                                       | 남은 5시간/7일 할당량을 백분율로 표시                                                            |
+| `fiveHourReset`, `weeklyReset`                                   | 할당량이 리셋되기까지 남은 시간 또는 리셋 시각                                                   |
+| `quota`                                                          | 가장 먼저 소진될 가능성이 높은 할당량과 리셋 시각                                                |
+| `thirdPartyFiveHour`, `thirdPartyWeekly`                         | 서드파티 모델 할당량                                                                             |
+| `argonWeekly`, `argonReset`                                      | Gemini 4 Argon 자체 주간 할당량(Google AI Pro)과 리셋                                            |
+| `context`, `contextPct`, `contextTokens`                         | 사용 중인 컨텍스트 창: 미터, 백분율 또는 토큰 수                                                 |
+| `git`                                                            | 브랜치, 커밋되지 않은 변경, ahead/behind                                                         |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | 추가/삭제된 줄, 스테이지/수정/추적 안 됨/충돌 파일 수, 커밋 ID, 스태시, 연결된 워크트리          |
+| `project`, `cwd`                                                 | 프로젝트 폴더, 현재 폴더                                                                         |
+| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | 활성 에이전트, 에이전트 상태, 요금제, 샌드박스, 아티팩트, CLI 버전                               |
+| `tasks`, `queue`                                                 | 실행 중인 서브에이전트, 백그라운드 작업, 대기 중인 메시지                                        |
+| `mode`                                                           | 승인 모드(예: accept-edits)와 Vim 모드                                                           |
+| `title`                                                          | 대화 제목                                                                                        |
+| `sessionTime`                                                    | 활성 대화가 시작된 이후 경과 시간                                                                |
+| `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | 세션 토큰, 예상 비용(USD), 프롬프트 캐시 사용량                                                  |
+| `tokensToday`, `tokensWeek`                                      | 오늘 및 최근 7일간 사용한 토큰, 모든 대화 포함(Node 22.13+)                                      |
+| `ram`                                                            | 시스템 메모리 사용량                                                                             |
+| `os`                                                             | agy가 동작하는 시스템: Windows, macOS, Linux 또는 WSL                                            |
+| `host`                                                           | OS의 현재 사용자와 짧은 호스트명(`alex@devbox`)                                                  |
+| `customText`, `exec`                                             | 직접 입력한 텍스트 또는 [셸 명령](docs/configuration.md#shell-command-widget-exec)의 출력        |
 
 표시할 내용이 없는 위젯은 스스로 숨습니다. 위젯은 색, 이름, 아이콘을 바꾸고 라벨을 없애거나 자체 알림 임계값을 지정할 수 있습니다. [Configuration](docs/configuration.md)을 참고하세요.
 
@@ -182,6 +181,7 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에�
 
 | 명령                                               | 하는 일                                            |
 | -------------------------------------------------- | -------------------------------------------------- |
+| `npx agy-powerline`                                | 설치(필요 시), 스크립트 업데이트 및 에디터 열기    |
 | `npx agy-powerline init [--yes]`                   | 스테이터스라인 설치 또는 업데이트                  |
 | `npx agy-powerline configure`                      | 에디터 열기(`config` 별칭)                         |
 | `npx agy-powerline preset <이름>`                  | 프리셋 적용(`--list`로 목록 확인)                  |

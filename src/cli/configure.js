@@ -109,9 +109,9 @@ const GLYPH_SLOTS = {
   endCap: { key: "endCaps", title: "End caps" },
 };
 
-function configureCommand() {
-  setConfigDir(resolveInstallDir());
-  runTui();
+function configureCommand(options = {}) {
+  setConfigDir(options.configDir || resolveInstallDir());
+  return runTui(options);
 }
 
 let config;
@@ -128,6 +128,11 @@ let hexInput = null;
 // into one of its fields (null when not typing).
 let editIndex = 0;
 let textInput = null;
+let activeStdin = process.stdin;
+let activeStdout = process.stdout;
+let activeResolve = null;
+let activeReject = null;
+let activeOnExit = null;
 
 function openUrl(url) {
   const target = String(url || "").trim();
@@ -339,12 +344,12 @@ let scrollScreen = null;
 // The editor fills the window, so the live preview has the room the real bar
 // gets in agy.
 function frameWidth() {
-  const columns = columnsOverride || process.stdout.columns || 100;
+  const columns = columnsOverride || activeStdout.columns || 100;
   return Math.max(50, columns - 1);
 }
 
 function frameHeight() {
-  return Math.max(12, rowsOverride || process.stdout.rows || 40);
+  return Math.max(12, rowsOverride || activeStdout.rows || 40);
 }
 
 function previewConfig() {
@@ -1409,7 +1414,7 @@ function frameLines() {
 }
 
 function draw() {
-  process.stdout.write(HOME_CLEAR + HIDE + frameLines().join("\n") + "\n");
+  activeStdout.write(HOME_CLEAR + HIDE + frameLines().join("\n") + "\n");
 }
 
 // Draws one screen without a terminal, for tests. Options: config, screen,
@@ -2068,53 +2073,112 @@ function onKey(_str, key) {
   draw();
 }
 
+function cleanupTui() {
+  const stdin = activeStdin;
+  const stdout = activeStdout;
+
+  stdin.off("keypress", onKey);
+  process.off("SIGINT", quit);
+  process.off("SIGTERM", quit);
+  stdout.off("resize", draw);
+  stdin.setRawMode?.(false);
+  stdin.pause?.();
+  stdout.write(SHOW + ALT_OFF);
+
+  activeStdin = process.stdin;
+  activeStdout = process.stdout;
+}
+
 function quit() {
   if (exiting) {
     return;
   }
 
   exiting = true;
-  persist();
-  process.stdin.setRawMode?.(false);
-  process.stdout.write(SHOW + ALT_OFF);
-  process.exit(0);
+  let saveError = null;
+  try {
+    persist();
+  } catch (err) {
+    saveError = err;
+  }
+
+  const resolve = activeResolve;
+  const reject = activeReject;
+  const onExit = activeOnExit;
+  activeResolve = null;
+  activeReject = null;
+  activeOnExit = null;
+
+  cleanupTui();
+
+  try {
+    onExit?.();
+  } finally {
+    if (saveError) {
+      reject?.(saveError);
+    } else {
+      resolve?.(true);
+    }
+  }
 }
 
-function start() {
-  if (!process.stdin.isTTY || !process.stdout.isTTY) {
+function start(options = {}) {
+  const stdin = options.stdin || process.stdin;
+  const stdout = options.stdout || process.stdout;
+
+  if (!stdin.isTTY || !stdout.isTTY) {
     console.error("Run this in an interactive terminal:");
     console.error("  npx agy-powerline configure");
-    process.exit(1);
+    process.exitCode = 1;
+    return Promise.resolve(false);
   }
 
   config = loadEditableConfig();
   if (!config) {
-    process.exit(1);
+    process.exitCode = 1;
+    return Promise.resolve(false);
   }
+
   previewData = sampleData();
   setActiveDepth(resolveColorDepth({ configColor: config.color, env: process.env }));
   screen = "main";
   cursor = 0;
+  searchQuery = "";
+  hexInput = null;
+  textInput = null;
+  editIndex = 0;
+  scrollTop = 0;
+  scrollScreen = null;
+  flashMessage = options.flash || "";
   exiting = false;
+  activeStdin = stdin;
+  activeStdout = stdout;
+  activeOnExit = options.onExit || null;
 
-  readline.emitKeypressEvents(process.stdin);
-  process.stdin.setRawMode(true);
-  process.stdin.resume();
-  process.stdin.on("keypress", onKey);
-  process.on("SIGINT", quit);
-  process.on("SIGTERM", quit);
-  // The frame follows the window width, so redraw before a resize wraps it.
-  process.stdout.on("resize", draw);
-  process.stdout.write(ALT_ON + HIDE);
-  draw();
+  return new Promise((resolve, reject) => {
+    activeResolve = resolve;
+    activeReject = reject;
+
+    readline.emitKeypressEvents(stdin);
+    stdin.setRawMode?.(true);
+    stdin.resume();
+    stdin.on("keypress", onKey);
+    process.on("SIGINT", quit);
+    process.on("SIGTERM", quit);
+    // The frame follows the window width, so redraw before a resize wraps it.
+    stdout.on("resize", draw);
+    stdout.write(ALT_ON + HIDE);
+    draw();
+  });
 }
 
-function runTui() {
-  start();
+function runTui(options = {}) {
+  return start(options);
 }
 
 module.exports = {
   configureCommand,
+  runTui,
   renderFrame,
   tabAfter,
   isQuitKey,
@@ -2124,5 +2188,8 @@ module.exports = {
 };
 
 if (require.main === module) {
-  configureCommand();
+  configureCommand().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
 }

@@ -191,10 +191,17 @@ const WIDGET_CATALOG = [
     summary: "your Antigravity plan",
   },
   {
+    id: "agent",
+    label: "Active Agent",
+    unique: true,
+    description: "name of the active non-default agent, hidden for the default agent",
+    summary: "active non-default agent name",
+  },
+  {
     id: "agentState",
     label: "Agent State",
     unique: true,
-    description: "what the agent is doing, such as idle or thinking",
+    description: "what the agent is doing, such as idle or thinking, plus tool confirmation",
     summary: "what the agent is doing",
   },
   {
@@ -210,6 +217,13 @@ const WIDGET_CATALOG = [
     unique: true,
     description: "running subagents and background tasks, shown only when there are some",
     summary: "running subagents and background tasks",
+  },
+  {
+    id: "queue",
+    label: "Queued Messages",
+    unique: true,
+    description: "queued user messages waiting to run, hidden when 0",
+    summary: "queued user message count",
   },
   {
     id: "mode",
@@ -280,6 +294,13 @@ const WIDGET_CATALOG = [
     unique: true,
     description: "session tokens, as a total or split into input and output",
     summary: "session tokens, total or split",
+  },
+  {
+    id: "cost",
+    label: "Session Cost",
+    unique: true,
+    description: "estimated session spend in US dollars, hidden until reported",
+    summary: "estimated session spend",
   },
   {
     id: "clock",

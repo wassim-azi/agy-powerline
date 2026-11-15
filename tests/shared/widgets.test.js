@@ -94,6 +94,7 @@ async function run() {
   testOsWidget();
   testHost();
   testCustomLabelAndIcon();
+  testAntigravityLatestPayloadFields();
 }
 
 function testCustomLabelAndIcon() {
@@ -585,6 +586,7 @@ function testWidgetWidthAndDepth() {
     "git",
     "title",
     "model",
+    "agent",
     "customText",
     "exec",
     "gitWorktree",
@@ -1151,6 +1153,102 @@ function testOneFormPerSetting() {
     buildCustomTheme({ colors: { model: "#ff0000" } }).colors.model.join() === "255,0,0" &&
       buildCustomTheme({ model: "#ff0000" }).colors.model.join() === base
   );
+}
+
+function testAntigravityLatestPayloadFields() {
+  const real = fixture("antigravity-1.3.0.json");
+
+  for (const layout of LAYOUT_ORDER) {
+    const costOut = render(
+      { ...real, cost: { total_usd: 0.4213, subagent_usd: 0.1, estimated: false } },
+      [{ id: "cost" }],
+      { layout }
+    );
+    const estOut = render(
+      { ...real, cost: { total_usd: 0.4213, estimated: true } },
+      [{ id: "cost" }],
+      { layout }
+    );
+    const microOut = render(
+      { ...real, cost: { total_usd: 0.0042, estimated: false } },
+      [{ id: "cost" }],
+      { layout }
+    );
+    const hiddenCost = render({ ...real, cost: undefined }, [{ id: "cost" }], { layout });
+    record(
+      `${layout} cost renders total_usd, ~estimated, sub-cent precision, and auto-hides when missing`,
+      costOut.includes("$0.42") &&
+        estOut.includes("~$0.42") &&
+        microOut.includes("$0.0042") &&
+        hiddenCost.trim() === "",
+      JSON.stringify({ costOut, estOut, microOut, hiddenCost })
+    );
+
+    const agentOut = render({ ...real, agent: { name: "security-reviewer" } }, [{ id: "agent" }], {
+      layout,
+    });
+    const clippedAgent = render(
+      { ...real, agent: { name: "security-reviewer" } },
+      [{ id: "agent", maxWidth: 10 }],
+      { layout, ascii: true }
+    );
+    const hiddenAgent = render({ ...real, agent: undefined }, [{ id: "agent" }], { layout });
+    record(
+      `${layout} agent shows agent.name, respects maxWidth, and auto-hides for the default agent`,
+      agentOut.includes("security-reviewer") &&
+        clippedAgent.includes("securit...") &&
+        !clippedAgent.includes("security-reviewer") &&
+        hiddenAgent.trim() === "",
+      JSON.stringify({ agentOut, clippedAgent, hiddenAgent })
+    );
+
+    const queueOut = render({ ...real, pending_input_count: 3 }, [{ id: "queue" }], { layout });
+    const zeroQueue = render({ ...real, pending_input_count: 0 }, [{ id: "queue" }], { layout });
+    record(
+      `${layout} queue renders pending_input_count and auto-hides at 0`,
+      queueOut.includes("3") && zeroQueue.trim() === "",
+      JSON.stringify({ queueOut, zeroQueue })
+    );
+
+    const confirmWithState = render(
+      { ...real, agent_state: "tool_use", tool_confirmation_pending: true },
+      [{ id: "agentState" }],
+      { layout }
+    );
+    const confirmAlone = render(
+      { ...real, agent_state: "", tool_confirmation_pending: true },
+      [{ id: "agentState" }],
+      { layout }
+    );
+    record(
+      `${layout} agentState surfaces tool_confirmation_pending`,
+      confirmWithState.includes("tool use (confirm)") && confirmAlone.includes("confirm"),
+      JSON.stringify({ confirmWithState, confirmAlone })
+    );
+
+    const initialOut = render(
+      {
+        ...real,
+        model: null,
+        exceeds_200k_tokens: null,
+        context_window: {
+          context_window_size: 0,
+          used_percentage: 0,
+          remaining_percentage: 100,
+          total_input_tokens: 0,
+          total_output_tokens: 0,
+          current_usage: null,
+        },
+      },
+      [{ id: "model" }, { id: "contextPct" }, { id: "cacheHit" }],
+      { layout }
+    );
+    record(
+      `${layout} handles null model, current_usage, and exceeds_200k_tokens cleanly`,
+      initialOut.includes("0.0%"),
+      initialOut
+    );
+  }
 }
 
 module.exports = { run };

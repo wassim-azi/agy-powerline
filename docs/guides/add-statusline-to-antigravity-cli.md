@@ -22,7 +22,7 @@ From inside agy you can also install agy-powerline as a plugin and let its setup
 
 ## The statusLine setting
 
-`statusLine` takes a `type` of `command` and the `command` to run. Use absolute paths: agy does not expand `~`.
+`statusLine` takes a `type` of `command` and the `command` to run (plus optional `enabled`, `padding`, and `stack_with_default`). Antigravity expands a leading `~` in `command`, though full paths remain safest across shells and Windows `cmd /c`.
 
 ```json
 {
@@ -35,7 +35,7 @@ From inside agy you can also install agy-powerline as a plugin and let its setup
 
 - **macOS and Linux:** the command runs through `sh -c`, so quote paths that may contain spaces.
 - **Windows:** agy runs the command through `cmd /c`. Point it at a `.cmd` file and don't put quotes around the path: `"command": "C:/Users/you/.agy-powerline/statusline.cmd"`.
-- **Inside agy:** `/statusline <command>` sets it, and `/statusline reset` goes back to the built-in bar.
+- **Inside agy:** `/statusline <command>` sets it, `/statusline` (or `on`/`enable`, `off`/`disable`) toggles it, and `/statusline delete` (or `/statusline reset`) goes back to the built-in bar.
 
 `init` can also keep agy's own bar and draw below it (`--stack`), or leave blank lines above (`--padding <n>`). The exact commands for each system are in [Setting it up by hand](../install.md#setting-it-up-by-hand).
 

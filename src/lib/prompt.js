@@ -5,10 +5,10 @@
 
 const readline = require("readline");
 
-function createRl() {
+function createRl(input = process.stdin, output = process.stdout) {
   return readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
+    input,
+    output,
   });
 }
 

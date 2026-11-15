@@ -710,6 +710,38 @@ function clearGitDetailsCache() {
 
 // The bar uses vcs.branch and vcs.dirty from Antigravity's payload. Ahead and
 // behind are not in it; they come from the local repository.
+function findHgBranch(cwd) {
+  if (!isExistingAbsoluteDir(cwd)) {
+    return null;
+  }
+
+  let dir = cwd;
+
+  for (let i = 0; i < 24; i++) {
+    const hgDir = path.join(dir, ".hg");
+
+    try {
+      if (fs.statSync(hgDir).isDirectory()) {
+        try {
+          return firstText(fs.readFileSync(path.join(hgDir, "branch"), "utf8").trim()) || "default";
+        } catch {
+          return "default";
+        }
+      }
+    } catch {
+      // Keep walking up.
+    }
+
+    const parent = path.dirname(dir);
+    if (parent === dir) {
+      return null;
+    }
+    dir = parent;
+  }
+
+  return null;
+}
+
 function vcsFromPayload(data) {
   const vcs = data?.vcs;
 
@@ -729,7 +761,8 @@ function resolveGit(data, config) {
   }
 
   const fromPayload = vcsFromPayload(data);
-  const local = getGitInfo(firstText(data.cwd, data.workspace?.current_dir));
+  const cwd = firstText(data.cwd, data.workspace?.current_dir);
+  const local = getGitInfo(cwd);
 
   if (fromPayload?.branch) {
     // Counts from the local repo only describe the payload's branch if it is
@@ -751,6 +784,19 @@ function resolveGit(data, config) {
       behind: local.behind,
       operation: local.operation,
     };
+  }
+
+  if (data?.vcs?.type === "hg") {
+    const branch = findHgBranch(cwd);
+    if (branch) {
+      return {
+        branch,
+        dirty: Boolean(fromPayload?.dirty),
+        ahead: 0,
+        behind: 0,
+        operation: null,
+      };
+    }
   }
 
   // No branch from the payload or the folder: nothing to show.

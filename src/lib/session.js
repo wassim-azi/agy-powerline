@@ -181,6 +181,21 @@ function currentUserAndHost() {
   return { username, hostname };
 }
 
+function extractCost(raw) {
+  if (!raw || typeof raw !== "object" || raw.total_usd == null) {
+    return null;
+  }
+  const totalUsd = Number(raw.total_usd);
+  if (!Number.isFinite(totalUsd) || totalUsd < 0 || totalUsd > Number.MAX_SAFE_INTEGER) {
+    return null;
+  }
+  return {
+    totalUsd,
+    subagentUsd: count(raw.subagent_usd),
+    estimated: raw.estimated === true,
+  };
+}
+
 // Payload numbers can be strings, negative or absurd. The bar must never show
 // NaN, a negative count or more than 100%.
 function count(value) {
@@ -400,7 +415,9 @@ function extractSession(data, config, options = {}) {
     cwd: firstText(data.cwd, data.workspace?.current_dir),
     project: firstText(data.workspace?.project_dir),
     plan: firstText(data.plan_tier),
+    agentName: oneLine(data.agent?.name),
     agentState: firstText(data.agent_state),
+    toolConfirmation: data.tool_confirmation_pending === true,
     artifacts: Math.floor(count(data.artifact_count)),
     // Finished subagents stay in the list Antigravity sends; only running ones count.
     subagents: running.length,
@@ -410,6 +427,8 @@ function extractSession(data, config, options = {}) {
         ? { name: oneLine(running[0].name), role: oneLine(running[0].role) }
         : null,
     tasks: Math.floor(count(data.task_count)),
+    pendingInputs: Math.floor(count(data.pending_input_count)),
+    cost: extractCost(data.cost),
     // Left out in the default mode, and with Vim editing off.
     approvalMode: firstText(data.cycle_mode),
     vimMode: firstText(data.vim?.mode),

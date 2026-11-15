@@ -668,6 +668,18 @@ function formatMode(approval, vim) {
   return [approval === "default" ? "" : approval, vim].filter(Boolean).join(", ");
 }
 
+function formatCost(cost) {
+  if (!cost || typeof cost !== "object") {
+    return "";
+  }
+  const usd = Number(cost.totalUsd);
+  if (!Number.isFinite(usd) || usd < 0) {
+    return "";
+  }
+  const amount = usd > 0 && usd < 0.01 ? `$${usd.toFixed(4)}` : `$${usd.toFixed(2)}`;
+  return cost.estimated ? `~${amount}` : amount;
+}
+
 // Cuts text to `max` terminal columns, ending with an ellipsis when cut.
 function clipText(text, max, ascii = false) {
   const value = String(text);
@@ -803,6 +815,7 @@ module.exports = {
   gitFileParts,
   formatTasks,
   formatMode,
+  formatCost,
   clipText,
   formatSubagent,
   limitWidth,

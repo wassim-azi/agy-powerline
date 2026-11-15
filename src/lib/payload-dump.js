@@ -24,6 +24,7 @@ const TITLE = "title";
 
 const QUOTA = {
   remaining_fraction: NUMBER,
+  remaining_amount: NUMBER,
   reset_time: TIME,
   reset_in_seconds: NUMBER,
   disabled: BOOL,
@@ -31,9 +32,10 @@ const QUOTA = {
 const VCS = { type: TEXT, branch: BRANCH, dirty: BOOL };
 
 const SCHEMA = {
-  model: { id: TEXT, display_name: TEXT },
+  model: { id: TEXT, display_name: TEXT, effort: TEXT },
   version: TEXT,
   product: TEXT,
+  agent: { name: TEXT },
   agent_state: TEXT,
   plan_tier: TEXT,
   cwd: PATH,
@@ -53,11 +55,18 @@ const SCHEMA = {
   },
   exceeds_200k_tokens: BOOL,
   quota: "quota",
+  cost: {
+    total_usd: NUMBER,
+    subagent_usd: NUMBER,
+    estimated: BOOL,
+  },
   vcs: VCS,
   sandbox: { enabled: BOOL, allow_network: BOOL },
   artifact_count: NUMBER,
   subagents: "subagents",
   task_count: NUMBER,
+  pending_input_count: NUMBER,
+  tool_confirmation_pending: BOOL,
   cycle_mode: TEXT,
   vim: { mode: TEXT },
   conversation_title: TITLE,
