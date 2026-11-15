@@ -46,6 +46,7 @@ async function run() {
   const es = buildHomeHtml({ lang: "es" });
   const ja = buildHomeHtml({ lang: "ja" });
   const zhCn = buildHomeHtml({ lang: "zh-CN" });
+  const ko = buildHomeHtml({ lang: "ko" });
   const themes = buildThemesHtml();
   const galleryThemes = THEME_ORDER.filter((id) => id !== "custom");
 
@@ -74,6 +75,7 @@ async function run() {
       ["es", "es/", es],
       ["ja", "ja/", ja],
       ["zh-CN", "zh-cn/", zhCn],
+      ["ko", "ko/", ko],
     ].every(([lang, slug, markup]) => {
       const g = (jsonLd(markup)[0] || {})["@graph"] || [];
       const localizedApp = g.find((node) => node["@type"] === "SoftwareApplication");
@@ -261,6 +263,18 @@ async function run() {
       !/\{\{\w+\}\}|<!--[A-Z_]+-->/.test(zhCn)
   );
 
+  record(
+    "the Korean home page is in Korean and links back to the English one",
+    /^<!doctype html>\s*<html lang="ko">/i.test(ko) &&
+      /<title>[^<]*agy[^<]*<\/title>/.test(ko) &&
+      ko.includes(`<link rel="canonical" href="${SITE_URL}ko/" />`) &&
+      ko.includes(`hreflang="en" href="${SITE_URL}"`) &&
+      ko.includes(`<meta property="og:locale" content="ko_KR" />`) &&
+      ko.includes("복사") &&
+      ko.includes("리셋") &&
+      !/\{\{\w+\}\}|<!--[A-Z_]+-->/.test(ko)
+  );
+
   // Each home page's footer links to the home page in every other language.
   const footerLangs = (page) =>
     (page.match(/<span class="footer-langs">([\s\S]*?)<\/span>/) || [])[1] || "";
@@ -270,12 +284,20 @@ async function run() {
       .join(",");
   record(
     "every home page links to the home page in each other language",
-    langLinks(html) === "fr,es,ja,zh-CN" &&
-      langLinks(fr) === "en,es,ja,zh-CN" &&
-      langLinks(es) === "en,fr,ja,zh-CN" &&
-      langLinks(ja) === "en,fr,es,zh-CN" &&
-      langLinks(zhCn) === "en,fr,es,ja",
-    [langLinks(html), langLinks(fr), langLinks(es), langLinks(ja), langLinks(zhCn)].join(" | ")
+    langLinks(html) === "fr,es,ja,zh-CN,ko" &&
+      langLinks(fr) === "en,es,ja,zh-CN,ko" &&
+      langLinks(es) === "en,fr,ja,zh-CN,ko" &&
+      langLinks(ja) === "en,fr,es,zh-CN,ko" &&
+      langLinks(zhCn) === "en,fr,es,ja,ko" &&
+      langLinks(ko) === "en,fr,es,ja,zh-CN",
+    [
+      langLinks(html),
+      langLinks(fr),
+      langLinks(es),
+      langLinks(ja),
+      langLinks(zhCn),
+      langLinks(ko),
+    ].join(" | ")
   );
 
   // The header's language menu lists every home page, with a flag, and marks
@@ -284,7 +306,7 @@ async function run() {
   const langMenu = (page) =>
     (page.match(/<details class="lang-menu">([\s\S]*?)<\/details>/) || [])[1] || "";
   const menuOk = (page, lang) =>
-    ["en", "fr", "es", "ja", "zh-CN"].every(
+    ["en", "fr", "es", "ja", "zh-CN", "ko"].every(
       (l) =>
         langMenu(page).includes(`hreflang="${l}" lang="${l}"`) &&
         langMenu(page).includes(`class="flag flag-${l}"`) &&
@@ -298,7 +320,8 @@ async function run() {
       menuOk(fr, "fr") &&
       menuOk(es, "es") &&
       menuOk(ja, "ja") &&
-      menuOk(zhCn, "zh-CN")
+      menuOk(zhCn, "zh-CN") &&
+      menuOk(ko, "ko")
   );
 
   const keys = (obj) => Object.keys(obj).sort().join(",");

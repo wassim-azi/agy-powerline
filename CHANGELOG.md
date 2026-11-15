@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Include newly documented payload fields (`agent`, `cost`, `model.effort`, `pending_input_count`, `tool_confirmation_pending`, `quota.*.remaining_amount`) in `AGY_POWERLINE_DEBUG=1` payload dumps
 - Bar labels, captions, and units in Simplified Chinese (`"language": "zh-CN"`) (#122)
 - Simplified Chinese home page at `agy-powerline.com/zh-cn/` (#122)
+- Bar labels, captions, and units in Korean (`"language": "ko"`) (#150)
+- Korean home page at `agy-powerline.com/ko/` (#150)
 
 ### Changed
 

@@ -9,12 +9,10 @@ What agy-powerline plans for the year to October 2027. Plans can change; the [is
 - **Quota run-out forecast** on `fiveHourPct`, `weeklyPct` and `quota`: when you run out at your current pace, e.g. "at this pace you run out at 15:40".
 - **Pace delta** on the same widgets: how far ahead of or behind a sustainable pace you are, e.g. `⇡15%` faster than sustainable or `⇣10%` of headroom.
 - **Themes named after their palettes**, so they're easy to find: `dark-dracula`, `dark-tokyo-night` and `dark-catppuccin-macchiato` (the current ids keep working), and the other Catppuccin flavors (Latte, Frappé, Mocha), each passing the contrast tests.
-- **Bar labels in more languages**: Korean ([#150](https://github.com/wassim-azi/agy-powerline/issues/150)), reviewed by a native or fluent speaker.
 
 ### Reliability and contributors
 
 - **Keeping up with agy**: support for new fields in the session JSON as new agy versions send them, each tested against a captured payload in `tests/fixtures/`.
-- **`exec` timeouts end the whole command**: a command that runs past its timeout is stopped with everything it started, on Windows too.
 - **One module per widget**: today a widget touches eight files; one module rendered by both layouts makes adding a widget a one-file pull request.
 - **Security practices**: the OpenSSF Best Practices Silver badge, and a second maintainer so that every change gets a review by someone other than its author.
 

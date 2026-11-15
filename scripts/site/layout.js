@@ -264,6 +264,9 @@ const SHARED_CSS = `
       :lang(zh-CN) :is(h1, h2, h3) {
         word-break: auto-phrase;
       }
+      :lang(ko) :is(h1, h2, h3) {
+        word-break: keep-all;
+      }
 
       .sr-only {
         position: absolute;
@@ -483,6 +486,9 @@ const SHARED_CSS = `
       }
       .flag-zh-CN {
         background-image: url("/img/flag-zh-CN.png");
+      }
+      .flag-ko {
+        background-image: url("/img/flag-ko.png");
       }
       .lang-menu:not([open]) > .lang-menu-panel {
         display: none;
@@ -1158,6 +1164,7 @@ const SITE_LANGUAGES = [
   { lang: "es", href: "/es/", label: "Español", locale: "es_ES" },
   { lang: "ja", href: "/ja/", label: "日本語", locale: "ja_JP" },
   { lang: "zh-CN", href: "/zh-cn/", label: "简体中文", locale: "zh_CN" },
+  { lang: "ko", href: "/ko/", label: "한국어", locale: "ko_KR" },
 ];
 const siteLanguage = (lang) => SITE_LANGUAGES.find((l) => l.lang === lang) || SITE_LANGUAGES[0];
 
@@ -1292,6 +1299,32 @@ const CHROME_TEXT = {
     copied: "已复制",
     copiedStatus: "已复制到剪贴板",
     copyCode: "复制代码",
+  },
+  ko: {
+    skip: "본문으로 건너뛰기",
+    pageTheme: "페이지 테마",
+    language: "언어",
+    system: "시스템",
+    light: "라이트",
+    dark: "다크",
+    menu: "메뉴",
+    nav: {
+      install: "설치",
+      docs: "Docs",
+      themes: "테마",
+      configurator: "설정",
+    },
+    getStarted: "시작하기",
+    github: "GitHub의 agy-powerline",
+    tagline: "Google Antigravity CLI용 agy 상태바. 텔레메트리 없는 무료 오픈소스.",
+    product: "제품",
+    docs: "문서",
+    project: "프로젝트",
+    footerNote: "MIT 라이선스 · 이 사이트의 모든 상태바는 실제 상태바 코드로 렌더링됩니다",
+    copy: "복사",
+    copied: "복사됨",
+    copiedStatus: "클립보드에 복사되었습니다",
+    copyCode: "코드 복사",
   },
 };
 

@@ -147,6 +147,16 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에�
 
 </details>
 
+### 상태바 언어
+
+`"language"`는 상태바에 표시되는 텍스트(레이블, 시간 단위, `남음`, `서브에이전트`)의 언어를 설정하며, 기본적으로 영어(`"en"`)가 사용됩니다. `en`, `fr`, `es`, `ja`, `zh-CN`, `ko`를 지원합니다. 페이로드 값과 날짜는 번역되지 않습니다.
+
+```json
+{ "language": "ko" }
+```
+
+또는 설치 시 지정할 수 있습니다: `npx agy-powerline init --language ko`.
+
 ## 위젯
 
 | 위젯                                                             | 표시 내용                                                                                        |
