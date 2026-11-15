@@ -1053,6 +1053,17 @@ function sitePages() {
       images: SCREENSHOTS.map((name) => screenshotUrl(name)),
     },
     {
+      path: "zh-cn/",
+      sources: HOME_SOURCES,
+      html: buildHomeHtml({ lang: "zh-CN" }),
+      card: {
+        title: stripTags(HOME_TEXT["zh-CN"].heroTitle),
+        label: "Antigravity CLI",
+        lang: "zh-CN",
+      },
+      images: SCREENSHOTS.map((name) => screenshotUrl(name)),
+    },
+    {
       path: THEMES_PAGE.path,
       sources: ["scripts/gallery/themes.html", "scripts/gallery/build.js", "src/lib/themes.js"],
       html: buildThemesHtml(),

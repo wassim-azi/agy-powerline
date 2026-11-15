@@ -45,6 +45,7 @@ async function run() {
   const fr = buildHomeHtml({ lang: "fr" });
   const es = buildHomeHtml({ lang: "es" });
   const ja = buildHomeHtml({ lang: "ja" });
+  const zhCn = buildHomeHtml({ lang: "zh-CN" });
   const themes = buildThemesHtml();
   const galleryThemes = THEME_ORDER.filter((id) => id !== "custom");
 
@@ -69,10 +70,11 @@ async function run() {
   record(
     "localized home pages also emit localized SoftwareApplication and FAQPage JSON-LD",
     [
-      ["fr", fr],
-      ["es", es],
-      ["ja", ja],
-    ].every(([lang, markup]) => {
+      ["fr", "fr/", fr],
+      ["es", "es/", es],
+      ["ja", "ja/", ja],
+      ["zh-CN", "zh-cn/", zhCn],
+    ].every(([lang, slug, markup]) => {
       const g = (jsonLd(markup)[0] || {})["@graph"] || [];
       const localizedApp = g.find((node) => node["@type"] === "SoftwareApplication");
       const localizedFaq = g.find((node) => node["@type"] === "FAQPage");
@@ -80,7 +82,7 @@ async function run() {
         g.some((node) => node["@type"] === "WebSite") &&
         g.some((node) => node["@type"] === "Person") &&
         Boolean(localizedApp) &&
-        localizedApp.url === `${SITE_URL}${lang}/` &&
+        localizedApp.url === `${SITE_URL}${slug}` &&
         localizedApp.inLanguage === lang &&
         Boolean(localizedFaq) &&
         localizedFaq.inLanguage === lang &&
@@ -247,18 +249,33 @@ async function run() {
       !/\{\{\w+\}\}|<!--[A-Z_]+-->/.test(ja)
   );
 
+  record(
+    "the Simplified Chinese home page is in Simplified Chinese and links back to the English one",
+    /^<!doctype html>\s*<html lang="zh-CN">/i.test(zhCn) &&
+      /<title>[^<]*agy[^<]*<\/title>/.test(zhCn) &&
+      zhCn.includes(`<link rel="canonical" href="${SITE_URL}zh-cn/" />`) &&
+      zhCn.includes(`hreflang="en" href="${SITE_URL}"`) &&
+      zhCn.includes(`<meta property="og:locale" content="zh_CN" />`) &&
+      zhCn.includes("复制") &&
+      zhCn.includes("重置") &&
+      !/\{\{\w+\}\}|<!--[A-Z_]+-->/.test(zhCn)
+  );
+
   // Each home page's footer links to the home page in every other language.
   const footerLangs = (page) =>
     (page.match(/<span class="footer-langs">([\s\S]*?)<\/span>/) || [])[1] || "";
   const langLinks = (page) =>
-    [...footerLangs(page).matchAll(/href="([^"]+)" hreflang="(\w+)"/g)].map((m) => m[2]).join(",");
+    [...footerLangs(page).matchAll(/href="([^"]+)" hreflang="([\w-]+)"/g)]
+      .map((m) => m[2])
+      .join(",");
   record(
     "every home page links to the home page in each other language",
-    langLinks(html) === "fr,es,ja" &&
-      langLinks(fr) === "en,es,ja" &&
-      langLinks(es) === "en,fr,ja" &&
-      langLinks(ja) === "en,fr,es",
-    [langLinks(html), langLinks(fr), langLinks(es), langLinks(ja)].join(" | ")
+    langLinks(html) === "fr,es,ja,zh-CN" &&
+      langLinks(fr) === "en,es,ja,zh-CN" &&
+      langLinks(es) === "en,fr,ja,zh-CN" &&
+      langLinks(ja) === "en,fr,es,zh-CN" &&
+      langLinks(zhCn) === "en,fr,es,ja",
+    [langLinks(html), langLinks(fr), langLinks(es), langLinks(ja), langLinks(zhCn)].join(" | ")
   );
 
   // The header's language menu lists every home page, with a flag, and marks
@@ -267,7 +284,7 @@ async function run() {
   const langMenu = (page) =>
     (page.match(/<details class="lang-menu">([\s\S]*?)<\/details>/) || [])[1] || "";
   const menuOk = (page, lang) =>
-    ["en", "fr", "es", "ja"].every(
+    ["en", "fr", "es", "ja", "zh-CN"].every(
       (l) =>
         langMenu(page).includes(`hreflang="${l}" lang="${l}"`) &&
         langMenu(page).includes(`class="flag flag-${l}"`) &&
@@ -277,7 +294,11 @@ async function run() {
     new RegExp(`hreflang="${lang}" lang="${lang}" aria-current="true"`).test(langMenu(page));
   record(
     "every home page has a language menu in its header, with its own language marked",
-    menuOk(html, "en") && menuOk(fr, "fr") && menuOk(es, "es") && menuOk(ja, "ja")
+    menuOk(html, "en") &&
+      menuOk(fr, "fr") &&
+      menuOk(es, "es") &&
+      menuOk(ja, "ja") &&
+      menuOk(zhCn, "zh-CN")
   );
 
   const keys = (obj) => Object.keys(obj).sort().join(",");

@@ -258,9 +258,10 @@ const SHARED_CSS = `
         line-height: 1.2;
         letter-spacing: -0.02em;
       }
-      /* Japanese has no spaces: a heading wraps between phrases, not inside a
+      /* CJK has no spaces: a heading wraps between phrases, not inside a
          word (browsers without auto-phrase wrap as before). */
-      :lang(ja) :is(h1, h2, h3) {
+      :lang(ja) :is(h1, h2, h3),
+      :lang(zh-CN) :is(h1, h2, h3) {
         word-break: auto-phrase;
       }
 
@@ -479,6 +480,9 @@ const SHARED_CSS = `
       }
       .flag-ja {
         background-image: url("/img/flag-ja.png");
+      }
+      .flag-zh-CN {
+        background-image: url("/img/flag-zh-CN.png");
       }
       .lang-menu:not([open]) > .lang-menu-panel {
         display: none;
@@ -1153,6 +1157,7 @@ const SITE_LANGUAGES = [
   { lang: "fr", href: "/fr/", label: "Français", locale: "fr_FR" },
   { lang: "es", href: "/es/", label: "Español", locale: "es_ES" },
   { lang: "ja", href: "/ja/", label: "日本語", locale: "ja_JP" },
+  { lang: "zh-CN", href: "/zh-cn/", label: "简体中文", locale: "zh_CN" },
 ];
 const siteLanguage = (lang) => SITE_LANGUAGES.find((l) => l.lang === lang) || SITE_LANGUAGES[0];
 
@@ -1261,6 +1266,32 @@ const CHROME_TEXT = {
     copied: "コピーしました",
     copiedStatus: "クリップボードにコピーしました",
     copyCode: "コードをコピー",
+  },
+  "zh-CN": {
+    skip: "跳转到正文",
+    pageTheme: "页面主题",
+    language: "语言",
+    system: "跟随系统",
+    light: "浅色",
+    dark: "深色",
+    menu: "菜单",
+    nav: {
+      install: "安装",
+      docs: "Docs",
+      themes: "主题",
+      configurator: "配置",
+    },
+    getStarted: "开始使用",
+    github: "GitHub 上的 agy-powerline",
+    tagline: "Google Antigravity CLI 的 agy 状态栏。免费开源，无任何遥测。",
+    product: "产品",
+    docs: "文档",
+    project: "项目",
+    footerNote: "MIT 许可证 · 本站展示的所有状态栏均由真实状态栏代码渲染",
+    copy: "复制",
+    copied: "已复制",
+    copiedStatus: "已复制到剪贴板",
+    copyCode: "复制代码",
   },
 };
 

@@ -157,6 +157,7 @@ function cardHtml({ width, height, title, label, lang = "en" }) {
       fr: `${themes} thèmes · 0 dépendance · sans télémétrie`,
       es: `${themes} temas · 0 dependencias · sin telemetría`,
       ja: `${themes} テーマ · 依存パッケージ 0 · テレメトリなし`,
+      "zh-CN": `${themes} 个主题 · 0 依赖 · 无遥测`,
     }[lang] || `${themes} themes · 0 dependencies · no telemetry`;
   const size = title.length > 60 ? 50 : title.length > 40 ? 58 : 66;
   return `<!doctype html>
