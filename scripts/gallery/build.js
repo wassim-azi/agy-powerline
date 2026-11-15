@@ -434,7 +434,7 @@ function trustHtml(text) {
     .join("\n            ");
 }
 
-// lang: "en" for /, "fr" for /fr/, "es" for /es/, "ja" for /ja/.
+// lang: "en" for /, "fr" for /fr/, "es" for /es/, "ja" for /ja/, "zh-CN" for /zh-cn/.
 function buildHomeHtml({ lang = "en" } = {}) {
   const text = HOME_TEXT[lang];
   const n = counts();
@@ -465,7 +465,7 @@ function buildHomeHtml({ lang = "en" } = {}) {
   const filled = template.replace(/\{\{(\w+)\}\}/g, (match, key) =>
     key in values ? values[key] : typeof text[key] === "string" ? text[key] : match
   );
-  const pagePath = lang === "en" ? "" : `${lang}/`;
+  const pagePath = (SITE_LANGUAGES.find((l) => l.lang === lang) || SITE_LANGUAGES[0]).href.slice(1);
   const page = injectSiteChrome(filled, {
     title: text.title,
     description: text.description,

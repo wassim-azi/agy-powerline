@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added the opt-in `cost` (`cost.total_usd`, `cost.estimated`), `agent` (`agent.name`), and `queue` (`pending_input_count`) widgets matching the latest Antigravity CLI statusline payload schema
 - Surface `tool_confirmation_pending` directly on the `agentState` widget and read Mercurial branch names from `.hg/branch` when `vcs.type` is `"hg"`
 - Include newly documented payload fields (`agent`, `cost`, `model.effort`, `pending_input_count`, `tool_confirmation_pending`, `quota.*.remaining_amount`) in `AGY_POWERLINE_DEBUG=1` payload dumps
+- Bar labels, captions, and units in Simplified Chinese (`"language": "zh-CN"`) (#122)
+- Simplified Chinese home page at `agy-powerline.com/zh-cn/` (#122)
 
 ### Changed
 

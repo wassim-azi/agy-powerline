@@ -723,6 +723,166 @@ const HOME_TEXT = {
     ctaLead: "コマンドひとつでインストールするか、先にブラウザでバーを作ってみてください。",
     viewOnGithub: "GitHub で見る",
   },
+  "zh-CN": {
+    lang: "zh-CN",
+    title: "Google Antigravity CLI 的 agy 状态栏 - agy-powerline",
+    description:
+      "agy-powerline 是专为 Google Antigravity CLI（agy）打造的状态栏工具：在 agy 状态栏中实时展示当前模型、上下文窗口、Git 状态以及带配额节奏标记的 Gemini、Claude/GPT 和 Argon 配额。零依赖，无遥测。",
+    imageAlt: "agy-powerline：提前预判配额是否够用的 agy 状态栏及默认外观",
+    eyebrow: "Google Antigravity CLI 状态栏",
+    heroTitle: '提前看出<span class="grad-text">配额是否够用</span>的 agy 状态栏',
+    heroLead:
+      "在 agy 输入框下方用一条 powerline 状态栏展示当前模型、上下文窗口、Git 以及带有消耗节奏标记的各项 Antigravity 配额。<strong>一条命令</strong>即可完成配置。",
+    copy: "复制",
+    copyCommand: "复制：",
+    copyInstall: "复制安装命令",
+    buildInBrowser: "在浏览器中定制状态栏",
+    heroFacts: ["Node.js 20+", "0 依赖", "无遥测", "MIT 许可证"],
+    askAgy: "向 agy 提任何问题…",
+    heroBarCaption:
+      "agy 输入框下方 agy-powerline 的实时预览。切换主题和布局即可查看效果；本页所有状态栏均由真实状态栏代码渲染。",
+    demoThemes: "主题",
+    demoLayouts: "布局",
+    allThemes: (n) => `全部 ${n} 个 →`,
+    anatomyEyebrow: "一目了然",
+    anatomyTitle: "十秒看懂 agy 状态栏",
+    anatomyLead: "默认状态栏分为两行：上方显示当前工作环境，下方显示各项配额剩余情况。",
+    anatomy: [
+      ["model", "模型", "agy 当前正在使用的模型。"],
+      ["context", "上下文窗口", "在 agy 需要压缩对话前，当前上下文已占用的比例。"],
+      ["git", "Git", "当前分支、未提交更改，以及领先或落后上游的提交数。"],
+      ["fiveHour", "5 小时配额", "Gemini 5 小时配额的剩余量及重置时间。"],
+      [
+        "pace",
+        "消耗节奏标记",
+        "标示当前在配额周期中所处的时间进度。若进度条超过该标记，说明消耗速度高于时间流逝速度，会在重置前用尽。",
+      ],
+      ["weekly", "7 天配额", "每周配额，附带独立的消耗节奏标记与重置时间。"],
+    ],
+    paceGuide: "了解节奏标记原理（英文）→",
+    stepsEyebrow: "快速上手",
+    stepsTitle: "一分钟完成部署",
+    steps: [
+      [
+        "安装",
+        "需要 Node.js 20 或更新版本以及 Antigravity CLI。修改前会自动备份 agy 的 <code>settings.json</code>，并打开实时预览编辑器。",
+        "npx agy-powerline",
+      ],
+      [
+        "挑选外观",
+        "安装过程中可带实时预览浏览预设、布局、主题与组件，也可随时重新打开编辑器调整。",
+        "npx agy-powerline configure",
+      ],
+      [
+        "重启一次 agy",
+        "状态栏会出现在输入框下方并随 agy 刷新。之后的任何修改都无需再次重启。",
+        "agy",
+      ],
+    ],
+    installGuide: "查看安装详情（英文）→",
+    featuresEyebrow: "功能特性",
+    featuresTitle: "Antigravity CLI 状态栏中你想看的一切信息",
+    featuresLead: "基于 Antigravity CLI 真实状态栏数据构建，安全稳定，适合全天运行。",
+    features: (n) => [
+      [
+        "pace",
+        "配额消耗节奏标记",
+        "每条配额进度条都标出了周期内当前时间位置，让你在配额耗尽前提前察觉。剩余 30% 时转为警戒色，10% 时转为危险色。",
+        "/guides/antigravity-quota/",
+      ],
+      [
+        "themes",
+        `${n.themes} 款主题`,
+        "涵盖深色、浅色与色盲友好配色，每款均在目标终端背景下通过 WCAG AA 对比度检查。",
+        "/themes/",
+      ],
+      [
+        "layouts",
+        "3 种布局",
+        "Pills、Lines 与 Classic 三种布局，行数自由编排，并会根据终端宽度自动适配。",
+        "/docs/configuration/",
+      ],
+      [
+        "widgets",
+        `${n.widgets} 个组件`,
+        "涵盖模型、上下文、Git、配额、Token、会话时长、代理状态、自定义 shell 命令等。",
+        "/widgets/",
+      ],
+      [
+        "configure",
+        "自由定制配置",
+        "提供带实时预览的终端交互编辑器、浏览器可视化配置器、多种预设以及带 Schema 校验的 JSON。",
+        "/configure/",
+      ],
+      [
+        "platforms",
+        "Windows、macOS、Linux、WSL",
+        "零运行时依赖，支持 Node.js 20 及以上版本。不发起任何网络请求，无任何遥测。",
+        "/install/",
+      ],
+    ],
+    shotsEyebrow: "真实截图",
+    shotsTitle: "运行在真实终端中",
+    shotsLead: "均截自真实 agy 会话，而非设计效果图。",
+    shots: {
+      windows: [
+        "agy 会话",
+        "Windows Terminal 中位于 agy 输入框下方的 agy-powerline：上方是一段简短对话，下方是三行 Pills 状态栏",
+      ],
+      "pills-dark": [
+        "Pills",
+        "搭配 dark-aurora 主题的 agy-powerline Pills 布局：模型、上下文、项目与 Git；带节奏标记与重置倒计时的 Gemini 5h 和 7d 配额；Claude/GPT 与 Argon 每周配额",
+      ],
+      "lines-light": ["Lines", "浅色终端上搭配 light-paper 主题的 agy-powerline Lines 布局"],
+      "classic-dark": [
+        "Classic",
+        "深色终端上搭配 dark-aurora 主题及方块进度条的 agy-powerline Classic 布局",
+      ],
+    },
+    themesEyebrow: "主题配色",
+    themesTitle: (n) => `共 ${n} 款适配深色、浅色及色盲友好终端的主题`,
+    themesLead: "主题库页面（英文）在各主题对应的终端背景上直接绘制预览，并提供色觉模拟对比。",
+    seeAllThemes: (n) => `查看全部 ${n} 款主题`,
+    trustEyebrow: "运行安全",
+    trustTitle: "每次刷新都会运行，因此力求极简小巧",
+    trustBody:
+      '零运行时依赖、无网络请求，且只读取你本机安装目录中的配置：克隆下来的外部仓库无法更改你的状态栏或执行命令。<a href="/security/">了解它在本机上的行为</a>（英文）。',
+    trust: [
+      [
+        "https://scorecard.dev/viewer/?uri=github.com/wassim-azi/agy-powerline",
+        "OpenSSF Scorecard",
+      ],
+      ["https://www.bestpractices.dev/projects/15655", "OpenSSF Best Practices"],
+      ["https://www.npmjs.com/package/agy-powerline", "npm provenance"],
+      ["/security/", "0 依赖"],
+      ["/privacy/", "无遥测"],
+      ["https://github.com/wassim-azi/agy-powerline/blob/main/LICENSE", "MIT 许可证"],
+    ],
+    faqEyebrow: "常见问题",
+    faqTitle: "大家最常先问的问题",
+    faq: [
+      [
+        "支持 Windows 吗？",
+        '支持 Windows、macOS、Linux 和 WSL。在 Windows 上 agy 通过 <code>cmd /c</code> 运行状态栏，安装程序会自动为你配置好；在 WSL 中请使用 WSL 内的 Linux 版 Node.js 安装（<a href="/install/#wsl">WSL 注意事项</a>，英文）。',
+      ],
+      [
+        "会向外部发送数据吗？",
+        '不会。agy-powerline 不发起任何网络请求，也不包含任何遥测或统计代码。异常问题只写入本地日志文件，你可以随时查看、清空或关闭。<a href="/security/">安全与隐私说明</a>（英文）列出了它读写的所有文件。只有本网站本身使用了 Google Analytics 统计访问量（<a href="/privacy/">隐私说明</a>，英文）。',
+      ],
+      [
+        "会拖慢 agy 的响应吗？",
+        "在 Windows 11 笔记本上，每次刷新中 agy-powerline 本身仅耗时约 0.1 秒。Windows 下启动 <code>cmd</code> 与 Node 会额外增加约 0.1–0.25 秒，所有外部状态栏命令均如此。",
+      ],
+      [
+        "会显示哪些配额？",
+        '涵盖 Gemini 的 5 小时与 7 天配额、第三方模型（Claude 与 GPT）的 5 小时与 7 天配额，以及 Google AI Pro 下 Gemini 4 Argon 的每周配额，每一项都带有重置时间。进度条说明见<a href="/guides/antigravity-quota/">配额指南</a>（英文）。',
+      ],
+    ],
+    allQuestions: "查看全部问题（英文）→",
+    ctaTitle: "在配额耗尽前提前掌握余量",
+    ctaLead: "一条命令即可安装，也可以先在浏览器里搭好你的状态栏。",
+    viewOnGithub: "在 GitHub 上查看",
+  },
 };
 
 module.exports = { HOME_TEXT };
