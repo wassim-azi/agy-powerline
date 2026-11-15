@@ -3,6 +3,9 @@
 
 "use strict";
 
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
 const { LAYOUT_ORDER } = require("../../src/lib/config");
 const { record, PAYLOAD } = require("../helpers");
 const { renderStatusline, defaultConfig, clearExecCache } = require("../../src/lib/shared");
@@ -257,12 +260,70 @@ function checkCcusageRecipe() {
   );
 }
 
+function isPidAlive(pid) {
+  if (!pid) {
+    return false;
+  }
+  try {
+    process.kill(pid, 0);
+    return true;
+  } catch (err) {
+    return err.code === "EPERM";
+  }
+}
+
+function checkTimeoutKillsTree() {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agy-exec-tree-"));
+  const script = path.join(dir, "spawn-child.js");
+  const pidFile = path.join(dir, "pids.json");
+  let pids = [];
+
+  try {
+    fs.writeFileSync(
+      script,
+      [
+        'const fs = require("fs");',
+        'const { spawn } = require("child_process");',
+        'const child = spawn(process.execPath, ["-e", "setTimeout(() => {}, 30000)"], { stdio: "ignore", windowsHide: true });',
+        `fs.writeFileSync(${JSON.stringify(pidFile)}, JSON.stringify([process.pid, child.pid]));`,
+        "setTimeout(() => {}, 30000);",
+      ].join("\n")
+    );
+
+    const started = Date.now();
+    const out = render([{ id: "exec", cmd: `"${process.execPath}" "${script}"`, timeout: 800 }]);
+    const elapsed = Date.now() - started;
+
+    const recorded = fs.existsSync(pidFile);
+    if (recorded) {
+      pids = JSON.parse(fs.readFileSync(pidFile, "utf8"));
+    }
+    const stillRunning = pids.filter((pid) => isPidAlive(pid));
+
+    record(
+      "a timed-out exec command terminates the child and grandchild processes it started",
+      recorded && elapsed < 4000 && stillRunning.length === 0 && !out.includes("30000"),
+      `elapsed=${elapsed}ms, recorded=${recorded}, alive=${JSON.stringify(stillRunning)}`
+    );
+  } finally {
+    for (const pid of pids) {
+      try {
+        process.kill(pid, "SIGKILL");
+      } catch {
+        // Already exited.
+      }
+    }
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
 async function run() {
   try {
     checkPayload();
     checkColors();
     checkRecipe();
     checkCcusageRecipe();
+    checkTimeoutKillsTree();
   } finally {
     clearExecCache();
   }

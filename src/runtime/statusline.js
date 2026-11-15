@@ -6,6 +6,7 @@
 
 const path = require("path");
 const { parseArgs } = require("util");
+const { isMainThread, workerData } = require("worker_threads");
 const { readConfigFile, renderStatusline, applyRenderOverrides } = require("./shared");
 const { isTrustedInstallDir } = require("./paths");
 const { dumpTarget, writePayloadDump } = require("./payload-dump");
@@ -37,32 +38,41 @@ const RENDER_OPTIONS = {
   language: { type: "string" },
 };
 
-// The config decides whether problems are logged, so it is read first. A
-// broken config can't say, so logging stays on (AGY_POWERLINE_LOG=0 still
-// turns it off).
-const { config, error: configError } = readConfigFile();
-setLogDir(__dirname, isLogEnabled(configError ? null : config));
+let config;
+let configError;
 
-// Antigravity can close the pipe before the statusline finishes writing. That
-// is a normal shutdown, so don't treat EPIPE as a runtime crash.
-process.stdout.on("error", (err) => {
-  if (err?.code === "EPIPE") {
+function startRuntime() {
+  // The config decides whether problems are logged, so it is read first. A
+  // broken config can't say, so logging stays on (AGY_POWERLINE_LOG=0 still
+  // turns it off).
+  ({ config, error: configError } = readConfigFile());
+  setLogDir(__dirname, isLogEnabled(configError ? null : config));
+
+  // Antigravity can close the pipe before the statusline finishes writing. That
+  // is a normal shutdown, so don't treat EPIPE as a runtime crash.
+  process.stdout.on("error", (err) => {
+    if (err?.code === "EPIPE") {
+      process.exit(0);
+    }
+
+    logError("RUNTIME_CRASH", err);
+    process.stderr.write(`[agy-powerline] ${redact(err?.message || err)}\n`);
     process.exit(0);
-  }
+  });
 
-  logError("RUNTIME_CRASH", err);
-  process.stderr.write(`[agy-powerline] ${redact(err?.message || err)}\n`);
-  process.exit(0);
-});
+  // A crash must not leave a stack trace in Antigravity's status bar.
+  process.on("uncaughtException", (err) => {
+    logError("RUNTIME_CRASH", err);
+    // The message can quote payload text; redact also strips escape sequences.
+    process.stderr.write(`[agy-powerline] ${redact(err?.message || err)}\n`);
+    process.stdout.write("\x1b[31m[agy-powerline: error, see agy-powerline.log]\x1b[0m\n");
+    process.exit(0);
+  });
 
-// A crash must not leave a stack trace in Antigravity's status bar.
-process.on("uncaughtException", (err) => {
-  logError("RUNTIME_CRASH", err);
-  // The message can quote payload text; redact also strips escape sequences.
-  process.stderr.write(`[agy-powerline] ${redact(err?.message || err)}\n`);
-  process.stdout.write("\x1b[31m[agy-powerline: error, see agy-powerline.log]\x1b[0m\n");
-  process.exit(0);
-});
+  readStdin(STDIN_TIMEOUT_MS).then(({ text, complete }) => {
+    render(text.replace(/^\uFEFF/, "").trim(), complete);
+  });
+}
 
 // Resolves with what stdin sent and whether it closed before the deadline.
 function readStdin(timeoutMs) {
@@ -84,9 +94,11 @@ function readStdin(timeoutMs) {
   });
 }
 
-readStdin(STDIN_TIMEOUT_MS).then(({ text, complete }) => {
-  render(text.replace(/^\uFEFF/, "").trim(), complete);
-});
+if (!isMainThread && workerData?.__agyExecWorker) {
+  require("./exec").runExecWorker(workerData);
+} else {
+  startRuntime();
+}
 
 function render(input, complete) {
   if (!input) {

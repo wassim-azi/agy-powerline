@@ -7,7 +7,13 @@ const fs = require("fs");
 const path = require("path");
 const os = require("os");
 const crypto = require("crypto");
-const { execSync } = require("child_process");
+const { spawn, execFileSync } = require("child_process");
+let workerThreads = null;
+try {
+  workerThreads = require("worker_threads");
+} catch {
+  // worker_threads is absent in the browser configurator bundle.
+}
 const { stripControl, sanitizeDeep } = require("./formatters");
 const { RESET, getActiveDepth } = require("./colors");
 const { logWarning } = require("./log");
@@ -239,6 +245,195 @@ function execWidgetOutput(widget, session = {}) {
   return t(session.execMode === "blocked" ? "cmd_blocked" : "cmd_preview", session.lang);
 }
 
+const MAX_EXEC_STDOUT_BYTES = 1024 * 1024;
+const TREE_KILL_GRACE_MS = 200;
+const WORKER_WAIT_HEADROOM_MS = 3000;
+
+let workerStarted = false;
+
+// execSync kills only the shell on timeout, leaving anything the shell started
+// running in the background. On Windows taskkill /T walks the live parent tree;
+// on POSIX the detached shell heads a process group that SIGKILL clears at once.
+function killProcessTree(pid) {
+  if (!pid) {
+    return;
+  }
+  if (process.platform === "win32") {
+    try {
+      execFileSync("taskkill", ["/T", "/F", "/PID", String(pid)], {
+        stdio: "ignore",
+        windowsHide: true,
+        timeout: 2000,
+      });
+    } catch {
+      // Process or tree may already have exited.
+    }
+    try {
+      process.kill(pid, "SIGKILL");
+    } catch {
+      // Already exited.
+    }
+    return;
+  }
+  try {
+    process.kill(-pid, "SIGKILL");
+  } catch {
+    // Process group may already have exited.
+  }
+  try {
+    process.kill(pid, "SIGKILL");
+  } catch {
+    // Leader may already have exited.
+  }
+}
+
+function runExecWorker(data) {
+  if (!data || workerStarted) {
+    return;
+  }
+  workerStarted = true;
+
+  const { cmd, cwd, timeoutMs, input, sab, port } = data;
+  let done = false;
+  let timer = null;
+  let graceTimer = null;
+  let timedOut = false;
+
+  const finish = (result) => {
+    if (done) {
+      return;
+    }
+    done = true;
+    clearTimeout(timer);
+    clearTimeout(graceTimer);
+    try {
+      port.postMessage(result);
+      port.close();
+    } catch {
+      // Parent may already have timed out and closed the port.
+    }
+    Atomics.store(sab, 0, 1);
+    Atomics.notify(sab, 0, 1);
+  };
+
+  let child;
+  try {
+    child = spawn(cmd, {
+      shell: true,
+      cwd,
+      detached: process.platform !== "win32",
+      windowsHide: true,
+      stdio: [input === undefined ? "ignore" : "pipe", "pipe", "ignore"],
+    });
+  } catch (err) {
+    finish({ status: null, signal: null, errorCode: err?.code, timedOut: false, stdout: "" });
+    return;
+  }
+
+  const chunks = [];
+  let bytes = 0;
+
+  child.stdout?.on("data", (chunk) => {
+    if (timedOut || bytes >= MAX_EXEC_STDOUT_BYTES) {
+      return;
+    }
+    const remaining = MAX_EXEC_STDOUT_BYTES - bytes;
+    const slice = chunk.length > remaining ? chunk.subarray(0, remaining) : chunk;
+    chunks.push(slice);
+    bytes += slice.length;
+  });
+
+  if (input !== undefined && child.stdin) {
+    // A command that exits without reading the whole payload closes the pipe
+    // under the write; ignore EPIPE and wait for close so stdout still counts.
+    child.stdin.on("error", () => {});
+    child.stdin.end(input);
+  }
+
+  child.on("error", (err) => {
+    finish({
+      status: null,
+      signal: null,
+      errorCode: err?.code,
+      timedOut,
+      stdout: "",
+    });
+  });
+
+  child.on("close", (status, signal) => {
+    if (timedOut) {
+      finish({ status: null, signal: "SIGTERM", timedOut: true, stdout: "" });
+      return;
+    }
+    finish({
+      status,
+      signal,
+      timedOut: false,
+      stdout: Buffer.concat(chunks).toString("utf8"),
+    });
+  });
+
+  timer = setTimeout(() => {
+    timedOut = true;
+    try {
+      child.stdin?.destroy();
+    } catch {
+      // Ignore stream cleanup errors.
+    }
+    killProcessTree(child.pid);
+    // Wait briefly for close so the kernel finishes reaping killed children; if
+    // a detached descendant kept stdout open, close the pipe and return anyway.
+    graceTimer = setTimeout(() => {
+      try {
+        child.stdout?.destroy();
+      } catch {
+        // Ignore stream cleanup errors.
+      }
+      finish({ status: null, signal: "SIGTERM", timedOut: true, stdout: "" });
+    }, TREE_KILL_GRACE_MS);
+  }, timeoutMs);
+}
+
+function runExecCommand(cmd, cwd, timeoutMs, input) {
+  if (!workerThreads) {
+    return { status: null, signal: null, timedOut: false, stdout: "" };
+  }
+  const sab = new Int32Array(new SharedArrayBuffer(4));
+  const { port1, port2 } = new workerThreads.MessageChannel();
+  const worker = new workerThreads.Worker(__filename, {
+    workerData: {
+      __agyExecWorker: true,
+      cmd,
+      cwd,
+      timeoutMs,
+      input,
+      sab,
+      port: port1,
+    },
+    transferList: [port1],
+  });
+  worker.unref();
+
+  try {
+    const waitStatus = Atomics.wait(sab, 0, 0, timeoutMs + WORKER_WAIT_HEADROOM_MS);
+    const msg = workerThreads.receiveMessageOnPort(port2)?.message;
+    if (msg) {
+      return msg;
+    }
+    if (waitStatus === "timed-out") {
+      return { status: null, signal: "SIGTERM", timedOut: true, stdout: "" };
+    }
+    return { status: null, signal: null, timedOut: false, stdout: "" };
+  } finally {
+    try {
+      port2.close();
+    } catch {
+      // Ignore
+    }
+    worker.terminate().catch(() => {});
+  }
+}
+
 function runExecWidget(widget, session = {}) {
   const cmd = String(widget?.cmd || "").trim();
   if (!cmd) {
@@ -288,28 +483,16 @@ function runExecWidget(widget, session = {}) {
       .split(/\r?\n/)[0]
       ?.trim() || "";
   try {
-    const stdout = execSync(cmd, {
-      cwd,
-      timeout: timeoutMs,
-      encoding: "utf8",
-      input,
-      stdio: [input === undefined ? "ignore" : "pipe", "pipe", "ignore"],
-      windowsHide: true,
-    });
-    output = firstLine(stdout);
-  } catch (err) {
-    // A command that exits without reading the whole payload closes the pipe
-    // under the write; it still succeeded, so its output counts. Otherwise the
-    // previous output stays. A non-zero exit is normal for many commands (grep
-    // with no match), so only timeouts and missing commands are logged, and
-    // never the command itself.
-    if (input !== undefined && err.status === 0 && !err.signal) {
-      output = firstLine(err.stdout);
-    } else if (err.code === "ETIMEDOUT" || err.signal === "SIGTERM") {
+    const result = runExecCommand(cmd, cwd, timeoutMs, input);
+    if (result.timedOut || result.signal === "SIGTERM") {
       logWarning("EXEC_TIMEOUT", { timeoutMs });
-    } else if (err.status === 127 || err.code === "ENOENT") {
+    } else if (result.status === 127 || result.errorCode === "ENOENT") {
       logWarning("EXEC_COMMAND_NOT_FOUND");
+    } else if (result.status === 0 && !result.signal) {
+      output = firstLine(result.stdout);
     }
+  } catch {
+    // Keep prior cached output on unexpected runner failures.
   }
 
   const entry = { output, timestamp: now };
@@ -340,6 +523,7 @@ function clearExecCache() {
 
 module.exports = {
   runExecWidget,
+  runExecWorker,
   execWidgetOutput,
   sanitizeExecOutput,
   restoreAfterReset,
@@ -353,3 +537,12 @@ module.exports = {
   DEFAULT_TIMEOUT_MS,
   DEFAULT_INTERVAL_SEC,
 };
+
+if (
+  workerThreads &&
+  !workerThreads.isMainThread &&
+  require.main === module &&
+  workerThreads.workerData?.__agyExecWorker
+) {
+  runExecWorker(workerThreads.workerData);
+}
