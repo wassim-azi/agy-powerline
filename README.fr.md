@@ -54,11 +54,11 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 L’option `--yes` évite les questions auxquelles agy ne peut pas répondre et remplace toute configuration `statusLine` existante, après sauvegarde de `settings.json`.
 
-Pour un terminal sans police Nerd Font, activez le mode ASCII (touche `i` dans `configure`).
+Pour un terminal sans police Nerd Font, activez le mode ASCII (`Settings` via `i` dans `configure`).
 
 ## Personnalisation
 
-`npx agy-powerline configure` ouvre un éditeur qui affiche un aperçu en temps réel de votre barre d’état. Utilisez `←` et `→` pour passer d’un onglet à l’autre (Widgets, Presets, Themes, Layout, Powerline) ; `↑` et `↓` pour vous déplacer ; Entrée pour sélectionner ; et `q` pour enregistrer et quitter. Les touches disponibles sont affichées en bas de chaque écran. La liste complète figure dans la [documentation de configuration](docs/configuration.md#configurator-keys).
+`npx agy-powerline configure` ouvre un éditeur qui affiche un aperçu en temps réel de votre barre d’état. Utilisez `←` et `→` pour passer d’un onglet à l’autre (Widgets, Presets, Themes, Layout, Powerline, Settings) ; `↑` et `↓` pour vous déplacer ; Entrée pour sélectionner ; et `q` pour enregistrer et quitter. Les touches disponibles sont affichées en bas de chaque écran. La liste complète figure dans la [documentation de configuration](docs/configuration.md#configurator-keys).
 
 Les modifications s’appliquent à une session `agy` en cours lors de l’actualisation suivante.
 

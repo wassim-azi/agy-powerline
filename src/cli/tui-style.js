@@ -162,21 +162,30 @@ function makeUi(colors, { ascii = false, width = 100 } = {}) {
 
   // Tabs for the main screens; the current one is a filled pill, and the
   // navigation keys sit at the right end. On a narrow terminal the navigation
-  // keys go first, then the tabs' key letters.
+  // keys go first, then the tabs' key letters, then extra padding between tabs.
   function tabs(items, current) {
-    const draw = (withKeys) =>
+    const draw = (withKeys, tight = false) =>
       " " +
       items
         .map(({ id, label, key }) => {
           if (id === current) {
             return pill(label);
           }
-          return ` ${label}${withKeys && key ? ` ${muted(key)}` : ""} `;
+          const pad = tight ? "" : " ";
+          return `${pad}${label}${withKeys && key ? ` ${muted(key)}` : ""}${pad}`;
         })
         .join(" ");
     const nav = muted(`${glyph.leftRight} navigate   q quit`);
     const full = draw(true);
-    return spread(full, nav) ?? (visibleWidth(full) <= width - 1 ? full : draw(false));
+    const plainTabs = draw(false);
+    return (
+      spread(full, nav) ??
+      (visibleWidth(full) <= width - 1
+        ? full
+        : visibleWidth(plainTabs) <= width - 1
+          ? plainTabs
+          : truncateLines(draw(false, true), width - 1, ascii))
+    );
   }
 
   // An on/off toggle; key, when given, follows the label like a tab's letter.

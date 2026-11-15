@@ -28,7 +28,7 @@ In an interactive terminal, running `npx agy-powerline` with no arguments handle
 
 On a first install in a terminal (no `statusline.config.json` yet, no `--yes`), `init` asks four questions, each with a preview of the bar it gives:
 
-1. **Symbols:** a sample of the bar and "Do these shapes look right? (Y/n)". Answer `n` if you see boxes or question marks: your terminal's font lacks the Powerline symbols, so `init` turns on [ASCII mode](configuration.md#terminals-ascii-mode-colors-narrow-windows) (`"ascii": true`) and shows the sample again in plain text. Enter keeps the symbols. `i` in `configure` changes it later.
+1. **Symbols:** a sample of the bar and "Do these shapes look right? (Y/n)". Answer `n` if you see boxes or question marks: your terminal's font lacks the Powerline symbols, so `init` turns on [ASCII mode](configuration.md#terminals-ascii-mode-colors-narrow-windows) (`"ascii": true`) and shows the sample again in plain text. Enter keeps the symbols. The Settings tab (`i`) in `configure` changes **ASCII mode** later.
 2. **Preset:** `default`, `compact`, `agent`, `git`, `tokens`, `quotas` or `full`. Enter keeps `default`.
 3. **Layout:** `pills` or `lines`. Enter keeps `pills`.
 4. **Terminal background:** dark, light or color-blind, then the themes for it (Enter keeps `dark-aurora`, `light-paper` or `colorblind-dark`).

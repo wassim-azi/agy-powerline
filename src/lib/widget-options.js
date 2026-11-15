@@ -79,7 +79,7 @@ function editFields(widget, config = {}, options = {}) {
           : value
             ? "hidden, value only"
             : "shown",
-      help: "Shows or hides the icon and label before the value. Default follows minimalist mode (m).",
+      help: "Shows or hides the icon and label before the value. Default follows Minimalist mode in Settings.",
     },
   ];
 

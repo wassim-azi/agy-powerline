@@ -65,11 +65,11 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 `--yes`는 agy가 답할 수 없는 프롬프트를 건너뛰고, `settings.json`을 백업한 뒤 기존 `statusLine`을 교체합니다.
 
-Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에서 `i`).
+Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에서 `i`로 `Settings` 열기).
 
 ## 커스터마이즈
 
-`npx agy-powerline configure`를 실행하면 바의 실시간 미리보기가 있는 에디터가 열립니다. `←` `→`로 Widgets, Presets, Themes, Layout, Powerline 탭을 전환하고, `↑` `↓`로 이동, Enter로 선택, `q`로 저장하고 종료합니다. 각 화면의 키는 하단에 표시되며, 전체 목록은 [Configuration](docs/configuration.md#configurator-keys)에 있습니다.
+`npx agy-powerline configure`를 실행하면 바의 실시간 미리보기가 있는 에디터가 열립니다. `←` `→`로 Widgets, Presets, Themes, Layout, Powerline, Settings 탭을 전환하고, `↑` `↓`로 이동, Enter로 선택, `q`로 저장하고 종료합니다. 각 화면의 키는 하단에 표시되며, 전체 목록은 [Configuration](docs/configuration.md#configurator-keys)에 있습니다.
 
 브라우저를 선호하나요? [브라우저에서 바 만들기](https://agy-powerline.com/configure/)에서 실시간 미리보기로 구성한 뒤 다운로드하거나 가져올 수 있습니다.
 
