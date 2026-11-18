@@ -5,7 +5,7 @@
 
 const { defaultConfig, canonicalThemeId, LAYOUTS } = require("./shared");
 const { THEMES, normalizeGradient } = require("./themes");
-const { VALID_WIDGET_IDS } = require("./config");
+const { VALID_WIDGET_IDS, resolveBarMaxWidth } = require("./config");
 const { COLOR_MODES } = require("./colors");
 const { isMeterStyle } = require("./widget-style");
 
@@ -15,6 +15,7 @@ const KNOWN_KEYS = new Set([
   "customTheme",
   "gradient",
   "meterStyle",
+  "maxWidth",
 ]);
 
 // Control characters shown as \uXXXX: the text is printed, never interpreted
@@ -67,6 +68,14 @@ function droppedSettings(raw) {
   }
   if (raw.meterStyle !== undefined && !isMeterStyle(raw.meterStyle)) {
     dropped.push(`unknown meter style ${visible(JSON.stringify(raw.meterStyle))}`);
+  }
+  if (
+    raw.maxWidth !== undefined &&
+    raw.maxWidth !== null &&
+    raw.maxWidth !== "full" &&
+    resolveBarMaxWidth(raw.maxWidth) === null
+  ) {
+    dropped.push(`invalid maxWidth ${visible(JSON.stringify(raw.maxWidth))}`);
   }
   return dropped;
 }

@@ -240,7 +240,7 @@ function testEveryScreenFits() {
   for (const screen of SCREENS) {
     for (const [columns, rows] of SIZES) {
       for (const ascii of [false, true]) {
-        const cursors = screen === "settings" ? [0, 1, 2, 6, 12] : [0, 12];
+        const cursors = screen === "settings" ? [0, 1, 2, 6, 9, 12] : [0, 12];
         for (const cursor of cursors) {
           const out = renderFrame({ config: { ...full, ascii }, screen, columns, rows, cursor });
           const height = out.split("\n").length;
@@ -397,7 +397,7 @@ function testAsciiAndNoColor() {
     }
   }
 
-  for (const cursor of [0, 1, 2, 6]) {
+  for (const cursor of [0, 1, 2, 6, 9]) {
     const out = strip(
       renderFrame({
         config: { ...defaultConfig(), ascii: true, gradient: "sunset" },
@@ -460,6 +460,7 @@ function testScreenContent() {
       /Warning sensitivity.? +default/.test(settings) &&
       /Alert blink.? +off/.test(settings) &&
       /Space between rows.? +off/.test(settings) &&
+      /Max bar width.? +full/.test(settings) &&
       /ASCII mode.? +off/.test(settings) &&
       /English \(en\)/.test(settings) &&
       /toggle \/ cycle/.test(settings)
@@ -487,8 +488,16 @@ function testScreenContent() {
       columns: 160,
     })
   );
+  const maxWidthCustom = strip(
+    renderFrame({
+      config: { ...defaultConfig(), maxWidth: 110 },
+      screen: "settings",
+      cursor: 9,
+      columns: 160,
+    })
+  );
   record(
-    "settings details panel explains clock format, gradient and warning sensitivity presets",
+    "settings details panel explains clock format, gradient, sensitivity and maxWidth presets",
     /● auto \(locale\)/.test(clockDetails) &&
       /○ 24h/.test(clockDetails) &&
       /○ 12h/.test(clockDetails) &&
@@ -497,7 +506,10 @@ function testScreenContent() {
       /Aurora/.test(gradientDetails) &&
       /Warning sensitivity.? +custom/.test(sensitivityCustom) &&
       /Active: quota 25% \/ 12% left, context 65% \/ 85% used/.test(sensitivityCustom) &&
-      /● custom +quota 25%\/12%, context 65%\/85%/.test(sensitivityCustom)
+      /● custom +quota 25%\/12%, context 65%\/85%/.test(sensitivityCustom) &&
+      /Max bar width.? +110 cols \(custom\)/.test(maxWidthCustom) &&
+      /○ full \(no cap\)/.test(maxWidthCustom) &&
+      /● 110 cols \(custom\)/.test(maxWidthCustom)
   );
 
   const search = strip(renderFrame({ config: defaultConfig(), screen: "add", search: "quo" }));
@@ -684,6 +696,20 @@ async function testSettingsInteractions() {
       resetSens.saved.thresholds.quotaWarn === 30 &&
       resetSens.saved.thresholds.contextCrit === 90 &&
       resetSens.saved.thresholds.blink === true
+  );
+
+  // #210: Max bar width cycles full -> 100 -> 120 -> 140 -> 160 -> full and resets on x.
+  const mwSteps = ["i", ...Array(9).fill(DOWN)];
+  const mwTo100 = await runConfigureKeys({}, [...mwSteps, "\r"]);
+  const mwTo120 = await runConfigureKeys({ maxWidth: 100 }, [...mwSteps, "\r"]);
+  const mwCustomToFull = await runConfigureKeys({ maxWidth: 110 }, [...mwSteps, "\r"]);
+  const mwReset = await runConfigureKeys({ maxWidth: 140 }, [...mwSteps, "x"]);
+  record(
+    "Settings Max bar width cycles presets and resets to full on x",
+    mwTo100.saved.maxWidth === 100 &&
+      mwTo120.saved.maxWidth === 120 &&
+      mwCustomToFull.saved.maxWidth === undefined &&
+      mwReset.saved.maxWidth === undefined
   );
 }
 

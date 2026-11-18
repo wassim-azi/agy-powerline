@@ -33,27 +33,27 @@ The editor fits your window. It fills the full width, so the preview has the roo
 
 Enter on a widget opens its options: color, label (shown or value only), and what that widget takes, such as the short model name, the reset timers' format, the custom badge's text, the caution and danger levels, blink, the pace marker, the pace delta and the meter style. `↑` `↓` pick an option, `←` `→` or Enter change it, `x` sets it back to its default, and Esc returns to the list. Each change is saved right away and shows in the preview. A Shell Command's `cmd` is shown but edited only in the config file. The preview title says when it shows a theme, preset or layout you haven't applied yet, and the preset that matches your widgets is marked `current`.
 
-| Key                    | Action                                                                                                 |
-| ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| ↑↓                     | Move cursor (with circular wrap-around at top/bottom; theme preview updates live)                      |
-| ←→, Tab, Shift+Tab     | Switch tab (Widgets, Presets, Themes, Layout, Powerline, Settings)                                     |
-| `w`                    | Widgets (your widget list)                                                                             |
-| Shift+↑↓               | Reorder widgets                                                                                        |
-| Enter                  | Edit the selected widget's options (see below)                                                         |
-| `a`                    | Add widget (includes live type-to-filter search across catalog)                                        |
-| `s`                    | Insert Flex Separator after the current item                                                           |
-| `n`                    | Insert New Line (next widgets go on the next row)                                                      |
-| `x`, Delete, Backspace | Remove widget, or reset option/setting to default (in Edit / Settings)                                 |
-| `o`                    | Presets (`default`, `compact`, `agent`, `git`, `tokens`, `quotas`, `full`)                             |
-| `t`                    | Themes (select `Custom` or press `c`/`e` to open in-TUI color editor)                                  |
-| `l`                    | Layout (Pills, Lines or Classic)                                                                       |
-| `p`                    | Powerline (joins, style, separators, start and end caps)                                               |
-| `i`                    | Settings (language, clock format, gradient, emojis, minimalist, pace, sensitivity, blink, gaps, ASCII) |
-| `d`                    | Reset configuration to defaults                                                                        |
-| `g`                    | Open GitHub repository in browser (⭐ Repo)                                                            |
-| Enter                  | Confirm selection or toggle/cycle setting in lists                                                     |
-| Esc                    | Back to previous list / widget list                                                                    |
-| `q` or Ctrl-C          | Save and quit (`q` doesn't quit while typing in the Add search or a code point)                        |
+| Key                    | Action                                                                                                            |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| ↑↓                     | Move cursor (with circular wrap-around at top/bottom; theme preview updates live)                                 |
+| ←→, Tab, Shift+Tab     | Switch tab (Widgets, Presets, Themes, Layout, Powerline, Settings)                                                |
+| `w`                    | Widgets (your widget list)                                                                                        |
+| Shift+↑↓               | Reorder widgets                                                                                                   |
+| Enter                  | Edit the selected widget's options (see below)                                                                    |
+| `a`                    | Add widget (includes live type-to-filter search across catalog)                                                   |
+| `s`                    | Insert Flex Separator after the current item                                                                      |
+| `n`                    | Insert New Line (next widgets go on the next row)                                                                 |
+| `x`, Delete, Backspace | Remove widget, or reset option/setting to default (in Edit / Settings)                                            |
+| `o`                    | Presets (`default`, `compact`, `agent`, `git`, `tokens`, `quotas`, `full`)                                        |
+| `t`                    | Themes (select `Custom` or press `c`/`e` to open in-TUI color editor)                                             |
+| `l`                    | Layout (Pills, Lines or Classic)                                                                                  |
+| `p`                    | Powerline (joins, style, separators, start and end caps)                                                          |
+| `i`                    | Settings (language, clock format, gradient, emojis, minimalist, pace, sensitivity, blink, gaps, max width, ASCII) |
+| `d`                    | Reset configuration to defaults                                                                                   |
+| `g`                    | Open GitHub repository in browser (⭐ Repo)                                                                       |
+| Enter                  | Confirm selection or toggle/cycle setting in lists                                                                |
+| Esc                    | Back to previous list / widget list                                                                               |
+| `q` or Ctrl-C          | Save and quit (`q` doesn't quit while typing in the Add search or a code point)                                   |
 
 ## Widgets
 
@@ -481,6 +481,8 @@ npx agy-powerline import my-bar.json
 **No Nerd Font?** Enable ASCII mode: caps and separators become plain text (`[` `]`, `<` `>`, `/`; joins default to `>`), dot meters become `#`/`-`, markers become `*`, and emojis turn off. Toggle **ASCII mode** in the Settings tab (`i`) in `configure`, set `"ascii": true`, pass `render --ascii`, or export `AGY_POWERLINE_ASCII=1`.
 
 **Narrow terminals**: the bar never runs past the `terminal_width` Antigravity reports. A row that is too wide first drops icons and labels (values only, as in [minimalist mode](#widget-options)), then shortens the model name (`3.8 Flash·High`) and the Lines meters (12 dots instead of 25), then hides its least important widgets one by one (custom text, version and cache counters first; the model and the 5h quota last), and as a last resort is cut with `…`. Widths count wide emojis and East Asian characters as two columns.
+
+**Wide terminals**: set `"maxWidth"` to a positive integer (e.g. `120`) — or cycle **Max bar width** (`full`, `100`, `120`, `140`, `160`) in the Settings tab (`i`) in `configure` — to cap the bar's effective width at `Math.min(terminal_width, maxWidth)` instead of stretching flex spaces across an ultrawide window. `"full"` or `null` (default) leaves the bar uncapped.
 
 The README's three-row Pills bar in a 74-column window: values only, the short model name, and the project hidden:
 

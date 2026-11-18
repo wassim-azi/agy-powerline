@@ -442,15 +442,20 @@ function extractSession(data, config, options = {}) {
     gitDetails,
     // Only read when tokensToday or tokensWeek is on the bar.
     usage: resolveUsage(config, { read: options.readUsage === true }),
-    terminalWidth: terminalWidth(data.terminal_width ?? process.stdout.columns ?? 0),
+    terminalWidth: terminalWidth(
+      data.terminal_width ?? process.stdout.columns ?? 0,
+      config?.maxWidth
+    ),
   };
 }
 
 // The flex padding repeats spaces up to this width, so a bogus value (1e12,
 // "Infinity") must not reach it. Anything unusable means unknown: no padding.
-function terminalWidth(value) {
+function terminalWidth(value, maxWidth) {
   const width = Math.floor(Number(value));
-  return Number.isFinite(width) && width > 0 ? Math.min(width, 1000) : 0;
+  const clamped = Number.isFinite(width) && width > 0 ? Math.min(width, 1000) : 0;
+  const cap = Number.isInteger(maxWidth) && maxWidth > 0 ? maxWidth : 0;
+  return clamped > 0 && cap > 0 ? Math.min(clamped, cap) : clamped;
 }
 
 module.exports = {
