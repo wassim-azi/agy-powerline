@@ -500,8 +500,16 @@ function testScreenContent() {
       columns: 160,
     })
   );
+  const alignmentDetails = strip(
+    renderFrame({
+      config: { ...defaultConfig(), alignment: "center" },
+      screen: "settings",
+      cursor: 11,
+      columns: 160,
+    })
+  );
   record(
-    "settings details panel explains clock format, reset format, gradient, sensitivity and maxWidth presets",
+    "settings details panel explains clock format, reset format, gradient, sensitivity, maxWidth and alignment options",
     /● auto \(locale\)/.test(clockDetails) &&
       /○ 24h/.test(clockDetails) &&
       /○ 12h/.test(clockDetails) &&
@@ -516,7 +524,11 @@ function testScreenContent() {
       /● custom +quota 25%\/12%, context 65%\/85%/.test(sensitivityCustom) &&
       /Max bar width.? +110 cols \(custom\)/.test(maxWidthCustom) &&
       /○ full \(no cap\)/.test(maxWidthCustom) &&
-      /● 110 cols \(custom\)/.test(maxWidthCustom)
+      /● 110 cols \(custom\)/.test(maxWidthCustom) &&
+      /Row alignment.? +center/.test(alignmentDetails) &&
+      /○ left/.test(alignmentDetails) &&
+      /● center/.test(alignmentDetails) &&
+      /○ spread/.test(alignmentDetails)
   );
 
   const search = strip(renderFrame({ config: defaultConfig(), screen: "add", search: "quo" }));
@@ -733,6 +745,24 @@ async function testSettingsInteractions() {
       mwTo120.saved.maxWidth === 120 &&
       mwCustomToFull.saved.maxWidth === undefined &&
       mwReset.saved.maxWidth === undefined
+  );
+
+  // #214: Row alignment cycles left -> center -> spread -> left and resets on x.
+  const alignSteps = ["i", ...Array(11).fill(DOWN)];
+  const alignCenter = await runConfigureKeys({}, [...alignSteps, "\r"]);
+  const alignSpread = await runConfigureKeys({ alignment: "center" }, [...alignSteps, "\r"]);
+  const alignReset = await runConfigureKeys({ alignment: "spread" }, [...alignSteps, "x"]);
+  const alignPreviewCenter = strip(alignCenter.frames[alignCenter.frames.length - 1] || "");
+  const firstPreviewRow = alignPreviewCenter
+    .split("\n")
+    .find((line) => line.includes("Gemini") || line.includes("Claude"));
+  const leadingPad = firstPreviewRow ? /^│\s{4,}/.test(firstPreviewRow) : false;
+  record(
+    "Settings Row alignment cycles left -> center -> spread, centers preview, and resets on x",
+    alignCenter.saved.alignment === "center" &&
+      alignSpread.saved.alignment === "spread" &&
+      alignReset.saved.alignment === "left" &&
+      leadingPad
   );
 }
 

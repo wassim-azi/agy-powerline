@@ -124,6 +124,12 @@ function resolveResetFormat(format) {
   return RESET_FORMAT_ORDER.includes(format) ? format : "countdown";
 }
 
+const ALIGNMENT_ORDER = ["left", "center", "spread"];
+
+function resolveAlignment(alignment) {
+  return ALIGNMENT_ORDER.includes(alignment) ? alignment : "left";
+}
+
 // Positive integer columns cap the bar on wide terminals; "full" or null
 // leaves it uncapped (clamped at 1000 columns like terminalWidth).
 function resolveBarMaxWidth(value) {
@@ -154,6 +160,7 @@ function defaultConfig() {
     pacing: true,
     minimalist: false,
     rowGap: false,
+    alignment: "left",
     log: true,
     resetFormat: "countdown",
     clock: normalizeClock(),
@@ -216,6 +223,7 @@ function mergeConfig(raw) {
     pacing: raw?.pacing !== false,
     minimalist: raw?.minimalist === true,
     rowGap: raw?.rowGap === true,
+    alignment: resolveAlignment(raw?.alignment),
     log: raw?.log !== false,
     resetFormat: resolveResetFormat(raw?.resetFormat),
     clock: normalizeClock(raw?.clock),
@@ -533,6 +541,8 @@ module.exports = {
   resolveLayoutId,
   RESET_FORMAT_ORDER,
   resolveResetFormat,
+  ALIGNMENT_ORDER,
+  resolveAlignment,
   resolveBarMaxWidth,
   defaultConfig,
   mergeConfig,

@@ -16,6 +16,7 @@ const {
   VALID_WIDGET_IDS,
   LAYOUT_ORDER,
   RESET_FORMAT_ORDER,
+  ALIGNMENT_ORDER,
   CONFIG_SCHEMA_URL: SCHEMA_URL,
 } = require(path.join(repo, "src/lib/config"));
 const { THEME_ORDER, THEME_ALIASES, GRADIENT_ORDER, COLOR_KEYS } = require(
@@ -73,6 +74,11 @@ function buildConfigSchema() {
       pacing: { type: "boolean", description: "Show the quota pace marker (default true)." },
       minimalist: { type: "boolean", description: "Values only, without icons or labels." },
       rowGap: { type: "boolean", description: "A blank line between rows." },
+      alignment: {
+        description:
+          'How widgets align across each row: "left" (default, stretches only at separator items), "center" (compact centered row), or "spread" (even gaps across the row).',
+        enum: [...ALIGNMENT_ORDER],
+      },
       maxWidth: {
         description:
           'Maximum bar width in columns (positive integer), or "full" / null for the full terminal width.',

@@ -414,6 +414,16 @@ In the TUI, press `p`, then Enter on **Separators**, **Start caps** or **End cap
 
 Pills fill the whole height of a terminal line, so stacked rows touch. `"rowGap": true` puts a blank line between rows, in every layout (in Lines and Classic it gives the text more air); it's off by default because the bar then takes more lines (three rows become five). Toggle **Space between rows** in the Settings tab (`i`) in `configure`.
 
+### Row alignment
+
+By default (`"alignment": "left"`), rows without `separator` items stay left-aligned, while rows with `separator` items stretch flex gaps across the terminal width. Set `"alignment"` — or cycle **Row alignment** in the Settings tab (`i`) in `configure` — to control all rows globally:
+
+- **`"left"`** _(default)_: left-aligns unseparated rows and stretches only at manual `separator` items.
+- **`"center"`**: keeps each row compact (joining any groups with a single space) and centers it inside `terminal_width` (capped by `maxWidth`).
+- **`"spread"`**: evenly distributes spaces across unseparated rows without requiring manual `separator` items between every widget (rows that already define `separator` groups keep those groups).
+
+Narrow terminals still shrink and truncate normally via `fit` before centering or spreading so lines stay within `terminal_width`.
+
 ## Custom theme
 
 Set `"theme": "custom"` (or run `npx agy-powerline theme custom`), and define a `customTheme` object with Hex (`#RRGGBB` or `#RGB`), RGB array `[r, g, b]`, or `"rgb(r, g, b)"`. `configure` also has a color editor (`t`, then `Custom`).

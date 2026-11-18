@@ -38,6 +38,7 @@ const SETTINGS = [
   "pacing",
   "minimalist",
   "rowGap",
+  "alignment",
   "maxWidth",
   "resetFormat",
   "log",

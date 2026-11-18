@@ -1040,6 +1040,26 @@ function joinFlex(parts, terminalWidth, markGaps = false) {
   return out;
 }
 
+// Applies global row alignment ("left", "center", or "spread") to one row's
+// pre-rendered widget groups; shared by Pills and Lines.
+function alignGroups(groups, alignment, terminalWidth, markGaps, renderGroupFn) {
+  const splitUnseparated = alignment === "spread" && groups.length === 1 && groups[0].length > 1;
+  const parts = splitUnseparated
+    ? groups[0].map((item) => renderGroupFn([item]))
+    : groups.map((group) => renderGroupFn(group));
+
+  if (alignment === "center") {
+    const line = parts.join(" ");
+    if (!(terminalWidth > 0)) {
+      return line;
+    }
+    const extra = terminalWidth - visibleWidth(line);
+    return extra > 0 ? " ".repeat(Math.floor(extra / 2)) + line : line;
+  }
+
+  return joinFlex(parts, terminalWidth, markGaps);
+}
+
 // Pills fill their whole cell, so stacked rows touch; rowGap puts a blank
 // line between them. It holds a space so a host that drops empty lines keeps it.
 function renderPillRows(rows, session, colors, config) {
@@ -1047,10 +1067,12 @@ function renderPillRows(rows, session, colors, config) {
 
   return rows
     .map((row) =>
-      joinFlex(
-        row.map((group) => renderPills(group, colors, config, counters)),
+      alignGroups(
+        row,
+        config.alignment,
         session.terminalWidth,
-        session.flexGaps === true
+        session.flexGaps === true,
+        (group) => renderPills(group, colors, config, counters)
       )
     )
     .join(config.rowGap === true ? "\n \n" : "\n");
@@ -1070,6 +1092,7 @@ module.exports = {
   renderGroup,
   renderPillRows,
   joinFlex,
+  alignGroups,
   FLEX_GAP_START,
   FLEX_GAP_END,
 };
