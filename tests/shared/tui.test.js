@@ -519,8 +519,16 @@ function testScreenContent() {
       columns: 160,
     })
   );
+  const quotaModeDetails = strip(
+    renderFrame({
+      config: { ...defaultConfig(), quotaMode: "used" },
+      screen: "settings",
+      cursor: 12,
+      columns: 160,
+    })
+  );
   record(
-    "settings details panel explains clock format, reset format, gradient, sensitivity, maxWidth and alignment options",
+    "settings details panel explains clock format, reset format, gradient, sensitivity, maxWidth, alignment and quotaMode options",
     /● auto \(locale\)/.test(clockDetails) &&
       /○ 24h/.test(clockDetails) &&
       /○ 12h/.test(clockDetails) &&
@@ -539,7 +547,10 @@ function testScreenContent() {
       /Row alignment.? +center/.test(alignmentDetails) &&
       /○ left/.test(alignmentDetails) &&
       /● center/.test(alignmentDetails) &&
-      /○ spread/.test(alignmentDetails)
+      /○ spread/.test(alignmentDetails) &&
+      /Quota display.? +used/.test(quotaModeDetails) &&
+      /○ remaining +72\.0% rem/.test(quotaModeDetails) &&
+      /● used +28\.0% used/.test(quotaModeDetails)
   );
 
   const search = strip(renderFrame({ config: defaultConfig(), screen: "add", search: "quo" }));
@@ -774,6 +785,20 @@ async function testSettingsInteractions() {
       alignSpread.saved.alignment === "spread" &&
       alignReset.saved.alignment === "left" &&
       leadingPad
+  );
+
+  // #211: Quota display cycles remaining -> used -> remaining, updates preview, and resets on x.
+  const qmSteps = ["i", ...Array(12).fill(DOWN)];
+  const qmUsed = await runConfigureKeys({}, [...qmSteps, "\r"]);
+  const qmBack = await runConfigureKeys({ quotaMode: "used" }, [...qmSteps, "\r"]);
+  const qmReset = await runConfigureKeys({ quotaMode: "used" }, [...qmSteps, "x"]);
+  const qmUsedPreview = strip(qmUsed.frames[qmUsed.frames.length - 1] || "");
+  record(
+    "Settings Quota display cycles remaining -> used, updates preview, and resets on x",
+    qmUsed.saved.quotaMode === "used" &&
+      /28\.0% used/.test(qmUsedPreview) &&
+      qmBack.saved.quotaMode === "remaining" &&
+      qmReset.saved.quotaMode === "remaining"
   );
 }
 

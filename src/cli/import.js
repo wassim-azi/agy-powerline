@@ -41,6 +41,7 @@ const SETTINGS = [
   "alignment",
   "maxWidth",
   "resetFormat",
+  "quotaMode",
   "log",
 ];
 

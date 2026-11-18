@@ -130,6 +130,12 @@ function resolveAlignment(alignment) {
   return ALIGNMENT_ORDER.includes(alignment) ? alignment : "left";
 }
 
+const QUOTA_MODE_ORDER = ["remaining", "used"];
+
+function resolveQuotaMode(mode) {
+  return QUOTA_MODE_ORDER.includes(mode) ? mode : "remaining";
+}
+
 // Positive integer columns cap the bar on wide terminals; "full" or null
 // leaves it uncapped (clamped at 1000 columns like terminalWidth).
 function resolveBarMaxWidth(value) {
@@ -163,6 +169,7 @@ function defaultConfig() {
     alignment: "left",
     log: true,
     resetFormat: "countdown",
+    quotaMode: "remaining",
     clock: normalizeClock(),
     thresholds: { ...DEFAULT_THRESHOLDS },
     powerline: normalizePowerline(),
@@ -226,6 +233,7 @@ function mergeConfig(raw) {
     alignment: resolveAlignment(raw?.alignment),
     log: raw?.log !== false,
     resetFormat: resolveResetFormat(raw?.resetFormat),
+    quotaMode: resolveQuotaMode(raw?.quotaMode),
     clock: normalizeClock(raw?.clock),
     thresholds,
     powerline,
@@ -544,6 +552,8 @@ module.exports = {
   resolveResetFormat,
   ALIGNMENT_ORDER,
   resolveAlignment,
+  QUOTA_MODE_ORDER,
+  resolveQuotaMode,
   resolveBarMaxWidth,
   defaultConfig,
   mergeConfig,

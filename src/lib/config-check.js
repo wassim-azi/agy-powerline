@@ -9,6 +9,7 @@ const {
   VALID_WIDGET_IDS,
   RESET_FORMAT_ORDER,
   ALIGNMENT_ORDER,
+  QUOTA_MODE_ORDER,
   resolveBarMaxWidth,
 } = require("./config");
 const { COLOR_MODES } = require("./colors");
@@ -76,6 +77,9 @@ function droppedSettings(raw) {
   }
   if (raw.resetFormat !== undefined && !RESET_FORMAT_ORDER.includes(raw.resetFormat)) {
     dropped.push(`unknown reset format ${visible(JSON.stringify(raw.resetFormat))}`);
+  }
+  if (raw.quotaMode !== undefined && !QUOTA_MODE_ORDER.includes(raw.quotaMode)) {
+    dropped.push(`unknown quota mode ${visible(JSON.stringify(raw.quotaMode))}`);
   }
   if (raw.alignment !== undefined && !ALIGNMENT_ORDER.includes(raw.alignment)) {
     dropped.push(`unknown alignment ${visible(JSON.stringify(raw.alignment))}`);

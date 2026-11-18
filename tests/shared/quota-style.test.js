@@ -413,7 +413,150 @@ async function run() {
   testPaceDelta();
   testResetTimes();
   testStyling();
+  testQuotaMode();
   testMinimalist();
+}
+
+function testQuotaMode() {
+  const quotaData = payload({
+    model: { display_name: "Gemini 4 Hydrogen (High)" },
+    quota: {
+      ...payload().quota,
+      "3p-5h": {
+        remaining_fraction: 0.65,
+        reset_time: RESET_AT,
+        reset_in_seconds: 3600,
+      },
+      "3p-weekly": {
+        remaining_fraction: 0.4,
+        reset_time: RESET_AT,
+        reset_in_seconds: 86400,
+      },
+      "gemini-argon-wtu-weekly": {
+        remaining_fraction: 0.85,
+        reset_time: RESET_AT,
+        reset_in_seconds: 86400,
+      },
+    },
+  });
+
+  const quotaWidgets = [
+    { id: "quota" },
+    { id: "fiveHourBar" },
+    { id: "fiveHourPct" },
+    { id: "weeklyBar" },
+    { id: "weeklyPct" },
+    { id: "thirdPartyFiveHour" },
+    { id: "thirdPartyWeekly" },
+    { id: "argonWeekly" },
+  ];
+
+  for (const layout of ["pills", "lines", "classic"]) {
+    const usedText = plain(
+      { layout, emojis: false, ascii: true, quotaMode: "used", widgets: quotaWidgets },
+      quotaData
+    );
+    const remText = plain(
+      { layout, emojis: false, ascii: true, quotaMode: "remaining", widgets: quotaWidgets },
+      quotaData
+    );
+
+    record(
+      `${layout}: quotaMode "used" flips all quota widgets from % rem to % used`,
+      /7d 79\.0% used/.test(usedText) &&
+        /28\.0% used/.test(usedText) &&
+        /35\.0% used/.test(usedText) &&
+        /60\.0% used/.test(usedText) &&
+        /15\.0% used/.test(usedText) &&
+        !/% rem/.test(usedText) &&
+        /7d 21\.0% rem/.test(remText) &&
+        /72\.0% rem/.test(remText),
+      usedText.trim()
+    );
+  }
+
+  // Color thresholds and Lines meter fill stay identical between remaining and used modes
+  // (e.g. 21% remaining === 79% used still triggers caution at quotaWarn=30).
+  const remColorBar = stripAnsi(
+    renderStatusline(
+      quotaData,
+      {
+        ...defaultConfig(),
+        layout: "lines",
+        ascii: true,
+        quotaMode: "remaining",
+        widgets: [{ id: "weeklyBar" }],
+      },
+      { color: "truecolor" }
+    )
+  ).replace("21.0% rem", "");
+  const usedColorBar = stripAnsi(
+    renderStatusline(
+      quotaData,
+      {
+        ...defaultConfig(),
+        layout: "lines",
+        ascii: true,
+        quotaMode: "used",
+        widgets: [{ id: "weeklyBar" }],
+      },
+      { color: "truecolor" }
+    )
+  ).replace("79.0% used", "");
+  const usedWarnRaw = renderStatusline(
+    quotaData,
+    {
+      ...defaultConfig(),
+      layout: "lines",
+      quotaMode: "used",
+      widgets: [{ id: "weeklyPct" }],
+    },
+    { color: "truecolor" }
+  );
+  const remWarnRaw = renderStatusline(
+    quotaData,
+    {
+      ...defaultConfig(),
+      layout: "lines",
+      quotaMode: "remaining",
+      widgets: [{ id: "weeklyPct" }],
+    },
+    { color: "truecolor" }
+  );
+  // Extract RGB color prefix before percentage text to ensure caution color matches.
+  const warnColorHex = (rendered) => rendered.match(/\x1b\[38;2;[0-9;]+m(?=\d)/g)?.[0];
+  record(
+    'quotaMode "used" keeps meter fill, pace marker, and warning color thresholds aligned',
+    remColorBar === usedColorBar &&
+      Boolean(warnColorHex(usedWarnRaw)) &&
+      warnColorHex(usedWarnRaw) === warnColorHex(remWarnRaw)
+  );
+
+  // Translation check across languages (e.g. French "util.", Japanese "使用", German "gen.").
+  const frUsed = plain(
+    { language: "fr", quotaMode: "used", emojis: false, widgets: [{ id: "fiveHourPct" }] },
+    quotaData
+  );
+  const jaUsed = plain(
+    { language: "ja", quotaMode: "used", emojis: false, widgets: [{ id: "fiveHourPct" }] },
+    quotaData
+  );
+  record(
+    'quotaMode "used" localizes quota suffix via i18n',
+    /28\.0% util\./.test(frUsed) && /28\.0% 使用/.test(jaUsed)
+  );
+
+  // Config, config-check, and JSON schema validation.
+  record(
+    "config, config-check, and schema validate quotaMode values",
+    mergeConfig({}).quotaMode === "remaining" &&
+      mergeConfig({ quotaMode: "used" }).quotaMode === "used" &&
+      mergeConfig({ quotaMode: "bogus" }).quotaMode === "remaining" &&
+      droppedSettings({ quotaMode: "used" }).length === 0 &&
+      droppedSettings({ quotaMode: "bogus" }).some((msg) => msg.includes("unknown quota mode")) &&
+      JSON.stringify(buildConfigSchema().properties.quotaMode?.enum) ===
+        JSON.stringify(["remaining", "used"])
+  );
 }
 
 module.exports = { run };

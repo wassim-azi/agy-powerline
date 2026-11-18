@@ -17,6 +17,7 @@ const {
   LAYOUT_ORDER,
   RESET_FORMAT_ORDER,
   ALIGNMENT_ORDER,
+  QUOTA_MODE_ORDER,
   CONFIG_SCHEMA_URL: SCHEMA_URL,
 } = require(path.join(repo, "src/lib/config"));
 const { THEME_ORDER, THEME_ALIASES, GRADIENT_ORDER, COLOR_KEYS } = require(
@@ -93,6 +94,11 @@ function buildConfigSchema() {
         description:
           'Default format for reset timer widgets without their own "format" (default "countdown").',
         enum: [...RESET_FORMAT_ORDER],
+      },
+      quotaMode: {
+        description:
+          'Show quota bars and percentages as remaining capacity ("remaining", default) or consumed usage ("used").',
+        enum: [...QUOTA_MODE_ORDER],
       },
       meterStyle: { description: "Meter style for every meter.", enum: [...METER_STYLE_IDS] },
       gradient: {
