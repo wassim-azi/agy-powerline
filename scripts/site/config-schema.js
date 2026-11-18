@@ -12,9 +12,12 @@
 const path = require("path");
 
 const repo = path.join(__dirname, "..", "..");
-const { VALID_WIDGET_IDS, LAYOUT_ORDER, CONFIG_SCHEMA_URL: SCHEMA_URL } = require(
-  path.join(repo, "src/lib/config")
-);
+const {
+  VALID_WIDGET_IDS,
+  LAYOUT_ORDER,
+  RESET_FORMAT_ORDER,
+  CONFIG_SCHEMA_URL: SCHEMA_URL,
+} = require(path.join(repo, "src/lib/config"));
 const { THEME_ORDER, THEME_ALIASES, GRADIENT_ORDER, COLOR_KEYS } = require(
   path.join(repo, "src/lib/themes")
 );
@@ -80,6 +83,11 @@ function buildConfigSchema() {
         ],
       },
       log: { type: "boolean", description: "Keep the local problem log (default true)." },
+      resetFormat: {
+        description:
+          'Default format for reset timer widgets without their own "format" (default "countdown").',
+        enum: [...RESET_FORMAT_ORDER],
+      },
       meterStyle: { description: "Meter style for every meter.", enum: [...METER_STYLE_IDS] },
       gradient: {
         type: "string",

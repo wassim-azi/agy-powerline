@@ -31,7 +31,17 @@ const RESET = "\x1b[0m";
 const MAX_IMPORT_BYTES = 256 * 1024;
 const BACKUP_SUFFIX = ".bak";
 const { visible, droppedSettings } = require("../lib/config-check");
-const SETTINGS = ["emojis", "ascii", "color", "pacing", "minimalist", "rowGap", "maxWidth", "log"];
+const SETTINGS = [
+  "emojis",
+  "ascii",
+  "color",
+  "pacing",
+  "minimalist",
+  "rowGap",
+  "maxWidth",
+  "resetFormat",
+  "log",
+];
 
 function readImportFile(file) {
   const target = path.resolve(String(file));

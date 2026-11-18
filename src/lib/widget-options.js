@@ -135,9 +135,9 @@ function editFields(widget, config = {}, options = {}) {
     fields.push({
       key: "format",
       label: "Format",
-      values: [undefined, "time", "both"],
-      show: (value) => value ?? "countdown",
-      help: "countdown (2hr 47m), time (6:33pm) or both (6:33pm (2hr 47m)).",
+      values: [undefined, "countdown", "time", "both"],
+      show: (value) => value ?? `${config.resetFormat || "countdown"} (default)`,
+      help: "countdown (2hr 47m), time (6:33pm) or both (6:33pm (2hr 47m)). Default follows Reset format in Settings.",
     });
   }
   if (widget.id === "customText") {

@@ -12,6 +12,7 @@ const {
   formatPaceDelta,
 } = require("../../src/lib/formatters");
 const { editFields } = require("../../src/lib/widget-options");
+const { droppedSettings } = require("../../src/lib/config-check");
 const { buildConfigSchema } = require("../../scripts/site/config-schema");
 const { resolveColor } = require("../../src/lib/widget-style");
 
@@ -216,6 +217,65 @@ function testResetTimes() {
     ["lines", "pills"].every((layout) =>
       / Reset: \d+hr \d+m/.test(plain({ layout, clock: utc, widgets: [{ id: "fiveHourReset" }] }))
     )
+  );
+
+  // Global resetFormat fallback and per-widget format override precedence.
+  const resetPayload = payload({
+    quota: {
+      ...payload().quota,
+      "gemini-argon-wtu-weekly": {
+        remaining_fraction: 0.5,
+        reset_time: "2026-10-12T20:00:00Z",
+        reset_in_seconds: 3 * 86400,
+      },
+    },
+  });
+  for (const layout of ["pills", "lines"]) {
+    const globalTime = plain(
+      {
+        layout,
+        clock: utc,
+        emojis: false,
+        resetFormat: "time",
+        widgets: [{ id: "fiveHourReset" }, { id: "weeklyReset" }, { id: "argonReset" }],
+      },
+      resetPayload
+    );
+    const override = plain(
+      {
+        layout,
+        clock: utc,
+        emojis: false,
+        resetFormat: "both",
+        widgets: [{ id: "fiveHourReset", format: "countdown" }, { id: "weeklyReset" }],
+      },
+      resetPayload
+    );
+    record(
+      `${layout}: global resetFormat sets default for reset widgets and per-widget format overrides it`,
+      /Reset: 6:33pm/.test(globalTime) &&
+        /Reset: oct 10, 2:50pm/.test(globalTime) &&
+        /Argon reset: oct 12, 8:00pm/.test(globalTime) &&
+        /Reset: 2hr 47m/.test(override) &&
+        !/6:33pm \(2hr 47m\)/.test(override) &&
+        /Reset: oct 10, 2:50pm \(1d 17h\)/.test(override)
+    );
+  }
+
+  const fmtField = editFields({ id: "fiveHourReset" }, { resetFormat: "time" }).find(
+    (f) => f.key === "format"
+  );
+  record(
+    "mergeConfig, config-check, schema and widget options support global resetFormat",
+    defaultConfig().resetFormat === "countdown" &&
+      mergeConfig({ resetFormat: "both" }).resetFormat === "both" &&
+      mergeConfig({ resetFormat: "bogus" }).resetFormat === "countdown" &&
+      droppedSettings({ resetFormat: "time" }).length === 0 &&
+      droppedSettings({ resetFormat: "bogus" }).some((m) => m.includes("unknown reset format")) &&
+      JSON.stringify(buildConfigSchema().properties.resetFormat?.enum) ===
+        JSON.stringify(["countdown", "time", "both"]) &&
+      fmtField?.values.includes("countdown") &&
+      fmtField?.show(undefined) === "time (default)"
   );
 
   const noTime = payload();
