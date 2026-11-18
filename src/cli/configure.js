@@ -1434,6 +1434,8 @@ function detectThresholdPreset(thresholds = {}) {
   );
 }
 
+const MAX_WIDTH_PRESETS = [null, 100, 120, 140, 160];
+
 const SETTINGS_ROWS = [
   {
     id: "language",
@@ -1481,11 +1483,25 @@ const SETTINGS_ROWS = [
     help: "Put a blank line between statusline rows in every layout so stacked pills don't touch and text rows get more air.",
   },
   {
+    id: "maxWidth",
+    label: "Max bar width",
+    help: "Cap the bar width on wide terminals instead of stretching flex spaces across the entire window.",
+  },
+  {
     id: "ascii",
     label: "ASCII mode",
     help: "Draw plain ASCII glyphs and boxes instead of Nerd Font caps, emojis and Unicode box-drawing characters.",
   },
 ];
+
+function maxWidthValue() {
+  if (!config.maxWidth) {
+    return "full";
+  }
+  return MAX_WIDTH_PRESETS.includes(config.maxWidth)
+    ? `${config.maxWidth} cols`
+    : `${config.maxWidth} cols (custom)`;
+}
 
 function clockFormatValue() {
   const hour12 = typeof config.clock?.hour12 === "boolean" ? config.clock.hour12 : null;
@@ -1535,6 +1551,10 @@ function settingValue(row) {
 
   if (row.id === "rowGap") {
     return config.rowGap ? "on" : "off";
+  }
+
+  if (row.id === "maxWidth") {
+    return maxWidthValue();
   }
 
   return config.ascii ? "on" : "off";
@@ -1618,6 +1638,20 @@ function settingsDetails(row) {
             },
           ]
         : [])
+    );
+  } else if (row.id === "maxWidth") {
+    const active = config.maxWidth ?? null;
+    const isPreset = MAX_WIDTH_PRESETS.includes(active);
+    lines.push(
+      "",
+      ...MAX_WIDTH_PRESETS.map((width) => {
+        const isCurrent = width === active;
+        const mark = isCurrent ? ui.glyph.on : ui.glyph.off;
+        const label = width === null ? "full (no cap)" : `${width} cols`;
+        const text = `${mark} ${label}`;
+        return isCurrent ? { raw: ui.accentText(text) } : { dim: text };
+      }),
+      ...(!isPreset ? [{ raw: ui.accentText(`${ui.glyph.on} ${active} cols (custom)`) }] : [])
     );
   }
   lines.push("", "Enter cycles or toggles; x resets to default.");
@@ -2183,6 +2217,21 @@ function toggleOrCycleSetting(row) {
     return;
   }
 
+  if (row.id === "maxWidth") {
+    const current = config.maxWidth ?? null;
+    const idx = MAX_WIDTH_PRESETS.indexOf(current);
+    const next = MAX_WIDTH_PRESETS[(idx + 1) % MAX_WIDTH_PRESETS.length];
+    if (next === null) {
+      delete config.maxWidth;
+    } else {
+      config.maxWidth = next;
+    }
+    if (persist()) {
+      flashMessage = `Max bar width: ${maxWidthValue()}`;
+    }
+    return;
+  }
+
   config.ascii = !config.ascii;
   if (persist()) {
     flashMessage = `ASCII mode: ${config.ascii ? "on" : "off"}`;
@@ -2208,6 +2257,8 @@ function resetSetting(row) {
   } else if (row.id === "blink") {
     config.thresholds = config.thresholds || {};
     config.thresholds.blink = defaults.thresholds.blink;
+  } else if (row.id === "maxWidth") {
+    delete config.maxWidth;
   } else {
     config[row.id] = defaults[row.id];
   }

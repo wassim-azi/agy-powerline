@@ -70,6 +70,15 @@ function buildConfigSchema() {
       pacing: { type: "boolean", description: "Show the quota pace marker (default true)." },
       minimalist: { type: "boolean", description: "Values only, without icons or labels." },
       rowGap: { type: "boolean", description: "A blank line between rows." },
+      maxWidth: {
+        description:
+          'Maximum bar width in columns (positive integer), or "full" / null for the full terminal width.',
+        oneOf: [
+          { type: "integer", minimum: 1, maximum: 1000 },
+          { type: "null" },
+          { const: "full" },
+        ],
+      },
       log: { type: "boolean", description: "Keep the local problem log (default true)." },
       meterStyle: { description: "Meter style for every meter.", enum: [...METER_STYLE_IDS] },
       gradient: {

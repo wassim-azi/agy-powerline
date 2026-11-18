@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Clock format in Settings**: cycle **Clock format** (`auto (locale)`, `24h`, `12h`) and reset with `x` in the `Settings` tab (`i`) of `configure` (#208)
 - **Bar gradient in Settings**: cycle **Bar gradient** (`off` and built-in presets with live preview, keeping custom hex gradients in the cycle until reset) in the `Settings` tab (`i`) of `configure` (#209)
 - **Warning sensitivity in Settings**: cycle **Warning sensitivity** presets (`default`, `early`, `relaxed`) backed by `thresholds`, preserving `custom` hand-edited thresholds and `blink`, in the `Settings` tab (`i`) of `configure` (#213)
+- **Global `maxWidth` cap**: added an optional `"maxWidth"` setting (`"full"` / `null` default, or a positive integer) to clamp bar width on ultrawide terminals (`Math.min(terminal_width, maxWidth)`), exposed as presets (`full`, `100`, `120`, `140`, `160`) in **Max bar width** in the `Settings` tab (`i`) of `configure` (#210)
 - **Simplified Chinese (`zh-CN`)**: added bar labels, captions, and units for `"language": "zh-CN"`, plus the localized home page at `agy-powerline.com/zh-cn/` (#122)
 - **Korean (`ko`)**: added bar labels, captions, and units for `"language": "ko"`, plus the localized home page at `agy-powerline.com/ko/` (#150)
 

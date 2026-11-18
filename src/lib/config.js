@@ -118,6 +118,17 @@ function resolveLayoutId(layoutId) {
   return LAYOUTS[layoutId] ? layoutId : "pills";
 }
 
+// Positive integer columns cap the bar on wide terminals; "full" or null
+// leaves it uncapped (clamped at 1000 columns like terminalWidth).
+function resolveBarMaxWidth(value) {
+  if (value === null || value === undefined || value === "full") {
+    return null;
+  }
+  return typeof value === "number" && Number.isInteger(value) && value >= 1
+    ? Math.min(value, 1000)
+    : null;
+}
+
 const DEFAULT_THRESHOLDS = {
   quotaWarn: 30,
   quotaCrit: 10,
@@ -218,6 +229,11 @@ function mergeConfig(raw) {
   const gradient = normalizeGradient(raw?.gradient);
   if (gradient) {
     result.gradient = gradient;
+  }
+
+  const maxWidth = resolveBarMaxWidth(raw?.maxWidth);
+  if (maxWidth !== null) {
+    result.maxWidth = maxWidth;
   }
 
   return result;
@@ -507,6 +523,7 @@ module.exports = {
   DEFAULT_THRESHOLDS,
   VALID_WIDGET_IDS,
   resolveLayoutId,
+  resolveBarMaxWidth,
   defaultConfig,
   mergeConfig,
   readConfigFile,
