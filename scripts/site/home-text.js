@@ -1120,7 +1120,7 @@ const HOME_TEXT = {
         "npx agy-powerline configure",
       ],
       [
-        "agy einmal neustarten",
+        "agy einmal neu starten",
         "Die Leiste erscheint unter dem Eingabefeld und aktualisiert sich mit agy. Spätere Änderungen sind sofort ohne Neustart sichtbar.",
         "agy",
       ],
