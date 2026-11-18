@@ -62,9 +62,10 @@ function renderAll(language, extra = {}) {
 async function run() {
   record(
     "a language without messages, or anything that isn't a code, shows English",
-    ["xx", "de-DE", "", 42, null, undefined, {}].every((code) => resolveLanguage(code) === "en") &&
+    ["xx", "pt-BR", "", 42, null, undefined, {}].every((code) => resolveLanguage(code) === "en") &&
       resolveLanguage("EN") === "en" &&
       resolveLanguage("en-US") === "en" &&
+      resolveLanguage("de-DE") === "de" &&
       matchLanguage("xx") === null &&
       mergeConfig({ language: "xx" }).language === "en" &&
       defaultConfig().language === DEFAULT_LANGUAGE

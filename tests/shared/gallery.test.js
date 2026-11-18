@@ -47,6 +47,7 @@ async function run() {
   const ja = buildHomeHtml({ lang: "ja" });
   const zhCn = buildHomeHtml({ lang: "zh-CN" });
   const ko = buildHomeHtml({ lang: "ko" });
+  const de = buildHomeHtml({ lang: "de" });
   const themes = buildThemesHtml();
   const galleryThemes = THEME_ORDER.filter((id) => id !== "custom");
 
@@ -76,6 +77,7 @@ async function run() {
       ["ja", "ja/", ja],
       ["zh-CN", "zh-cn/", zhCn],
       ["ko", "ko/", ko],
+      ["de", "de/", de],
     ].every(([lang, slug, markup]) => {
       const g = (jsonLd(markup)[0] || {})["@graph"] || [];
       const localizedApp = g.find((node) => node["@type"] === "SoftwareApplication");
@@ -275,6 +277,18 @@ async function run() {
       !/\{\{\w+\}\}|<!--[A-Z_]+-->/.test(ko)
   );
 
+  record(
+    "the German home page is in German and links back to the English one",
+    /^<!doctype html>\s*<html lang="de">/i.test(de) &&
+      /<title>[^<]*agy[^<]*<\/title>/.test(de) &&
+      de.includes(`<link rel="canonical" href="${SITE_URL}de/" />`) &&
+      de.includes(`hreflang="en" href="${SITE_URL}"`) &&
+      de.includes(`<meta property="og:locale" content="de_DE" />`) &&
+      de.includes("Kopieren") &&
+      de.includes("übr.") &&
+      !/\{\{\w+\}\}|<!--[A-Z_]+-->/.test(de)
+  );
+
   // Each home page's footer links to the home page in every other language.
   const footerLangs = (page) =>
     (page.match(/<span class="footer-langs">([\s\S]*?)<\/span>/) || [])[1] || "";
@@ -284,12 +298,13 @@ async function run() {
       .join(",");
   record(
     "every home page links to the home page in each other language",
-    langLinks(html) === "fr,es,ja,zh-CN,ko" &&
-      langLinks(fr) === "en,es,ja,zh-CN,ko" &&
-      langLinks(es) === "en,fr,ja,zh-CN,ko" &&
-      langLinks(ja) === "en,fr,es,zh-CN,ko" &&
-      langLinks(zhCn) === "en,fr,es,ja,ko" &&
-      langLinks(ko) === "en,fr,es,ja,zh-CN",
+    langLinks(html) === "fr,es,ja,zh-CN,ko,de" &&
+      langLinks(fr) === "en,es,ja,zh-CN,ko,de" &&
+      langLinks(es) === "en,fr,ja,zh-CN,ko,de" &&
+      langLinks(ja) === "en,fr,es,zh-CN,ko,de" &&
+      langLinks(zhCn) === "en,fr,es,ja,ko,de" &&
+      langLinks(ko) === "en,fr,es,ja,zh-CN,de" &&
+      langLinks(de) === "en,fr,es,ja,zh-CN,ko",
     [
       langLinks(html),
       langLinks(fr),
@@ -297,6 +312,7 @@ async function run() {
       langLinks(ja),
       langLinks(zhCn),
       langLinks(ko),
+      langLinks(de),
     ].join(" | ")
   );
 
@@ -306,7 +322,7 @@ async function run() {
   const langMenu = (page) =>
     (page.match(/<details class="lang-menu">([\s\S]*?)<\/details>/) || [])[1] || "";
   const menuOk = (page, lang) =>
-    ["en", "fr", "es", "ja", "zh-CN", "ko"].every(
+    ["en", "fr", "es", "ja", "zh-CN", "ko", "de"].every(
       (l) =>
         langMenu(page).includes(`hreflang="${l}" lang="${l}"`) &&
         langMenu(page).includes(`class="flag flag-${l}"`) &&
@@ -321,7 +337,8 @@ async function run() {
       menuOk(es, "es") &&
       menuOk(ja, "ja") &&
       menuOk(zhCn, "zh-CN") &&
-      menuOk(ko, "ko")
+      menuOk(ko, "ko") &&
+      menuOk(de, "de")
   );
 
   const keys = (obj) => Object.keys(obj).sort().join(",");

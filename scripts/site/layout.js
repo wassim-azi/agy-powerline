@@ -490,6 +490,9 @@ const SHARED_CSS = `
       .flag-ko {
         background-image: url("/img/flag-ko.png");
       }
+      .flag-de {
+        background-image: url("/img/flag-de.png");
+      }
       .lang-menu:not([open]) > .lang-menu-panel {
         display: none;
       }
@@ -1165,6 +1168,7 @@ const SITE_LANGUAGES = [
   { lang: "ja", href: "/ja/", label: "日本語", locale: "ja_JP" },
   { lang: "zh-CN", href: "/zh-cn/", label: "简体中文", locale: "zh_CN" },
   { lang: "ko", href: "/ko/", label: "한국어", locale: "ko_KR" },
+  { lang: "de", href: "/de/", label: "Deutsch", locale: "de_DE" },
 ];
 const siteLanguage = (lang) => SITE_LANGUAGES.find((l) => l.lang === lang) || SITE_LANGUAGES[0];
 
@@ -1325,6 +1329,34 @@ const CHROME_TEXT = {
     copied: "복사됨",
     copiedStatus: "클립보드에 복사되었습니다",
     copyCode: "코드 복사",
+  },
+  de: {
+    skip: "Zum Inhalt springen",
+    pageTheme: "Seitendesign",
+    language: "Sprache",
+    system: "System",
+    light: "Hell",
+    dark: "Dunkel",
+    menu: "Menü",
+    nav: {
+      install: "Installation",
+      docs: "Docs",
+      themes: "Themes",
+      configurator: "Konfigurator",
+    },
+    getStarted: "Loslegen",
+    github: "agy-powerline auf GitHub",
+    tagline:
+      "Die agy-Statuszeile für Google Antigravity CLI. Kostenlos, Open Source und ohne Telemetrie.",
+    product: "Produkt",
+    docs: "Docs",
+    project: "Projekt",
+    footerNote:
+      "MIT-Lizenz · Jede Leiste auf dieser Website wird vom echten Statuszeilen-Code gezeichnet",
+    copy: "Kopieren",
+    copied: "Kopiert",
+    copiedStatus: "In die Zwischenablage kopiert",
+    copyCode: "Code kopieren",
   },
 };
 

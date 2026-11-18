@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Row alignment (`alignment`)**: added `"alignment"` (`"left"` default, `"center"` for a compact centered bar, `"spread"` for evenly distributed gaps without manual `separator` items), exposed as **Row alignment** in the `Settings` tab (`i`) of `configure` (#214)
 - **Simplified Chinese (`zh-CN`)**: added bar labels, captions, and units for `"language": "zh-CN"`, plus the localized home page at `agy-powerline.com/zh-cn/` (#122)
 - **Korean (`ko`)**: added bar labels, captions, and units for `"language": "ko"`, plus the localized home page at `agy-powerline.com/ko/` (#150)
+- **German (`de`)**: added `README.de.md`, bar labels, captions, and units for `"language": "de"`, plus the localized home page at `agy-powerline.com/de/` (#231)
 
 ### Changed
 
