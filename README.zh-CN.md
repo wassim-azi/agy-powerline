@@ -166,7 +166,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 npx agy-powerline init --language zh-CN
 ```
 
-也可以在 `statusline.config.json` 中设置 `"language": "zh-CN"`（或在 `configure` 中按 `u` 键切换）。模型名、分支名等来自 agy 的内容会按原文显示，`2h 47m` 的时间单位保持英文缩写以控制宽度。命令行输出与 `configure` 界面保持英文。详情见[语言设置文档](docs/configuration.md#language)。
+也可以在 `statusline.config.json` 中设置 `"language": "zh-CN"`（或在 `configure` 中按 `i` 打开 `Settings`）。模型名、分支名等来自 agy 的内容会按原文显示，`2h 47m` 的时间单位保持英文缩写以控制宽度。命令行输出与 `configure` 界面保持英文。详情见[语言设置文档](docs/configuration.md#language)。
 
 ## 组件
 
