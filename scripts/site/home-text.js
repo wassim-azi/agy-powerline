@@ -892,7 +892,7 @@ const HOME_TEXT = {
     eyebrow: "Google Antigravity CLI 상태바",
     heroTitle: '리셋 전에 <span class="grad-text">할당량이 남는지</span> 미리 보는 agy 상태바',
     heroLead:
-      "agy 입력창 아래 한 줄(또는 여러 줄)의 powerline 상태바에서 모델, 컨텍스트 창, Git, 그리고 소비 속도 마커가 포함된 모든 Antigravity 할당량을 확인하세요. <strong>명령어 하나</strong>로 설치됩니다.",
+      "agy 입력창 아래의 powerline 상태바에서 모델, 컨텍스트 창, Git, 그리고 소비 속도 마커가 포함된 모든 Antigravity 할당량을 확인하세요. <strong>명령어 하나</strong>로 설치됩니다.",
     copy: "복사",
     copyCommand: "복사:",
     copyInstall: "설치 명령어 복사",
@@ -910,7 +910,11 @@ const HOME_TEXT = {
       "기본 상태바는 위 줄에 현재 작업 상태를, 아래 줄에 각 할당량의 잔여량을 표시합니다.",
     anatomy: [
       ["model", "모델", "agy가 현재 사용 중인 모델입니다."],
-      ["context", "컨텍스트 창", "agy가 대화를 압축하기 전까지 남은 컨텍스트 사용 비율입니다."],
+      [
+        "context",
+        "컨텍스트 창",
+        "agy가 대화를 압축하기 전까지 현재 대화가 얼마나 찼는지 보여주는 컨텍스트 사용 비율입니다.",
+      ],
       ["git", "Git", "현재 브랜치, 커밋되지 않은 변경 사항, 업스트림과의 앞/뒤 커밋 수입니다."],
       ["fiveHour", "5시간 할당량", "Gemini 5시간 할당량의 잔여량과 리셋 시간입니다."],
       [
