@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Clean `exec` timeout cleanup**: kill the full process tree (`taskkill /T /F` on Windows, process group `SIGKILL` on macOS/Linux) when an `exec` command times out so child and grandchild processes don't outlive the refresh (#177)
+- **Simplified Chinese (`zh-CN`) and Korean (`ko`) translations**: fixed preset, context-window, and language-setting descriptions in `README.ko.md` and `/ko/`, completed untranslated widget and command rows in `README.zh-CN.md`, and localized the header `Docs` nav label (#225)
 
 ## [1.11.4] - 2026-11-13
 

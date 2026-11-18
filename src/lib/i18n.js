@@ -281,7 +281,7 @@ const MESSAGES = {
     tag_dir: "폴더",
     tag_project: "프로젝트",
     tag_host: "호스트",
-    tag_lines: "줄수",
+    tag_lines: "줄 수",
     tag_files: "파일",
     tag_commit: "커밋",
     tag_stash: "스태시",

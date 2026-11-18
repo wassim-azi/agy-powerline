@@ -16,15 +16,26 @@
 [![Web Configurator](https://img.shields.io/badge/web%20configurator-live-00dc82.svg)](https://agy-powerline.com/configure/)
 [![Mentioned in Awesome Gemini CLI](https://img.shields.io/badge/mentioned%20in-awesome-fc60a8.svg?logo=awesomelists&logoColor=white)](https://github.com/Piebald-AI/awesome-gemini-cli)
 
-**Google Antigravity CLI를 위한 빠르고 자유롭게 설정 가능한 agy 스테이터스라인.**
-
 > 이 문서는 영어 원본 [README](README.md)의 번역이며, 원본보다 오래된 내용일 수 있습니다. 내용이 다를 경우 영어 원본이 우선합니다. 상세 문서([`docs/`](docs/))는 영어로만 제공됩니다.
+
+**Google Antigravity CLI를 위한 빠르고 자유롭게 설정 가능한 agy 스테이터스라인.**
 
 사용 중인 모델, Gemini 5시간/7일 할당량, Claude/GPT 및 Argon 할당량, 컨텍스트 창, git 브랜치 등을 한눈에 확인하세요. 인터랙티브 에디터에서 위젯, 테마, 레이아웃을 선택하세요. 명령 한 번으로 설치되며, 의존성은 없습니다.
 
 <p align="center">
   <img src="assets/demo.gif" alt="agy-powerline configure: argon을 입력해 Argon의 주간 할당량을 추가한 뒤, 프리셋·테마·레이아웃을 살펴보며 바의 실시간 미리보기를 확인하고, Powerline 탭을 여는 모습" width="850">
 </p>
+
+## 왜 agy-powerline인가요?
+
+| 기능             | 제공 내용                                                                                          | 자세히 보기                                                                                               |
+| ---------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| 할당량 속도 표시 | 할당량 미터의 페이스 마커로 5시간 또는 7일 할당량이 리셋 전까지 유지되는지 확인                    | [할당량 가이드](docs/guides/antigravity-quota.md) · [계산기](https://agy-powerline.com/quota-calculator/) |
+| 다중 모델 할당량 | Gemini 5시간/7일, 서드파티(Claude/GPT), Gemini 4 Argon 할당량을 나란히 추적                        | [페이로드 레퍼런스](docs/payload.md#quota-buckets)                                                        |
+| 테마 & 레이아웃  | `pills`, `lines`, `classic` 전반에서 WCAG AA 대비를 통과한 22개 테마(다크, 라이트, 색약 친화 포함) | [테마 갤러리](https://agy-powerline.com/themes/)                                                          |
+| 인터랙티브 설정  | 터미널(`npx agy-powerline configure`) 또는 브라우저에서 실시간 미리보기 에디터로 설정              | [웹 설정기](https://agy-powerline.com/configure/)                                                         |
+| 보안 & 개인정보  | 런타임 의존성 0, 네트워크 호출 없음, 텔레메트리 없음, `settings.json` 자동 백업                    | [보안](SECURITY.md)                                                                                       |
+| 크로스 플랫폼    | 내장 진단 도구(`doctor`)와 함께 Windows, macOS, Linux, WSL 지원                                    | [설치](docs/install.md) · [문제 해결](docs/troubleshooting.md)                                            |
 
 ## 설치
 
@@ -79,15 +90,15 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에�
 
 프리셋에서 시작한 뒤 조정하세요:
 
-| 프리셋    | 표시 내용                                                                                            |
-| --------- | ---------------------------------------------------------------------------------------------------- |
-| `default` | 모델, 컨텍스트, git; 두 번째 행에 리셋 시간이 있는 5시간/7일 할당량                                  |
-| `compact` | 한 줄: 짧은 모델명, 가장 여유 있는 할당량, 컨텍스트 %, git                                           |
-| `agent`   | 에이전트 상태, 서브에이전트, 제목, 모드, 샌드박스; 모델, 컨텍스트 %, 아티팩트, 가장 여유 있는 할당량 |
-| `git`     | 프로젝트, 브랜치, 워크트리, 스태시; 파일 수, 변경 줄 수, 커밋                                        |
-| `tokens`  | 컨텍스트 토큰, 세션 토큰 입/출력, 캐시 적중; 오늘 및 최근 7일간 토큰                                 |
-| `quotas`  | 요금제와 모델; 5시간/7일 할당량 나란히; 세 번째 행에 서드파티와 Argon                                |
-| `full`    | 전부: 세션, 프로젝트, git; 컨텍스트, 토큰, 캐시; 양쪽 할당량                                         |
+| 프리셋    | 표시 내용                                                                                                         |
+| --------- | ----------------------------------------------------------------------------------------------------------------- |
+| `default` | 모델, 컨텍스트, git; 두 번째 행에 리셋 시간이 있는 5시간/7일 할당량                                               |
+| `compact` | 한 줄: 짧은 모델명, 남은 양이 가장 적은 할당량, 컨텍스트 %, git                                                   |
+| `agent`   | 에이전트 상태, 서브에이전트, 제목, 모드, 샌드박스; 모델, 컨텍스트 %, 아티팩트(산출물), 남은 양이 가장 적은 할당량 |
+| `git`     | 프로젝트, 브랜치, 워크트리, 스태시; 파일 수, 변경 줄 수, 커밋                                                     |
+| `tokens`  | 컨텍스트 토큰, 세션 토큰 입/출력, 캐시 적중; 오늘 및 최근 7일간 토큰                                              |
+| `quotas`  | 요금제(플랜)와 모델; 5시간/7일 할당량 나란히; 세 번째 행에 서드파티와 Argon                                       |
+| `full`    | 전부: 세션, 프로젝트, git; 컨텍스트, 토큰, 캐시; 양쪽 할당량                                                      |
 
 ### 테마
 
@@ -98,7 +109,7 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에�
 | 색약 친화   | `colorblind-dark`, `colorblind-light`                                                                                                                                                                                                                       |
 | 직접 지정   | `custom` ([방법](docs/configuration.md#custom-theme))                                                                                                                                                                                                       |
 
-모든 테마는 [테마 갤러리](https://agy-powerline.com/themes/) 또는 `npx agy-powerline theme --gallery`에서 미리 볼 수 있습니다. 각 행에 걸쳐 색이 이어지는 그라데이션을 넣으려면 `npx agy-powerline gradient <이름>`을 사용하세요. `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono` 또는 직접 지정한 색을 쓸 수 있습니다([방법](docs/configuration.md#gradients)).
+모든 테마는 [테마 갤러리](https://agy-powerline.com/themes/) 또는 `npx agy-powerline theme --gallery`에서 미리 볼 수 있습니다. 각 행에 걸쳐 색이 이어지는 그라데이션을 넣으려면 `npx agy-powerline gradient <name>`을 사용하세요. `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono` 또는 직접 지정한 색을 쓸 수 있습니다([방법](docs/configuration.md#gradients)).
 
 ### 레이아웃
 
@@ -149,62 +160,62 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에�
 
 ### 상태바 언어
 
-`"language"`는 상태바에 표시되는 텍스트(레이블, 시간 단위, `남음`, `서브에이전트`)의 언어를 설정하며, 기본적으로 영어(`"en"`)가 사용됩니다. `en`, `fr`, `es`, `ja`, `zh-CN`, `ko`를 지원합니다. 페이로드 값과 날짜는 번역되지 않습니다.
+바 자체의 텍스트(`리셋`, `남음`, `컨텍스트`, `서브에이전트` 등의 레이블)를 한국어로 표시할 수 있습니다:
 
-```json
-{ "language": "ko" }
+```sh
+npx agy-powerline init --language ko
 ```
 
-또는 설치 시 지정할 수 있습니다: `npx agy-powerline init --language ko`.
+또는 `statusline.config.json`에 `"language": "ko"`를 설정하세요(`configure`에서는 `u` 키로 전환). 모델명, 브랜치 등 agy가 전달하는 값은 그대로 표시되며, `2h 47m` 같은 시간 단위는 폭을 줄이기 위해 영문 약어를 유지합니다. CLI 출력과 `configure` 화면은 영어로 유지됩니다. 자세한 내용은 [언어 설정 문서](docs/configuration.md#language)를 참고하세요.
 
 ## 위젯
 
-| 위젯                                                             | 표시 내용                                                                                        |
-| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| `model`                                                          | 사용 중인 모델                                                                                   |
-| `clock`                                                          | 현재 현지 시각(12/24시간 형식은 `clock`에서 설정)                                                |
-| `fiveHourBar`, `weeklyBar`                                       | 남은 5시간/7일 할당량을 미터로 표시, [페이스 마커](docs/configuration.md#quota-pace-marker) 포함 |
-| `fiveHourPct`, `weeklyPct`                                       | 남은 5시간/7일 할당량을 백분율로 표시                                                            |
-| `fiveHourReset`, `weeklyReset`                                   | 할당량이 리셋되기까지 남은 시간 또는 리셋 시각                                                   |
-| `quota`                                                          | 가장 먼저 소진될 가능성이 높은 할당량과 리셋 시각                                                |
-| `thirdPartyFiveHour`, `thirdPartyWeekly`                         | 서드파티 모델 할당량                                                                             |
-| `argonWeekly`, `argonReset`                                      | Gemini 4 Argon 자체 주간 할당량(Google AI Pro)과 리셋                                            |
-| `context`, `contextPct`, `contextTokens`                         | 사용 중인 컨텍스트 창: 미터, 백분율 또는 토큰 수                                                 |
-| `git`                                                            | 브랜치, 커밋되지 않은 변경, ahead/behind                                                         |
-| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | 추가/삭제된 줄, 스테이지/수정/추적 안 됨/충돌 파일 수, 커밋 ID, 스태시, 연결된 워크트리          |
-| `project`, `cwd`                                                 | 프로젝트 폴더, 현재 폴더                                                                         |
-| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | 활성 에이전트, 에이전트 상태, 요금제, 샌드박스, 아티팩트, CLI 버전                               |
-| `tasks`, `queue`                                                 | 실행 중인 서브에이전트, 백그라운드 작업, 대기 중인 메시지                                        |
-| `mode`                                                           | 승인 모드(예: accept-edits)와 Vim 모드                                                           |
-| `title`                                                          | 대화 제목                                                                                        |
-| `sessionTime`                                                    | 활성 대화가 시작된 이후 경과 시간                                                                |
-| `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | 세션 토큰, 예상 비용(USD), 프롬프트 캐시 사용량                                                  |
-| `tokensToday`, `tokensWeek`                                      | 오늘 및 최근 7일간 사용한 토큰, 모든 대화 포함(Node 22.13+)                                      |
-| `ram`                                                            | 시스템 메모리 사용량                                                                             |
-| `os`                                                             | agy가 동작하는 시스템: Windows, macOS, Linux 또는 WSL                                            |
-| `host`                                                           | OS의 현재 사용자와 짧은 호스트명(`alex@devbox`)                                                  |
-| `customText`, `exec`                                             | 직접 입력한 텍스트 또는 [셸 명령](docs/configuration.md#shell-command-widget-exec)의 출력        |
+| 위젯                                                             | 표시 내용                                                                                          |
+| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| `model`                                                          | 사용 중인 모델                                                                                     |
+| `clock`                                                          | 현재 현지 시각(12/24시간 형식은 `clock`에서 설정)                                                  |
+| `fiveHourBar`, `weeklyBar`                                       | 남은 5시간/7일 할당량을 미터로 표시, [페이스 마커](docs/configuration.md#quota-pace-marker) 포함   |
+| `fiveHourPct`, `weeklyPct`                                       | 남은 5시간/7일 할당량을 백분율로 표시                                                              |
+| `fiveHourReset`, `weeklyReset`                                   | 할당량이 리셋되기까지 남은 시간 또는 리셋 시각                                                     |
+| `quota`                                                          | 가장 먼저 소진될 가능성이 높은 할당량과 리셋 시각                                                  |
+| `thirdPartyFiveHour`, `thirdPartyWeekly`                         | 서드파티 모델 할당량                                                                               |
+| `argonWeekly`, `argonReset`                                      | Gemini 4 Argon 자체 주간 할당량(Google AI Pro)과 리셋                                              |
+| `context`, `contextPct`, `contextTokens`                         | 사용 중인 컨텍스트 창: 미터, 백분율 또는 토큰 수                                                   |
+| `git`                                                            | 브랜치, 커밋되지 않은 변경, ahead/behind                                                           |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | 추가/삭제된 줄, 스테이지/수정/추적 안 됨/충돌 파일 수, 커밋 ID, 스태시, 연결된 워크트리            |
+| `project`, `cwd`                                                 | 프로젝트 폴더, 현재 폴더                                                                           |
+| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | 활성 에이전트, 에이전트 상태(확인 플래그 포함), 요금제(플랜), 샌드박스, 아티팩트(산출물), CLI 버전 |
+| `tasks`, `queue`                                                 | 실행 중인 서브에이전트, 백그라운드 작업, 대기 중인 메시지                                          |
+| `mode`                                                           | 승인 모드(예: accept-edits)와 Vim 모드                                                             |
+| `title`                                                          | 대화 제목                                                                                          |
+| `sessionTime`                                                    | 활성 대화가 시작된 이후 경과 시간                                                                  |
+| `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | 세션 토큰, 예상 비용(USD), 프롬프트 캐시 사용량                                                    |
+| `tokensToday`, `tokensWeek`                                      | 오늘 및 최근 7일간 사용한 토큰, 모든 대화 포함(Node 22.13+)                                        |
+| `ram`                                                            | 시스템 메모리 사용량                                                                               |
+| `os`                                                             | agy가 동작하는 시스템: Windows, macOS, Linux 또는 WSL                                              |
+| `host`                                                           | OS의 현재 사용자와 짧은 호스트명(`alex@devbox`)                                                    |
+| `customText`, `exec`                                             | 직접 입력한 텍스트 또는 [셸 명령](docs/configuration.md#shell-command-widget-exec)의 출력          |
 
 표시할 내용이 없는 위젯은 스스로 숨습니다. 위젯은 색, 이름, 아이콘을 바꾸고 라벨을 없애거나 자체 알림 임계값을 지정할 수 있습니다. [Configuration](docs/configuration.md)을 참고하세요.
 
 ## 명령
 
-| 명령                                               | 하는 일                                            |
-| -------------------------------------------------- | -------------------------------------------------- |
-| `npx agy-powerline`                                | 설치(필요 시), 스크립트 업데이트 및 에디터 열기    |
-| `npx agy-powerline init [--yes]`                   | 스테이터스라인 설치 또는 업데이트                  |
-| `npx agy-powerline configure`                      | 에디터 열기(`config` 별칭)                         |
-| `npx agy-powerline preset <이름>`                  | 프리셋 적용(`--list`로 목록 확인)                  |
-| `npx agy-powerline theme <이름>`                   | 테마 전환(`--list`, `--gallery`)                   |
-| `npx agy-powerline gradient <이름>`                | 각 행을 그라데이션으로 색칠(`--list`, `off`)       |
-| `npx agy-powerline layout <pills\|lines\|classic>` | 레이아웃 전환                                      |
-| `npx agy-powerline caps <스타일>`                  | 필 모양 전환: `round`, `angled`, `slanted`, `flat` |
-| `npx agy-powerline export [파일]`                  | 구성을 파일로 저장, 백업하거나 공유할 때 사용      |
-| `npx agy-powerline import <파일>`                  | 변경 내용을 보여준 뒤 구성 불러오기(`--merge`)     |
-| `npx agy-powerline doctor`                         | 설치 상태 확인과 문제 설명                         |
-| `npx agy-powerline report`                         | 개인정보를 포함하지 않는 버그 리포트 작성          |
-| `npx agy-powerline uninstall [--delete]`           | agy에서 제거(`--delete`는 파일도 삭제)             |
-| `npx agy-powerline render --demo`                  | 샘플 데이터로 바 출력                              |
+| 명령                                               | 하는 일                                                        |
+| -------------------------------------------------- | -------------------------------------------------------------- |
+| `npx agy-powerline`                                | 설치(필요 시), 스크립트 업데이트 및 에디터 열기                |
+| `npx agy-powerline init [--yes]`                   | 스테이터스라인 설치 또는 업데이트(`--preset`, `--yes` 등 지원) |
+| `npx agy-powerline configure`                      | 에디터 열기(`config` 별칭)                                     |
+| `npx agy-powerline preset <name>`                  | 프리셋 적용(`--list`로 목록 확인)                              |
+| `npx agy-powerline theme <name>`                   | 테마 전환(`--list`, `--gallery`)                               |
+| `npx agy-powerline gradient <name>`                | 각 행을 그라데이션으로 색칠(`--list`, `off`)                   |
+| `npx agy-powerline layout <pills\|lines\|classic>` | 레이아웃 전환                                                  |
+| `npx agy-powerline caps <style>`                   | 캡슐 모양 전환: `round`, `angled`, `slanted`, `flat`           |
+| `npx agy-powerline export [file]`                  | 구성을 파일로 저장, 백업하거나 공유할 때 사용                  |
+| `npx agy-powerline import <file>`                  | 변경 내용을 보여준 뒤 구성 불러오기(`--merge`)                 |
+| `npx agy-powerline doctor`                         | 설치 상태 확인과 문제 설명                                     |
+| `npx agy-powerline report`                         | 개인정보를 포함하지 않는 버그 리포트 작성                      |
+| `npx agy-powerline uninstall [--delete]`           | agy에서 제거(`--delete`는 파일도 삭제)                         |
+| `npx agy-powerline render --demo`                  | 샘플 데이터로 바 출력                                          |
 
 모든 명령은 `--help`로 옵션을 확인할 수 있습니다.
 

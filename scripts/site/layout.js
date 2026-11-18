@@ -1284,7 +1284,7 @@ const CHROME_TEXT = {
     menu: "菜单",
     nav: {
       install: "安装",
-      docs: "Docs",
+      docs: "文档",
       themes: "主题",
       configurator: "配置",
     },
@@ -1310,7 +1310,7 @@ const CHROME_TEXT = {
     menu: "메뉴",
     nav: {
       install: "설치",
-      docs: "Docs",
+      docs: "문서",
       themes: "테마",
       configurator: "설정",
     },
