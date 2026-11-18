@@ -600,7 +600,7 @@ const HOME_TEXT = {
     steps: [
       [
         "インストール",
-        "Node.js 20 以上と Antigravity CLI が必要です。agy の <code>settings.json</code> を変更する前にバックアップし、ライブエディタを開きます。",
+        "Node.js 20 以上と Antigravity CLI が必要です。agy の <code>settings.json</code> を変更する前にバックアップし、ライブエディターを開きます。",
         "npx agy-powerline",
       ],
       [

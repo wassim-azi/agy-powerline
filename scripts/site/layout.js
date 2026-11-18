@@ -1256,7 +1256,7 @@ const CHROME_TEXT = {
     menu: "メニュー",
     nav: {
       install: "インストール",
-      docs: "Docs",
+      docs: "ドキュメント",
       themes: "テーマ",
       configurator: "設定",
     },

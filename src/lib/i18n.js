@@ -198,12 +198,13 @@ const MESSAGES = {
 
     rem: "残",
     over_200k: ">200k",
-    now: "今すぐ",
+    now: "今",
     confirm: "確認",
     unit_d: "d",
     unit_h: "h",
     unit_hr: "h",
     unit_m: "m",
+    // "サブエージェント" is 16 columns and pushes the agent preset past 80 columns.
     subagent: "subagent",
     subagents: "subagents",
     task: "タスク",
