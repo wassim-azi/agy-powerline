@@ -27,7 +27,8 @@ const {
   MAX_WIDTH_WIDGETS,
   stepNumberField,
 } = require("../../src/lib/widget-options");
-const { isVisibilityThreshold } = require("../../src/lib/widget-style");
+const { isVisibilityThreshold, isValidCompactionLimit } = require("../../src/lib/widget-style");
+const { buildConfigSchema } = require("../../scripts/site/config-schema");
 
 const strip = (text) => text.replace(/\x1b\[[0-9;]*m/g, "");
 const fixture = (name) =>
@@ -83,6 +84,7 @@ function withPlatform(platform, wsl, fn) {
 async function run() {
   testTightestQuota();
   testWidgetThresholds();
+  testContextCompactionLimit();
   testSplitTokens();
   testShortModel();
   testOneFormPerSetting();
@@ -1070,6 +1072,156 @@ function testWidgetThresholds() {
   record(
     "configure leaves visibility thresholds off unrelated widgets",
     !widgetEditFields({ id: "model" }).some(({ key }) => key === "showBelow" || key === "showAbove")
+  );
+}
+
+function testContextCompactionLimit() {
+  const real = fixture("antigravity-1.3.0.json");
+  const contextWidgets = ["context", "contextPct", "contextTokens"];
+  const withTokens = (usedTokens, exceeds200k = false) => ({
+    ...withContextUsed(real, (usedTokens * 100) / real.context_window.context_window_size),
+    exceeds_200k_tokens: exceeds200k,
+  });
+  const renderRaw = (data, widgets, options = {}) =>
+    renderStatusline(
+      { ...data, terminal_width: 0 },
+      { ...defaultConfig(), layout: options.layout || "pills", widgets },
+      { color: "truecolor" }
+    );
+
+  const invalid = [null, "256000", 0, -1, NaN, Infinity];
+  record(
+    "isValidCompactionLimit accepts positive finite numbers only",
+    [1, 256000, 512000].every(isValidCompactionLimit) &&
+      invalid.every((value) => !isValidCompactionLimit(value))
+  );
+
+  for (const layout of LAYOUT_ORDER) {
+    const p150 = withTokens(150_000, false);
+    const outContext = render(p150, [{ id: "context", compactionLimit: 256_000 }], { layout });
+    const outPct = render(p150, [{ id: "contextPct", compactionLimit: 256_000 }], { layout });
+    const outTokens = render(p150, [{ id: "contextTokens", compactionLimit: 256_000 }], {
+      layout,
+    });
+    record(
+      `${layout} context scales tokens and percentage to compactionLimit`,
+      outContext.includes("150.0K/256.0K") && outContext.includes("(58.6%)"),
+      outContext
+    );
+    record(
+      `${layout} contextPct scales percentage to compactionLimit`,
+      outPct.includes("58.6%"),
+      outPct
+    );
+    record(
+      `${layout} contextTokens scales denominator to compactionLimit`,
+      outTokens.includes("150.0K/256.0K"),
+      outTokens
+    );
+
+    // At 200K with exceeds_200k_tokens: true:
+    // - unset: danger (>200k, blinks with blink: true)
+    // - 256K: 78.1% -> caution (no >200k, blinks only with blink: "warn", not blink: true)
+    // - 512K: 39.1% -> healthy (no >200k, does not blink even with blink: "warn")
+    const p200 = withTokens(200_000, true);
+    for (const id of contextWidgets) {
+      const unsetRaw = renderRaw(p200, [{ id, blink: true }], { layout });
+      const warn256Raw = renderRaw(p200, [{ id, compactionLimit: 256_000, blink: "warn" }], {
+        layout,
+      });
+      const crit256Raw = renderRaw(p200, [{ id, compactionLimit: 256_000, blink: true }], {
+        layout,
+      });
+      const warn512Raw = renderRaw(p200, [{ id, compactionLimit: 512_000, blink: "warn" }], {
+        layout,
+      });
+      const plain256 = strip(crit256Raw);
+      const plain512 = strip(warn512Raw);
+      record(
+        `${layout} ${id} compactionLimit supersedes exceeds_200k_tokens danger override`,
+        unsetRaw.includes("\x1b[5m") &&
+          warn256Raw.includes("\x1b[5m") &&
+          !crit256Raw.includes("\x1b[5m") &&
+          !warn512Raw.includes("\x1b[5m") &&
+          !plain256.includes(">200k") &&
+          !plain512.includes(">200k"),
+        { plain256, plain512 }
+      );
+    }
+
+    // Overflow past compactionLimit clamps at 100.0% and enters danger.
+    const p300 = withTokens(300_000, true);
+    const overContext = renderRaw(
+      p300,
+      [{ id: "context", compactionLimit: 256_000, blink: true }],
+      {
+        layout,
+      }
+    );
+    const overPct = render(p300, [{ id: "contextPct", compactionLimit: 256_000 }], { layout });
+    record(
+      `${layout} context clamps overflow past compactionLimit at 100.0% and enters danger`,
+      overContext.includes("\x1b[5m") &&
+        strip(overContext).includes("300.0K/256.0K") &&
+        strip(overContext).includes("(100.0%)") &&
+        overPct.includes("100.0%"),
+      strip(overContext)
+    );
+
+    // showAbove uses scaled percentage and respects active compactionLimit over exceeds_200k_tokens.
+    const hidden256 = render(
+      withTokens(150_000, false),
+      [{ id: "contextPct", compactionLimit: 256_000, showAbove: 60 }],
+      { layout }
+    );
+    const shown256 = render(
+      withTokens(160_000, false),
+      [{ id: "contextPct", compactionLimit: 256_000, showAbove: 60 }],
+      { layout }
+    );
+    const hidden512 = render(
+      withTokens(210_000, true),
+      [{ id: "contextPct", compactionLimit: 512_000, showAbove: 60 }],
+      { layout }
+    );
+    record(
+      `${layout} showAbove uses compactionLimit percentage and ignores exceeds_200k_tokens`,
+      hidden256.trim() === "" && shown256.includes("62.5%") && hidden512.trim() === "",
+      { hidden256, shown256, hidden512 }
+    );
+
+    // Values >= contextSize or invalid values leave rendering unchanged.
+    const baseline = render(p200, [{ id: "context" }], { layout });
+    for (const value of [...invalid, 1_048_576, 2_000_000]) {
+      const same = render(p200, [{ id: "context", compactionLimit: value }], { layout });
+      record(
+        `${layout} compactionLimit ${String(value)} leaves output unchanged`,
+        same === baseline,
+        same
+      );
+    }
+  }
+
+  for (const id of contextWidgets) {
+    const field = widgetEditFields({ id }).find(({ key }) => key === "compactionLimit");
+    record(
+      `configure exposes compactionLimit for ${id}`,
+      Array.isArray(field?.values) &&
+        field.values.includes(256_000) &&
+        field.values.includes(512_000) &&
+        field.show(undefined) === "off (full window)" &&
+        field.show(256_000) === "256.0K" &&
+        field.show(300_000) === "300.0K"
+    );
+  }
+  record(
+    "configure omits compactionLimit from unrelated widgets",
+    !widgetEditFields({ id: "model" }).some(({ key }) => key === "compactionLimit") &&
+      !widgetEditFields({ id: "fiveHourBar" }).some(({ key }) => key === "compactionLimit")
+  );
+  record(
+    "config schema documents compactionLimit",
+    buildConfigSchema().definitions.widget.properties.compactionLimit?.type === "number"
   );
 }
 

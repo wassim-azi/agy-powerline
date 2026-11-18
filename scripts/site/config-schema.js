@@ -172,6 +172,12 @@ function buildConfigSchema() {
           blink: { enum: [true, false, "warn"] },
           showBelow: percent("Quota widgets: hide while more than this % is left."),
           showAbove: percent("Context widgets: hide while less than this % is used."),
+          compactionLimit: {
+            type: "number",
+            minimum: 1,
+            description:
+              "Context widgets: soft token ceiling (e.g. 256000 or 512000) to scale percentage, meter and thresholds when auto-compaction triggers below context_window_size.",
+          },
           pace: { type: "boolean", description: "Quota meters: show the pace marker." },
           paceDelta: {
             type: "boolean",

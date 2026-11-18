@@ -193,12 +193,23 @@ function testWidgetEditor() {
       !/Label text/.test(edit(3)) &&
       !/Label text/.test(edit(4))
   );
+  const contextLimit = strip(
+    renderFrame({
+      config: { ...defaultConfig(), widgets: [{ id: "contextPct", compactionLimit: 256_000 }] },
+      screen: "edit",
+      editIndex: 0,
+      cursor: 8,
+      columns: 160,
+    })
+  );
   record(
     "configure shows the quota and context visibility options and help",
     /Show below.? +always/.test(showBelow) &&
       /this share or less is left/.test(showBelow) &&
       /Show above.? +always/.test(context) &&
-      /this share or more is used/.test(context)
+      /this share or more is used/.test(context) &&
+      /Compaction limit.? +256\.0K/.test(contextLimit) &&
+      /soft token ceiling/.test(contextLimit)
   );
   record(
     "the editor explains the selected option and draws the widget with it",

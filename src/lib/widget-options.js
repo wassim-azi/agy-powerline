@@ -6,6 +6,7 @@
 const {
   resolveQuotaThresholds,
   resolveContextThresholds,
+  formatTokens,
   isValidDepth,
   isValidMaxWidth,
 } = require("./formatters");
@@ -16,6 +17,7 @@ const {
   CONTEXT_WIDGETS,
   RESET_WIDGETS,
   isVisibilityThreshold,
+  isValidCompactionLimit,
   WIDGET_TAGS,
   LABEL_MAX,
 } = require("./widget-style");
@@ -242,13 +244,23 @@ function editFields(widget, config = {}, options = {}) {
     });
   }
   if (context) {
-    fields.push({
-      key: "showAbove",
-      label: "Show above",
-      number: 50,
-      show: (value) => (isVisibilityThreshold(value) ? `${value}%` : "always"),
-      help: "Shows the widget only when this share or more is used.",
-    });
+    fields.push(
+      {
+        key: "showAbove",
+        label: "Show above",
+        number: 50,
+        show: (value) => (isVisibilityThreshold(value) ? `${value}%` : "always"),
+        help: "Shows the widget only when this share or more is used.",
+      },
+      {
+        key: "compactionLimit",
+        label: "Compaction limit",
+        values: [undefined, 200000, 256000, 512000],
+        show: (value) =>
+          isValidCompactionLimit(value) ? formatTokens(value) : "off (full window)",
+        help: "Scales context %, meter and thresholds to a soft token ceiling (e.g. 256K or 512K) instead of the full 1M window.",
+      }
+    );
   }
   if (METER_WIDGETS.has(widget.id)) {
     fields.push({

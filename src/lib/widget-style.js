@@ -278,6 +278,33 @@ function isVisibilityThreshold(value) {
   return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;
 }
 
+function isValidCompactionLimit(value) {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
+}
+
+// Resolves effective context size, percentage and 200K flag for a context widget.
+// An active compactionLimit (< contextSize) scales percentage/thresholds and
+// supersedes the fixed exceeds_200k_tokens heuristic.
+function resolveContextView(widget, session) {
+  const contextSize = session?.contextSize ?? 0;
+  const usedTokens = session?.usedTokens ?? 0;
+  const limit = widget?.compactionLimit;
+
+  if (contextSize > 0 && isValidCompactionLimit(limit) && limit < contextSize) {
+    return {
+      size: limit,
+      pct: Math.min(100, Math.max(0, (usedTokens * 100) / limit)),
+      exceeds200k: false,
+    };
+  }
+
+  return {
+    size: contextSize,
+    pct: session?.contextPct ?? 0,
+    exceeds200k: Boolean(session?.exceeds200k),
+  };
+}
+
 // Invalid hand-edited values behave like unset options, leaving the widget
 // visible as it was before per-widget visibility thresholds existed.
 function hiddenByThreshold(id, widget, session) {
@@ -289,16 +316,16 @@ function hiddenByThreshold(id, widget, session) {
     );
   }
 
-  // Past 200k tokens the context widgets are in danger: they show whatever
-  // the percentage says.
+  // Past 200k tokens the context widgets are in danger (unless superseded by a
+  // widget's own compactionLimit): they show whatever the percentage says.
   if (CONTEXT_WIDGETS.has(id) && isVisibilityThreshold(widget?.showAbove)) {
-    const used = session?.contextPct;
+    const { pct, exceeds200k } = resolveContextView(widget, session);
     return (
       session?.hasContext === true &&
-      !session?.exceeds200k &&
-      typeof used === "number" &&
-      Number.isFinite(used) &&
-      used < widget.showAbove
+      !exceeds200k &&
+      typeof pct === "number" &&
+      Number.isFinite(pct) &&
+      pct < widget.showAbove
     );
   }
 
@@ -334,6 +361,8 @@ module.exports = {
   CONTEXT_WIDGETS,
   RESET_WIDGETS,
   isVisibilityThreshold,
+  isValidCompactionLimit,
+  resolveContextView,
   hiddenByThreshold,
   hasNoData,
   RAM_CAUTION,
