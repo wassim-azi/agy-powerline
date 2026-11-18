@@ -39,7 +39,7 @@ The marker needs no extra data: it comes from the reset time agy already sends a
 
 ## Show only what you need
 
-- **The `quotas` preset** puts the plan and model first, the 5-hour and 7-day quotas side by side, and the third-party and Argon quotas on a third row: `npx agy-powerline preset quotas`.
+- **The `quotas` preset** puts the plan and model first, the 5-hour and 7-day quotas side by side, and the third-party and Argon quotas below: `npx agy-powerline preset quotas`.
 - **The `quota` widget** shows only the bucket closest to running out for the model in use, with its reset: `⏳ Quota: 7d 21.0% rem · 1d 17h`. The `compact` preset uses it to keep the bar on one line.
 - **Percentages instead of meters:** `fiveHourPct` and `weeklyPct`.
 - **Exact reset times** instead of a countdown: set the reset widgets to show the time, or both ([Reset times and clock](../configuration.md#reset-times-and-clock)).

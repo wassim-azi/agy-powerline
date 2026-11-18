@@ -8,7 +8,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { record } = require("../helpers");
-const { renderStatusline, defaultConfig } = require("../../src/lib/shared");
+const { renderStatusline, defaultConfig, sampleData } = require("../../src/lib/shared");
 const {
   shortModelName,
   shouldBlink,
@@ -855,6 +855,16 @@ function testTightestQuota() {
 
   const disabled = render({ quota: { "3p-5h": { remaining_fraction: 0, disabled: true } } }, quota);
   record("quota hides when every bucket is disabled", disabled.trim() === "", disabled);
+
+  for (const layout of LAYOUT_ORDER) {
+    const sample3p5h = render(sampleData(), [{ id: "thirdPartyFiveHour" }], { layout });
+    const disabled3p5h = render(real, [{ id: "thirdPartyFiveHour" }], { layout });
+    record(
+      `${layout} thirdPartyFiveHour renders with sampleData() and hides when disabled`,
+      /3P 5h: .*100\.0% rem/.test(sample3p5h) && disabled3p5h.trim() === "",
+      `${sample3p5h} / ${disabled3p5h}`
+    );
+  }
 
   const low = renderStatusline(
     { ...fixture("antigravity-near-limits.json"), terminal_width: 0 },

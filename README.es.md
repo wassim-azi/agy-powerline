@@ -97,7 +97,7 @@ Comienza desde un preajuste y luego ajústalo:
 | `agent`   | Estado del agente, subagentes, título, modo, sandbox; modelo, % de contexto, artefactos, cuota más ajustada                         |
 | `git`     | Proyecto, rama, worktree, stash; recuento de archivos, cambios de líneas, commit                                                    |
 | `tokens`  | Tokens de contexto, tokens de sesión de entrada/salida, aciertos de caché (`Cache hit`); tokens de hoy y durante los últimos 7 días |
-| `quotas`  | Plan y modelo; cuotas de 5h y 7d lado a lado; modelos de terceros y Argon en una tercera fila                                       |
+| `quotas`  | Plan y modelo; cuotas de 5h y 7d lado a lado; modelos de terceros y Argon debajo                                                    |
 | `full`    | Todo: sesión, proyecto y git; contexto, tokens y caché; ambas cuotas                                                                |
 
 ### Temas

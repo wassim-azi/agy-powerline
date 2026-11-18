@@ -97,7 +97,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 | `agent`   | 代理状态、子代理、标题、模式、沙箱；模型、上下文 %、产物、最紧张的配额 |
 | `git`     | 项目、分支、worktree、stash；文件数、改动行数、提交                    |
 | `tokens`  | 上下文 token、会话输入/输出 token、缓存命中率；今天和 7 天的 token     |
-| `quotas`  | 套餐和模型；5h 和 7d 配额并排显示，第三方和 Argon 配额在第三行         |
+| `quotas`  | 套餐和模型；5h 和 7d 配额并排显示，下方显示第三方和 Argon 配额         |
 | `full`    | 全部：会话、项目和 git；上下文、token 和缓存；两组配额                 |
 
 ### 主题

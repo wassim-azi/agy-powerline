@@ -90,15 +90,15 @@ Lieber im Browser? [Stelle deine Leiste im Browser zusammen](https://agy-powerli
 
 Starte mit einer Vorlage und passe sie nach Bedarf an:
 
-| Vorlage   | Zeigt                                                                                                  |
-| --------- | ------------------------------------------------------------------------------------------------------ |
-| `default` | Modell, Kontext, Git; 5h- und 7T-Kontingente mit Reset-Zeiten in einer zweiten Zeile                   |
-| `compact` | Eine Zeile: kurzer Modellname, knappstes Kontingent, Kontext-%, Git                                    |
-| `agent`   | Agent-Status, Subagenten, Titel, Modus, Sandbox; Modell, Kontext-%, Artefakte, knappstes Kontingent    |
-| `git`     | Projekt, Branch, Worktree, Stash; Dateianzahl, Zeilenänderungen, Commit                                |
-| `tokens`  | Kontext-Tokens, Sitzungs-Tokens (ein/aus), Cache-Hit; Tokens heute und über 7 Tage                     |
-| `quotas`  | Tarif und Modell; 5h- und 7T-Kontingente nebeneinander; Drittanbieter und Argon in einer dritten Zeile |
-| `full`    | Alles: Sitzung, Projekt und Git; Kontext, Tokens und Cache; beide Kontingente                          |
+| Vorlage   | Zeigt                                                                                               |
+| --------- | --------------------------------------------------------------------------------------------------- |
+| `default` | Modell, Kontext, Git; 5h- und 7T-Kontingente mit Reset-Zeiten in einer zweiten Zeile                |
+| `compact` | Eine Zeile: kurzer Modellname, knappstes Kontingent, Kontext-%, Git                                 |
+| `agent`   | Agent-Status, Subagenten, Titel, Modus, Sandbox; Modell, Kontext-%, Artefakte, knappstes Kontingent |
+| `git`     | Projekt, Branch, Worktree, Stash; Dateianzahl, Zeilenänderungen, Commit                             |
+| `tokens`  | Kontext-Tokens, Sitzungs-Tokens (ein/aus), Cache-Hit; Tokens heute und über 7 Tage                  |
+| `quotas`  | Tarif und Modell; 5h- und 7T-Kontingente nebeneinander; Drittanbieter und Argon darunter            |
+| `full`    | Alles: Sitzung, Projekt und Git; Kontext, Tokens und Cache; beide Kontingente                       |
 
 ### Themes
 
