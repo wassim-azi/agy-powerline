@@ -19,6 +19,7 @@ const {
   renderStatusline,
   sampleData,
   defaultConfig,
+  DEFAULT_THRESHOLDS,
   mergeConfig,
   themeColors,
   PRESETS,
@@ -26,6 +27,7 @@ const {
   applyPreset,
 } = require("../lib/shared");
 const { resolveInstallDir } = require("../lib/paths");
+const { GRADIENTS, GRADIENT_ORDER, gradientStops } = require("../lib/themes");
 const { WIDGET_TAGS } = require("../lib/widget-style");
 const { SUPPORTED_LANGUAGES, resolveLanguage } = require("../lib/i18n");
 const { editFields: getEditFields, stepNumberField } = require("../lib/widget-options");
@@ -127,6 +129,8 @@ let hexInput = null;
 // into one of its fields (null when not typing).
 let editIndex = 0;
 let textInput = null;
+// Preserves a custom hex-stop gradient loaded at session start across cycles.
+let customGradientSpec = null;
 let activeStdin = process.stdin;
 let activeStdout = process.stdout;
 let activeResolve = null;
@@ -1381,11 +1385,70 @@ const LANGUAGE_LABELS = {
   ko: "Korean (ko)",
 };
 
+const CLOCK_FORMAT_OPTIONS = [
+  { value: null, label: "auto (locale)" },
+  { value: false, label: "24h" },
+  { value: true, label: "12h" },
+];
+
+const THRESHOLD_PRESETS = [
+  {
+    id: "default",
+    label: "default",
+    quotaWarn: DEFAULT_THRESHOLDS.quotaWarn,
+    quotaCrit: DEFAULT_THRESHOLDS.quotaCrit,
+    contextWarn: DEFAULT_THRESHOLDS.contextWarn,
+    contextCrit: DEFAULT_THRESHOLDS.contextCrit,
+  },
+  {
+    id: "early",
+    label: "early",
+    quotaWarn: 40,
+    quotaCrit: 20,
+    contextWarn: 60,
+    contextCrit: 80,
+  },
+  {
+    id: "relaxed",
+    label: "relaxed",
+    quotaWarn: 20,
+    quotaCrit: 5,
+    contextWarn: 80,
+    contextCrit: 95,
+  },
+];
+
+function detectThresholdPreset(thresholds = {}) {
+  const qw = thresholds.quotaWarn ?? DEFAULT_THRESHOLDS.quotaWarn;
+  const qc = thresholds.quotaCrit ?? DEFAULT_THRESHOLDS.quotaCrit;
+  const cw = thresholds.contextWarn ?? DEFAULT_THRESHOLDS.contextWarn;
+  const cc = thresholds.contextCrit ?? DEFAULT_THRESHOLDS.contextCrit;
+  return (
+    THRESHOLD_PRESETS.find(
+      (preset) =>
+        preset.quotaWarn === qw &&
+        preset.quotaCrit === qc &&
+        preset.contextWarn === cw &&
+        preset.contextCrit === cc
+    ) ?? null
+  );
+}
+
 const SETTINGS_ROWS = [
   {
     id: "language",
     label: "Bar language",
     help: "Language used for labels, units and captions inside the statusline bar. Payload values and dates keep their own format.",
+  },
+  {
+    id: "clockFormat",
+    label: "Clock format",
+    help: "Time format for Clock and exact reset times: auto follows your locale (12h in the built-in style), or force 24h or 12h.",
+  },
+  {
+    id: "gradient",
+    label: "Bar gradient",
+    help: "Sweep one color gradient across each row on top of the theme. Custom hex gradients stay in the cycle until reset.",
   },
   {
     id: "emojis",
@@ -1401,6 +1464,11 @@ const SETTINGS_ROWS = [
     id: "pacing",
     label: "Quota pace marker",
     help: "Draw the current-time tick mark on quota meters so you can tell whether usage runs ahead of time before reset.",
+  },
+  {
+    id: "sensitivity",
+    label: "Warning sensitivity",
+    help: "When quota and context widgets turn to the caution and danger colors. Per-widget warn and crit options still override this.",
   },
   {
     id: "blink",
@@ -1419,10 +1487,30 @@ const SETTINGS_ROWS = [
   },
 ];
 
+function clockFormatValue() {
+  const hour12 = typeof config.clock?.hour12 === "boolean" ? config.clock.hour12 : null;
+  return CLOCK_FORMAT_OPTIONS.find((opt) => opt.value === hour12)?.label ?? "auto (locale)";
+}
+
+function gradientValue() {
+  if (!config.gradient) {
+    return "off";
+  }
+  return GRADIENTS[config.gradient]?.name ?? `custom (${config.gradient})`;
+}
+
 function settingValue(row) {
   if (row.id === "language") {
     const code = resolveLanguage(config.language);
     return LANGUAGE_LABELS[code] || code;
+  }
+
+  if (row.id === "clockFormat") {
+    return clockFormatValue();
+  }
+
+  if (row.id === "gradient") {
+    return gradientValue();
   }
 
   if (row.id === "emojis") {
@@ -1435,6 +1523,10 @@ function settingValue(row) {
 
   if (row.id === "pacing") {
     return config.pacing !== false ? "on" : "off";
+  }
+
+  if (row.id === "sensitivity") {
+    return detectThresholdPreset(config.thresholds)?.label ?? "custom";
   }
 
   if (row.id === "blink") {
@@ -1465,6 +1557,67 @@ function settingsDetails(row) {
           ? { raw: ui.accentText(`${mark} ${label}`) }
           : { dim: `${mark} ${label}` };
       })
+    );
+  } else if (row.id === "clockFormat") {
+    const active = typeof config.clock?.hour12 === "boolean" ? config.clock.hour12 : null;
+    lines.push(
+      "",
+      ...CLOCK_FORMAT_OPTIONS.map((opt) => {
+        const mark = opt.value === active ? ui.glyph.on : ui.glyph.off;
+        const text = `${mark} ${opt.label}`;
+        return opt.value === active ? { raw: ui.accentText(text) } : { dim: text };
+      })
+    );
+  } else if (row.id === "gradient") {
+    const active = config.gradient || null;
+    const choices = [
+      { id: null, label: "off" },
+      ...GRADIENT_ORDER.map((id) => ({ id, label: GRADIENTS[id].name })),
+      ...(customGradientSpec
+        ? [{ id: customGradientSpec, label: `custom (${customGradientSpec})` }]
+        : []),
+    ];
+    lines.push(
+      "",
+      ...choices.map((item) => {
+        const isCurrent = item.id === active;
+        const mark = isCurrent ? ui.glyph.on : ui.glyph.off;
+        const swatch =
+          item.id && !config.ascii && getActiveDepth() !== "none"
+            ? "  " + (gradientStops(item.id) || []).map((color) => `${fg(color)}■`).join("") + RESET
+            : "";
+        const text = `${mark} ${item.label}`;
+        return isCurrent
+          ? { raw: `${ui.accentText(text)}${swatch}` }
+          : { raw: `${dim(text)}${swatch}` };
+      })
+    );
+  } else if (row.id === "sensitivity") {
+    const thresholds = config.thresholds || {};
+    const qw = thresholds.quotaWarn ?? DEFAULT_THRESHOLDS.quotaWarn;
+    const qc = thresholds.quotaCrit ?? DEFAULT_THRESHOLDS.quotaCrit;
+    const cw = thresholds.contextWarn ?? DEFAULT_THRESHOLDS.contextWarn;
+    const cc = thresholds.contextCrit ?? DEFAULT_THRESHOLDS.contextCrit;
+    const active = detectThresholdPreset(thresholds);
+    lines.push(
+      "",
+      `Active: quota ${qw}% / ${qc}% left, context ${cw}% / ${cc}% used`,
+      "",
+      ...THRESHOLD_PRESETS.map((preset) => {
+        const isCurrent = active?.id === preset.id;
+        const mark = isCurrent ? ui.glyph.on : ui.glyph.off;
+        const text = `${mark} ${preset.id.padEnd(8)} quota ${preset.quotaWarn}%/${preset.quotaCrit}%, context ${preset.contextWarn}%/${preset.contextCrit}%`;
+        return isCurrent ? { raw: ui.accentText(text) } : { dim: text };
+      }),
+      ...(!active
+        ? [
+            {
+              raw: ui.accentText(
+                `${ui.glyph.on} ${"custom".padEnd(8)} quota ${qw}%/${qc}%, context ${cw}%/${cc}%`
+              ),
+            },
+          ]
+        : [])
     );
   }
   lines.push("", "Enter cycles or toggles; x resets to default.");
@@ -1521,6 +1674,7 @@ function renderFrame(options = {}) {
   if (options.widgets) {
     config.widgets = options.widgets;
   }
+  customGradientSpec = config.gradient && !GRADIENTS[config.gradient] ? config.gradient : null;
   screen = options.screen || "main";
   cursor = options.cursor || 0;
   searchQuery = options.search || "";
@@ -1691,6 +1845,7 @@ function onMain(key) {
 
   if (key.name === "d") {
     config = defaultConfig();
+    customGradientSpec = null;
     if (persist()) {
       flashMessage = "Reset to default configuration.";
     }
@@ -1942,6 +2097,37 @@ function toggleOrCycleSetting(row) {
     return;
   }
 
+  if (row.id === "clockFormat") {
+    const current = typeof config.clock?.hour12 === "boolean" ? config.clock.hour12 : null;
+    const idx = CLOCK_FORMAT_OPTIONS.findIndex((opt) => opt.value === current);
+    const next = CLOCK_FORMAT_OPTIONS[(idx + 1) % CLOCK_FORMAT_OPTIONS.length];
+    config.clock = { ...(config.clock || {}), hour12: next.value };
+    if (persist()) {
+      flashMessage = `Clock format: ${next.label}`;
+    }
+    return;
+  }
+
+  if (row.id === "gradient") {
+    const choices = [
+      undefined,
+      ...GRADIENT_ORDER,
+      ...(customGradientSpec ? [customGradientSpec] : []),
+    ];
+    const current = config.gradient || undefined;
+    const idx = choices.indexOf(current);
+    const next = choices[(idx + 1) % choices.length];
+    if (next === undefined) {
+      delete config.gradient;
+    } else {
+      config.gradient = next;
+    }
+    if (persist()) {
+      flashMessage = `Bar gradient: ${gradientValue()}`;
+    }
+    return;
+  }
+
   if (row.id === "emojis") {
     config.emojis = config.emojis === false;
     if (persist()) {
@@ -1962,6 +2148,23 @@ function toggleOrCycleSetting(row) {
     config.pacing = config.pacing === false;
     if (persist()) {
       flashMessage = `Quota pace marker: ${config.pacing ? "on" : "off"}`;
+    }
+    return;
+  }
+
+  if (row.id === "sensitivity") {
+    const current = detectThresholdPreset(config.thresholds);
+    const idx = current ? THRESHOLD_PRESETS.indexOf(current) : -1;
+    const next = THRESHOLD_PRESETS[(idx + 1) % THRESHOLD_PRESETS.length];
+    config.thresholds = {
+      ...(config.thresholds || {}),
+      quotaWarn: next.quotaWarn,
+      quotaCrit: next.quotaCrit,
+      contextWarn: next.contextWarn,
+      contextCrit: next.contextCrit,
+    };
+    if (persist()) {
+      flashMessage = `Warning sensitivity: ${next.label}`;
     }
     return;
   }
@@ -1990,6 +2193,18 @@ function resetSetting(row) {
   const defaults = defaultConfig();
   if (row.id === "language") {
     config.language = defaults.language;
+  } else if (row.id === "clockFormat") {
+    config.clock = { ...(config.clock || {}), hour12: defaults.clock.hour12 };
+  } else if (row.id === "gradient") {
+    delete config.gradient;
+  } else if (row.id === "sensitivity") {
+    config.thresholds = {
+      ...(config.thresholds || {}),
+      quotaWarn: defaults.thresholds.quotaWarn,
+      quotaCrit: defaults.thresholds.quotaCrit,
+      contextWarn: defaults.thresholds.contextWarn,
+      contextCrit: defaults.thresholds.contextCrit,
+    };
   } else if (row.id === "blink") {
     config.thresholds = config.thresholds || {};
     config.thresholds.blink = defaults.thresholds.blink;
@@ -2291,6 +2506,7 @@ function start(options = {}) {
   hexInput = null;
   textInput = null;
   editIndex = 0;
+  customGradientSpec = config.gradient && !GRADIENTS[config.gradient] ? config.gradient : null;
   scrollTop = 0;
   scrollScreen = null;
   flashMessage = options.flash || "";

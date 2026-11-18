@@ -9,23 +9,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Added the opt-in `cost` (`cost.total_usd`, `cost.estimated`), `agent` (`agent.name`), and `queue` (`pending_input_count`) widgets matching the latest Antigravity CLI statusline payload schema
-- Surface `tool_confirmation_pending` directly on the `agentState` widget and read Mercurial branch names from `.hg/branch` when `vcs.type` is `"hg"`
-- Include newly documented payload fields (`agent`, `cost`, `model.effort`, `pending_input_count`, `tool_confirmation_pending`, `quota.*.remaining_amount`) in `AGY_POWERLINE_DEBUG=1` payload dumps
-- Bar labels, captions, and units in Simplified Chinese (`"language": "zh-CN"`) (#122)
-- Simplified Chinese home page at `agy-powerline.com/zh-cn/` (#122)
-- Bar labels, captions, and units in Korean (`"language": "ko"`) (#150)
-- Korean home page at `agy-powerline.com/ko/` (#150)
+- **New Antigravity CLI 1.4.5 widgets**: added opt-in `cost` (`cost.total_usd`, `cost.estimated`), `agent` (`agent.name`), and `queue` (`pending_input_count`) widgets (#202)
+- **Approval & Mercurial status**: surfaced `tool_confirmation_pending` directly on `agentState` and read Mercurial branch names from `.hg/branch` when `vcs.type` is `"hg"` (#202)
+- **Expanded debug dumps**: included `agent`, `cost`, `model.effort`, `pending_input_count`, `tool_confirmation_pending`, and `quota.*.remaining_amount` in `AGY_POWERLINE_DEBUG=1` payload dumps (#202)
+- **Clock format in Settings**: cycle **Clock format** (`auto (locale)`, `24h`, `12h`) and reset with `x` in the `Settings` tab (`i`) of `configure` (#208)
+- **Bar gradient in Settings**: cycle **Bar gradient** (`off` and built-in presets with live preview, keeping custom hex gradients in the cycle until reset) in the `Settings` tab (`i`) of `configure` (#209)
+- **Warning sensitivity in Settings**: cycle **Warning sensitivity** presets (`default`, `early`, `relaxed`) backed by `thresholds`, preserving `custom` hand-edited thresholds and `blink`, in the `Settings` tab (`i`) of `configure` (#213)
+- **Simplified Chinese (`zh-CN`)**: added bar labels, captions, and units for `"language": "zh-CN"`, plus the localized home page at `agy-powerline.com/zh-cn/` (#122)
+- **Korean (`ko`)**: added bar labels, captions, and units for `"language": "ko"`, plus the localized home page at `agy-powerline.com/ko/` (#150)
 
 ### Changed
 
-- Running `npx agy-powerline` with no arguments in an interactive terminal now installs (or repairs/refreshes outdated scripts while keeping your config and render flags) and launches the live-preview `configure` TUI directly, printing a post-exit summary with a reminder to restart `agy`; pass `--help` for command usage, while piped stdin still renders the statusline and `init --yes` remains unchanged for scripted installs
-- `configure` now restores terminal state, detaches event listeners, and resolves cleanly instead of calling `process.exit(0)` mid-caller
-- Moved global bar toggles (`Bar language`, `Emojis`, `Minimalist mode`, `Quota pace marker`, `Alert blink`, `Space between rows`, `ASCII mode`) out of the live preview's bottom chip strip into a new `Settings` tab (`i`), keeping `Live preview` focused on the rendered bar (#216)
+- **One-step `npx agy-powerline` onboarding**: running bare `npx agy-powerline` in an interactive terminal now installs or refreshes outdated scripts (keeping existing config and render flags) and launches the live-preview `configure` TUI directly, printing a post-exit summary with a reminder to restart `agy` (`--help` shows usage, piped stdin still renders, and `init --yes` remains unchanged for scripted installs) (#202)
+- **Dedicated `Settings` tab (`i`) in `configure`**: moved global bar toggles (`Bar language`, `Emojis`, `Minimalist mode`, `Quota pace marker`, `Alert blink`, `Space between rows`, `ASCII mode`) out of the live preview's bottom chip strip into `Settings`, keeping `Live preview` focused on the rendered bar (#216)
+- **Clean `configure` lifecycle**: `configure` now restores terminal state, detaches event listeners, and resolves cleanly instead of calling `process.exit(0)` mid-caller (#202)
+- **Aligned onboarding docs & visuals**: updated the demo GIF, OG share cards, and guides for the unified `npx agy-powerline` workflow (#205)
 
 ### Fixed
 
-- Kill the full process tree (`taskkill /T /F` on Windows, process group `SIGKILL` on macOS/Linux) when an `exec` widget command times out so child and grandchild processes don't outlive the refresh (#177)
+- **Clean `exec` timeout cleanup**: kill the full process tree (`taskkill /T /F` on Windows, process group `SIGKILL` on macOS/Linux) when an `exec` command times out so child and grandchild processes don't outlive the refresh (#177)
 
 ## [1.11.4] - 2026-11-13
 
