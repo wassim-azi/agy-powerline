@@ -240,7 +240,7 @@ function testEveryScreenFits() {
   for (const screen of SCREENS) {
     for (const [columns, rows] of SIZES) {
       for (const ascii of [false, true]) {
-        const cursors = screen === "settings" ? [0, 1, 2, 6, 9, 12] : [0, 12];
+        const cursors = screen === "settings" ? [0, 1, 2, 3, 7, 10, 12] : [0, 12];
         for (const cursor of cursors) {
           const out = renderFrame({ config: { ...full, ascii }, screen, columns, rows, cursor });
           const height = out.split("\n").length;
@@ -397,7 +397,7 @@ function testAsciiAndNoColor() {
     }
   }
 
-  for (const cursor of [0, 1, 2, 6, 9]) {
+  for (const cursor of [0, 1, 2, 3, 7, 10]) {
     const out = strip(
       renderFrame({
         config: { ...defaultConfig(), ascii: true, gradient: "sunset" },
@@ -453,6 +453,7 @@ function testScreenContent() {
     "settings screen shows bar-wide options, values and details instead of preview chips",
     /Bar language.? +English \(en\)/.test(settings) &&
       /Clock format.? +auto \(locale\)/.test(settings) &&
+      /Reset format.? +countdown/.test(settings) &&
       /Bar gradient.? +off/.test(settings) &&
       /Emojis.? +on/.test(settings) &&
       /Minimalist mode.? +off/.test(settings) &&
@@ -469,11 +470,14 @@ function testScreenContent() {
   const clockDetails = strip(
     renderFrame({ config: defaultConfig(), screen: "settings", cursor: 1, columns: 160 })
   );
+  const resetDetails = strip(
+    renderFrame({ config: defaultConfig(), screen: "settings", cursor: 2, columns: 160 })
+  );
   const gradientDetails = strip(
     renderFrame({
       config: { ...defaultConfig(), gradient: "#ff5f6d-#ffc371" },
       screen: "settings",
-      cursor: 2,
+      cursor: 3,
       columns: 160,
     })
   );
@@ -484,7 +488,7 @@ function testScreenContent() {
         thresholds: { quotaWarn: 25, quotaCrit: 12, contextWarn: 65, contextCrit: 85 },
       },
       screen: "settings",
-      cursor: 6,
+      cursor: 7,
       columns: 160,
     })
   );
@@ -492,15 +496,18 @@ function testScreenContent() {
     renderFrame({
       config: { ...defaultConfig(), maxWidth: 110 },
       screen: "settings",
-      cursor: 9,
+      cursor: 10,
       columns: 160,
     })
   );
   record(
-    "settings details panel explains clock format, gradient, sensitivity and maxWidth presets",
+    "settings details panel explains clock format, reset format, gradient, sensitivity and maxWidth presets",
     /● auto \(locale\)/.test(clockDetails) &&
       /○ 24h/.test(clockDetails) &&
       /○ 12h/.test(clockDetails) &&
+      /● countdown +2hr 47m/.test(resetDetails) &&
+      /○ time +6:33pm/.test(resetDetails) &&
+      /○ both +6:33pm \(2hr 47m\)/.test(resetDetails) &&
       /Bar gradient.? +custom \(#ff5f6d-#ffc371\)/.test(gradientDetails) &&
       /● custom \(#ff5f6d-#ffc371\)/.test(gradientDetails) &&
       /Aurora/.test(gradientDetails) &&
@@ -645,9 +652,25 @@ async function testSettingsInteractions() {
       clockReset.saved.clock.timeZone === "UTC"
   );
 
+  // #212: Reset format cycles countdown -> time -> both and resets to countdown on x.
+  const rfSteps = ["i", DOWN, DOWN];
+  const rfToTime = await runConfigureKeys(
+    { widgets: [{ id: "fiveHourReset" }], clock: { timeZone: "UTC", hour12: true, locale: "" } },
+    [...rfSteps, "\r"]
+  );
+  const rfToBoth = await runConfigureKeys({}, [...rfSteps, "\r", "\r"]);
+  const rfReset = await runConfigureKeys({ resetFormat: "both" }, [...rfSteps, "x"]);
+  record(
+    "Settings Reset format cycles countdown -> time -> both, updates preview, and resets on x",
+    rfToTime.saved.resetFormat === "time" &&
+      /\b\d{1,2}:\d{2}(am|pm)\b/.test(rfToTime.frames[3] || "") &&
+      rfToBoth.saved.resetFormat === "both" &&
+      rfReset.saved.resetFormat === "countdown"
+  );
+
   // #209: Bar gradient cycles off + built-in presets while preserving custom hex gradient.
   const customGrad = "#ff5f6d-#ffc371";
-  const gradSteps = ["i", DOWN, DOWN];
+  const gradSteps = ["i", ...Array(3).fill(DOWN)];
   // From custom -> off -> all presets -> back to custom.
   const toAurora = await runConfigureKeys({ gradient: customGrad }, [...gradSteps, "\r", "\r"]);
   const backToCustom = await runConfigureKeys({ gradient: customGrad }, [
@@ -672,17 +695,17 @@ async function testSettingsInteractions() {
   };
   const keepCustom = await runConfigureKeys({ thresholds: customThresholds }, [
     "i",
-    ...Array(6).fill(DOWN),
+    ...Array(7).fill(DOWN),
   ]);
   const toEarly = await runConfigureKeys({ thresholds: customThresholds }, [
     "i",
-    ...Array(6).fill(DOWN),
+    ...Array(7).fill(DOWN),
     "\r",
     "\r",
   ]);
   const resetSens = await runConfigureKeys(
     { thresholds: { quotaWarn: 40, quotaCrit: 20, contextWarn: 60, contextCrit: 80, blink: true } },
-    ["i", ...Array(6).fill(DOWN), "x"]
+    ["i", ...Array(7).fill(DOWN), "x"]
   );
   record(
     "Settings Warning sensitivity preserves custom thresholds and blink, cycles presets, and resets",
@@ -699,7 +722,7 @@ async function testSettingsInteractions() {
   );
 
   // #210: Max bar width cycles full -> 100 -> 120 -> 140 -> 160 -> full and resets on x.
-  const mwSteps = ["i", ...Array(9).fill(DOWN)];
+  const mwSteps = ["i", ...Array(10).fill(DOWN)];
   const mwTo100 = await runConfigureKeys({}, [...mwSteps, "\r"]);
   const mwTo120 = await runConfigureKeys({ maxWidth: 100 }, [...mwSteps, "\r"]);
   const mwCustomToFull = await runConfigureKeys({ maxWidth: 110 }, [...mwSteps, "\r"]);

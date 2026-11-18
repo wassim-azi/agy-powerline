@@ -27,6 +27,7 @@ const {
   applyPreset,
 } = require("../lib/shared");
 const { resolveInstallDir } = require("../lib/paths");
+const { RESET_FORMAT_ORDER, resolveResetFormat } = require("../lib/config");
 const { GRADIENTS, GRADIENT_ORDER, gradientStops } = require("../lib/themes");
 const { WIDGET_TAGS } = require("../lib/widget-style");
 const { SUPPORTED_LANGUAGES, resolveLanguage } = require("../lib/i18n");
@@ -1434,6 +1435,12 @@ function detectThresholdPreset(thresholds = {}) {
   );
 }
 
+const RESET_FORMAT_EXAMPLES = {
+  countdown: "2hr 47m",
+  time: "6:33pm",
+  both: "6:33pm (2hr 47m)",
+};
+
 const MAX_WIDTH_PRESETS = [null, 100, 120, 140, 160];
 
 const SETTINGS_ROWS = [
@@ -1446,6 +1453,11 @@ const SETTINGS_ROWS = [
     id: "clockFormat",
     label: "Clock format",
     help: "Time format for Clock and exact reset times: auto follows your locale (12h in the built-in style), or force 24h or 12h.",
+  },
+  {
+    id: "resetFormat",
+    label: "Reset format",
+    help: "Default format for reset timer widgets without their own Format option: countdown, exact reset time, or both.",
   },
   {
     id: "gradient",
@@ -1525,6 +1537,10 @@ function settingValue(row) {
     return clockFormatValue();
   }
 
+  if (row.id === "resetFormat") {
+    return resolveResetFormat(config.resetFormat);
+  }
+
   if (row.id === "gradient") {
     return gradientValue();
   }
@@ -1586,6 +1602,16 @@ function settingsDetails(row) {
         const mark = opt.value === active ? ui.glyph.on : ui.glyph.off;
         const text = `${mark} ${opt.label}`;
         return opt.value === active ? { raw: ui.accentText(text) } : { dim: text };
+      })
+    );
+  } else if (row.id === "resetFormat") {
+    const active = resolveResetFormat(config.resetFormat);
+    lines.push(
+      "",
+      ...RESET_FORMAT_ORDER.map((fmt) => {
+        const mark = fmt === active ? ui.glyph.on : ui.glyph.off;
+        const text = `${mark} ${fmt.padEnd(10)} ${RESET_FORMAT_EXAMPLES[fmt]}`;
+        return fmt === active ? { raw: ui.accentText(text) } : { dim: text };
       })
     );
   } else if (row.id === "gradient") {
@@ -2138,6 +2164,17 @@ function toggleOrCycleSetting(row) {
     config.clock = { ...(config.clock || {}), hour12: next.value };
     if (persist()) {
       flashMessage = `Clock format: ${next.label}`;
+    }
+    return;
+  }
+
+  if (row.id === "resetFormat") {
+    const current = resolveResetFormat(config.resetFormat);
+    const next =
+      RESET_FORMAT_ORDER[(RESET_FORMAT_ORDER.indexOf(current) + 1) % RESET_FORMAT_ORDER.length];
+    config.resetFormat = next;
+    if (persist()) {
+      flashMessage = `Reset format: ${next}`;
     }
     return;
   }

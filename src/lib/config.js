@@ -118,6 +118,12 @@ function resolveLayoutId(layoutId) {
   return LAYOUTS[layoutId] ? layoutId : "pills";
 }
 
+const RESET_FORMAT_ORDER = ["countdown", "time", "both"];
+
+function resolveResetFormat(format) {
+  return RESET_FORMAT_ORDER.includes(format) ? format : "countdown";
+}
+
 // Positive integer columns cap the bar on wide terminals; "full" or null
 // leaves it uncapped (clamped at 1000 columns like terminalWidth).
 function resolveBarMaxWidth(value) {
@@ -149,6 +155,7 @@ function defaultConfig() {
     minimalist: false,
     rowGap: false,
     log: true,
+    resetFormat: "countdown",
     clock: normalizeClock(),
     thresholds: { ...DEFAULT_THRESHOLDS },
     powerline: normalizePowerline(),
@@ -210,6 +217,7 @@ function mergeConfig(raw) {
     minimalist: raw?.minimalist === true,
     rowGap: raw?.rowGap === true,
     log: raw?.log !== false,
+    resetFormat: resolveResetFormat(raw?.resetFormat),
     clock: normalizeClock(raw?.clock),
     thresholds,
     powerline,
@@ -523,6 +531,8 @@ module.exports = {
   DEFAULT_THRESHOLDS,
   VALID_WIDGET_IDS,
   resolveLayoutId,
+  RESET_FORMAT_ORDER,
+  resolveResetFormat,
   resolveBarMaxWidth,
   defaultConfig,
   mergeConfig,

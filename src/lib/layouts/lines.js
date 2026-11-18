@@ -270,7 +270,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
     const text = quota
       ? formatResetText(quota, {
           format: widget.format,
-          fallback: "countdown",
+          fallback: config.resetFormat || "countdown",
           weekly,
           clock: config.clock,
         })

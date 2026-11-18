@@ -202,6 +202,18 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
   };
   const over200k = session.exceeds200k ? ` ${t("over_200k", session.lang)}` : "";
   const remWord = t("rem", session.lang);
+  const quotaReset = (quota, color, weekly = false) => {
+    const text = quota
+      ? formatResetText(quota, {
+          format: widget.format,
+          fallback: config.resetFormat || "countdown",
+          weekly,
+          clock: config.clock,
+        })
+      : "";
+    // No usable reset in the payload: hide rather than claim "now".
+    return text ? pill(color, lbl(text)) : null;
+  };
 
   if (hasNoData(id, session) || hiddenByThreshold(id, widget, session)) {
     return null;
@@ -291,20 +303,8 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       return pill(color, lbl(`${rem.toFixed(1)}% ${remWord}${paceDelta(session.fiveHour)}`), blink);
     }
 
-    case "fiveHourReset": {
-      const text = session.fiveHour
-        ? formatResetText(session.fiveHour, {
-            format: widget.format,
-            fallback: "countdown",
-            clock: config.clock,
-          })
-        : "";
-      // No usable reset in the payload: hide rather than claim "now".
-      if (!text) {
-        return null;
-      }
-      return pill(colors.fiveHour, lbl(text));
-    }
+    case "fiveHourReset":
+      return quotaReset(session.fiveHour, colors.fiveHour);
 
     case "weeklyBar": {
       if (!session.weekly) {
@@ -348,21 +348,8 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       return pill(color, lbl(`${rem.toFixed(1)}% ${remWord}${paceDelta(session.weekly)}`), blink);
     }
 
-    case "weeklyReset": {
-      const text = session.weekly
-        ? formatResetText(session.weekly, {
-            format: widget.format,
-            fallback: "countdown",
-            weekly: true,
-            clock: config.clock,
-          })
-        : "";
-      // No usable reset in the payload: hide rather than claim "now".
-      if (!text) {
-        return null;
-      }
-      return pill(colors.weekly, lbl(text));
-    }
+    case "weeklyReset":
+      return quotaReset(session.weekly, colors.weekly, true);
 
     case "thirdPartyFiveHour": {
       if (!session.thirdPartyFiveHour || session.thirdPartyFiveHour.disabled) {
@@ -441,20 +428,8 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       );
     }
 
-    case "argonReset": {
-      const text = session.argonWeekly
-        ? formatResetText(session.argonWeekly, {
-            format: widget.format,
-            fallback: "countdown",
-            weekly: true,
-            clock: config.clock,
-          })
-        : "";
-      if (!text) {
-        return null;
-      }
-      return pill(colors.weekly, lbl(text));
-    }
+    case "argonReset":
+      return quotaReset(session.argonWeekly, colors.weekly, true);
 
     case "context": {
       const thresh = resolveContextThresholds(widget, config);
