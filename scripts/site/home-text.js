@@ -1050,6 +1050,190 @@ const HOME_TEXT = {
     ctaLead: "명령어 하나로 설치하거나 브라우저에서 나만의 상태바를 구성해 보세요.",
     viewOnGithub: "GitHub에서 보기",
   },
+  de: {
+    lang: "de",
+    title: "agy-Statuszeile für Google Antigravity CLI - agy-powerline",
+    description:
+      "agy-powerline ist die agy-Statuszeile für Google Antigravity CLI: Gemini-, Claude/GPT- und Argon-Kontingente mit Tempomarkierung, Kontext und Git in agy.",
+    imageAlt:
+      "agy-powerline: die agy-Statuszeile, die dir zeigt, ob dein Kontingent bis zum Reset reicht, mit der Standardleiste",
+    eyebrow: "Statuszeile für Google Antigravity CLI",
+    heroTitle:
+      'Die agy-Statuszeile, die dir zeigt, <span class="grad-text">ob dein Kontingent reicht</span>',
+    heroLead:
+      "Dein Modell, das Kontextfenster, Git und jedes Antigravity-Kontingent mit Tempomarkierung in einer Powerline-Leiste unter dem Eingabefeld von agy. Mit <strong>einem Befehl</strong> eingerichtet.",
+    copy: "Kopieren",
+    copyCommand: "Kopieren:",
+    copyInstall: "Installationsbefehl kopieren",
+    buildInBrowser: "Leiste im Browser zusammenstellen",
+    heroFacts: ["Node.js 20+", "0 Abhängigkeiten", "Keine Telemetrie", "MIT-Lizenz"],
+    askAgy: "Frag agy irgendetwas…",
+    heroBarCaption:
+      "Eine Live-Vorschau von agy-powerline unter dem Eingabefeld von agy. Wähle ein Theme und ein Layout zum Umschalten; jede Leiste auf dieser Seite wird vom echten Statuszeilen-Code gezeichnet.",
+    demoThemes: "Theme",
+    demoLayouts: "Layout",
+    allThemes: (n) => `Alle ${n} →`,
+    anatomyEyebrow: "Auf einen Blick",
+    anatomyTitle: "Die agy-Statuszeile in zehn Sekunden lesen",
+    anatomyLead:
+      "Die Standardleiste hat zwei Zeilen: oben, womit du gerade arbeitest; unten, wie viel Kontingent noch übrig ist.",
+    anatomy: [
+      ["model", "Modell", "Das Modell, das agy gerade verwendet."],
+      [
+        "context",
+        "Kontextfenster",
+        "Wie voll die Unterhaltung ist, bevor agy den Kontext komprimieren muss.",
+      ],
+      [
+        "git",
+        "Git",
+        "Branch, nicht committete Änderungen sowie Commits vor oder hinter dem Upstream.",
+      ],
+      [
+        "fiveHour",
+        "5-Stunden-Kontingent",
+        "Was von deinem Gemini-5-Stunden-Kontingent übrig ist und wann es zurückgesetzt wird.",
+      ],
+      [
+        "pace",
+        "Tempomarkierung",
+        "Wo du dich im Zeitfenster des Kontingents befindest. Reicht der Füllstand über die Markierung hinaus, verbrauchst du das Kontingent schneller als die Zeit vergeht, und es ist vor dem Reset erschöpft.",
+      ],
+      [
+        "weekly",
+        "7-Tage-Kontingent",
+        "Dein Wochenkontingent mit eigener Tempomarkierung und Reset-Zeit.",
+      ],
+    ],
+    paceGuide: "So funktioniert die Tempomarkierung (auf Englisch) →",
+    stepsEyebrow: "Loslegen",
+    stepsTitle: "In einer Minute einsatzbereit",
+    steps: [
+      [
+        "Installieren",
+        "Benötigt Node.js 20 oder neuer und die Antigravity CLI. Sichert die <code>settings.json</code> von agy vor dem Ändern und öffnet dann den Editor mit Live-Vorschau.",
+        "npx agy-powerline",
+      ],
+      [
+        "Stil auswählen",
+        "Durchsuche Vorlagen, Layouts, Themes und Widgets mit Live-Vorschau bei der Einrichtung oder öffne den Editor jederzeit erneut.",
+        "npx agy-powerline configure",
+      ],
+      [
+        "agy einmal neu starten",
+        "Die Leiste erscheint unter dem Eingabefeld und aktualisiert sich mit agy. Spätere Änderungen sind sofort ohne Neustart sichtbar.",
+        "agy",
+      ],
+    ],
+    installGuide: "Details zur Installation (auf Englisch) →",
+    featuresEyebrow: "Funktionen",
+    featuresTitle: "Alles, was du in der Statusleiste der Antigravity CLI sehen möchtest",
+    featuresLead:
+      "Für die Antigravity CLI aus ihren echten Statuszeilen-Daten gebaut und sicher den ganzen Tag ausführbar.",
+    features: (n) => [
+      [
+        "pace",
+        "Kontingent-Tempomarkierungen",
+        "Jede Kontingentanzeige zeigt, wo du im Zeitfenster stehst – so erkennst du frühzeitig, wenn ein Kontingent knapp wird. Warnung bei 30 % Rest, kritisch bei 10 %.",
+        "/guides/antigravity-quota/",
+      ],
+      [
+        "themes",
+        `${n.themes} Themes`,
+        "Dunkle, helle und farbenblindfreundliche Farbpaletten, jede auf WCAG-AA-Kontrast auf ihrem Terminal geprüft.",
+        "/themes/",
+      ],
+      [
+        "layouts",
+        "3 Layouts",
+        "Pills, Lines und Classic auf beliebig vielen Zeilen. Zeilen passen sich automatisch an die Terminalbreite an.",
+        "/docs/configuration/",
+      ],
+      [
+        "widgets",
+        `${n.widgets} Widgets`,
+        "Modell, Kontext, Git, Kontingente, Tokens, Sitzungsdauer, Agent-Status, eigene Shell-Befehle und mehr.",
+        "/widgets/",
+      ],
+      [
+        "configure",
+        "Konfiguriere auf deine Weise",
+        "Ein Terminal-Editor mit Live-Vorschau, ein Browser-Konfigurator, Vorlagen oder reines JSON mit Schema.",
+        "/configure/",
+      ],
+      [
+        "platforms",
+        "Windows, macOS, Linux, WSL",
+        "Null Laufzeitabhängigkeiten, Node.js 20 oder neuer. Keine Netzwerkaufrufe und keine Telemetrie.",
+        "/install/",
+      ],
+    ],
+    shotsEyebrow: "Echte Screenshots",
+    shotsTitle: "In einem echten Terminal",
+    shotsLead: "In echten agy-Sitzungen aufgenommen, keine Mock-ups.",
+    shots: {
+      windows: [
+        "agy-Sitzung",
+        "agy-powerline unter dem Eingabefeld von agy in Windows Terminal: oben ein kurzes Gespräch, darunter die dreizeilige Pills-Leiste",
+      ],
+      "pills-dark": [
+        "Pills",
+        "agy-powerline Pills-Layout mit dem Theme dark-aurora: Modell, Kontext, Projekt und Git; Gemini-5h- und -7T-Kontingente mit Tempomarkierungen und Resets; wöchentliche Claude/GPT- und Argon-Kontingente",
+      ],
+      "lines-light": [
+        "Lines",
+        "agy-powerline Lines-Layout mit dem Theme light-paper auf einem hellen Terminal",
+      ],
+      "classic-dark": [
+        "Classic",
+        "agy-powerline Classic-Layout mit dem Theme dark-aurora auf einem dunklen Terminal mit Blockanzeigen",
+      ],
+    },
+    themesEyebrow: "Themes",
+    themesTitle: (n) => `${n} Themes für dunkle, helle und farbenblindfreundliche Terminals`,
+    themesLead:
+      "Jedes Theme wird auf der Themes-Seite (auf Englisch) auf seinem vorgesehenen Terminal-Hintergrund mit einer Farbseh-Simulation dargestellt.",
+    seeAllThemes: (n) => `Alle ${n} Themes ansehen`,
+    trustEyebrow: "Sicher ausführbar",
+    trustTitle: "Läuft bei jeder Aktualisierung – deshalb bleibt es schlank",
+    trustBody:
+      'Keine Laufzeitabhängigkeiten, keine Netzwerkaufrufe und eine Konfiguration, die nur aus deinem eigenen Installationsordner gelesen wird: Ein geklontes Repository kann weder deine Leiste ändern noch Befehle ausführen. <a href="/security/">Was auf deinem Rechner passiert</a> (auf Englisch).',
+    trust: [
+      [
+        "https://scorecard.dev/viewer/?uri=github.com/wassim-azi/agy-powerline",
+        "OpenSSF Scorecard",
+      ],
+      ["https://www.bestpractices.dev/projects/15655", "OpenSSF Best Practices"],
+      ["https://www.npmjs.com/package/agy-powerline", "npm-Provenance"],
+      ["/security/", "0 Abhängigkeiten"],
+      ["/privacy/", "Keine Telemetrie"],
+      ["https://github.com/wassim-azi/agy-powerline/blob/main/LICENSE", "MIT-Lizenz"],
+    ],
+    faqEyebrow: "FAQ",
+    faqTitle: "Häufig gestellte Fragen",
+    faq: [
+      [
+        "Funktioniert es unter Windows?",
+        'Ja: Windows, macOS, Linux und WSL. Unter Windows führt agy die Leiste über <code>cmd /c</code> aus, was das Installationsprogramm automatisch einrichtet. Für WSL installiere es mit einem Linux-Node.js innerhalb von WSL (<a href="/install/#wsl">WSL-Hinweise</a>, auf Englisch).',
+      ],
+      [
+        "Sendet es irgendwelche Daten nach außen?",
+        'Nein. agy-powerline führt keine Netzwerkanfragen durch und enthält weder Telemetrie noch Analytics. Probleme werden in ein lokales Log geschrieben, das du lesen, leeren oder deaktivieren kannst. <a href="/security/">Sicherheit &amp; Datenschutz</a> (auf Englisch) listet jede gelesene und geschriebene Datei auf. Nur diese Website nutzt Google Analytics zum Zählen von Besuchen (<a href="/privacy/">Datenschutz</a>, auf Englisch).',
+      ],
+      [
+        "Macht es agy langsamer?",
+        "Eine Aktualisierung benötigt auf einem Windows-11-Laptop etwa 0,1 s eigener Arbeit von agy-powerline. Unter Windows kommen für den Start von <code>cmd</code> und Node etwa 0,1–0,25 s hinzu, wie bei jedem Statuszeilen-Befehl.",
+      ],
+      [
+        "Welche Kontingente werden angezeigt?",
+        'Die 5-Stunden- und 7-Tage-Kontingente von Gemini, die 5-Stunden- und 7-Tage-Kontingente für Drittanbieter (Claude und GPT) sowie das Wochenkontingent von Gemini 4 Argon in Google AI Pro, jeweils mit Reset-Zeit. Der <a href="/guides/antigravity-quota/">Kontingent-Guide</a> (auf Englisch) erklärt die Anzeigen.',
+      ],
+    ],
+    allQuestions: "Alle Fragen (auf Englisch) →",
+    ctaTitle: "Wisse Bescheid, bevor dein Kontingent aufgebraucht ist",
+    ctaLead: "Installiere die Leiste mit einem Befehl oder stelle sie zuerst im Browser zusammen.",
+    viewOnGithub: "Auf GitHub ansehen",
+  },
 };
 
 module.exports = { HOME_TEXT };

@@ -1389,6 +1389,7 @@ const LANGUAGE_LABELS = {
   ja: "Japanese (ja)",
   "zh-CN": "Simplified Chinese (zh-CN)",
   ko: "Korean (ko)",
+  de: "German (de)",
 };
 
 const CLOCK_FORMAT_OPTIONS = [

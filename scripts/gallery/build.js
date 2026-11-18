@@ -3,7 +3,7 @@
 
 "use strict";
 
-// Builds the site's home page (/, /fr/, /es/, /ja/, /zh-cn/ and /ko/) and the theme gallery (/themes/):
+// Builds the site's home page (/, /fr/, /es/, /ja/, /zh-cn/, /ko/ and /de/) and the theme gallery (/themes/):
 // every bar on them is rendered by the real statusline code. The home page
 // shows the bar in an agy window with a few themes and the three layouts to
 // switch between; the gallery shows every theme on dark and light terminals,
@@ -434,7 +434,7 @@ function trustHtml(text) {
     .join("\n            ");
 }
 
-// lang: "en" for /, "fr" for /fr/, "es" for /es/, "ja" for /ja/, "zh-CN" for /zh-cn/, "ko" for /ko/.
+// lang: "en" for /, "fr" for /fr/, "es" for /es/, "ja" for /ja/, "zh-CN" for /zh-cn/, "ko" for /ko/, "de" for /de/.
 function buildHomeHtml({ lang = "en" } = {}) {
   const text = HOME_TEXT[lang];
   const n = counts();
