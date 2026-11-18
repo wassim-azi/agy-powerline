@@ -43,7 +43,7 @@ const {
   resolveContextThresholds,
   shouldBlink,
 } = require("../formatters");
-const { joinFlex } = require("./pills");
+const { alignGroups } = require("./pills");
 const { execWidgetOutput, restoreAfterReset } = require("../exec");
 const {
   NAMED_COLORS,
@@ -841,10 +841,15 @@ function renderLinesLayout(session, emojis, ascii = false, colors, config) {
 
   return (
     rows
-      .map((groups) => {
-        const parts = groups.map((group) => group.join(pipe));
-        return joinFlex(parts, session.terminalWidth, session.flexGaps === true);
-      })
+      .map((groups) =>
+        alignGroups(
+          groups,
+          config.alignment,
+          session.terminalWidth,
+          session.flexGaps === true,
+          (group) => group.join(pipe)
+        )
+      )
       // rowGap: a line holding a space, as in Pills, so a host keeps it.
       .join(config.rowGap === true ? "\n \n" : "\n") + RESET
   );

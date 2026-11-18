@@ -5,7 +5,12 @@
 
 const { defaultConfig, canonicalThemeId, LAYOUTS } = require("./shared");
 const { THEMES, normalizeGradient } = require("./themes");
-const { VALID_WIDGET_IDS, RESET_FORMAT_ORDER, resolveBarMaxWidth } = require("./config");
+const {
+  VALID_WIDGET_IDS,
+  RESET_FORMAT_ORDER,
+  ALIGNMENT_ORDER,
+  resolveBarMaxWidth,
+} = require("./config");
 const { COLOR_MODES } = require("./colors");
 const { isMeterStyle } = require("./widget-style");
 
@@ -71,6 +76,9 @@ function droppedSettings(raw) {
   }
   if (raw.resetFormat !== undefined && !RESET_FORMAT_ORDER.includes(raw.resetFormat)) {
     dropped.push(`unknown reset format ${visible(JSON.stringify(raw.resetFormat))}`);
+  }
+  if (raw.alignment !== undefined && !ALIGNMENT_ORDER.includes(raw.alignment)) {
+    dropped.push(`unknown alignment ${visible(JSON.stringify(raw.alignment))}`);
   }
   if (
     raw.maxWidth !== undefined &&

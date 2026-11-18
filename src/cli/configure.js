@@ -27,7 +27,12 @@ const {
   applyPreset,
 } = require("../lib/shared");
 const { resolveInstallDir } = require("../lib/paths");
-const { RESET_FORMAT_ORDER, resolveResetFormat } = require("../lib/config");
+const {
+  RESET_FORMAT_ORDER,
+  resolveResetFormat,
+  ALIGNMENT_ORDER,
+  resolveAlignment,
+} = require("../lib/config");
 const { GRADIENTS, GRADIENT_ORDER, gradientStops } = require("../lib/themes");
 const { WIDGET_TAGS } = require("../lib/widget-style");
 const { SUPPORTED_LANGUAGES, resolveLanguage } = require("../lib/i18n");
@@ -1443,6 +1448,12 @@ const RESET_FORMAT_EXAMPLES = {
 
 const MAX_WIDTH_PRESETS = [null, 100, 120, 140, 160];
 
+const ALIGNMENT_DESCRIPTIONS = {
+  left: "default (flex spaces only at Separator items)",
+  center: "compact centered row inside terminal width",
+  spread: "even flex gaps across rows without Separators",
+};
+
 const SETTINGS_ROWS = [
   {
     id: "language",
@@ -1498,6 +1509,11 @@ const SETTINGS_ROWS = [
     id: "maxWidth",
     label: "Max bar width",
     help: "Cap the bar width on wide terminals instead of stretching flex spaces across the entire window.",
+  },
+  {
+    id: "alignment",
+    label: "Row alignment",
+    help: "How widgets sit across each row: left (default, flex spaces only at Separator items), center (compact centered bar), or spread (even gaps across unseparated rows).",
   },
   {
     id: "ascii",
@@ -1571,6 +1587,10 @@ function settingValue(row) {
 
   if (row.id === "maxWidth") {
     return maxWidthValue();
+  }
+
+  if (row.id === "alignment") {
+    return resolveAlignment(config.alignment);
   }
 
   return config.ascii ? "on" : "off";
@@ -1678,6 +1698,16 @@ function settingsDetails(row) {
         return isCurrent ? { raw: ui.accentText(text) } : { dim: text };
       }),
       ...(!isPreset ? [{ raw: ui.accentText(`${ui.glyph.on} ${active} cols (custom)`) }] : [])
+    );
+  } else if (row.id === "alignment") {
+    const active = resolveAlignment(config.alignment);
+    lines.push(
+      "",
+      ...ALIGNMENT_ORDER.map((mode) => {
+        const mark = mode === active ? ui.glyph.on : ui.glyph.off;
+        const text = `${mark} ${mode.padEnd(8)} ${ALIGNMENT_DESCRIPTIONS[mode]}`;
+        return mode === active ? { raw: ui.accentText(text) } : { dim: text };
+      })
     );
   }
   lines.push("", "Enter cycles or toggles; x resets to default.");
@@ -2265,6 +2295,16 @@ function toggleOrCycleSetting(row) {
     }
     if (persist()) {
       flashMessage = `Max bar width: ${maxWidthValue()}`;
+    }
+    return;
+  }
+
+  if (row.id === "alignment") {
+    const current = resolveAlignment(config.alignment);
+    const next = ALIGNMENT_ORDER[(ALIGNMENT_ORDER.indexOf(current) + 1) % ALIGNMENT_ORDER.length];
+    config.alignment = next;
+    if (persist()) {
+      flashMessage = `Row alignment: ${next}`;
     }
     return;
   }
