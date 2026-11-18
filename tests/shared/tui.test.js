@@ -3,14 +3,19 @@
 
 "use strict";
 
+const fs = require("fs");
+const os = require("os");
+const path = require("path");
+const { PassThrough } = require("stream");
 const { record } = require("../helpers");
-const { renderFrame, tabAfter, isQuitKey } = require("../../src/cli/configure");
+const { configureCommand, renderFrame, tabAfter, isQuitKey } = require("../../src/cli/configure");
 const {
   applyPreset,
   defaultConfig,
   renderStatusline,
   sampleData,
 } = require("../../src/lib/shared");
+const { GRADIENT_ORDER } = require("../../src/lib/themes");
 const { visibleWidth } = require("../../src/lib/formatters");
 const { WIDGET_CATALOG } = require("../../src/lib/catalog");
 
@@ -41,6 +46,7 @@ async function run() {
   testWidgetEditor();
   testDepthIsRestored();
   testTabKeys();
+  await testSettingsInteractions();
 }
 
 // Numbers, badges and the preview title say what is a widget, what is in
@@ -234,7 +240,8 @@ function testEveryScreenFits() {
   for (const screen of SCREENS) {
     for (const [columns, rows] of SIZES) {
       for (const ascii of [false, true]) {
-        for (const cursor of [0, 12]) {
+        const cursors = screen === "settings" ? [0, 1, 2, 6, 12] : [0, 12];
+        for (const cursor of cursors) {
           const out = renderFrame({ config: { ...full, ascii }, screen, columns, rows, cursor });
           const height = out.split("\n").length;
           if (widest(out) > columns - 1 || height > rows - 1) {
@@ -390,6 +397,33 @@ function testAsciiAndNoColor() {
     }
   }
 
+  for (const cursor of [0, 1, 2, 6]) {
+    const out = strip(
+      renderFrame({
+        config: { ...defaultConfig(), ascii: true, gradient: "sunset" },
+        screen: "settings",
+        cursor,
+        columns: 160,
+        color: "none",
+      })
+    );
+    const found = out.match(/[^\x00-\x7f]/g);
+    if (found) {
+      nonAscii.push(`settings@${cursor}: ${[...new Set(found)].join("")}`);
+    }
+
+    const plain = renderFrame({
+      config: { ...defaultConfig(), gradient: "sunset" },
+      screen: "settings",
+      cursor,
+      columns: 160,
+      color: "none",
+    });
+    if (/\x1b\[[34]8;/.test(plain)) {
+      colored.push(`settings@${cursor}`);
+    }
+  }
+
   record("ASCII mode draws every screen in plain ASCII", !nonAscii.length, nonAscii.join("; "));
   record(
     "no-color mode draws every screen without color codes",
@@ -418,14 +452,52 @@ function testScreenContent() {
   record(
     "settings screen shows bar-wide options, values and details instead of preview chips",
     /Bar language.? +English \(en\)/.test(settings) &&
+      /Clock format.? +auto \(locale\)/.test(settings) &&
+      /Bar gradient.? +off/.test(settings) &&
       /Emojis.? +on/.test(settings) &&
       /Minimalist mode.? +off/.test(settings) &&
       /Quota pace marker.? +on/.test(settings) &&
+      /Warning sensitivity.? +default/.test(settings) &&
       /Alert blink.? +off/.test(settings) &&
       /Space between rows.? +off/.test(settings) &&
       /ASCII mode.? +off/.test(settings) &&
       /English \(en\)/.test(settings) &&
       /toggle \/ cycle/.test(settings)
+  );
+
+  const clockDetails = strip(
+    renderFrame({ config: defaultConfig(), screen: "settings", cursor: 1, columns: 160 })
+  );
+  const gradientDetails = strip(
+    renderFrame({
+      config: { ...defaultConfig(), gradient: "#ff5f6d-#ffc371" },
+      screen: "settings",
+      cursor: 2,
+      columns: 160,
+    })
+  );
+  const sensitivityCustom = strip(
+    renderFrame({
+      config: {
+        ...defaultConfig(),
+        thresholds: { quotaWarn: 25, quotaCrit: 12, contextWarn: 65, contextCrit: 85 },
+      },
+      screen: "settings",
+      cursor: 6,
+      columns: 160,
+    })
+  );
+  record(
+    "settings details panel explains clock format, gradient and warning sensitivity presets",
+    /● auto \(locale\)/.test(clockDetails) &&
+      /○ 24h/.test(clockDetails) &&
+      /○ 12h/.test(clockDetails) &&
+      /Bar gradient.? +custom \(#ff5f6d-#ffc371\)/.test(gradientDetails) &&
+      /● custom \(#ff5f6d-#ffc371\)/.test(gradientDetails) &&
+      /Aurora/.test(gradientDetails) &&
+      /Warning sensitivity.? +custom/.test(sensitivityCustom) &&
+      /Active: quota 25% \/ 12% left, context 65% \/ 85% used/.test(sensitivityCustom) &&
+      /● custom +quota 25%\/12%, context 65%\/85%/.test(sensitivityCustom)
   );
 
   const search = strip(renderFrame({ config: defaultConfig(), screen: "add", search: "quo" }));
@@ -494,6 +566,124 @@ function testTabKeys() {
       tabAfter("customTheme", left) === null &&
       tabAfter("glyphs", right) === null &&
       tabAfter("main", { name: "up" }) === null
+  );
+}
+
+async function runConfigureKeys(initialConfig, keys) {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agy-tui-settings-"));
+  const configPath = path.join(dir, "statusline.config.json");
+  fs.writeFileSync(configPath, JSON.stringify(initialConfig, null, 2));
+
+  const stdin = new PassThrough();
+  const stdout = new PassThrough();
+  stdin.isTTY = true;
+  stdin.setRawMode = () => {};
+  stdout.isTTY = true;
+  stdout.columns = 160;
+  stdout.rows = 40;
+
+  let output = "";
+  const frames = [];
+  stdout.on("data", (chunk) => {
+    output += chunk.toString("utf8");
+  });
+
+  try {
+    const done = configureCommand({ stdin, stdout, configDir: dir });
+    await new Promise((r) => setImmediate(r));
+    for (const seq of keys) {
+      const before = output.length;
+      stdin.write(seq);
+      await new Promise((r) => setImmediate(r));
+      frames.push(strip(output.slice(before)));
+    }
+    stdin.write("q");
+    await done;
+    const saved = JSON.parse(fs.readFileSync(configPath, "utf8"));
+    return { saved, frames };
+  } finally {
+    fs.rmSync(dir, { recursive: true, force: true });
+  }
+}
+
+async function testSettingsInteractions() {
+  const DOWN = "\x1b[B";
+
+  // #208: Clock format cycles auto -> 24h -> 12h and resets to auto with x.
+  const clockCycle = await runConfigureKeys(
+    {
+      widgets: [{ id: "clock" }, { id: "fiveHourReset", format: "time" }],
+      clock: { hour12: null, timeZone: "UTC", locale: "" },
+    },
+    ["i", DOWN, "\r", "\r"]
+  );
+  const clock24Preview = clockCycle.frames[2] || "";
+  const clock12Preview = clockCycle.frames[3] || "";
+  const clockReset = await runConfigureKeys(
+    { clock: { hour12: false, timeZone: "UTC", locale: "" } },
+    ["i", DOWN, "x"]
+  );
+  record(
+    "Settings Clock format cycles auto -> 24h -> 12h, updates preview, and resets on x",
+    clockCycle.saved.clock.hour12 === true &&
+      clockCycle.saved.clock.timeZone === "UTC" &&
+      /\b\d{2}:\d{2}\b/.test(clock24Preview) &&
+      /\b\d{1,2}:\d{2}(am|pm)\b/.test(clock12Preview) &&
+      clockReset.saved.clock.hour12 === null &&
+      clockReset.saved.clock.timeZone === "UTC"
+  );
+
+  // #209: Bar gradient cycles off + built-in presets while preserving custom hex gradient.
+  const customGrad = "#ff5f6d-#ffc371";
+  const gradSteps = ["i", DOWN, DOWN];
+  // From custom -> off -> all presets -> back to custom.
+  const toAurora = await runConfigureKeys({ gradient: customGrad }, [...gradSteps, "\r", "\r"]);
+  const backToCustom = await runConfigureKeys({ gradient: customGrad }, [
+    ...gradSteps,
+    ...Array(GRADIENT_ORDER.length + 2).fill("\r"),
+  ]);
+  const gradReset = await runConfigureKeys({ gradient: "sunset" }, [...gradSteps, "x"]);
+  record(
+    "Settings Bar gradient cycles presets, preserves custom gradient in cycle, and resets to off",
+    toAurora.saved.gradient === GRADIENT_ORDER[0] &&
+      backToCustom.saved.gradient === customGrad &&
+      gradReset.saved.gradient === undefined
+  );
+
+  // #213: Warning sensitivity keeps custom values untouched until cycled, and preserves blink.
+  const customThresholds = {
+    quotaWarn: 25,
+    quotaCrit: 12,
+    contextWarn: 65,
+    contextCrit: 85,
+    blink: true,
+  };
+  const keepCustom = await runConfigureKeys({ thresholds: customThresholds }, [
+    "i",
+    ...Array(6).fill(DOWN),
+  ]);
+  const toEarly = await runConfigureKeys({ thresholds: customThresholds }, [
+    "i",
+    ...Array(6).fill(DOWN),
+    "\r",
+    "\r",
+  ]);
+  const resetSens = await runConfigureKeys(
+    { thresholds: { quotaWarn: 40, quotaCrit: 20, contextWarn: 60, contextCrit: 80, blink: true } },
+    ["i", ...Array(6).fill(DOWN), "x"]
+  );
+  record(
+    "Settings Warning sensitivity preserves custom thresholds and blink, cycles presets, and resets",
+    keepCustom.saved.thresholds.quotaWarn === 25 &&
+      keepCustom.saved.thresholds.contextCrit === 85 &&
+      toEarly.saved.thresholds.quotaWarn === 40 &&
+      toEarly.saved.thresholds.quotaCrit === 20 &&
+      toEarly.saved.thresholds.contextWarn === 60 &&
+      toEarly.saved.thresholds.contextCrit === 80 &&
+      toEarly.saved.thresholds.blink === true &&
+      resetSens.saved.thresholds.quotaWarn === 30 &&
+      resetSens.saved.thresholds.contextCrit === 90 &&
+      resetSens.saved.thresholds.blink === true
   );
 }
 

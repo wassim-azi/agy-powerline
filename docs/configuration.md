@@ -33,27 +33,27 @@ The editor fits your window. It fills the full width, so the preview has the roo
 
 Enter on a widget opens its options: color, label (shown or value only), and what that widget takes, such as the short model name, the reset timers' format, the custom badge's text, the caution and danger levels, blink, the pace marker, the pace delta and the meter style. `↑` `↓` pick an option, `←` `→` or Enter change it, `x` sets it back to its default, and Esc returns to the list. Each change is saved right away and shows in the preview. A Shell Command's `cmd` is shown but edited only in the config file. The preview title says when it shows a theme, preset or layout you haven't applied yet, and the preset that matches your widgets is marked `current`.
 
-| Key                    | Action                                                                            |
-| ---------------------- | --------------------------------------------------------------------------------- |
-| ↑↓                     | Move cursor (with circular wrap-around at top/bottom; theme preview updates live) |
-| ←→, Tab, Shift+Tab     | Switch tab (Widgets, Presets, Themes, Layout, Powerline, Settings)                |
-| `w`                    | Widgets (your widget list)                                                        |
-| Shift+↑↓               | Reorder widgets                                                                   |
-| Enter                  | Edit the selected widget's options (see below)                                    |
-| `a`                    | Add widget (includes live type-to-filter search across catalog)                   |
-| `s`                    | Insert Flex Separator after the current item                                      |
-| `n`                    | Insert New Line (next widgets go on the next row)                                 |
-| `x`, Delete, Backspace | Remove widget, or reset option/setting to default (in Edit / Settings)            |
-| `o`                    | Presets (`default`, `compact`, `agent`, `git`, `tokens`, `quotas`, `full`)        |
-| `t`                    | Themes (select `Custom` or press `c`/`e` to open in-TUI color editor)             |
-| `l`                    | Layout (Pills, Lines or Classic)                                                  |
-| `p`                    | Powerline (joins, style, separators, start and end caps)                          |
-| `i`                    | Settings (bar language, emojis, minimalist mode, pace marker, blink, gaps, ASCII) |
-| `d`                    | Reset configuration to defaults                                                   |
-| `g`                    | Open GitHub repository in browser (⭐ Repo)                                       |
-| Enter                  | Confirm selection or toggle/cycle setting in lists                                |
-| Esc                    | Back to previous list / widget list                                               |
-| `q` or Ctrl-C          | Save and quit (`q` doesn't quit while typing in the Add search or a code point)   |
+| Key                    | Action                                                                                                 |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| ↑↓                     | Move cursor (with circular wrap-around at top/bottom; theme preview updates live)                      |
+| ←→, Tab, Shift+Tab     | Switch tab (Widgets, Presets, Themes, Layout, Powerline, Settings)                                     |
+| `w`                    | Widgets (your widget list)                                                                             |
+| Shift+↑↓               | Reorder widgets                                                                                        |
+| Enter                  | Edit the selected widget's options (see below)                                                         |
+| `a`                    | Add widget (includes live type-to-filter search across catalog)                                        |
+| `s`                    | Insert Flex Separator after the current item                                                           |
+| `n`                    | Insert New Line (next widgets go on the next row)                                                      |
+| `x`, Delete, Backspace | Remove widget, or reset option/setting to default (in Edit / Settings)                                 |
+| `o`                    | Presets (`default`, `compact`, `agent`, `git`, `tokens`, `quotas`, `full`)                             |
+| `t`                    | Themes (select `Custom` or press `c`/`e` to open in-TUI color editor)                                  |
+| `l`                    | Layout (Pills, Lines or Classic)                                                                       |
+| `p`                    | Powerline (joins, style, separators, start and end caps)                                               |
+| `i`                    | Settings (language, clock format, gradient, emojis, minimalist, pace, sensitivity, blink, gaps, ASCII) |
+| `d`                    | Reset configuration to defaults                                                                        |
+| `g`                    | Open GitHub repository in browser (⭐ Repo)                                                            |
+| Enter                  | Confirm selection or toggle/cycle setting in lists                                                     |
+| Esc                    | Back to previous list / widget list                                                                    |
+| `q` or Ctrl-C          | Save and quit (`q` doesn't quit while typing in the Add search or a code point)                        |
 
 ## Widgets
 
@@ -205,7 +205,7 @@ How times look is set once for every widget under `"clock"`:
 { "clock": { "hour12": false, "timeZone": "Europe/Paris", "locale": "fr-FR" } }
 ```
 
-- **`hour12`**: `true` for `6:33pm`, `false` for `18:33`. Left out: 12-hour in the built-in style, or the locale's own habit when `locale` is set.
+- **`hour12`**: `true` for `6:33pm`, `false` for `18:33`. Left out: 12-hour in the built-in style, or the locale's own habit when `locale` is set. Cycle **Clock format** (`auto (locale)`, `24h`, `12h`) in the Settings tab (`i`) in `configure`.
 - **`timeZone`**: any IANA zone (`America/New_York`, `Asia/Tokyo`). Default: the machine's local time.
 - **`locale`**: a language tag (`de-DE`, `ja-JP`) for localized month names and time formats (`10. Okt., 14:50`). Default: the compact built-in English style.
 
@@ -244,7 +244,7 @@ Quota and context widgets change color as they get low or full: the theme's ok c
 - **`quotaCrit`** _(default: `10`%)_: remaining quota at which they turn to the danger color.
 - **`contextWarn`** _(default: `70`%)_: used context at which the context widgets turn to the caution color.
 - **`contextCrit`** _(default: `90`%)_: used context at which they turn to the danger color. Antigravity's `exceeds_200k_tokens` also triggers it.
-- **`blink`** _(default: `false`)_: `true` makes danger-level widgets blink; `"warn"` makes caution-level ones blink too. ASCII mode never blinks. Toggle **Alert blink** in the Settings tab (`i`) in `configure`.
+- **`blink`** _(default: `false`)_: `true` makes danger-level widgets blink; `"warn"` makes caution-level ones blink too. ASCII mode never blinks. Toggle **Alert blink** in the Settings tab (`i`) in `configure`, or cycle **Warning sensitivity** (`default`: 30/10% quota and 70/90% context, `early`: 40/20% and 60/80%, `relaxed`: 20/5% and 80/95%; hand-edited values stay `custom` until cycled or reset).
 - **Per widget**: any quota or context widget takes its own `warn`, `crit` and `blink` (e.g. `{"id": "fiveHourBar", "warn": 20, "crit": 10, "blink": true}`).
 - **Visibility per widget**: quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) and their reset widgets (`fiveHourReset`, `weeklyReset`, `argonReset`) take `showBelow`, a remaining-quota percentage from 0 to 100. The widget hides while more remains and appears at or below the threshold. A reset widget uses its own quota window. Context widgets (`context`, `contextPct`, `contextTokens`) take `showAbove`, a used-context percentage from 0 to 100; they hide below the threshold and appear at or above it, or as soon as Antigravity reports `exceeds_200k_tokens` (the danger color). Both options are unset by default (`always` in `configure`); values that aren't numbers from 0 to 100 are ignored.
 
@@ -452,7 +452,7 @@ A gradient gives each row one color sweep from left to right, on top of any them
 { "gradient": "#ff5f6d-#ffc371" }
 ```
 
-Or from the command line: `npx agy-powerline gradient sunset`, `npx agy-powerline gradient "#ff5f6d-#ffc371"`, `npx agy-powerline gradient off`. `npx agy-powerline gradient --list` shows every preset in its colors.
+Or from the command line: `npx agy-powerline gradient sunset`, `npx agy-powerline gradient "#ff5f6d-#ffc371"`, `npx agy-powerline gradient off`. `npx agy-powerline gradient --list` shows every preset in its colors. You can also cycle **Bar gradient** (`off` and built-in presets, keeping any custom hex gradient in the cycle until reset) in the Settings tab (`i`) in `configure`.
 
 - **Value:** a preset (`aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono`) or 2 to 6 hex colors joined by `-` (`#` optional, 3 or 6 digits). Anything else is ignored and the bar keeps the theme's colors.
 - **Spacing:** the first widget of each row takes the first color, the last widget the last color, and the ones between evenly spaced colors, mixed in the OKLab color space so the steps look even. Widgets hidden for lack of data, or dropped to fit the terminal, don't count.
