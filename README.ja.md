@@ -26,6 +26,17 @@
   <img src="assets/demo.gif" alt="agy-powerline の configure：argon と入力して Argon の週間クォータを追加し、プリセット、テーマ、レイアウトをバーのライブプレビューで見て回り、最後に Powerline タブを開く" width="850">
 </p>
 
+## なぜ agy-powerline？
+
+| 機能                         | できること                                                                                                          | 詳しく見る                                                                                                 |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| クォータのペース表示         | クォータメーターのペースマーカーで、5h または 7d のクォータがリセットまでもつかがひと目でわかる                     | [クォータガイド](docs/guides/antigravity-quota.md) · [計算機](https://agy-powerline.com/quota-calculator/) |
+| マルチプロバイダーのクォータ | Gemini 5h/7d、サードパーティ（Claude/GPT）、Gemini 4 Argon のクォータを横並びで追跡                                 | [ペイロードリファレンス](docs/payload.md#quota-buckets)                                                    |
+| テーマ & レイアウト          | `pills`、`lines`、`classic` の各レイアウトで使える WCAG AA 準拠の 22 テーマ（ダーク、ライト、色覚多様性対応を含む） | [テーマギャラリー](https://agy-powerline.com/themes/)                                                      |
+| 対話式のコンフィギュレーター | ターミナル（`npx agy-powerline configure`）またはブラウザーのライブプレビュー付きエディターで設定                   | [Web コンフィギュレーター](https://agy-powerline.com/configure/)                                           |
+| セキュリティ & プライバシー  | ランタイム依存パッケージ 0、ネットワーク通信なし、テレメトリなし、`settings.json` の自動バックアップ                | [セキュリティ](SECURITY.md)                                                                                |
+| クロスプラットフォーム       | 組み込みの診断機能（`doctor`）付きで Windows、macOS、Linux、WSL で動作                                              | [インストール](docs/install.md) · [トラブルシューティング](docs/troubleshooting.md)                        |
+
 ## インストール
 
 [Node.js](https://nodejs.org/) 20 以上と [Antigravity CLI](https://antigravity.google/docs/cli/overview) が必要です。Windows、macOS、Linux、WSL で動作します（[WSL についての注意](docs/install.md#wsl)）。
@@ -46,7 +57,18 @@ agy                           # Antigravity を起動
 
 </details>
 
-agy にインストールしてもらうこともできます。次の文を `agy` のセッションに貼り付けてください。
+### agy の中からインストールする
+
+agy-powerline は agy のプラグインでもあります。追加してから `agy` セッション内でセットアップスキルを実行すると、`init` と `doctor` を自動で実行します：
+
+```text
+agy plugin install https://github.com/wassim-azi/agy-powerline
+/agy-powerline-setup
+```
+
+完了後に `agy` を一度再起動してください。詳細：[プラグインでのインストール](docs/install.md#install-from-inside-agy-plugin)。
+
+または、次の文を `agy` のセッションに貼り付けてください。
 
 ```text
 Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then tell me to restart agy.
@@ -60,21 +82,23 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 
 `npx agy-powerline configure` を実行すると、バーのライブプレビュー付きのエディターが開きます。`←` `→` で Widgets、Presets、Themes、Layout、Powerline、Settings を切り替え、`↑` `↓` で移動、Enter で選択、`q` で保存して終了します。各画面のキーは画面下部に表示されます。キーの一覧は [Configuration](docs/configuration.md#configurator-keys) にあります。
 
+ブラウザーの方がよければ、[ブラウザーでバーを作成](https://agy-powerline.com/configure/)してライブプレビューで確認し、ダウンロードまたはインポートできます。
+
 変更は、実行中の `agy` の次回の更新時に反映されます。
 
 ### プリセット
 
 プリセットから始めて、好みに合わせて調整します：
 
-| プリセット | 表示内容                                                                                                                                   |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `default`  | モデル、コンテキスト、git；2 行目に 5h と 7d のクォータとリセットまでの時間                                                                |
-| `compact`  | 1 行：短いモデル名、最も残りの少ないクォータ、コンテキスト %、git                                                                          |
-| `agent`    | エージェントの状態、サブエージェント、タイトル、モード、サンドボックス；モデル、コンテキスト %、アーティファクト、最も残りの少ないクォータ |
-| `git`      | プロジェクト、ブランチ、worktree、stash；ファイル数、変更行数、コミット                                                                    |
-| `tokens`   | コンテキストのトークン、セッションの入出力トークン、キャッシュ；今日と 7 日間のトークン                                                    |
-| `quotas`   | プランとモデル；5h と 7d のクォータを横並びに、サードパーティと Argon を 3 行目に                                                          |
-| `full`     | すべて：セッション、プロジェクト、git；コンテキスト、トークン、キャッシュ；両方のクォータ                                                  |
+| プリセット | 表示内容                                                                                                                                             |
+| ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `default`  | モデル、コンテキスト、git；2 行目に 5h と 7d のクォータとリセットまでの時間                                                                          |
+| `compact`  | 1 行：短いモデル名、最も残りの少ないクォータ、コンテキスト %、git                                                                                    |
+| `agent`    | エージェントの状態、サブエージェント、タイトル、モード、サンドボックス；モデル、コンテキスト %、アーティファクト（成果物）、最も残りの少ないクォータ |
+| `git`      | プロジェクト、ブランチ、worktree、stash；ファイル数、変更行数、コミット                                                                              |
+| `tokens`   | コンテキストのトークン、セッションの入出力トークン、キャッシュヒット；今日と 7 日間のトークン                                                        |
+| `quotas`   | プランとモデル；5h と 7d のクォータを横並びに、サードパーティと Argon を 3 行目に                                                                    |
+| `full`     | すべて：セッション、プロジェクト、git；コンテキスト、トークン、キャッシュ；両方のクォータ                                                            |
 
 ### テーマ
 
@@ -85,7 +109,7 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 | 色覚多様性に配慮 | `colorblind-dark`、`colorblind-light`                                                                                                                                                                                                                            |
 | 独自の配色       | `custom`（[方法](docs/configuration.md#custom-theme)）                                                                                                                                                                                                           |
 
-すべてのテーマは `npx agy-powerline theme --gallery` でプレビューできます。
+すべてのテーマは[テーマギャラリー](https://agy-powerline.com/themes/)または `npx agy-powerline theme --gallery` でプレビューできます。各行にグラデーションをかけるには `npx agy-powerline gradient <name>` を使います（`aurora`、`sunset`、`ocean`、`forest`、`neon`、`candy`、`rainbow`、`mono`、または独自の配色を指定可能：[方法](docs/configuration.md#gradients)）。
 
 ### レイアウト
 
@@ -146,52 +170,52 @@ npx agy-powerline init --language ja
 
 ## ウィジェット
 
-| ウィジェット                                                     | 表示内容                                                                                                 |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `model`                                                          | 使用中のモデル                                                                                           |
-| `clock`                                                          | Current local time (12/24-hour format set under `clock`)                                                 |
-| `fiveHourBar`、`weeklyBar`                                       | 5h / 7d クォータの残りをメーターで表示（[ペースマーカー](docs/configuration.md#quota-pace-marker)付き）  |
-| `fiveHourPct`、`weeklyPct`                                       | 5h / 7d クォータの残りをパーセントで表示                                                                 |
-| `fiveHourReset`、`weeklyReset`                                   | クォータがリセットされるまでの時間、またはリセット時刻                                                   |
-| `quota`                                                          | 最も早く尽きそうなクォータとそのリセット                                                                 |
-| `thirdPartyFiveHour`、`thirdPartyWeekly`                         | サードパーティモデルのクォータ                                                                           |
-| `argonWeekly`、`argonReset`                                      | Gemini 4 Argon 専用の週間クォータ（Google AI Pro）とそのリセット                                         |
-| `context`、`contextPct`、`contextTokens`                         | 使用中のコンテキストウィンドウ：メーター、パーセント、またはトークン数                                   |
-| `git`                                                            | ブランチ、未コミットの変更、ahead/behind                                                                 |
-| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree |
-| `project`、`cwd`                                                 | プロジェクトのフォルダー、現在のフォルダー                                                               |
-| `agent`、`agentState`、`plan`、`sandbox`、`artifacts`、`version` | アクティブなエージェント、エージェントの状態、プラン、サンドボックス、成果物、CLI のバージョン           |
-| `tasks`、`queue`                                                 | 実行中のサブエージェント、バックグラウンドタスク、待機中のユーザーメッセージ                             |
-| `mode`                                                           | 承認モード（例：accept-edits）と Vim モード                                                              |
-| `title`                                                          | 会話のタイトル                                                                                           |
-| `sessionTime`                                                    | Time since the active conversation started                                                               |
-| `totalTokens`、`cost`、`cacheHit`、`cacheRead`、`cacheCreate`    | セッションのトークン数、推定コスト（USD）、プロンプトキャッシュの使用状況                                |
-| `tokensToday`、`tokensWeek`                                      | 今日と過去 7 日間のトークン使用量（すべての会話、Node 22.13 以降）                                       |
-| `ram`                                                            | マシンのメモリ使用量                                                                                     |
-| `os`                                                             | System agy runs on: Windows, macOS, Linux or WSL                                                         |
-| `host`                                                           | Current user and short hostname from the OS (`alex@devbox`)                                              |
-| `customText`、`exec`                                             | 任意のテキスト、または [シェルコマンド](docs/configuration.md#shell-command-widget-exec)の出力           |
+| ウィジェット                                                     | 表示内容                                                                                                                             |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `model`                                                          | 使用中のモデル                                                                                                                       |
+| `clock`                                                          | 現在の現地時刻（12/24 時間表記は `clock` で設定）                                                                                    |
+| `fiveHourBar`、`weeklyBar`                                       | 5h / 7d クォータの残りをメーターで表示（[ペースマーカー](docs/configuration.md#quota-pace-marker)付き）                              |
+| `fiveHourPct`、`weeklyPct`                                       | 5h / 7d クォータの残りをパーセントで表示                                                                                             |
+| `fiveHourReset`、`weeklyReset`                                   | クォータがリセットされるまでの時間、またはリセット時刻                                                                               |
+| `quota`                                                          | 最も早く尽きそうなクォータとそのリセット                                                                                             |
+| `thirdPartyFiveHour`、`thirdPartyWeekly`                         | サードパーティモデルのクォータ                                                                                                       |
+| `argonWeekly`、`argonReset`                                      | Gemini 4 Argon 専用の週間クォータ（Google AI Pro）とそのリセット                                                                     |
+| `context`、`contextPct`、`contextTokens`                         | 使用中のコンテキストウィンドウ：メーター、パーセント、またはトークン数                                                               |
+| `git`                                                            | ブランチ、未コミットの変更、ahead/behind                                                                                             |
+| `gitChanges`、`gitFiles`、`gitSha`、`gitStash`、`gitWorktree`    | 追加・削除された行数、ステージ済/変更/未追跡/競合ファイル数、コミット ID、stash 数、リンクされた worktree                            |
+| `project`、`cwd`                                                 | プロジェクトのフォルダー、現在のフォルダー                                                                                           |
+| `agent`、`agentState`、`plan`、`sandbox`、`artifacts`、`version` | アクティブなエージェント、エージェントの状態（確認フラグ付き）、プラン、サンドボックス、アーティファクト（成果物）、CLI のバージョン |
+| `tasks`、`queue`                                                 | 実行中のサブエージェント、バックグラウンドタスク、待機中のユーザーメッセージ                                                         |
+| `mode`                                                           | 承認モード（例：accept-edits）と Vim モード                                                                                          |
+| `title`                                                          | 会話のタイトル                                                                                                                       |
+| `sessionTime`                                                    | アクティブな会話が始まってからの経過時間                                                                                             |
+| `totalTokens`、`cost`、`cacheHit`、`cacheRead`、`cacheCreate`    | セッションのトークン数、推定コスト（USD）、プロンプトキャッシュの使用状況                                                            |
+| `tokensToday`、`tokensWeek`                                      | 今日と過去 7 日間のトークン使用量（すべての会話、Node 22.13 以降）                                                                   |
+| `ram`                                                            | マシンのメモリ使用量                                                                                                                 |
+| `os`                                                             | agy が動作しているシステム：Windows、macOS、Linux、または WSL                                                                        |
+| `host`                                                           | OS の現在のユーザーと短いホスト名（`alex@devbox`）                                                                                   |
+| `customText`、`exec`                                             | 任意のテキスト、または [シェルコマンド](docs/configuration.md#shell-command-widget-exec)の出力                                       |
 
-表示する内容のないウィジェットは自動的に隠れます。ウィジェットごとに色を変えたり、ラベルを外したり、独自の警告しきい値を設定したりできます。詳しくは [Configuration](docs/configuration.md) を参照してください。
+表示する内容のないウィジェットは自動的に隠れます。ウィジェットごとに色や名前・アイコンを変えたり、ラベルを外したり、独自の警告しきい値を設定したりできます。詳しくは [Configuration](docs/configuration.md) を参照してください。
 
 ## コマンド
 
-| コマンド                                           | 内容                                                         |
-| -------------------------------------------------- | ------------------------------------------------------------ |
-| `npx agy-powerline`                                | インストール（必要時）、スクリプト更新、エディター起動       |
-| `npx agy-powerline init [--yes]`                   | ステータスラインをインストールまたは更新                     |
-| `npx agy-powerline configure`                      | エディターを開く（別名 `config`）                            |
-| `npx agy-powerline preset <name>`                  | プリセットを適用（一覧は `--list`）                          |
-| `npx agy-powerline theme <name>`                   | テーマを切り替え（`--list`、`--gallery`）                    |
-| `npx agy-powerline gradient <name>`                | Color each row with a gradient (`--list`, `off`)             |
-| `npx agy-powerline layout <pills\|lines\|classic>` | レイアウトを切り替え                                         |
-| `npx agy-powerline caps <style>`                   | カプセルの形を切り替え：`round`、`angled`、`slanted`、`flat` |
-| `npx agy-powerline export [file]`                  | Save your config to a file, to back it up or share it        |
-| `npx agy-powerline import <file>`                  | Load a config, after showing what changes (`--merge`)        |
-| `npx agy-powerline doctor`                         | インストールを確認し、問題を説明                             |
-| `npx agy-powerline report`                         | プライバシーに配慮したバグレポートを作成                     |
-| `npx agy-powerline uninstall [--delete]`           | agy から削除（`--delete` でファイルも削除）                  |
-| `npx agy-powerline render --demo`                  | サンプルデータでバーを表示                                   |
+| コマンド                                           | 内容                                                                       |
+| -------------------------------------------------- | -------------------------------------------------------------------------- |
+| `npx agy-powerline`                                | インストール（必要時）、スクリプト更新、エディター起動                     |
+| `npx agy-powerline init [--yes]`                   | ステータスラインをインストールまたは更新（`--preset`、`--yes` などに対応） |
+| `npx agy-powerline configure`                      | エディターを開く（別名 `config`）                                          |
+| `npx agy-powerline preset <name>`                  | プリセットを適用（一覧は `--list`）                                        |
+| `npx agy-powerline theme <name>`                   | テーマを切り替え（`--list`、`--gallery`）                                  |
+| `npx agy-powerline gradient <name>`                | 各行にグラデーションを適用（`--list`、`off`）                              |
+| `npx agy-powerline layout <pills\|lines\|classic>` | レイアウトを切り替え                                                       |
+| `npx agy-powerline caps <style>`                   | カプセルの形を切り替え：`round`、`angled`、`slanted`、`flat`               |
+| `npx agy-powerline export [file]`                  | 設定をファイルに保存（バックアップや共有用）                               |
+| `npx agy-powerline import <file>`                  | 変更内容を表示したうえで設定を読み込む（`--merge`）                        |
+| `npx agy-powerline doctor`                         | インストールを確認し、問題を説明                                           |
+| `npx agy-powerline report`                         | プライバシーに配慮したバグレポートを作成                                   |
+| `npx agy-powerline uninstall [--delete]`           | agy から削除（`--delete` でファイルも削除）                                |
+| `npx agy-powerline render --demo`                  | サンプルデータでバーを表示                                                 |
 
 各コマンドのオプションは `--help` で確認できます。
 
@@ -212,7 +236,7 @@ npx agy-powerline doctor       # すべてが最新か確認
 
 - **ネットワーク通信なし、テレメトリなし。** 表示する情報はすべて、agy がバーに渡すデータ、`.git`、OS から取得します。外部へのリンクは `configure` の `g` だけで、ブラウザーで GitHub のページを開きます。
 - **設定は安全です。** `init` と `uninstall` は `settings.json` をバックアップし、解析できないファイルは編集しません。
-- **追加しない限り何も実行されません。** ahead/behind を数えるための短い `git` の呼び出しを除き、バーが実行するコマンドは自分で設定した `exec` ウィジェットだけです。
+- **追加しない限り何も実行されません。** ahead/behind の数や、追加した git ウィジェットのファイル数・行数を数えるための短い `git` の呼び出しを除き、バーが実行するコマンドは自分で設定した `exec` ウィジェットだけです。
 - **ランタイム依存パッケージはゼロ**で、CI から [npm provenance](https://docs.npmjs.com/generating-provenance-statements) 付きで公開されています。
 
 詳細：[SECURITY.md](SECURITY.md)。
