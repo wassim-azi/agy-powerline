@@ -60,7 +60,7 @@ Enter on a widget opens its options: color, label (shown or value only), and wha
 Most values come from the JSON Antigravity pipes on stdin; `host`, `os` and `ram` read from the machine agy runs on, and token totals across conversations read from agy's local database. A widget with nothing to show hides itself: a model, quota, reset time, context window or token usage that is missing from the payload (or unusable) is left out, not shown as `Unknown`, `0%` or `now`.
 
 - Local clock (`clock` e.g. `🕒 2:05pm`: the current time, in the format set under [`"clock"`](#reset-times-and-clock); `Clock: 2:05pm` in ASCII mode)
-- Model (`model.display_name`; `"short": true` shows `3.8 Flash·High` instead of `Gemini 3.8 Flash (High)`)
+- Model (`model.display_name`; `"short": true` shows `4 Hydrogen·High` instead of `Gemini 4 Hydrogen (High)`)
 - Tightest quota (`quota` e.g. `⏳ 7d 28.6% rem · 11hr 35m`: of the quota buckets for the model in use, the one closest to running out; the Argon weekly bucket (`Argon 7d`) for Gemini 4 Argon, the other `gemini-*` buckets for the other Gemini models and for Argon on plans without an Argon bucket, `3p-*` for the others)
 - 5h / 7d remaining quota meters (`fiveHourBar`, `weeklyBar`) with consumption-based fill direction, a [pace marker](#quota-pace-marker), and separate reset timers that show a countdown or the [exact reset time](#reset-times-and-clock) (`fiveHourReset`, `weeklyReset`)
 - 3P 5h / 7d remaining quota (5h hidden while `disabled`)
@@ -491,7 +491,7 @@ npx agy-powerline import my-bar.json
 
 **No Nerd Font?** Enable ASCII mode: caps and separators become plain text (`[` `]`, `<` `>`, `/`; joins default to `>`), dot meters become `#`/`-`, markers become `*`, and emojis turn off. Toggle **ASCII mode** in the Settings tab (`i`) in `configure`, set `"ascii": true`, pass `render --ascii`, or export `AGY_POWERLINE_ASCII=1`.
 
-**Narrow terminals**: the bar never runs past the `terminal_width` Antigravity reports. A row that is too wide first drops icons and labels (values only, as in [minimalist mode](#widget-options)), then shortens the model name (`3.8 Flash·High`) and the Lines meters (12 dots instead of 25), then hides its least important widgets one by one (custom text, version and cache counters first; the model and the 5h quota last), and as a last resort is cut with `…`. Widths count wide emojis and East Asian characters as two columns.
+**Narrow terminals**: the bar never runs past the `terminal_width` Antigravity reports. A row that is too wide first drops icons and labels (values only, as in [minimalist mode](#widget-options)), then shortens the model name (`4 Hydrogen·High`) and the Lines meters (12 dots instead of 25), then hides its least important widgets one by one (custom text, version and cache counters first; the model and the 5h quota last), and as a last resort is cut with `…`. Widths count wide emojis and East Asian characters as two columns.
 
 **Wide terminals**: set `"maxWidth"` to a positive integer (e.g. `120`) — or cycle **Max bar width** (`full`, `100`, `120`, `140`, `160`) in the Settings tab (`i`) in `configure` — to cap the bar's effective width at `Math.min(terminal_width, maxWidth)` instead of stretching flex spaces across an ultrawide window. `"full"` or `null` (default) leaves the bar uncapped.
 

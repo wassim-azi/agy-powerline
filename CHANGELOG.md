@@ -28,6 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Dedicated `Settings` tab (`i`) in `configure`**: moved global bar toggles (`Bar language`, `Emojis`, `Minimalist mode`, `Quota pace marker`, `Alert blink`, `Space between rows`, `ASCII mode`) out of the live preview's bottom chip strip into `Settings`, keeping `Live preview` focused on the rendered bar (#216)
 - **Clean `configure` lifecycle**: `configure` now restores terminal state, detaches event listeners, and resolves cleanly instead of calling `process.exit(0)` mid-caller (#202)
 - **Aligned onboarding docs & visuals**: updated the demo GIF, OG share cards, and guides for the unified `npx agy-powerline` workflow (#205)
+- **Updated sample model to Gemini 4 Hydrogen**: replaced `Gemini 3.8 Flash (High)` (`3.8 Flash·High`) with `Gemini 4 Hydrogen (High)` (`4 Hydrogen·High`) across demo data, live previews, docs, OG share cards, and the demo GIF (#220)
 
 ### Fixed
 

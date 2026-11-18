@@ -15,7 +15,7 @@ const SHARED_JS = path.join(ROOT, "src", "lib", "shared.js");
 const NODE = process.execPath;
 
 const PAYLOAD = JSON.stringify({
-  model: { display_name: "Gemini 3.8 Flash (High)" },
+  model: { display_name: "Gemini 4 Hydrogen (High)" },
   workspace: { current_dir: "C:/Projects/agy-powerline", project_dir: "C:/Projects/agy-powerline" },
   cwd: "C:/Projects/agy-powerline",
   agent_state: "idle",

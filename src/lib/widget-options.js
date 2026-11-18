@@ -119,7 +119,7 @@ function editFields(widget, config = {}, options = {}) {
       label: "Short name",
       values: [undefined, true],
       show: (value) => onOff(value),
-      help: "3.8 Flash·High instead of Gemini 3.8 Flash (High).",
+      help: "4 Hydrogen·High instead of Gemini 4 Hydrogen (High).",
     });
   }
   if (widget.id === "totalTokens") {
