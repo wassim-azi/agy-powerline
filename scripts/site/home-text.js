@@ -216,7 +216,7 @@ const HOME_TEXT = {
       [
         "git",
         "Git",
-        "La branche, les modifications non commitées et les commits d'avance ou de retard.",
+        "La branche, les modifications non commitées et les commits en avance ou en retard sur l'upstream.",
       ],
       [
         "fiveHour",
@@ -240,7 +240,7 @@ const HOME_TEXT = {
     steps: [
       [
         "Installer",
-        "Il faut Node.js 20 ou plus récent et Antigravity CLI. Sauvegarde le <code>settings.json</code> d'agy avant de le modifier, puis ouvre l'éditeur en direct.",
+        "Il faut Node.js 20 ou plus récent et Antigravity CLI. Sauvegarde le <code>settings.json</code> d'agy avant de le modifier, puis ouvre l'éditeur avec aperçu en direct.",
         "npx agy-powerline",
       ],
       [
@@ -424,7 +424,7 @@ const HOME_TEXT = {
     steps: [
       [
         "Instalar",
-        "Necesita Node.js 20 o más reciente y Antigravity CLI. Guarda una copia del <code>settings.json</code> de agy antes de cambiarlo y abre el editor en vivo.",
+        "Necesita Node.js 20 o más reciente y Antigravity CLI. Guarda una copia del <code>settings.json</code> de agy antes de cambiarlo y abre el editor con vista previa en vivo.",
         "npx agy-powerline",
       ],
       [

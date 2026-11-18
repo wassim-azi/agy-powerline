@@ -31,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **Clean `exec` timeout cleanup**: kill the full process tree (`taskkill /T /F` on Windows, process group `SIGKILL` on macOS/Linux) when an `exec` command times out so child and grandchild processes don't outlive the refresh (#177)
+- **French (`fr`) and Spanish (`es`) translations**: fixed the nested blockquote, untranslated `Mise à jour` comments, outdated security statement, and `5h/7j` / `repère de rythme` consistency in `README.fr.md`, added the missing overview and plugin sections across `README.fr.md` and `README.es.md`, and refined the live-preview editor phrasing on `/fr/` and `/es/` (#229)
 - **Japanese (`ja`) translation**: changed `now` (`今すぐ` -> `今`) and documented the 80-column width constraint on `subagent`/`subagents` in `src/lib/i18n.js`, completed the untranslated widget and command rows and missing sections in `README.ja.md`, and localized the header `Docs` nav label on `/ja/` (#227)
 - **Simplified Chinese (`zh-CN`) and Korean (`ko`) translations**: fixed preset, context-window, and language-setting descriptions in `README.ko.md` and `/ko/`, completed untranslated widget and command rows in `README.zh-CN.md`, and localized the header `Docs` nav label (#225)
 
