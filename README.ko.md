@@ -166,7 +166,7 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에�
 npx agy-powerline init --language ko
 ```
 
-또는 `statusline.config.json`에 `"language": "ko"`를 설정하세요(`configure`에서는 `u` 키로 전환). 모델명, 브랜치 등 agy가 전달하는 값은 그대로 표시되며, `2h 47m` 같은 시간 단위는 폭을 줄이기 위해 영문 약어를 유지합니다. CLI 출력과 `configure` 화면은 영어로 유지됩니다. 자세한 내용은 [언어 설정 문서](docs/configuration.md#language)를 참고하세요.
+또는 `statusline.config.json`에 `"language": "ko"`를 설정하세요(`configure`에서 `i`로 `Settings` 열기). 모델명, 브랜치 등 agy가 전달하는 값은 그대로 표시되며, `2h 47m` 같은 시간 단위는 폭을 줄이기 위해 영문 약어를 유지합니다. CLI 출력과 `configure` 화면은 영어로 유지됩니다. 자세한 내용은 [언어 설정 문서](docs/configuration.md#language)를 참고하세요.
 
 ## 위젯
 

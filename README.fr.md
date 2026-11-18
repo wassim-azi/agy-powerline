@@ -166,7 +166,7 @@ Les mots de la barre elle-même (`7j`, `Réinit`, `rest.`, les unités de `1j 17
 npx agy-powerline init --language fr
 ```
 
-ou `"language": "fr"` dans `statusline.config.json` (touche `u` dans `configure`). Le nom du modèle, la branche et tout ce qu’envoie agy restent tels quels ; les commandes et `configure` restent en anglais. Détails dans la [documentation de configuration](docs/configuration.md#language).
+ou `"language": "fr"` dans `statusline.config.json` (`Settings` via `i` dans `configure`). Le nom du modèle, la branche et tout ce qu’envoie agy restent tels quels ; les commandes et `configure` restent en anglais. Détails dans la [documentation de configuration](docs/configuration.md#language).
 
 ## Widgets
 

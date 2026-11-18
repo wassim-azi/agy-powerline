@@ -166,7 +166,7 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 npx agy-powerline init --language ja
 ```
 
-または `statusline.config.json` に `"language": "ja"` と書きます（`configure` では `u` キー）。モデル名、ブランチなど agy から届く内容はそのまま表示され、`2h 47m` の単位は幅を抑えるため英字のままです。コマンドと `configure` は英語のままです。詳しくは[設定のドキュメント](docs/configuration.md#language)をご覧ください。
+または `statusline.config.json` に `"language": "ja"` と書きます（`configure` で `i` から `Settings` を開く）。モデル名、ブランチなど agy から届く内容はそのまま表示され、`2h 47m` の単位は幅を抑えるため英字のままです。コマンドと `configure` は英語のままです。詳しくは[設定のドキュメント](docs/configuration.md#language)をご覧ください。
 
 ## ウィジェット
 

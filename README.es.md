@@ -166,7 +166,7 @@ Las palabras propias de la barra (`Modelo`, `Reinicio`, `rest.`, `entrada`/`sali
 npx agy-powerline init --language es
 ```
 
-o `"language": "es"` en `statusline.config.json` (tecla `u` en `configure`). El nombre del modelo, la rama y todo lo que envía agy quedan tal cual; los comandos y `configure` siguen en inglés. Detalles en la [documentación de configuración](docs/configuration.md#language).
+o `"language": "es"` en `statusline.config.json` (`Settings` con `i` en `configure`). El nombre del modelo, la rama y todo lo que envía agy quedan tal cual; los comandos y `configure` siguen en inglés. Detalles en la [documentación de configuración](docs/configuration.md#language).
 
 ## Widgets
 
