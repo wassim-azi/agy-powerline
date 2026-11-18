@@ -26,6 +26,17 @@ Consulta de un vistazo tu modelo, las cuotas de Gemini (5h/7d), Claude/GPT y Arg
   <img src="assets/demo.gif" alt="configure de agy-powerline: añade la cuota semanal de Argon escribiendo argon, luego navega por los preajustes, temas y diseños con una vista previa en tiempo real de la barra, y abre la pestaña Powerline" width="850">
 </p>
 
+## ¿Por qué agy-powerline?
+
+| Característica               | Qué obtienes                                                                                             | Más información                                                                                                 |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
+| Ritmo de cuotas              | Los marcadores de ritmo en los medidores muestran si tu cuota de 5h o 7d durará hasta su reinicio        | [Guía de cuotas](docs/guides/antigravity-quota.md) · [Calculadora](https://agy-powerline.com/quota-calculator/) |
+| Cuotas de varios proveedores | Sigue lado a lado las cuotas de Gemini 5h/7d, de terceros (Claude/GPT) y de Gemini 4 Argon               | [Referencia del payload](docs/payload.md#quota-buckets)                                                         |
+| Temas y diseños              | 22 temas con contraste WCAG AA (oscuros, claros y aptos para daltonismo) en `pills`, `lines` y `classic` | [Galería de temas](https://agy-powerline.com/themes/)                                                           |
+| Configuradores interactivos  | Editor con vista previa en vivo en la terminal (`npx agy-powerline configure`) o en el navegador         | [Configurador web](https://agy-powerline.com/configure/)                                                        |
+| Seguridad y privacidad       | Cero dependencias en tiempo de ejecución, sin red ni telemetría, copias de seguridad de `settings.json`  | [Seguridad](SECURITY.md)                                                                                        |
+| Multiplataforma              | Funciona en Windows, macOS, Linux y WSL con diagnósticos integrados (`doctor`)                           | [Instalación](docs/install.md) · [Solución de problemas](docs/troubleshooting.md)                               |
+
 ## Instalación
 
 Necesitas [Node.js](https://nodejs.org/) 20 o superior y la [CLI de Antigravity](https://antigravity.google/docs/cli/overview). Funciona en Windows, macOS, Linux y WSL ([notas sobre WSL](docs/install.md#wsl)).
@@ -35,7 +46,7 @@ npx agy-powerline             # instala la barra de estado y abre el editor
 agy                           # inicia Antigravity
 ```
 
-En una terminal, `npx agy-powerline` instala los scripts (o actualiza los antiguos conservando tu configuración), enlaza `settings.json` tras crear una copia de seguridad y abre el editor con vista previa en vivo. Reinicia `agy` una vez después. Para instalaciones automatizadas, usa `npx agy-powerline init --yes`. Detalles: [cómo funciona la instalación](docs/install.md).
+En una terminal, `npx agy-powerline` instala los scripts (o actualiza los antiguos conservando tu configuración), enlaza `settings.json` (tras crear una copia de seguridad y preguntar antes de reemplazar un `statusLine` existente) y abre el editor con vista previa en vivo. Reinicia `agy` una vez después. Para instalaciones automatizadas, usa `npx agy-powerline init --yes`. Detalles: [cómo funciona la instalación](docs/install.md).
 
 <details>
 <summary>Captura de pantalla: la barra en una sesión real de agy (Windows Terminal)</summary>
@@ -79,15 +90,15 @@ Los cambios se aplican a una sesión en ejecución de `agy` en su siguiente refr
 
 Comienza desde un preajuste y luego ajústalo:
 
-| Preajuste | Muestra                                                                                                               |
-| --------- | --------------------------------------------------------------------------------------------------------------------- |
-| `default` | Modelo, contexto, git; cuotas de 5h y 7d con reinicios en una segunda fila                                            |
-| `compact` | Una sola línea: modelo abreviado, cuota más ajustada, % de contexto, git                                              |
-| `agent`   | Estado del agente, subagentes, título, modo, sandbox; modelo, % de contexto, artefactos, cuota más ajustada           |
-| `git`     | Proyecto, rama, worktree, stash; recuento de archivos, cambios de líneas, commit                                      |
-| `tokens`  | Tokens de contexto, tokens de sesión de entrada/salida, aciertos de caché; tokens de hoy y durante los últimos 7 días |
-| `quotas`  | Plan y modelo; cuotas de 5h y 7d lado a lado; modelos de terceros y Argon en una tercera fila                         |
-| `full`    | Todo: sesión, proyecto y git; contexto, tokens y caché; ambas cuotas                                                  |
+| Preajuste | Muestra                                                                                                                             |
+| --------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `default` | Modelo, contexto, git; cuotas de 5h y 7d con reinicios en una segunda fila                                                          |
+| `compact` | Una sola línea: modelo abreviado, cuota más ajustada, % de contexto, git                                                            |
+| `agent`   | Estado del agente, subagentes, título, modo, sandbox; modelo, % de contexto, artefactos, cuota más ajustada                         |
+| `git`     | Proyecto, rama, worktree, stash; recuento de archivos, cambios de líneas, commit                                                    |
+| `tokens`  | Tokens de contexto, tokens de sesión de entrada/salida, aciertos de caché (`Cache hit`); tokens de hoy y durante los últimos 7 días |
+| `quotas`  | Plan y modelo; cuotas de 5h y 7d lado a lado; modelos de terceros y Argon en una tercera fila                                       |
+| `full`    | Todo: sesión, proyecto y git; contexto, tokens y caché; ambas cuotas                                                                |
 
 ### Temas
 
@@ -149,7 +160,7 @@ Previsualízalos todos en la [galería de temas](https://agy-powerline.com/theme
 
 ### Idioma de la barra
 
-Las palabras propias de la barra (`Reinicio`, `rest.`, las unidades de `2h 47m`) pueden mostrarse en español:
+Las palabras propias de la barra (`Modelo`, `Reinicio`, `rest.`, `entrada`/`salida`) pueden mostrarse en español:
 
 ```sh
 npx agy-powerline init --language es
@@ -173,7 +184,7 @@ o `"language": "es"` en `statusline.config.json` (tecla `u` en `configure`). El 
 | `git`                                                            | Rama, cambios no confirmados y commits por delante o por detrás (ahead/behind)                                                        |
 | `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Líneas añadidas y eliminadas, archivos preparados/modificados/sin seguimiento/en conflicto, ID de commit, stashes, worktree vinculado |
 | `project`, `cwd`                                                 | Directorio del proyecto, directorio actual                                                                                            |
-| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | Agente activo, estado del agente, plan, sandbox, artefactos, versión de la CLI                                                        |
+| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | Agente activo, estado del agente (con indicador de confirmación), plan, sandbox, artefactos, versión de la CLI                        |
 | `tasks`, `queue`                                                 | Subagentes en ejecución, tareas en segundo plano y mensajes en cola                                                                   |
 | `mode`                                                           | Modo de aprobación (p. ej., accept-edits) y modo Vim                                                                                  |
 | `title`                                                          | El título de la conversación                                                                                                          |
@@ -192,7 +203,7 @@ Un widget sin nada que mostrar se oculta automáticamente. Los widgets se pueden
 | Comando                                            | Qué hace                                                               |
 | -------------------------------------------------- | ---------------------------------------------------------------------- |
 | `npx agy-powerline`                                | Instala (si hace falta), actualiza scripts y abre el editor            |
-| `npx agy-powerline init [--yes]`                   | Instala o actualiza la barra de estado                                 |
+| `npx agy-powerline init [--yes]`                   | Instala o actualiza la barra de estado (admite `--preset`, `--yes`, …) |
 | `npx agy-powerline configure`                      | Abre el editor (alias `config`)                                        |
 | `npx agy-powerline preset <name>`                  | Aplica un preajuste (`--list` para verlos)                             |
 | `npx agy-powerline theme <name>`                   | Cambia el tema (`--list`, `--gallery`)                                 |
