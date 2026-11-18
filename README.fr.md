@@ -97,7 +97,7 @@ Choisissez un préréglage comme point de départ, puis personnalisez-le :
 | `agent`    | État de l’agent, sous-agents, titre, mode, sandbox ; modèle, contexte %, artefacts, quota le plus proche de sa limite |
 | `git`      | Projet, branche, worktree, stash ; nombre de fichiers, lignes modifiées, commit                                       |
 | `tokens`   | Tokens du contexte, tokens de la session en entrée et en sortie, cache hit ; tokens du jour et des 7 derniers jours   |
-| `quotas`   | Offre et modèle ; quotas sur 5h et 7j côte à côte ; modèles tiers et Argon sur une troisième ligne                    |
+| `quotas`   | Offre et modèle ; quotas sur 5h et 7j côte à côte ; modèles tiers et Argon en dessous                                 |
 | `full`     | Toutes les informations : session, projet et Git ; contexte, tokens et cache ; les deux quotas                        |
 
 ### Thèmes

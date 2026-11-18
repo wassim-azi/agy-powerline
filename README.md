@@ -95,7 +95,7 @@ Start from a preset, then adjust:
 | `agent`   | Agent state, subagents, title, mode, sandbox; model, context %, artifacts, tightest quota |
 | `git`     | Project, branch, worktree, stash; file counts, line changes, commit                       |
 | `tokens`  | Context tokens, session tokens in/out, cache hit; tokens today and over 7 days            |
-| `quotas`  | Plan and model; 5h and 7d quotas side by side; third-party and Argon on a third row       |
+| `quotas`  | Plan and model; 5h and 7d quotas side by side; third-party and Argon below                |
 | `full`    | Everything: session, project and git; context, tokens and cache; both quotas              |
 
 ### Themes

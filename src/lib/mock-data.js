@@ -39,7 +39,6 @@ function sampleData() {
         remaining_fraction: 1,
         reset_time: new Date(now + 17890 * 1000).toISOString(),
         reset_in_seconds: 17890,
-        disabled: true,
       },
       "3p-weekly": {
         remaining_fraction: 0,
