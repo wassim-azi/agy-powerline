@@ -56,6 +56,7 @@ const {
   showsPaceDelta,
   METER_STYLES,
   meterStyle,
+  resolveContextView,
   hiddenByThreshold,
   hasNoData,
   RAM_CAUTION,
@@ -222,7 +223,6 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
     classic,
     elapsedPct: isPaced(widget, config) ? quota.elapsedPct : null,
   });
-  const over200k = session.exceeds200k ? ` ${t("over_200k", session.lang)}` : "";
   const remWord = t("rem", session.lang);
 
   const paceDelta = (quota) => {
@@ -282,14 +282,16 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
   // Context widgets share their state color and blink.
   function contextState() {
     const thresh = resolveContextThresholds(widget, config);
-    const isCrit = session.exceeds200k || session.contextPct >= thresh.crit;
-    const isWarn = session.contextPct >= thresh.warn;
+    const { size, pct, exceeds200k } = resolveContextView(widget, session);
+    const isCrit = exceeds200k || pct >= thresh.crit;
+    const isWarn = pct >= thresh.warn;
     const level = isCrit ? "crit" : isWarn ? "warn" : "normal";
     const blinkSeq = !ascii && shouldBlink(level, thresh.blink) ? BLINK : "";
-    const color = session.exceeds200k
+    const color = exceeds200k
       ? palette.quotaCrit || palette.red || LINES.red
-      : colorForUsedPct(Math.round(session.contextPct), palette, thresh);
-    return { thresh, blinkSeq, color };
+      : colorForUsedPct(Math.round(pct), palette, thresh);
+    const over200k = exceeds200k ? ` ${t("over_200k", session.lang)}` : "";
+    return { thresh, size, pct, over200k, blinkSeq, color };
   }
 
   if (hasNoData(id, session) || hiddenByThreshold(id, widget, session)) {
@@ -396,12 +398,12 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       return quotaReset(session.argonWeekly, true);
 
     case "context": {
-      const { thresh, blinkSeq, color } = contextState();
+      const { thresh, size, pct, over200k, blinkSeq, color } = contextState();
       return (
         blinkSeq +
         fg(palette.text) +
         tag() +
-        renderDotMeter(session.contextPct, dots, ascii, palette, false, {
+        renderDotMeter(pct, dots, ascii, palette, false, {
           ...thresh,
           color,
           style,
@@ -409,32 +411,27 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         }) +
         " " +
         fg(color) +
-        `${formatContextTokens(session.usedTokens, session.contextSize)} ` +
-        `(${session.contextPct.toFixed(1)}%)${over200k}` +
+        `${formatContextTokens(session.usedTokens, size)} ` +
+        `(${pct.toFixed(1)}%)${over200k}` +
         RESET
       );
     }
 
     case "contextPct": {
-      const { blinkSeq, color } = contextState();
+      const { pct, over200k, blinkSeq, color } = contextState();
       return (
-        blinkSeq +
-        fg(palette.text) +
-        tag() +
-        fg(color) +
-        `${session.contextPct.toFixed(1)}%${over200k}` +
-        RESET
+        blinkSeq + fg(palette.text) + tag() + fg(color) + `${pct.toFixed(1)}%${over200k}` + RESET
       );
     }
 
     case "contextTokens": {
-      const { blinkSeq, color } = contextState();
+      const { size, blinkSeq, color } = contextState();
       return (
         blinkSeq +
         fg(palette.text) +
         tag() +
         fg(color) +
-        formatContextTokens(session.usedTokens, session.contextSize) +
+        formatContextTokens(session.usedTokens, size) +
         RESET
       );
     }

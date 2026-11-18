@@ -63,6 +63,7 @@ const {
   showsPaceDelta,
   METER_STYLES,
   meterStyle,
+  resolveContextView,
   hiddenByThreshold,
   hasNoData,
   RAM_CAUTION,
@@ -200,8 +201,22 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
     const delta = showsPaceDelta(widget) ? formatPaceDelta(quota, ascii) : "";
     return delta ? ` ${delta}` : "";
   };
-  const over200k = session.exceeds200k ? ` ${t("over_200k", session.lang)}` : "";
   const remWord = t("rem", session.lang);
+  const contextState = () => {
+    const thresh = resolveContextThresholds(widget, config);
+    const { size, pct, exceeds200k } = resolveContextView(widget, session);
+    const level =
+      exceeds200k || pct >= thresh.crit ? "crit" : pct >= thresh.warn ? "warn" : "normal";
+    const blink = !ascii && shouldBlink(level, thresh.blink);
+    const color = contextColor(pct, colors.context, exceeds200k, {
+      crit: thresh.crit,
+      warn: thresh.warn,
+      critColor: colors.warn,
+      warnColor: colors.caution,
+    });
+    const over200k = exceeds200k ? ` ${t("over_200k", session.lang)}` : "";
+    return { size, pct, over200k, blink, color };
+  };
   const quotaReset = (quota, color, weekly = false) => {
     const text = quota
       ? formatResetText(quota, {
@@ -432,64 +447,25 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       return quotaReset(session.argonWeekly, colors.weekly, true);
 
     case "context": {
-      const thresh = resolveContextThresholds(widget, config);
-      const level =
-        session.exceeds200k || session.contextPct >= thresh.crit
-          ? "crit"
-          : session.contextPct >= thresh.warn
-            ? "warn"
-            : "normal";
-      const blink = !ascii && shouldBlink(level, thresh.blink);
-      const color = contextColor(session.contextPct, colors.context, session.exceeds200k, {
-        crit: thresh.crit,
-        warn: thresh.warn,
-        critColor: colors.warn,
-        warnColor: colors.caution,
-      });
+      const { size, pct, over200k, blink, color } = contextState();
       return meterSegment(
         color,
-        session.contextPct,
+        pct,
         meterLabel(),
-        `${close} ${formatContextTokens(session.usedTokens, session.contextSize)} (${session.contextPct.toFixed(1)}%)${over200k} `,
+        `${close} ${formatContextTokens(session.usedTokens, size)} (${pct.toFixed(1)}%)${over200k} `,
         false,
         blink
       );
     }
 
     case "contextPct": {
-      const thresh = resolveContextThresholds(widget, config);
-      const level =
-        session.exceeds200k || session.contextPct >= thresh.crit
-          ? "crit"
-          : session.contextPct >= thresh.warn
-            ? "warn"
-            : "normal";
-      const blink = !ascii && shouldBlink(level, thresh.blink);
-      const color = contextColor(session.contextPct, colors.context, session.exceeds200k, {
-        crit: thresh.crit,
-        warn: thresh.warn,
-        critColor: colors.warn,
-        warnColor: colors.caution,
-      });
-      return pill(color, lbl(`${session.contextPct.toFixed(1)}%${over200k}`), blink);
+      const { pct, over200k, blink, color } = contextState();
+      return pill(color, lbl(`${pct.toFixed(1)}%${over200k}`), blink);
     }
 
     case "contextTokens": {
-      const thresh = resolveContextThresholds(widget, config);
-      const level =
-        session.exceeds200k || session.contextPct >= thresh.crit
-          ? "crit"
-          : session.contextPct >= thresh.warn
-            ? "warn"
-            : "normal";
-      const blink = !ascii && shouldBlink(level, thresh.blink);
-      const color = contextColor(session.contextPct, colors.context, session.exceeds200k, {
-        crit: thresh.crit,
-        warn: thresh.warn,
-        critColor: colors.warn,
-        warnColor: colors.caution,
-      });
-      return pill(color, lbl(formatContextTokens(session.usedTokens, session.contextSize)), blink);
+      const { size, blink, color } = contextState();
+      return pill(color, lbl(formatContextTokens(session.usedTokens, size)), blink);
     }
 
     case "cwd": {

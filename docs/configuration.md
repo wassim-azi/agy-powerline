@@ -258,6 +258,14 @@ Quota and context widgets change color as they get low or full: the theme's ok c
 }
 ```
 
+- **Context compaction ceiling (`compactionLimit`)**: models with a `1.0M` (`1048576`) context window often trigger Antigravity auto-compaction earlier (e.g. at `256000` or `512000` tokens). Adding `"compactionLimit"` to `context`, `contextPct` or `contextTokens` scales the displayed percentage, meter, token denominator (`149.9K/256.0K`), `warn`/`crit`/`blink` thresholds and `showAbove` against `min(context_window_size, compactionLimit)` (clamped at `100.0%` if used tokens exceed it), and supersedes Antigravity's fixed `exceeds_200k_tokens` danger flag so caution thresholds work smoothly. Unset, non-positive or values `>= context_window_size` leave the widget unchanged. Cycle presets (`off`, `200.0K`, `256.0K`, `512.0K`) under **Compaction limit** in `configure`, or set any positive token count in `statusline.config.json`:
+
+```json
+{
+  "widgets": [{ "id": "context", "compactionLimit": 256000 }]
+}
+```
+
 ## Shell command widget (`exec`)
 
 Runs a shell command of your choice and shows the first line of its output:
