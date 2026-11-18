@@ -1095,8 +1095,8 @@ function testSplitTokens() {
 function testShortModel() {
   record(
     "shortModelName drops Gemini and joins the variant",
-    shortModelName("Gemini 3.8 Flash (High)") === "3.8 Flash·High" &&
-      shortModelName("Gemini 3.8 Flash (High)", true) === "3.8 Flash High" &&
+    shortModelName("Gemini 4 Hydrogen (High)") === "4 Hydrogen·High" &&
+      shortModelName("Gemini 4 Hydrogen (High)", true) === "4 Hydrogen High" &&
       shortModelName("Claude Sonnet 4.6") === "Claude Sonnet 4.6" &&
       shortModelName("Claude Sonnet 4.6 (Thinking)") === "Claude Sonnet 4.6·Thinking"
   );

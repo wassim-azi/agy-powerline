@@ -45,7 +45,7 @@ On every refresh the command gets one JSON object on stdin: the model, the conte
 
 ```json
 {
-  "model": { "id": "Gemini 3.8 Flash (High)", "display_name": "Gemini 3.8 Flash (High)" },
+  "model": { "id": "Gemini 4 Hydrogen (High)", "display_name": "Gemini 4 Hydrogen (High)" },
   "context_window": { "context_window_size": 1048576, "used_percentage": 10.42 },
   "quota": {
     "gemini-5h": { "remaining_fraction": 0.979, "reset_in_seconds": 17042 }

@@ -357,7 +357,7 @@ function testWidthTiers() {
   record(
     "the list and the details panel share a wide window evenly, with the widget drawn alone",
     Math.abs(left + 1 - right) <= 1 &&
-      (wide.match(/Gemini 3\.8 Flash \(High\)/g) || []).length === 2 &&
+      (wide.match(/Gemini 4 Hydrogen \(High\)/g) || []).length === 2 &&
       /the model in use/.test(wide),
     `${left + 1} / ${right}`
   );

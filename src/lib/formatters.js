@@ -289,7 +289,7 @@ function formatTokens(n) {
   return `${Math.round(n)}`;
 }
 
-// "Gemini 3.8 Flash (High)" -> "3.8 Flash·High". Other names only lose a
+// "Gemini 4 Hydrogen (High)" -> "4 Hydrogen·High". Other names only lose a
 // trailing "(...)" to the same separator.
 function shortModelName(name, ascii = false) {
   return String(name ?? "")

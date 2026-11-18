@@ -81,7 +81,7 @@ function checkPayload() {
     );
     record(
       `${layout}: an exec command with "payload": true reads the session JSON on stdin`,
-      out.includes("Gemini 3.8 Flash (High)|100|false"),
+      out.includes("Gemini 4 Hydrogen (High)|100|false"),
       out
     );
   }

@@ -630,7 +630,7 @@ function testRuntimeRenderOverrides() {
       "installed runtime applies valid flags and leaves its saved config unchanged",
       baseline.status === 0 &&
         valid.status === 0 &&
-        valid.stdout.includes("Flash") &&
+        valid.stdout.includes("Hydrogen") &&
         valid.stdout !== baseline.stdout &&
         valid.stderr === "" &&
         fs.readFileSync(configPath, "utf8") === savedConfig,

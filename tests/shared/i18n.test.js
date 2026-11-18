@@ -126,7 +126,7 @@ async function run() {
       english.join(", ")
     );
 
-    const payloadText = ["Gemini 3.8 Flash (High)", "main", "thinking", "agy-powerline"];
+    const payloadText = ["Gemini 4 Hydrogen (High)", "main", "thinking", "agy-powerline"];
     const plain = renderAll(DEFAULT_LANGUAGE);
     record(
       "payload text (model, branch, agent state, folder) prints the same in every language",

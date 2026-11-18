@@ -11,8 +11,8 @@ function sampleData() {
   const sample = {
     cwd: process.cwd(),
     model: {
-      id: "Gemini 3.8 Flash (High)",
-      display_name: "Gemini 3.8 Flash (High)",
+      id: "Gemini 4 Hydrogen (High)",
+      display_name: "Gemini 4 Hydrogen (High)",
     },
     workspace: {
       current_dir: process.cwd(),

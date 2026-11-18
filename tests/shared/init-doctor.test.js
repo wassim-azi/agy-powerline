@@ -110,7 +110,7 @@ async function testSymbolsQuestion() {
     record(
       "no turns on ASCII mode, shows the sample in ASCII and says how to change it",
       no.ascii === true &&
-        no.printed[1].includes("[ 3.8 Flash High ]") &&
+        no.printed[1].includes("[ 4 Hydrogen High ]") &&
         !no.printed[1].includes("\uE0B4") &&
         /ASCII mode is on/.test(no.printed[2]) &&
         /configure.*"ascii": false/.test(no.printed[3]),

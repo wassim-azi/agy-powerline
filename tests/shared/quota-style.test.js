@@ -379,7 +379,7 @@ function testMinimalist() {
   );
   record(
     "raw works per widget",
-    plain({ widgets: [{ id: "model", raw: true }] }).trim() === "Gemini 3.8 Flash (High)"
+    plain({ widgets: [{ id: "model", raw: true }] }).trim() === "Gemini 4 Hydrogen (High)"
   );
   record(
     "raw: false keeps one widget labeled in minimalist mode",

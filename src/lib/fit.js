@@ -121,7 +121,7 @@ function fitRow(row, width, measure) {
     );
   }
 
-  // A shorter model name ("3.8 Flash·High"), shorter meters (12 dots in
+  // A shorter model name ("4 Hydrogen·High"), shorter meters (12 dots in
   // Lines) and no pace delta before any widget has to go.
   if (measure(current) > width) {
     current = current.map((widget) =>
