@@ -57,6 +57,7 @@ const {
   METER_STYLES,
   meterStyle,
   resolveContextView,
+  resolveQuotaView,
   hiddenByThreshold,
   hasNoData,
   RAM_CAUTION,
@@ -223,7 +224,6 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
     classic,
     elapsedPct: isPaced(widget, config) ? quota.elapsedPct : null,
   });
-  const remWord = t("rem", session.lang);
 
   const paceDelta = (quota) => {
     const delta = showsPaceDelta(widget) ? formatPaceDelta(quota, ascii) : "";
@@ -232,37 +232,36 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
 
   function quotaState(quota) {
     const thresh = resolveQuotaThresholds(widget, config);
-    const rem = quota.remaining;
-    const level = rem <= thresh.crit ? "crit" : rem <= thresh.warn ? "warn" : "normal";
+    const view = resolveQuotaView(quota, config, session.lang);
+    const level =
+      view.remaining <= thresh.crit ? "crit" : view.remaining <= thresh.warn ? "warn" : "normal";
     const blinkSeq = !ascii && shouldBlink(level, thresh.blink) ? BLINK : "";
-    const color = colorForRemainingPct(Math.round(rem), palette, thresh);
-    return { thresh, rem, blinkSeq, color };
+    const color = colorForRemainingPct(Math.round(view.remaining), palette, thresh);
+    return { thresh, view, blinkSeq, color };
   }
 
-  // A quota meter with its remaining %, for the 5h, 7d and third-party bars.
+  // A quota meter with its remaining or used %, for the 5h, 7d and third-party bars.
   function quotaMeter(quota) {
-    const { thresh, rem, blinkSeq, color } = quotaState(quota);
+    const { thresh, view, blinkSeq, color } = quotaState(quota);
     return (
       blinkSeq +
       fg(palette.text) +
       tag() +
-      renderDotMeter(rem, dots, ascii, palette, true, pace(quota, thresh)) +
+      renderDotMeter(view.pct, dots, ascii, palette, view.isRemaining, {
+        ...pace(quota, thresh),
+        color,
+      }) +
       " " +
       fg(color) +
-      `${rem.toFixed(1)}% ${remWord}` +
+      view.text +
       RESET
     );
   }
 
   function quotaPct(quota) {
-    const { rem, blinkSeq, color } = quotaState(quota);
+    const { view, blinkSeq, color } = quotaState(quota);
     return (
-      blinkSeq +
-      fg(palette.text) +
-      tag() +
-      fg(color) +
-      `${rem.toFixed(1)}% ${remWord}${paceDelta(quota)}` +
-      RESET
+      blinkSeq + fg(palette.text) + tag() + fg(color) + `${view.text}${paceDelta(quota)}` + RESET
     );
   }
 
@@ -322,7 +321,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       if (!quota) {
         return null;
       }
-      const { rem, blinkSeq, color } = quotaState(quota);
+      const { view, blinkSeq, color } = quotaState(quota);
       const reset = quota.reset ? `${ascii ? ", " : " · "}${quota.reset}` : "";
       return (
         blinkSeq +
@@ -330,7 +329,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         tag() +
         `${quota.label} ` +
         fg(color) +
-        `${rem.toFixed(1)}% ${remWord}${paceDelta(quota)}` +
+        `${view.text}${paceDelta(quota)}` +
         fg(palette.text) +
         reset +
         RESET

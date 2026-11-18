@@ -41,6 +41,7 @@ const MESSAGES = {
     tag_queue: "Queue",
 
     rem: "rem",
+    used: "used",
     over_200k: ">200k",
     now: "now",
     confirm: "confirm",
@@ -93,6 +94,7 @@ const MESSAGES = {
     tag_queue: "File",
 
     rem: "rest.",
+    used: "util.",
     over_200k: ">200k",
     now: "maintenant",
     confirm: "confirmer",
@@ -145,6 +147,7 @@ const MESSAGES = {
     tag_queue: "Cola",
 
     rem: "rest.",
+    used: "usado",
     over_200k: ">200k",
     now: "ahora",
     confirm: "confirmar",
@@ -197,6 +200,7 @@ const MESSAGES = {
     tag_queue: "キュー",
 
     rem: "残",
+    used: "使用",
     over_200k: ">200k",
     now: "今",
     confirm: "確認",
@@ -250,6 +254,7 @@ const MESSAGES = {
     tag_queue: "队列",
 
     rem: "剩余",
+    used: "已用",
     over_200k: ">200k",
     now: "现在",
     confirm: "确认",
@@ -302,6 +307,7 @@ const MESSAGES = {
     tag_queue: "대기",
 
     rem: "남음",
+    used: "사용",
     over_200k: ">200k",
     now: "지금",
     confirm: "확인",
@@ -354,6 +360,7 @@ const MESSAGES = {
     tag_queue: "Warteschlange",
 
     rem: "übr.",
+    used: "gen.",
     over_200k: ">200k",
     now: "jetzt",
     confirm: "bestätigen",

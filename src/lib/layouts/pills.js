@@ -64,6 +64,7 @@ const {
   METER_STYLES,
   meterStyle,
   resolveContextView,
+  resolveQuotaView,
   hiddenByThreshold,
   hasNoData,
   RAM_CAUTION,
@@ -201,7 +202,32 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
     const delta = showsPaceDelta(widget) ? formatPaceDelta(quota, ascii) : "";
     return delta ? ` ${delta}` : "";
   };
-  const remWord = t("rem", session.lang);
+  const quotaState = (quota, baseColor) => {
+    const thresh = resolveQuotaThresholds(widget, config);
+    const view = resolveQuotaView(quota, config, session.lang);
+    const level =
+      view.remaining <= thresh.crit ? "crit" : view.remaining <= thresh.warn ? "warn" : "normal";
+    const blink = !ascii && shouldBlink(level, thresh.blink);
+    const color = quotaColor(view.remaining, baseColor, {
+      crit: thresh.crit,
+      warn: thresh.warn,
+      critColor: colors.warn,
+      warnColor: colors.caution,
+    });
+    return { view, blink, color };
+  };
+  const quotaMeter = (quota, baseColor) => {
+    const { view, blink, color } = quotaState(quota, baseColor);
+    return meterSegment(
+      color,
+      view.pct,
+      meterLabel(),
+      `${close} ${view.text} `,
+      view.isRemaining,
+      blink,
+      pace(quota)
+    );
+  };
   const contextState = () => {
     const thresh = resolveContextThresholds(widget, config);
     const { size, pct, exceeds200k } = resolveContextView(widget, session);
@@ -258,190 +284,53 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       if (!quota) {
         return null;
       }
-      const thresh = resolveQuotaThresholds(widget, config);
-      const rem = quota.remaining;
-      const level = rem <= thresh.crit ? "crit" : rem <= thresh.warn ? "warn" : "normal";
-      const blink = !ascii && shouldBlink(level, thresh.blink);
-      const color = quotaColor(rem, colors.fiveHour, {
-        crit: thresh.crit,
-        warn: thresh.warn,
-        critColor: colors.warn,
-        warnColor: colors.caution,
-      });
+      const { view, blink, color } = quotaState(quota, colors.fiveHour);
       const reset = quota.reset ? `${ascii ? ", " : " · "}${quota.reset}` : "";
-      return pill(
-        color,
-        lbl(`${quota.label} ${rem.toFixed(1)}% ${remWord}${paceDelta(quota)}${reset}`),
-        blink
-      );
+      return pill(color, lbl(`${quota.label} ${view.text}${paceDelta(quota)}${reset}`), blink);
     }
 
-    case "fiveHourBar": {
-      if (!session.fiveHour) {
-        return null;
-      }
-      const thresh = resolveQuotaThresholds(widget, config);
-      const rem = session.fiveHour.remaining;
-      const level = rem <= thresh.crit ? "crit" : rem <= thresh.warn ? "warn" : "normal";
-      const blink = !ascii && shouldBlink(level, thresh.blink);
-      const color = quotaColor(rem, colors.fiveHour, {
-        crit: thresh.crit,
-        warn: thresh.warn,
-        critColor: colors.warn,
-        warnColor: colors.caution,
-      });
-      return meterSegment(
-        color,
-        rem,
-        meterLabel(),
-        `${close} ${rem.toFixed(1)}% ${remWord} `,
-        true,
-        blink,
-        pace(session.fiveHour)
-      );
-    }
+    case "fiveHourBar":
+      return session.fiveHour ? quotaMeter(session.fiveHour, colors.fiveHour) : null;
 
     case "fiveHourPct": {
       if (!session.fiveHour) {
         return null;
       }
-      const thresh = resolveQuotaThresholds(widget, config);
-      const rem = session.fiveHour.remaining;
-      const level = rem <= thresh.crit ? "crit" : rem <= thresh.warn ? "warn" : "normal";
-      const blink = !ascii && shouldBlink(level, thresh.blink);
-      const color = quotaColor(rem, colors.fiveHour, {
-        crit: thresh.crit,
-        warn: thresh.warn,
-        critColor: colors.warn,
-        warnColor: colors.caution,
-      });
-      return pill(color, lbl(`${rem.toFixed(1)}% ${remWord}${paceDelta(session.fiveHour)}`), blink);
+      const { view, blink, color } = quotaState(session.fiveHour, colors.fiveHour);
+      return pill(color, lbl(`${view.text}${paceDelta(session.fiveHour)}`), blink);
     }
 
     case "fiveHourReset":
       return quotaReset(session.fiveHour, colors.fiveHour);
 
-    case "weeklyBar": {
-      if (!session.weekly) {
-        return null;
-      }
-      const thresh = resolveQuotaThresholds(widget, config);
-      const rem = session.weekly.remaining;
-      const level = rem <= thresh.crit ? "crit" : rem <= thresh.warn ? "warn" : "normal";
-      const blink = !ascii && shouldBlink(level, thresh.blink);
-      const color = quotaColor(rem, colors.weekly, {
-        crit: thresh.crit,
-        warn: thresh.warn,
-        critColor: colors.warn,
-        warnColor: colors.caution,
-      });
-      return meterSegment(
-        color,
-        rem,
-        meterLabel(),
-        `${close} ${rem.toFixed(1)}% ${remWord} `,
-        true,
-        blink,
-        pace(session.weekly)
-      );
-    }
+    case "weeklyBar":
+      return session.weekly ? quotaMeter(session.weekly, colors.weekly) : null;
 
     case "weeklyPct": {
       if (!session.weekly) {
         return null;
       }
-      const thresh = resolveQuotaThresholds(widget, config);
-      const rem = session.weekly.remaining;
-      const level = rem <= thresh.crit ? "crit" : rem <= thresh.warn ? "warn" : "normal";
-      const blink = !ascii && shouldBlink(level, thresh.blink);
-      const color = quotaColor(rem, colors.weekly, {
-        crit: thresh.crit,
-        warn: thresh.warn,
-        critColor: colors.warn,
-        warnColor: colors.caution,
-      });
-      return pill(color, lbl(`${rem.toFixed(1)}% ${remWord}${paceDelta(session.weekly)}`), blink);
+      const { view, blink, color } = quotaState(session.weekly, colors.weekly);
+      return pill(color, lbl(`${view.text}${paceDelta(session.weekly)}`), blink);
     }
 
     case "weeklyReset":
       return quotaReset(session.weekly, colors.weekly, true);
 
-    case "thirdPartyFiveHour": {
-      if (!session.thirdPartyFiveHour || session.thirdPartyFiveHour.disabled) {
-        return null;
-      }
-      const thresh = resolveQuotaThresholds(widget, config);
-      const rem = session.thirdPartyFiveHour.remaining;
-      const level = rem <= thresh.crit ? "crit" : rem <= thresh.warn ? "warn" : "normal";
-      const blink = !ascii && shouldBlink(level, thresh.blink);
-      const color = quotaColor(rem, colors.thirdParty, {
-        crit: thresh.crit,
-        warn: thresh.warn,
-        critColor: colors.warn,
-        warnColor: colors.caution,
-      });
-      return meterSegment(
-        color,
-        rem,
-        meterLabel(),
-        `${close} ${rem.toFixed(1)}% ${remWord} `,
-        true,
-        blink,
-        pace(session.thirdPartyFiveHour)
-      );
-    }
+    case "thirdPartyFiveHour":
+      return session.thirdPartyFiveHour && !session.thirdPartyFiveHour.disabled
+        ? quotaMeter(session.thirdPartyFiveHour, colors.thirdParty)
+        : null;
 
-    case "thirdPartyWeekly": {
-      if (!session.thirdPartyWeekly) {
-        return null;
-      }
-      const thresh = resolveQuotaThresholds(widget, config);
-      const rem = session.thirdPartyWeekly.remaining;
-      const level = rem <= thresh.crit ? "crit" : rem <= thresh.warn ? "warn" : "normal";
-      const blink = !ascii && shouldBlink(level, thresh.blink);
-      const color = quotaColor(rem, colors.thirdParty, {
-        crit: thresh.crit,
-        warn: thresh.warn,
-        critColor: colors.warn,
-        warnColor: colors.caution,
-      });
-      return meterSegment(
-        color,
-        rem,
-        meterLabel(),
-        `${close} ${rem.toFixed(1)}% ${remWord} `,
-        true,
-        blink,
-        pace(session.thirdPartyWeekly)
-      );
-    }
+    case "thirdPartyWeekly":
+      return session.thirdPartyWeekly
+        ? quotaMeter(session.thirdPartyWeekly, colors.thirdParty)
+        : null;
 
     // Argon is a Gemini model, so its quota takes the Gemini 7d color; the
     // 🔮 tag tells the two apart.
-    case "argonWeekly": {
-      if (!session.argonWeekly) {
-        return null;
-      }
-      const thresh = resolveQuotaThresholds(widget, config);
-      const rem = session.argonWeekly.remaining;
-      const level = rem <= thresh.crit ? "crit" : rem <= thresh.warn ? "warn" : "normal";
-      const blink = !ascii && shouldBlink(level, thresh.blink);
-      const color = quotaColor(rem, colors.weekly, {
-        crit: thresh.crit,
-        warn: thresh.warn,
-        critColor: colors.warn,
-        warnColor: colors.caution,
-      });
-      return meterSegment(
-        color,
-        rem,
-        meterLabel(),
-        `${close} ${rem.toFixed(1)}% ${remWord} `,
-        true,
-        blink,
-        pace(session.argonWeekly)
-      );
-    }
+    case "argonWeekly":
+      return session.argonWeekly ? quotaMeter(session.argonWeekly, colors.weekly) : null;
 
     case "argonReset":
       return quotaReset(session.argonWeekly, colors.weekly, true);

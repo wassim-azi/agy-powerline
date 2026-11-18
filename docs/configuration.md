@@ -158,6 +158,10 @@ It's off by default. Turn it on per widget with `"paceDelta": true`, or with **P
 - It's independent of `"pacing"` and `"pace"`, which only set the meters' marker.
 - On a terminal too narrow for the row, the delta goes before any widget is dropped.
 
+### Quota perspective (`quotaMode`)
+
+By default (`"quotaMode": "remaining"`), quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) show the percentage remaining (`72.0% rem`). Set `"quotaMode": "used"` — or cycle **Quota display** in the Settings tab (`i`) in `configure` — to display quota consumed instead (`28.0% used`), localized in every supported bar language. Meters continue filling left-to-right by usage consumed alongside the pace marker, and warning/danger thresholds continue triggering at the same usage levels.
+
 ## Meter styles
 
 Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"meterStyle"` picks another look for every meter, and `"meter"` on a meter widget (`fiveHourBar`, `weeklyBar`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`, `context`) for that one; the widget's value wins. `configure` sets the per-widget one (Enter on a meter widget, then **Meter**).

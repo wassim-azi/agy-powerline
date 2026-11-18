@@ -305,6 +305,23 @@ function resolveContextView(widget, session) {
   };
 }
 
+// Resolves display percentage, suffix word ("rem" or "used"), and meter
+// direction from quotaMode while keeping remaining % for warning thresholds.
+function resolveQuotaView(quota, config, lang) {
+  const remaining = Math.max(0, Math.min(100, Number(quota?.remaining) || 0));
+  const used = Math.max(0, Math.min(100, 100 - remaining));
+  const isRemaining = config?.quotaMode !== "used";
+  const pct = isRemaining ? remaining : used;
+  const word = t(isRemaining ? "rem" : "used", lang);
+  return {
+    remaining,
+    used,
+    pct,
+    isRemaining,
+    text: `${pct.toFixed(1)}% ${word}`,
+  };
+}
+
 // Invalid hand-edited values behave like unset options, leaving the widget
 // visible as it was before per-widget visibility thresholds existed.
 function hiddenByThreshold(id, widget, session) {
@@ -363,6 +380,7 @@ module.exports = {
   isVisibilityThreshold,
   isValidCompactionLimit,
   resolveContextView,
+  resolveQuotaView,
   hiddenByThreshold,
   hasNoData,
   RAM_CAUTION,

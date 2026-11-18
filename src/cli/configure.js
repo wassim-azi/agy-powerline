@@ -32,6 +32,8 @@ const {
   resolveResetFormat,
   ALIGNMENT_ORDER,
   resolveAlignment,
+  QUOTA_MODE_ORDER,
+  resolveQuotaMode,
 } = require("../lib/config");
 const { GRADIENTS, GRADIENT_ORDER, gradientStops } = require("../lib/themes");
 const { WIDGET_TAGS } = require("../lib/widget-style");
@@ -1455,6 +1457,11 @@ const ALIGNMENT_DESCRIPTIONS = {
   spread: "even flex gaps across rows without Separators",
 };
 
+const QUOTA_MODE_DESCRIPTIONS = {
+  remaining: "72.0% rem (capacity remaining)",
+  used: "28.0% used (quota consumed)",
+};
+
 const SETTINGS_ROWS = [
   {
     id: "language",
@@ -1515,6 +1522,11 @@ const SETTINGS_ROWS = [
     id: "alignment",
     label: "Row alignment",
     help: "How widgets sit across each row: left (default, flex spaces only at Separator items), center (compact centered bar), or spread (even gaps across unseparated rows).",
+  },
+  {
+    id: "quotaMode",
+    label: "Quota display",
+    help: "Show quota bars and percentages as remaining capacity (72.0% rem) or quota consumed (28.0% used). Caution and danger colors trigger at the same usage levels in both modes.",
   },
   {
     id: "ascii",
@@ -1592,6 +1604,10 @@ function settingValue(row) {
 
   if (row.id === "alignment") {
     return resolveAlignment(config.alignment);
+  }
+
+  if (row.id === "quotaMode") {
+    return resolveQuotaMode(config.quotaMode);
   }
 
   return config.ascii ? "on" : "off";
@@ -1707,6 +1723,16 @@ function settingsDetails(row) {
       ...ALIGNMENT_ORDER.map((mode) => {
         const mark = mode === active ? ui.glyph.on : ui.glyph.off;
         const text = `${mark} ${mode.padEnd(8)} ${ALIGNMENT_DESCRIPTIONS[mode]}`;
+        return mode === active ? { raw: ui.accentText(text) } : { dim: text };
+      })
+    );
+  } else if (row.id === "quotaMode") {
+    const active = resolveQuotaMode(config.quotaMode);
+    lines.push(
+      "",
+      ...QUOTA_MODE_ORDER.map((mode) => {
+        const mark = mode === active ? ui.glyph.on : ui.glyph.off;
+        const text = `${mark} ${mode.padEnd(10)} ${QUOTA_MODE_DESCRIPTIONS[mode]}`;
         return mode === active ? { raw: ui.accentText(text) } : { dim: text };
       })
     );
@@ -2306,6 +2332,17 @@ function toggleOrCycleSetting(row) {
     config.alignment = next;
     if (persist()) {
       flashMessage = `Row alignment: ${next}`;
+    }
+    return;
+  }
+
+  if (row.id === "quotaMode") {
+    const current = resolveQuotaMode(config.quotaMode);
+    const next =
+      QUOTA_MODE_ORDER[(QUOTA_MODE_ORDER.indexOf(current) + 1) % QUOTA_MODE_ORDER.length];
+    config.quotaMode = next;
+    if (persist()) {
+      flashMessage = `Quota display: ${next}`;
     }
     return;
   }
