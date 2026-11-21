@@ -17,6 +17,7 @@ const {
   LAYOUT_ORDER,
   RESET_FORMAT_ORDER,
   ALIGNMENT_ORDER,
+  OVERFLOW_ORDER,
   QUOTA_MODE_ORDER,
   CONFIG_SCHEMA_URL: SCHEMA_URL,
 } = require(path.join(repo, "src/lib/config"));
@@ -79,6 +80,11 @@ function buildConfigSchema() {
         description:
           'How widgets align across each row: "left" (default, stretches only at separator items), "center" (compact centered row), or "spread" (even gaps across the row).',
         enum: [...ALIGNMENT_ORDER],
+      },
+      overflow: {
+        description:
+          'How rows wider than terminal_width behave: "fit" (default, shrink labels and drop low-priority widgets) or "wrap" (keep every widget and wrap onto continuation rows).',
+        enum: [...OVERFLOW_ORDER],
       },
       maxWidth: {
         description:

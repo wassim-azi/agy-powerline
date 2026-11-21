@@ -59,7 +59,7 @@ const {
 
 const { extractSession } = require("./session");
 const { execPayloadJson } = require("./exec");
-const { fitWidgets, truncateLines, widestLine } = require("./fit");
+const { fitWidgets, wrapWidgets, truncateLines, widestLine } = require("./fit");
 
 const {
   deriveLinesPalette,
@@ -132,9 +132,11 @@ function renderBar(data, config, overrides) {
     let out = draw(resolved.widgets);
 
     // A bar wider than the terminal wraps into a mess, so overflowing rows
-    // lose labels, then their least useful widgets, and are cut as a last resort.
+    // either shrink/drop ("fit", default) or break onto continuation lines
+    // ("wrap"), and are cut as a last resort.
     if (width > 0 && widestLine(out) > width) {
-      out = draw(fitWidgets(resolved.widgets, width, (row) => widestLine(draw(row))));
+      const fitOrWrap = resolved.overflow === "wrap" ? wrapWidgets : fitWidgets;
+      out = draw(fitOrWrap(resolved.widgets, width, (row) => widestLine(draw(row))));
       out = truncateLines(out, width, ascii);
     }
 

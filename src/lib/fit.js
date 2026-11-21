@@ -152,6 +152,76 @@ function fitWidgets(widgets, width, measure) {
   return joinRows(splitRows(widgets).map((row) => fitRow(row, width, measure)));
 }
 
+function splitGroups(row) {
+  const groups = [[]];
+  for (const widget of row) {
+    if (widget.id === "separator") {
+      if (groups[groups.length - 1].length) {
+        groups.push([]);
+      }
+    } else if (!LAYOUT_IDS.has(widget.id)) {
+      groups[groups.length - 1].push(widget);
+    }
+  }
+  return groups.filter((group) => group.length > 0);
+}
+
+// Breaks an overflowing row across continuation lines without dropping widgets
+// or stripping labels. Separator-delimited groups stay together when a group
+// fits on a line as a unit, and break widget-by-widget when the group itself
+// is wider than the terminal.
+function wrapRow(row, width, measure) {
+  if (measure(row) <= width) {
+    return [row];
+  }
+
+  const wrapped = [];
+  let current = [];
+
+  for (const group of splitGroups(row)) {
+    const visibleGroup = group.filter((widget) => measure([widget]) > 0);
+    if (!visibleGroup.length) {
+      continue;
+    }
+
+    if (current.length) {
+      const withGroup = [...current, { id: "separator" }, ...visibleGroup];
+      if (measure(withGroup) <= width) {
+        current = withGroup;
+        continue;
+      }
+      wrapped.push(current);
+      current = [];
+    }
+
+    if (measure(visibleGroup) <= width) {
+      current = [...visibleGroup];
+      continue;
+    }
+
+    for (const widget of visibleGroup) {
+      if (!current.length) {
+        current = [widget];
+      } else if (measure([...current, widget]) <= width) {
+        current.push(widget);
+      } else {
+        wrapped.push(current);
+        current = [widget];
+      }
+    }
+  }
+
+  if (current.length) {
+    wrapped.push(current);
+  }
+
+  return wrapped.length ? wrapped : [row];
+}
+
+function wrapWidgets(widgets, width, measure) {
+  return joinRows(splitRows(widgets).flatMap((row) => wrapRow(row, width, measure)));
+}
+
 // Last resort for a single widget wider than the terminal (a very long model
 // name or path): cut the line and end it with an ellipsis.
 function truncateLine(line, width, ascii = false) {
@@ -202,6 +272,7 @@ function widestLine(text) {
 module.exports = {
   DROP_ORDER,
   fitWidgets,
+  wrapWidgets,
   truncateLines,
   widestLine,
 };

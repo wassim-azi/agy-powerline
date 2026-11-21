@@ -130,6 +130,12 @@ function resolveAlignment(alignment) {
   return ALIGNMENT_ORDER.includes(alignment) ? alignment : "left";
 }
 
+const OVERFLOW_ORDER = ["fit", "wrap"];
+
+function resolveOverflow(overflow) {
+  return OVERFLOW_ORDER.includes(overflow) ? overflow : "fit";
+}
+
 const QUOTA_MODE_ORDER = ["remaining", "used"];
 
 function resolveQuotaMode(mode) {
@@ -167,6 +173,7 @@ function defaultConfig() {
     minimalist: false,
     rowGap: false,
     alignment: "left",
+    overflow: "fit",
     log: true,
     resetFormat: "countdown",
     quotaMode: "remaining",
@@ -231,6 +238,7 @@ function mergeConfig(raw) {
     minimalist: raw?.minimalist === true,
     rowGap: raw?.rowGap === true,
     alignment: resolveAlignment(raw?.alignment),
+    overflow: resolveOverflow(raw?.overflow),
     log: raw?.log !== false,
     resetFormat: resolveResetFormat(raw?.resetFormat),
     quotaMode: resolveQuotaMode(raw?.quotaMode),
@@ -552,6 +560,8 @@ module.exports = {
   resolveResetFormat,
   ALIGNMENT_ORDER,
   resolveAlignment,
+  OVERFLOW_ORDER,
+  resolveOverflow,
   QUOTA_MODE_ORDER,
   resolveQuotaMode,
   resolveBarMaxWidth,
