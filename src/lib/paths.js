@@ -26,6 +26,7 @@ const RUNTIME_FILES = [
   "paths.js",
   "exec.js",
   "powerline.js",
+  "widgets.js",
   "widget-style.js",
   "fit.js",
   "log.js",

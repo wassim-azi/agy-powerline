@@ -35,7 +35,14 @@ const {
   MAX_WIDTH_WIDGETS,
   stepNumberField,
 } = require("../../src/lib/widget-options");
-const { isVisibilityThreshold, isValidCompactionLimit } = require("../../src/lib/widget-style");
+const {
+  isVisibilityThreshold,
+  isValidCompactionLimit,
+  WIDGET_TAGS,
+} = require("../../src/lib/widget-style");
+const { WIDGET_DEFINITIONS, VALID_WIDGET_IDS, DROP_ORDER } = require("../../src/lib/widgets");
+const { WIDGET_CATALOG } = require("../../src/lib/catalog");
+const { RUNTIME_FILES } = require("../../src/lib/paths");
 const { buildConfigSchema } = require("../../scripts/site/config-schema");
 
 const strip = (text) => text.replace(/\x1b\[[0-9;]*m/g, "");
@@ -107,6 +114,38 @@ async function run() {
   testAntigravityLatestPayloadFields();
   testEnvWidget();
   testOsc8Links();
+  testWidgetRegistryInvariants();
+}
+
+function testWidgetRegistryInvariants() {
+  const ids = WIDGET_DEFINITIONS.map((def) => def.id);
+  const nonLayout = WIDGET_DEFINITIONS.filter((def) => !def.layoutHelper);
+  const uniqueDropPriorities = new Set(nonLayout.map((def) => def.dropPriority));
+  const everyRendererPresent = nonLayout.every((def) => typeof def.render === "function");
+  const everyTaggedExceptExec = nonLayout
+    .filter((def) => def.id !== "exec")
+    .every((def) => Boolean(WIDGET_TAGS[def.id]));
+
+  record(
+    "unified widget registry stays consistent with catalog, drop order, tags, and RUNTIME_FILES",
+    ids.length === VALID_WIDGET_IDS.size &&
+      WIDGET_CATALOG.length === ids.length &&
+      DROP_ORDER.length === nonLayout.length &&
+      uniqueDropPriorities.size === nonLayout.length &&
+      everyRendererPresent &&
+      everyTaggedExceptExec &&
+      RUNTIME_FILES.includes("widgets.js"),
+    JSON.stringify({
+      defs: ids.length,
+      valid: VALID_WIDGET_IDS.size,
+      catalog: WIDGET_CATALOG.length,
+      dropOrder: DROP_ORDER.length,
+      nonLayout: nonLayout.length,
+      uniqueDrops: uniqueDropPriorities.size,
+      everyRendererPresent,
+      everyTaggedExceptExec,
+    })
+  );
 }
 
 function testCustomLabelAndIcon() {

@@ -11,6 +11,7 @@ const { stripControl, normalizeClock } = require("./formatters");
 const { normalizePowerline, applyStyle, STYLES } = require("./powerline");
 const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
 const { isMeterStyle } = require("./widget-style");
+const { VALID_WIDGET_IDS } = require("./widgets");
 const { resolveLanguage, matchLanguage } = require("./i18n");
 
 // Display text in widget configs is printed as-is, so strip terminal control
@@ -24,60 +25,6 @@ function cleanWidget(widget) {
   }
   return out;
 }
-
-const VALID_WIDGET_IDS = new Set([
-  "model",
-  "quota",
-  "fiveHourPct",
-  "fiveHourReset",
-  "fiveHourBar",
-  "weeklyPct",
-  "weeklyReset",
-  "weeklyBar",
-  "thirdPartyFiveHour",
-  "thirdPartyWeekly",
-  "argonWeekly",
-  "argonReset",
-  "context",
-  "contextPct",
-  "contextTokens",
-  "cwd",
-  "project",
-  "os",
-  "host",
-  "git",
-  "gitChanges",
-  "gitFiles",
-  "gitSha",
-  "gitStash",
-  "gitWorktree",
-  "plan",
-  "agent",
-  "agentState",
-  "artifacts",
-  "tasks",
-  "queue",
-  "mode",
-  "title",
-  "sessionTime",
-  "ram",
-  "version",
-  "sandbox",
-  "cacheRead",
-  "cacheCreate",
-  "cacheHit",
-  "totalTokens",
-  "cost",
-  "clock",
-  "tokensToday",
-  "tokensWeek",
-  "tokensMonth",
-  "exec",
-  "env",
-  "customText",
-  "separator",
-  "lineBreak",
-]);
 
 // Editors that read "$schema" complete and check the config file with it.
 const CONFIG_SCHEMA_URL = "https://agy-powerline.com/schema/v1.json";

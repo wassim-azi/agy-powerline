@@ -12,6 +12,15 @@ const {
   visibleWidth,
 } = require("./formatters");
 const { DEFAULT_LANGUAGE, t } = require("./i18n");
+const {
+  WIDGET_TAGS,
+  QUOTA_WIDGETS,
+  PACE_DELTA_WIDGETS,
+  CONTEXT_WIDGETS,
+  RESET_WIDGETS,
+  USAGE_WIDGETS,
+  SHOW_BELOW_SESSION_KEYS,
+} = require("./widgets");
 
 // Basic names the exec widget's color option always accepted; the Lines
 // layout also uses them as its fallback palette.
@@ -103,61 +112,6 @@ const VALID_FORECAST_VALUES = new Set([true, "countdown", "time"]);
 function showsForecast(widget) {
   return VALID_FORECAST_VALUES.has(widget?.forecast) && !widget?.compact;
 }
-
-// Each widget's icon and label, shared by both layouts so Pills and Lines
-// read the same. name is the English label (configure shows it), key its
-// message in i18n.js. iconOnly: with emojis on, the icon stands in for the label
-// (a meter or the model name already says what it is).
-const WIDGET_TAGS = {
-  model: { icon: "🤖", name: "Model", key: "tag_model", iconOnly: true },
-  quota: { icon: "⏳", name: "Quota", key: "tag_quota" },
-  fiveHourBar: { icon: "⏳", name: "5h", key: "tag_5h", iconOnly: true },
-  fiveHourPct: { icon: "⏳", name: "5h", key: "tag_5h" },
-  fiveHourReset: { icon: "🔄", name: "Reset", key: "tag_reset" },
-  weeklyBar: { icon: "📅", name: "7d", key: "tag_7d", iconOnly: true },
-  weeklyPct: { icon: "📅", name: "7d", key: "tag_7d" },
-  weeklyReset: { icon: "🔄", name: "Reset", key: "tag_reset" },
-  thirdPartyFiveHour: { icon: "🧪", name: "3P 5h", key: "tag_3p_5h" },
-  thirdPartyWeekly: { icon: "🧪", name: "3P 7d", key: "tag_3p_7d" },
-  argonWeekly: { icon: "🔮", name: "Argon 7d", key: "tag_argon_7d" },
-  argonReset: { icon: "🔄", name: "Argon reset", key: "tag_argon_reset" },
-  context: { icon: "💾", name: "Context", key: "tag_context", iconOnly: true },
-  contextPct: { icon: "💾", name: "Context", key: "tag_context" },
-  contextTokens: { icon: "💾", name: "Context", key: "tag_context" },
-  cwd: { icon: "📂", name: "Dir", key: "tag_dir" },
-  project: { icon: "📦", name: "Project", key: "tag_project" },
-  os: { icon: "💻", name: "" },
-  host: { icon: "👤", name: "Host", key: "tag_host", iconOnly: true },
-  git: { icon: "🌿", name: "" },
-  gitChanges: { icon: "📝", name: "Lines", key: "tag_lines" },
-  gitFiles: { icon: "📄", name: "Files", key: "tag_files" },
-  gitSha: { icon: "📌", name: "Commit", key: "tag_commit" },
-  gitStash: { icon: "💼", name: "Stash", key: "tag_stash" },
-  gitWorktree: { icon: "🌳", name: "Worktree", key: "tag_worktree" },
-  plan: { icon: "⭐", name: "Plan", key: "tag_plan" },
-  agent: { icon: "🧩", name: "Agent", key: "tag_agent", iconOnly: true },
-  agentState: { icon: "🟣", name: "Agent", key: "tag_agent" },
-  artifacts: { icon: "📎", name: "Artifacts", key: "tag_artifacts" },
-  tasks: { icon: "👥", name: "" },
-  queue: { icon: "📨", name: "Queue", key: "tag_queue" },
-  mode: { icon: "🧭", name: "" },
-  title: { icon: "💬", name: "" },
-  sessionTime: { icon: "⏱️", name: "Session", key: "tag_session" },
-  ram: { icon: "💻", name: "RAM", key: "tag_ram" },
-  version: { icon: "🔖", name: "" },
-  sandbox: { icon: "🔒", name: "" },
-  cacheRead: { icon: "📥", name: "Cache read", key: "tag_cache_read" },
-  cacheCreate: { icon: "📤", name: "Cache create", key: "tag_cache_create" },
-  cacheHit: { icon: "⚡", name: "Cache hit", key: "tag_cache_hit" },
-  totalTokens: { icon: "🪙", name: "Tokens", key: "tag_tokens" },
-  cost: { icon: "💵", name: "Cost", key: "tag_cost" },
-  clock: { icon: "🕒", name: "Clock", key: "tag_clock", iconOnly: true },
-  tokensToday: { icon: "📈", name: "Today", key: "tag_today" },
-  tokensWeek: { icon: "📊", name: "7d", key: "tag_7d" },
-  tokensMonth: { icon: "🗓️", name: "30d", key: "tag_30d" },
-  env: { icon: "🔧", name: "" },
-  customText: { icon: "🏷️", name: "" },
-};
 
 const VALID_ENV_NAME = /^[A-Za-z_][A-Za-z0-9_]{0,127}$/;
 // Refuse credential-like variable names so a shared config cannot expose secrets on screen.
@@ -279,37 +233,6 @@ function subagentDetail(session, widget, ascii) {
 // RAM use (%) that turns the ram widget to the caution, then danger color.
 const RAM_CAUTION = 80;
 const RAM_DANGER = 90;
-
-// Widgets whose visibility follows quota or context use the normalized
-// session fields below. Reset widgets follow their own quota window.
-const QUOTA_WIDGETS = new Set([
-  "quota",
-  "fiveHourBar",
-  "fiveHourPct",
-  "weeklyBar",
-  "weeklyPct",
-  "thirdPartyFiveHour",
-  "thirdPartyWeekly",
-  "argonWeekly",
-]);
-// The percentage widgets have no meter to carry the pace marker.
-const PACE_DELTA_WIDGETS = new Set(["quota", "fiveHourPct", "weeklyPct"]);
-const CONTEXT_WIDGETS = new Set(["context", "contextPct", "contextTokens"]);
-const RESET_WIDGETS = new Set(["fiveHourReset", "weeklyReset", "argonReset"]);
-const SHOW_BELOW_SESSION_KEYS = {
-  quota: "tightestQuota",
-  fiveHourBar: "fiveHour",
-  fiveHourPct: "fiveHour",
-  fiveHourReset: "fiveHour",
-  weeklyBar: "weekly",
-  weeklyPct: "weekly",
-  weeklyReset: "weekly",
-  thirdPartyFiveHour: "thirdPartyFiveHour",
-  thirdPartyWeekly: "thirdPartyWeekly",
-  argonWeekly: "argonWeekly",
-  argonReset: "argonWeekly",
-};
-const USAGE_WIDGETS = new Set(["cacheRead", "cacheCreate", "cacheHit"]);
 
 function isVisibilityThreshold(value) {
   return typeof value === "number" && Number.isFinite(value) && value >= 0 && value <= 100;

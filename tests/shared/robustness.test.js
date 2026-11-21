@@ -519,9 +519,7 @@ async function run() {
   testBadGradients();
   testExecPayloadFailures();
   testUsageStderr();
-  await testConcurrentExecCache();
-  await testStdoutEpipe();
-  await testStdoutErrorIsLogged();
+  await Promise.all([testConcurrentExecCache(), testStdoutEpipe(), testStdoutErrorIsLogged()]);
   testRuntimeRenderOverrides();
 
   const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "agy-verify-bad-json-"));
@@ -695,20 +693,6 @@ function runWithOpenStdin(statuslinePath, input) {
 }
 
 async function testOpenStdin(statuslinePath) {
-  const silent = await runWithOpenStdin(statuslinePath, "");
-  record(
-    "runtime exits quietly when stdin stays open and empty",
-    silent.code === 0 && silent.stdout === "" && silent.ms < 5000,
-    `code ${silent.code}, ${silent.ms} ms, stdout ${JSON.stringify(silent.stdout)}`
-  );
-
-  const full = await runWithOpenStdin(statuslinePath, `\uFEFF${PAYLOAD}\n`);
-  record(
-    "runtime renders a complete payload immediately even when stdin stays open",
-    full.code === 0 && /Gemini/.test(full.stdout) && full.ms < 800,
-    `code ${full.code}, ${full.ms} ms`
-  );
-
   // Split right after an inner "}" and mid-way through a 4-byte UTF-8 sequence
   // so readStdin waits for the root object to close without corrupting UTF-8.
   const multiBytePayload = JSON.stringify({
@@ -718,18 +702,36 @@ async function testOpenStdin(statuslinePath) {
   const innerClose = multiBytePayload.indexOf("}") + 1;
   const buf = Buffer.from(multiBytePayload, "utf8");
   const rocketIndex = buf.indexOf(Buffer.from("🚀", "utf8"));
-  const chunked = await runWithOpenStdin(statuslinePath, [
-    buf.subarray(0, innerClose),
-    buf.subarray(innerClose, rocketIndex + 2),
-    buf.subarray(rocketIndex + 2),
+
+  const [silent, full, chunked, partial] = await Promise.all([
+    runWithOpenStdin(statuslinePath, ""),
+    runWithOpenStdin(statuslinePath, `\uFEFF${PAYLOAD}\n`),
+    runWithOpenStdin(statuslinePath, [
+      buf.subarray(0, innerClose),
+      buf.subarray(innerClose, rocketIndex + 2),
+      buf.subarray(rocketIndex + 2),
+    ]),
+    runWithOpenStdin(statuslinePath, PAYLOAD.slice(0, 40)),
   ]);
+
+  record(
+    "runtime exits quietly when stdin stays open and empty",
+    silent.code === 0 && silent.stdout === "" && silent.ms < 5000,
+    `code ${silent.code}, ${silent.ms} ms, stdout ${JSON.stringify(silent.stdout)}`
+  );
+
+  record(
+    "runtime renders a complete payload immediately even when stdin stays open",
+    full.code === 0 && /Gemini/.test(full.stdout) && full.ms < 800,
+    `code ${full.code}, ${full.ms} ms`
+  );
+
   record(
     "runtime waits across partial chunks and split UTF-8 bytes on open stdin then resolves immediately",
     chunked.code === 0 && /Gemini/.test(chunked.stdout) && chunked.ms < 800,
     `code ${chunked.code}, ${chunked.ms} ms`
   );
 
-  const partial = await runWithOpenStdin(statuslinePath, PAYLOAD.slice(0, 40));
   record(
     "runtime exits quietly on a payload cut off by the stdin deadline",
     partial.code === 0 && partial.stdout === "" && partial.ms < 5000,

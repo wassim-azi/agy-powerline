@@ -24,32 +24,10 @@ const { pickGlyph, glyphChar } = require("../powerline");
 const {
   quotaColor,
   contextColor,
-  formatClockTime,
   resolveQuotaThresholds,
   resolveContextThresholds,
   shouldBlink,
-  formatTokens,
   formatContextTokens,
-  shortModelName,
-  formatTokenSplit,
-  formatUsage,
-  formatSessionTime,
-  formatGitSync,
-  formatGitOperation,
-  gitChangeParts,
-  gitFileParts,
-  formatTasks,
-  formatMode,
-  formatCost,
-  limitWidth,
-  shortenPath,
-  fishPath,
-  fishBranch,
-  homePath,
-  linkPath,
-  linkGitBranch,
-  linkGitSha,
-  basenameOf,
   label,
   visibleWidth,
   formatResetText,
@@ -80,6 +58,7 @@ const {
   subagentDetail,
   readEnvValue,
 } = require("../widget-style");
+const { renderWidget } = require("../widgets");
 const { t } = require("../i18n");
 
 const WHITE = [255, 255, 255];
@@ -279,30 +258,50 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
     return null;
   }
 
-  switch (id) {
-    case "clock":
-      return pill(colors.meta, lbl(formatClockTime(new Date(), config.clock)));
-
-    case "model":
-      if (!session.model) {
-        return null;
+  return renderWidget(id, {
+    session,
+    widget,
+    config,
+    emojis,
+    ascii,
+    raw,
+    isLines: false,
+    osIcons: OS_ICONS,
+    ramCaution: RAM_CAUTION,
+    ramDanger: RAM_DANGER,
+    titleMax: TITLE_MAX,
+    subagentDetail,
+    readEnvValue,
+    widgetTag,
+    execWidgetOutput,
+    text: (value, { pillColor = "meta", icon } = {}) =>
+      pill(colors[pillColor] || colors.meta, lbl(value, icon)),
+    taggedText: (tagText, value) => pill(colors.meta, ` ${tagText}${value} `),
+    valueWithLevel: (value, level) => {
+      let color = colors.meta;
+      if (level === "danger") {
+        color = colors.warn;
+      } else if (level === "caution") {
+        color = colors.caution;
       }
-      return pill(
-        colors.model,
-        lbl(
-          limitWidth(
-            widget?.short ? shortModelName(session.model, ascii) : session.model,
-            widget,
-            ascii
-          )
-        )
-      );
-
-    case "quota": {
-      const quota = session.tightestQuota;
-      if (!quota) {
-        return null;
+      return pill(color, lbl(value));
+    },
+    cacheHit: (pct) => {
+      let color = colors.meta;
+      if (pct >= 80) {
+        color = colors.fiveHour;
+      } else if (pct >= 50) {
+        color = colors.weekly;
       }
+      return pill(color, lbl(`${pct}%`));
+    },
+    quotaMeter: (quota, colorSlot) => quotaMeter(quota, colors[colorSlot]),
+    quotaPct: (quota, colorSlot) => {
+      const { view, blink, color } = quotaState(quota, colors[colorSlot]);
+      return pill(color, lbl(`${view.text}${paceDelta(quota)}${forecast(quota)}`), blink);
+    },
+    quotaReset: (quota, colorSlot, weekly = false) => quotaReset(quota, colors[colorSlot], weekly),
+    tightestQuota: (quota) => {
       const { view, blink, color } = quotaState(quota, colors.fiveHour);
       const reset = quota.reset ? `${ascii ? ", " : " · "}${quota.reset}` : "";
       return pill(
@@ -310,63 +309,8 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         lbl(`${quota.label} ${view.text}${paceDelta(quota)}${forecast(quota)}${reset}`),
         blink
       );
-    }
-
-    case "fiveHourBar":
-      return session.fiveHour ? quotaMeter(session.fiveHour, colors.fiveHour) : null;
-
-    case "fiveHourPct": {
-      if (!session.fiveHour) {
-        return null;
-      }
-      const { view, blink, color } = quotaState(session.fiveHour, colors.fiveHour);
-      return pill(
-        color,
-        lbl(`${view.text}${paceDelta(session.fiveHour)}${forecast(session.fiveHour)}`),
-        blink
-      );
-    }
-
-    case "fiveHourReset":
-      return quotaReset(session.fiveHour, colors.fiveHour);
-
-    case "weeklyBar":
-      return session.weekly ? quotaMeter(session.weekly, colors.weekly) : null;
-
-    case "weeklyPct": {
-      if (!session.weekly) {
-        return null;
-      }
-      const { view, blink, color } = quotaState(session.weekly, colors.weekly);
-      return pill(
-        color,
-        lbl(`${view.text}${paceDelta(session.weekly)}${forecast(session.weekly)}`),
-        blink
-      );
-    }
-
-    case "weeklyReset":
-      return quotaReset(session.weekly, colors.weekly, true);
-
-    case "thirdPartyFiveHour":
-      return session.thirdPartyFiveHour && !session.thirdPartyFiveHour.disabled
-        ? quotaMeter(session.thirdPartyFiveHour, colors.thirdParty)
-        : null;
-
-    case "thirdPartyWeekly":
-      return session.thirdPartyWeekly
-        ? quotaMeter(session.thirdPartyWeekly, colors.thirdParty)
-        : null;
-
-    // Argon is a Gemini model, so its quota takes the Gemini 7d color; the
-    // 🔮 tag tells the two apart.
-    case "argonWeekly":
-      return session.argonWeekly ? quotaMeter(session.argonWeekly, colors.weekly) : null;
-
-    case "argonReset":
-      return quotaReset(session.argonWeekly, colors.weekly, true);
-
-    case "context": {
+    },
+    contextBar: () => {
       const { size, pct, over200k, blink, color } = contextState();
       return meterSegment(
         color,
@@ -376,253 +320,16 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         false,
         blink
       );
-    }
-
-    case "contextPct": {
+    },
+    contextPct: () => {
       const { pct, over200k, blink, color } = contextState();
       return pill(color, lbl(`${pct.toFixed(1)}%${over200k}`), blink);
-    }
-
-    case "contextTokens": {
+    },
+    contextTokens: () => {
       const { size, blink, color } = contextState();
       return pill(color, lbl(formatContextTokens(session.usedTokens, size)), blink);
-    }
-
-    case "cwd": {
-      const home = homePath(session.cwd);
-      const pathText =
-        widget?.fish === true
-          ? fishPath(home, widget?.depth)
-          : shortenPath(home, widget?.depth, ascii);
-      const name = limitWidth(pathText, widget, ascii, session.lang);
-      if (!name) {
-        return null;
-      }
-      return pill(colors.meta, lbl(linkPath(name, session.cwd, widget, ascii)));
-    }
-
-    case "project": {
-      const name = limitWidth(basenameOf(session.project), widget, ascii);
-      if (!name) {
-        return null;
-      }
-      return pill(colors.meta, lbl(linkPath(name, session.project, widget, ascii)));
-    }
-
-    case "os": {
-      if (!session.os) {
-        return null;
-      }
-      return pill(colors.meta, lbl(session.os, OS_ICONS[session.os]));
-    }
-
-    case "host": {
-      if (!session.hostname) {
-        return null;
-      }
-      const name = session.username ? `${session.username}@${session.hostname}` : session.hostname;
-      return pill(colors.meta, lbl(name));
-    }
-
-    case "git": {
-      // Antigravity can send vcs.type without a branch; an empty pill says nothing.
-      if (!session.git?.branch) {
-        return null;
-      }
-      const mark = session.git.dirty ? `${ascii ? "* " : "● "}` : "";
-      const opStr = widget.operation === false ? "" : formatGitOperation(session.git.operation);
-      const opPart = opStr ? `|${opStr}` : "";
-      const syncStr = formatGitSync(session.git.ahead, session.git.behind, ascii);
-      const syncPart = syncStr ? ` ${syncStr}` : "";
-      const rawBranch = widget?.fish === true ? fishBranch(session.git.branch) : session.git.branch;
-      const branch = linkGitBranch(
-        limitWidth(rawBranch, widget, ascii),
-        session.git.branch,
-        session,
-        widget,
-        ascii
-      );
-      return pill(
-        session.git.dirty ? colors.gitDirty : colors.git,
-        lbl(`${mark}${branch}${opPart}${syncPart}`)
-      );
-    }
-
-    case "gitChanges": {
-      const parts = gitChangeParts(session.gitDetails?.changes, ascii);
-      if (!parts.length) {
-        return null;
-      }
-      return pill(colors.git, lbl(parts.map((part) => part.text).join(" ")));
-    }
-
-    case "gitFiles": {
-      const files = session.gitDetails?.files;
-      const parts = gitFileParts(files, ascii);
-      if (!parts.length) {
-        return null;
-      }
-      const color = files.conflicts > 0 ? colors.gitDirty : colors.git;
-      return pill(color, lbl(parts.map((part) => part.text).join(" ")));
-    }
-
-    case "gitSha":
-      if (!session.gitDetails?.sha) {
-        return null;
-      }
-      return pill(colors.git, lbl(linkGitSha(session.gitDetails.sha, session, widget, ascii)));
-
-    case "gitStash":
-      if (!(session.gitDetails?.stash > 0)) {
-        return null;
-      }
-      return pill(colors.git, lbl(String(session.gitDetails.stash)));
-
-    case "gitWorktree":
-      if (!session.gitDetails?.worktree) {
-        return null;
-      }
-      return pill(colors.git, lbl(limitWidth(session.gitDetails.worktree, widget, ascii)));
-
-    case "plan":
-      if (!session.plan) {
-        return null;
-      }
-      return pill(colors.meta, lbl(session.plan));
-
-    case "agent":
-      if (!session.agentName) {
-        return null;
-      }
-      return pill(colors.meta, lbl(limitWidth(session.agentName, widget, ascii)));
-
-    case "agentState": {
-      if (!session.agentState && !session.toolConfirmation) {
-        return null;
-      }
-      const state = session.agentState ? session.agentState.replace(/_/g, " ") : "";
-      const text = session.toolConfirmation
-        ? state
-          ? `${state} (${t("confirm", session.lang)})`
-          : t("confirm", session.lang)
-        : state;
-      const idle = session.agentState === "idle" && !session.toolConfirmation;
-      return pill(idle ? colors.meta : colors.warn, lbl(text, idle ? "🟢" : undefined));
-    }
-
-    case "artifacts":
-      if (!session.artifacts) {
-        return null;
-      }
-      return pill(colors.meta, lbl(String(session.artifacts)));
-
-    case "queue":
-      if (!session.pendingInputs) {
-        return null;
-      }
-      return pill(colors.meta, lbl(String(session.pendingInputs)));
-
-    case "tasks": {
-      const text = formatTasks(
-        session.subagents,
-        session.tasks,
-        session.lang,
-        subagentDetail(session, widget, ascii)
-      );
-      if (!text) {
-        return null;
-      }
-      return pill(colors.meta, lbl(text));
-    }
-
-    case "mode": {
-      const text = formatMode(session.approvalMode, session.vimMode);
-      if (!text) {
-        return null;
-      }
-      // An approval mode like accept-edits changes what the agent may do alone.
-      const approval = session.approvalMode && session.approvalMode !== "default";
-      return pill(approval ? colors.caution : colors.meta, lbl(text));
-    }
-
-    case "title":
-      if (!session.title) {
-        return null;
-      }
-      return pill(colors.meta, lbl(limitWidth(session.title, widget, ascii, TITLE_MAX)));
-
-    case "sessionTime": {
-      const text = formatSessionTime(session.sessionStartMs, Date.now(), session.lang);
-      return text ? pill(colors.meta, lbl(text)) : null;
-    }
-
-    case "ram": {
-      const pct = session.ramPct ?? 0;
-      let color = colors.meta;
-      if (pct >= RAM_DANGER) {
-        color = colors.warn;
-      } else if (pct >= RAM_CAUTION) {
-        color = colors.caution;
-      }
-      return pill(color, lbl(`${pct}%`));
-    }
-
-    case "version":
-      if (!session.version) {
-        return null;
-      }
-      return pill(colors.meta, lbl(`v${session.version}`));
-
-    case "sandbox": {
-      if (!session.sandbox) {
-        return null;
-      }
-      const net = session.sandboxNet;
-      const text = t(net ? "sandbox_net" : "sandbox_isolated", session.lang);
-      const color = net ? colors.warn : colors.git;
-      return pill(color, lbl(text, net ? "🌐" : undefined));
-    }
-
-    case "cacheRead":
-      return pill(colors.meta, lbl(formatTokens(session.cacheRead)));
-
-    case "cacheCreate":
-      return pill(colors.meta, lbl(formatTokens(session.cacheCreate)));
-
-    case "cacheHit": {
-      const pct = session.cacheHitPct ?? 0;
-      let color = colors.meta;
-      if (pct >= 80) {
-        color = colors.fiveHour;
-      } else if (pct >= 50) {
-        color = colors.weekly;
-      }
-      return pill(color, lbl(`${pct}%`));
-    }
-
-    case "totalTokens":
-      if (!session.totalTokens) {
-        return null;
-      }
-      return pill(
-        colors.meta,
-        lbl(
-          widget?.split
-            ? formatTokenSplit(session.inputTokens, session.outputTokens, ascii, session.lang)
-            : formatTokens(session.totalTokens)
-        )
-      );
-
-    case "cost": {
-      const text = formatCost(session.cost, widget, ascii, session.lang);
-      if (!text) {
-        return null;
-      }
-      const budget = widget?.budget;
-      const pct =
-        typeof budget === "number" && Number.isFinite(budget) && budget > 0
-          ? (session.cost.totalUsd * 100) / budget
-          : null;
+    },
+    budgetText: (text, pct) => {
       if (pct === null) {
         return pill(colors.meta, lbl(text));
       }
@@ -636,64 +343,26 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         warnColor: colors.caution,
       });
       return pill(color, lbl(text), !ascii && shouldBlink(level, thresh.blink));
-    }
-
-    case "tokensToday":
-    case "tokensWeek":
-    case "tokensMonth": {
-      const period = { tokensToday: "today", tokensWeek: "week", tokensMonth: "month" }[id];
-      const usage = formatUsage(session.usage?.[period], widget, ascii, session.lang);
-      if (!usage) {
-        return null;
-      }
-      if (usage.pct === null) {
-        return pill(colors.meta, lbl(usage.text));
-      }
-      // A budget alerts like the context widgets: caution, then danger.
-      const thresh = resolveContextThresholds(widget, config);
-      const level =
-        usage.pct >= thresh.crit ? "crit" : usage.pct >= thresh.warn ? "warn" : "normal";
-      const color = contextColor(usage.pct, colors.meta, false, {
-        crit: thresh.crit,
-        warn: thresh.warn,
-        critColor: colors.warn,
-        warnColor: colors.caution,
-      });
-      return pill(color, lbl(usage.text), !ascii && shouldBlink(level, thresh.blink));
-    }
-
-    case "customText": {
-      if (!widget?.text) {
-        return null;
-      }
-      return pill(colors.meta, lbl(limitWidth(widget.text, widget, ascii)));
-    }
-
-    case "env": {
-      const entry = readEnvValue(widget, session, ascii);
-      if (!entry) {
-        return null;
-      }
-      const envWidget = widget?.label === undefined ? { ...widget, label: entry.name } : widget;
-      const envTag = widgetTag("env", {
-        emojis,
-        raw,
-        widget: envWidget,
-        ascii,
-        lang: session.lang,
-      });
-      return pill(colors.meta, ` ${envTag}${entry.value} `);
-    }
-
-    case "exec": {
-      // Only real output is cut: the [cmd] preview and blocked markers stay whole.
-      const output =
-        session.execMode === "run"
-          ? limitWidth(execWidgetOutput(widget, session), widget, ascii)
-          : execWidgetOutput(widget, session);
-      if (!output) {
-        return null;
-      }
+    },
+    gitBranch: ({ branch, dirty, opStr, syncPart }) => {
+      const mark = dirty ? `${ascii ? "* " : "● "}` : "";
+      const opPart = opStr ? `|${opStr}` : "";
+      return pill(
+        dirty ? colors.gitDirty : colors.git,
+        lbl(`${mark}${branch}${opPart}${syncPart}`)
+      );
+    },
+    gitChanges: (parts) => pill(colors.git, lbl(parts.map((part) => part.text).join(" "))),
+    gitFiles: (parts, hasConflicts) =>
+      pill(
+        hasConflicts ? colors.gitDirty : colors.git,
+        lbl(parts.map((part) => part.text).join(" "))
+      ),
+    agentState: ({ text, idle }) =>
+      pill(idle ? colors.meta : colors.warn, lbl(text, idle ? "🟢" : undefined)),
+    sandbox: ({ text, net }) =>
+      pill(net ? colors.warn : colors.git, lbl(text, net ? "🌐" : undefined)),
+    execSegment: (output) => {
       const icon = widget.icon !== undefined ? widget.icon : "⚡";
       const named = widget.label || "";
       const color = colors.meta;
@@ -701,11 +370,8 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return pill(color, named && !raw ? ` ${named}: ${output} ` : ` ${output} `);
       }
       return pill(color, label(emojis, icon, named, output));
-    }
-
-    default:
-      return null;
-  }
+    },
+  });
 }
 
 // Pill text on a gradient color that the theme's text doesn't read on.

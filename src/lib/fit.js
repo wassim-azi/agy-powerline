@@ -4,60 +4,7 @@
 "use strict";
 
 const { visibleWidth, cutToWidth, closeLink } = require("./formatters");
-
-// When a row is wider than the terminal, widgets are dropped in this order,
-// first entry first. Ids not listed (custom ones) go before all of them.
-const DROP_ORDER = [
-  "customText",
-  "env",
-  "os",
-  "host",
-  "gitStash",
-  "gitWorktree",
-  "title",
-  "sessionTime",
-  "clock",
-  "version",
-  "cacheCreate",
-  "cacheRead",
-  "cost",
-  "totalTokens",
-  "cacheHit",
-  "tokensMonth",
-  "tokensWeek",
-  "tokensToday",
-  "artifacts",
-  "queue",
-  "tasks",
-  "plan",
-  "ram",
-  "project",
-  "cwd",
-  "exec",
-  "agent",
-  "agentState",
-  "mode",
-  "argonReset",
-  "thirdPartyWeekly",
-  "thirdPartyFiveHour",
-  "argonWeekly",
-  "weeklyReset",
-  "fiveHourReset",
-  "contextTokens",
-  "gitSha",
-  "gitFiles",
-  "gitChanges",
-  "git",
-  "sandbox",
-  "weeklyPct",
-  "weeklyBar",
-  "contextPct",
-  "context",
-  "fiveHourPct",
-  "fiveHourBar",
-  "quota",
-  "model",
-];
+const { DROP_ORDER } = require("./widgets");
 
 const LAYOUT_IDS = new Set(["separator", "lineBreak"]);
 
@@ -129,19 +76,39 @@ function fitRow(row, width, measure) {
     );
   }
 
-  while (measure(current) > width) {
-    const content = current.filter((widget) => !LAYOUT_IDS.has(widget.id));
-    if (content.length <= 1) {
-      break;
+  // Drop lowest-ranked widgets (rightmost on a tie) until the row fits or one
+  // widget remains. Dropping more widgets never widens a row, so binary search
+  // over the exact drop sequence finds the same cutoff in O(log n) renders.
+  const content = current.filter((widget) => !LAYOUT_IDS.has(widget.id));
+  if (content.length > 1 && measure(current) > width) {
+    const dropSequence = [];
+    const remaining = [...content];
+    while (remaining.length > 1) {
+      let victimIndex = 0;
+      for (let i = 1; i < remaining.length; i++) {
+        if (dropRank(remaining[i].id) <= dropRank(remaining[victimIndex].id)) {
+          victimIndex = i;
+        }
+      }
+      dropSequence.push(remaining.splice(victimIndex, 1)[0]);
     }
-    // Lowest rank goes first; on a tie, the rightmost one.
-    let victim = content[0];
-    for (const widget of content) {
-      if (dropRank(widget.id) <= dropRank(victim.id)) {
-        victim = widget;
+
+    const afterDrops = (count) => {
+      const dropped = new Set(dropSequence.slice(0, count));
+      return tidySeparators(current.filter((widget) => !dropped.has(widget)));
+    };
+
+    let lo = 1;
+    let hi = dropSequence.length;
+    while (lo < hi) {
+      const mid = (lo + hi) >> 1;
+      if (measure(afterDrops(mid)) <= width) {
+        hi = mid;
+      } else {
+        lo = mid + 1;
       }
     }
-    current = tidySeparators(current.filter((widget) => widget !== victim));
+    current = afterDrops(lo);
   }
 
   return current;

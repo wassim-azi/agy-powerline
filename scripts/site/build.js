@@ -280,24 +280,95 @@ const SITE_PATH_OF = Object.fromEntries([
 
 // --- git dates ---------------------------------------------------------------
 
-function gitDate(args) {
-  try {
-    return execFileSync("git", args, { cwd: repo, encoding: "utf8", windowsHide: true }).trim();
-  } catch {
-    return "";
+let commitDatesCache = null;
+
+// Reads commit dates for all tracked files in one git invocation instead of
+// spawning git per page (~30+ spawns on Windows). Tracks renames backward so
+// firstCommitDate matches `git log --diff-filter=A --follow`.
+function loadCommitDates() {
+  if (commitDatesCache !== null) {
+    return commitDatesCache;
   }
+  const latest = new Map();
+  const earliest = new Map();
+  // Maps a historical path to the current path(s) tracking it across renames.
+  const followers = new Map();
+  const track = (file) => {
+    let set = followers.get(file);
+    if (!set) {
+      set = new Set([file]);
+      followers.set(file, set);
+    }
+    return set;
+  };
+
+  try {
+    const out = execFileSync(
+      "git",
+      ["-c", "core.quotepath=false", "log", "-M", "--format=__COMMIT__%cI", "--name-status"],
+      { cwd: repo, encoding: "utf8", windowsHide: true, maxBuffer: 64 * 1024 * 1024 }
+    );
+    let order = 0;
+    let currentDate = "";
+    for (const rawLine of out.split(/\r?\n/)) {
+      if (!rawLine) continue;
+      if (rawLine.startsWith("__COMMIT__")) {
+        currentDate = rawLine.slice("__COMMIT__".length);
+        order += 1;
+        continue;
+      }
+      if (!currentDate) continue;
+      const parts = rawLine.split("\t");
+      const status = parts[0];
+      if (status.startsWith("R") && parts.length >= 3) {
+        const oldPath = parts[1];
+        const newPath = parts[2];
+        if (!latest.has(newPath)) {
+          latest.set(newPath, { order, date: currentDate });
+        }
+        const targets = track(newPath);
+        const oldTargets = followers.get(oldPath) || new Set();
+        for (const target of targets) {
+          oldTargets.add(target);
+          earliest.set(target, currentDate);
+        }
+        followers.set(oldPath, oldTargets);
+      } else if (parts.length >= 2) {
+        const file = parts[1];
+        if (!latest.has(file)) {
+          latest.set(file, { order, date: currentDate });
+        }
+        for (const target of track(file)) {
+          earliest.set(target, currentDate);
+        }
+      }
+    }
+  } catch {
+    // Missing git or non-repo checkout leaves dates empty.
+  }
+
+  commitDatesCache = { latest, earliest };
+  return commitDatesCache;
 }
 
 // The last commit that touched any of the files: an accurate lastmod. With a
 // shallow clone every file would get the latest commit's date, so the Pages
 // workflow checks out the full history. Uncommitted files have none.
 function lastCommitDate(sources) {
-  return gitDate(["log", "-1", "--format=%cI", "--", ...sources]);
+  const { latest } = loadCommitDates();
+  let best = null;
+  for (const source of sources) {
+    const entry = latest.get(source.replace(/\\/g, "/"));
+    if (entry && (!best || entry.order < best.order)) {
+      best = entry;
+    }
+  }
+  return best ? best.date : "";
 }
 
 function firstCommitDate(source) {
-  const dates = gitDate(["log", "--diff-filter=A", "--follow", "--format=%cI", "--", source]);
-  return dates.split("\n").filter(Boolean).pop() || "";
+  const { earliest } = loadCommitDates();
+  return earliest.get(source.replace(/\\/g, "/")) || "";
 }
 
 // --- Markdown pages -------------------------------------------------------
@@ -727,7 +798,7 @@ function widgetsPage() {
     "Every widget of the agy-powerline statusline for Antigravity CLI, with a live preview: model, quotas with pace markers, context, git, tokens and more.";
   return {
     path: "widgets/",
-    sources: ["src/lib/catalog.js", "src/lib/widget-style.js"],
+    sources: ["src/lib/widgets.js", "src/lib/catalog.js", "src/lib/widget-style.js"],
     card: {
       title: `All ${widgets.length} agy statusline widgets, with previews`,
       label: "Widgets",
@@ -1130,10 +1201,53 @@ function configuratorPage() {
 const isIndexable = (page) => !/<meta name="robots" content="noindex/.test(page.html);
 
 // The share cards scripts/site/images.js draws: one per indexable page.
+// Built from page metadata directly so callers (images.js, site.test.js) do
+// not re-render every HTML page and screenshot copy just to list card titles.
 function cardPages() {
-  return sitePages()
-    .filter(isIndexable)
-    .map((page) => ({ path: page.path, ...page.card }));
+  const widgetCount = WIDGET_CATALOG.filter(
+    (w) => w.id !== "separator" && w.id !== "lineBreak"
+  ).length;
+  const pageCard = (page, label) => ({
+    path: page.path,
+    ...(page.card || {
+      title: cardTitle(page.title),
+      label: label || (page.parent === "docs" ? "Docs" : page.name),
+    }),
+  });
+  return [
+    { path: "", title: stripTags(HOME_TEXT.en.heroTitle), label: "Antigravity CLI" },
+    { path: "fr/", title: stripTags(HOME_TEXT.fr.heroTitle), label: "Antigravity CLI", lang: "fr" },
+    { path: "es/", title: stripTags(HOME_TEXT.es.heroTitle), label: "Antigravity CLI", lang: "es" },
+    { path: "ja/", title: stripTags(HOME_TEXT.ja.heroTitle), label: "Antigravity CLI", lang: "ja" },
+    {
+      path: "zh-cn/",
+      title: stripTags(HOME_TEXT["zh-CN"].heroTitle),
+      label: "Antigravity CLI",
+      lang: "zh-CN",
+    },
+    { path: "ko/", title: stripTags(HOME_TEXT.ko.heroTitle), label: "Antigravity CLI", lang: "ko" },
+    { path: "de/", title: stripTags(HOME_TEXT.de.heroTitle), label: "Antigravity CLI", lang: "de" },
+    { path: THEMES_PAGE.path, title: "Themes for the agy statusline", label: "Themes" },
+    {
+      path: "configure/",
+      title: "Build your agy statusline in the browser",
+      label: "Configurator",
+    },
+    { path: "docs/", title: "Everything about the agy statusline", label: "Docs" },
+    { path: "guides/", title: "Guides for Antigravity CLI's status bar", label: "Guides" },
+    {
+      path: "widgets/",
+      title: `All ${widgetCount} agy statusline widgets, with previews`,
+      label: "Widgets",
+    },
+    {
+      path: "quota-calculator/",
+      title: "Will your Antigravity quota last until it resets?",
+      label: "Calculator",
+    },
+    ...MARKDOWN_PAGES.map((p) => pageCard(p)),
+    ...GUIDES.map((g) => pageCard(g, "Guide")),
+  ];
 }
 
 function buildSite(outDir) {

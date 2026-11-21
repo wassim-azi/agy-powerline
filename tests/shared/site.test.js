@@ -17,7 +17,7 @@ const { KNOWN_KEYS } = require("../../src/lib/config-check");
 const { VALID_WIDGET_IDS, defaultConfig, mergeConfig } = require("../../src/lib/config");
 const { INDEXNOW_KEY, cardPages } = require("../../scripts/site/build");
 const { cardHash, stripWebpMetadata, ART_PROMPTS } = require("../../scripts/site/images");
-const { SCREENSHOTS, screenshotCopies } = require("../../scripts/gallery/build");
+const { SCREENSHOTS } = require("../../scripts/gallery/build");
 const { decodePng, resizePng, encodePng } = require("../../scripts/site/png");
 const { cardSlug } = require("../../scripts/site/layout");
 const { quotaPace, formatDuration } = require("../../scripts/site/quota-pace");
@@ -597,17 +597,23 @@ async function run() {
     );
 
     // Screenshots come with smaller copies, each lighter than the original,
-    // and the feature icons with a 56 px copy for 1x screens.
+    // and the feature icons with a 56 px copy for 1x screens. Check the files
+    // the site build already wrote instead of resizing every PNG a second time.
     const shotTags = [...home.matchAll(/<img\b[^>]*agy-statusline-[^>]*>/g)].map(([t]) => t);
-    const heavy = SCREENSHOTS.flatMap((name) =>
-      screenshotCopies(name)
-        .filter(({ png }) => png)
-        .filter(({ png }) => {
-          const original = path.join(ROOT, "assets", "screenshots", `${name}.png`);
-          return png.length >= fs.statSync(original).size;
-        })
-        .map(({ url }) => url)
-    );
+    const heavy = shotTags.flatMap((tag) => {
+      const src = (tag.match(/\bsrc="([^"]+)"/) || [])[1] || "";
+      const name = (src.match(/agy-statusline-([\w-]+?)(?:-\d+)?\.png$/) || [])[1];
+      if (!name) return [];
+      const originalSize = fs.statSync(
+        path.join(ROOT, "assets", "screenshots", `${name}.png`)
+      ).size;
+      const srcset = (tag.match(/\bsrcset="([^"]+)"/) || [])[1] || "";
+      return srcset
+        .split(",")
+        .map((candidate) => candidate.trim().split(/\s+/)[0])
+        .filter((url) => /-\d+\.png$/.test(url))
+        .filter((url) => fs.statSync(path.join(out, url)).size >= originalSize);
+    });
     record(
       "home page screenshots have a srcset of copies lighter than the original",
       shotTags.length === SCREENSHOTS.length &&

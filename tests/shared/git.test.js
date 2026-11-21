@@ -397,23 +397,27 @@ function testGitOperations(root, git) {
   };
 
   // main: base then "main" on x.txt; feature (from base): "theirs" on x.txt,
-  // then a second commit on y.txt.
+  // then a second commit on y.txt. Build once and copy for each operation so
+  // we skip ~45 redundant git subprocess spawns.
+  const baseOpRepo = path.join(root, "op-template");
+  fs.mkdirSync(baseOpRepo);
+  git(baseOpRepo, "init", "-q");
+  write(path.join(baseOpRepo, "x.txt"), "base\n");
+  git(baseOpRepo, "add", "x.txt");
+  git(baseOpRepo, "commit", "-q", "-m", "base");
+  git(baseOpRepo, "checkout", "-q", "-b", "feature");
+  write(path.join(baseOpRepo, "x.txt"), "theirs\n");
+  git(baseOpRepo, "commit", "-q", "-am", "theirs");
+  write(path.join(baseOpRepo, "y.txt"), "y\n");
+  git(baseOpRepo, "add", "y.txt");
+  git(baseOpRepo, "commit", "-q", "-m", "second");
+  git(baseOpRepo, "checkout", "-q", "main");
+  write(path.join(baseOpRepo, "x.txt"), "main\n");
+  git(baseOpRepo, "commit", "-q", "-am", "main");
+
   const repo = (name) => {
     const dir = path.join(root, name);
-    fs.mkdirSync(dir);
-    git(dir, "init", "-q");
-    write(path.join(dir, "x.txt"), "base\n");
-    git(dir, "add", "x.txt");
-    git(dir, "commit", "-q", "-m", "base");
-    git(dir, "checkout", "-q", "-b", "feature");
-    write(path.join(dir, "x.txt"), "theirs\n");
-    git(dir, "commit", "-q", "-am", "theirs");
-    write(path.join(dir, "y.txt"), "y\n");
-    git(dir, "add", "y.txt");
-    git(dir, "commit", "-q", "-m", "second");
-    git(dir, "checkout", "-q", "main");
-    write(path.join(dir, "x.txt"), "main\n");
-    git(dir, "commit", "-q", "-am", "main");
+    fs.cpSync(baseOpRepo, dir, { recursive: true });
     return dir;
   };
 
