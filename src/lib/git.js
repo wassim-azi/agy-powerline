@@ -15,6 +15,80 @@ const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
 const SYNC_CACHE_NAME = ".git-sync-cache.json";
 const SYNC_CACHE_MAX = 20;
 const COMMIT = /^[0-9a-f]{40}(?:[0-9a-f]{24})?$/;
+const SAFE_HOST = /^[A-Za-z0-9](?:[A-Za-z0-9.-]*[A-Za-z0-9])?(?::\d{1,5})?$/;
+
+// Normalizes a git remote URL (SSH, scp-like, or HTTP(S)) into a clean web base URL
+// with embedded credentials stripped, or "" when unusable or unsafe.
+function parseRemoteWebUrl(rawUrl) {
+  if (typeof rawUrl !== "string") {
+    return "";
+  }
+  const url = rawUrl.trim();
+  if (!url || /[\x00-\x20\x7f\\?#]/.test(url)) {
+    return "";
+  }
+
+  let proto = "https:";
+  let host;
+  let repoPath;
+
+  const scp = url.match(/^(?:[^@/:]+@)?([A-Za-z0-9.-]+):(.+)$/);
+  if (scp && !/^[A-Za-z]:[\\/]/.test(url) && !url.includes("://")) {
+    host = scp[1];
+    repoPath = scp[2];
+  } else {
+    const uri = url.match(/^(https?|ssh|git):\/\/(?:[^@/]+@)?([^/]+)\/(.+)$/i);
+    if (!uri) {
+      return "";
+    }
+    proto = uri[1].toLowerCase() === "http" ? "http:" : "https:";
+    // SSH URIs often include an SSH port (:22, :2222) that is not the HTTPS web port.
+    host = uri[1].toLowerCase() === "ssh" ? uri[2].replace(/:\d+$/, "") : uri[2];
+    repoPath = uri[3];
+  }
+
+  if (!SAFE_HOST.test(host) || host.includes("..")) {
+    return "";
+  }
+
+  repoPath = repoPath.replace(/\/+$/, "").replace(/\.git$/i, "");
+  const parts = repoPath.split("/").filter(Boolean);
+  if (parts.length < 2 || parts.some((part) => part === "." || part === "..")) {
+    return "";
+  }
+
+  return `${proto}//${host}/${parts.join("/")}`;
+}
+
+// Reads [remote "origin"] url from .git/config without spawning git.
+function readOriginUrl(commonDir) {
+  let text;
+  try {
+    text = fs.readFileSync(path.join(commonDir, "config"), "utf8");
+  } catch {
+    return "";
+  }
+
+  let inOrigin = false;
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#") || line.startsWith(";")) {
+      continue;
+    }
+    if (line.startsWith("[")) {
+      inOrigin = /^\[\s*remote\s+"origin"\s*\]$/i.test(line);
+      continue;
+    }
+    if (!inOrigin) {
+      continue;
+    }
+    const match = line.match(/^url\s*=\s*(.+)$/i);
+    if (match) {
+      return parseRemoteWebUrl(match[1]);
+    }
+  }
+  return "";
+}
 
 // A git call that runs past its time is skipped until a later refresh. Tests
 // give git more time: on a busy CI machine a plain call can take longer.
@@ -554,18 +628,18 @@ function readHead(gitDir, commonDir) {
   try {
     head = fs.readFileSync(path.join(gitDir, "HEAD"), "utf8").trim();
   } catch {
-    return { branch: "", commit: "" };
+    return { branch: "", commit: "", detached: false };
   }
   if (COMMIT.test(head)) {
-    return { branch: head.slice(0, 7), commit: head };
+    return { branch: head.slice(0, 7), commit: head, detached: true };
   }
   const ref = head.replace(/^ref:\s+/, "");
   const branch = ref.replace(/^refs\/heads\//, "");
   if (!ref.startsWith("refs/heads/") || !isSafeBranchName(branch)) {
-    return { branch: "", commit: "" };
+    return { branch: "", commit: "", detached: false };
   }
   const commit = readRef(commonDir, ref);
-  return { branch, commit: COMMIT.test(commit) ? commit : "" };
+  return { branch, commit: COMMIT.test(commit) ? commit : "", detached: false };
 }
 
 // One line per stash in the stash reflog.
@@ -702,9 +776,13 @@ function getGitDetails(cwd, needs = {}) {
       return null;
     }
     const commonDir = commonGitDir(gitDir);
-    const { branch, commit } = readHead(gitDir, commonDir);
+    const { branch, commit, detached } = readHead(gitDir, commonDir);
     const details = { branch };
 
+    if (needs.remote) {
+      details.detached = detached;
+      details.remoteUrl = readOriginUrl(commonDir);
+    }
     if (needs.sha) {
       details.sha = commit.slice(0, 7);
     }
@@ -749,6 +827,12 @@ function resolveGitDetails(data, config) {
   for (const widget of config?.widgets ?? []) {
     if (DETAIL_NEEDS[widget?.id]) {
       needs[DETAIL_NEEDS[widget.id]] = true;
+    }
+    if ((widget?.id === "git" || widget?.id === "gitSha") && widget.link === true) {
+      needs.remote = true;
+      if (widget.id === "gitSha") {
+        needs.sha = true;
+      }
     }
   }
   if (!Object.keys(needs).length) {
@@ -873,6 +957,8 @@ module.exports = {
   DIFF_ARGS,
   hasRiskyRepoConfig,
   hasPlantedGitBinary,
+  parseRemoteWebUrl,
+  readOriginUrl,
   parseStatus,
   parseShortstat,
   getGitDetails,

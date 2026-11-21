@@ -41,7 +41,7 @@ const SGR = /\x1b\[[0-9;]*m/g;
 const CONTROL = /[\x00-\x09\x0b-\x1f\x7f-\x9f\u2028\u2029\u202A-\u202E\u2066-\u2069]/;
 const STACK_TRACE = /\n\s+at .+:\d+:\d+/;
 
-const strip = (text) => text.replace(SGR, "");
+const strip = (text) => text.replace(SGR, "").replace(/\x1b\]8;;[^\x1b\x07]*(?:\x07|\x1b\\)/g, "");
 const widest = (text) => Math.max(...strip(text).split("\n").map(visibleWidth));
 
 // Escape sequences, separators, bidi overrides, lone surrogates, wide and

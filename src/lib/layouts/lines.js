@@ -36,6 +36,9 @@ const {
   shortenPath,
   fishPath,
   fishBranch,
+  linkPath,
+  linkGitBranch,
+  linkGitSha,
   formatTokens,
   formatContextTokens,
   shortModelName,
@@ -470,7 +473,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       if (!dirname) {
         return null;
       }
-      return fg(palette.location) + tag() + dirname + RESET;
+      return fg(palette.location) + tag() + linkPath(dirname, session.cwd, widget, ascii) + RESET;
     }
 
     case "project": {
@@ -478,7 +481,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       if (!proj) {
         return null;
       }
-      return fg(palette.location) + tag() + proj + RESET;
+      return fg(palette.location) + tag() + linkPath(proj, session.project, widget, ascii) + RESET;
     }
 
     case "os": {
@@ -504,7 +507,13 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       const syncStr = formatGitSync(session.git.ahead, session.git.behind, ascii);
       const syncPart = syncStr ? ` ${syncStr}` : "";
       const rawBranch = widget?.fish === true ? fishBranch(session.git.branch) : session.git.branch;
-      const branch = limitWidth(rawBranch, widget, ascii);
+      const branch = linkGitBranch(
+        limitWidth(rawBranch, widget, ascii),
+        session.git.branch,
+        session,
+        widget,
+        ascii
+      );
       return (
         fg(palette.git) +
         tag() +
@@ -551,7 +560,9 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       if (!session.gitDetails?.sha) {
         return null;
       }
-      return fg(palette.git) + tag() + session.gitDetails.sha + RESET;
+      return (
+        fg(palette.git) + tag() + linkGitSha(session.gitDetails.sha, session, widget, ascii) + RESET
+      );
 
     case "gitStash":
       if (!(session.gitDetails?.stash > 0)) {

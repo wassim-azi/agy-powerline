@@ -46,6 +46,9 @@ const {
   fishPath,
   fishBranch,
   homePath,
+  linkPath,
+  linkGitBranch,
+  linkGitSha,
   basenameOf,
   label,
   visibleWidth,
@@ -395,7 +398,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       if (!name) {
         return null;
       }
-      return pill(colors.meta, lbl(name));
+      return pill(colors.meta, lbl(linkPath(name, session.cwd, widget, ascii)));
     }
 
     case "project": {
@@ -403,7 +406,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       if (!name) {
         return null;
       }
-      return pill(colors.meta, lbl(name));
+      return pill(colors.meta, lbl(linkPath(name, session.project, widget, ascii)));
     }
 
     case "os": {
@@ -432,7 +435,13 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       const syncStr = formatGitSync(session.git.ahead, session.git.behind, ascii);
       const syncPart = syncStr ? ` ${syncStr}` : "";
       const rawBranch = widget?.fish === true ? fishBranch(session.git.branch) : session.git.branch;
-      const branch = limitWidth(rawBranch, widget, ascii);
+      const branch = linkGitBranch(
+        limitWidth(rawBranch, widget, ascii),
+        session.git.branch,
+        session,
+        widget,
+        ascii
+      );
       return pill(
         session.git.dirty ? colors.gitDirty : colors.git,
         lbl(`${mark}${branch}${opPart}${syncPart}`)
@@ -461,7 +470,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       if (!session.gitDetails?.sha) {
         return null;
       }
-      return pill(colors.git, lbl(session.gitDetails.sha));
+      return pill(colors.git, lbl(linkGitSha(session.gitDetails.sha, session, widget, ascii)));
 
     case "gitStash":
       if (!(session.gitDetails?.stash > 0)) {
