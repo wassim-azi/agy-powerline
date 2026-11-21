@@ -23,7 +23,7 @@
 使用中のモデル、Gemini の 5h/7d・Claude/GPT・Argon のクォータ、コンテキストウィンドウ、git ブランチなどがひと目でわかります。ウィジェット、テーマ、レイアウトは対話式のエディターで選べます。インストールはコマンドひとつ、依存パッケージはありません。
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline の configure：argon と入力して Argon の週間クォータを追加し、プリセット、テーマ、レイアウトをバーのライブプレビューで見て回り、最後に Powerline タブを開く" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline の対話式エディター：argon と入力して Argon の週間クォータを追加し、プリセット、テーマ、レイアウトをバーのライブプレビューで見て回り、最後に Powerline タブを開く" width="850">
 </p>
 
 ## なぜ agy-powerline？
@@ -33,7 +33,7 @@
 | クォータのペース表示         | クォータメーターのペースマーカーで、5h または 7d のクォータがリセットまでもつかがひと目でわかる                     | [クォータガイド](docs/guides/antigravity-quota.md) · [計算機](https://agy-powerline.com/quota-calculator/) |
 | マルチプロバイダーのクォータ | Gemini 5h/7d、サードパーティ（Claude/GPT）、Gemini 4 Argon のクォータを横並びで追跡                                 | [ペイロードリファレンス](docs/payload.md#quota-buckets)                                                    |
 | テーマ & レイアウト          | `pills`、`lines`、`classic` の各レイアウトで使える WCAG AA 準拠の 22 テーマ（ダーク、ライト、色覚多様性対応を含む） | [テーマギャラリー](https://agy-powerline.com/themes/)                                                      |
-| 対話式のコンフィギュレーター | ターミナル（`npx agy-powerline configure`）またはブラウザーのライブプレビュー付きエディターで設定                   | [Web コンフィギュレーター](https://agy-powerline.com/configure/)                                           |
+| 対話式のコンフィギュレーター | ターミナル（`npx agy-powerline`）またはブラウザーのライブプレビュー付きエディターで設定                             | [Web コンフィギュレーター](https://agy-powerline.com/configure/)                                           |
 | セキュリティ & プライバシー  | ランタイム依存パッケージ 0、ネットワーク通信なし、テレメトリなし、`settings.json` の自動バックアップ                | [セキュリティ](SECURITY.md)                                                                                |
 | クロスプラットフォーム       | 組み込みの診断機能（`doctor`）付きで Windows、macOS、Linux、WSL で動作                                              | [インストール](docs/install.md) · [トラブルシューティング](docs/troubleshooting.md)                        |
 
@@ -76,11 +76,11 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 `--yes` は agy が答えられない確認をスキップし、`settings.json` をバックアップしたうえで既存の `statusLine` を置き換えます。
 
-Nerd Font のないターミナルでは、ASCII モードをオンにしてください（`configure` で `i` から `Settings` を開く）。
+Nerd Font のないターミナルでは、ASCII モードをオンにしてください（`npx agy-powerline` で `i` から `Settings` を開く）。
 
 ## カスタマイズ
 
-`npx agy-powerline configure` を実行すると、バーのライブプレビュー付きのエディターが開きます。`←` `→` で Widgets、Presets、Themes、Layout、Powerline、Settings を切り替え、`↑` `↓` で移動、Enter で選択、`q` で保存して終了します。各画面のキーは画面下部に表示されます。キーの一覧は [Configuration](docs/configuration.md#configurator-keys) にあります。
+`npx agy-powerline` を実行すると、バーのライブプレビュー付きのエディターが開きます。`←` `→` で Widgets、Presets、Themes、Layout、Powerline、Settings を切り替え、`↑` `↓` で移動、Enter で選択、`q` で保存して終了します。各画面のキーは画面下部に表示されます。キーの一覧は [Configuration](docs/configuration.md#configurator-keys) にあります。
 
 ブラウザーの方がよければ、[ブラウザーでバーを作成](https://agy-powerline.com/configure/)してライブプレビューで確認し、ダウンロードまたはインポートできます。
 
@@ -166,7 +166,7 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 npx agy-powerline init --language ja
 ```
 
-または `statusline.config.json` に `"language": "ja"` と書きます（`configure` で `i` から `Settings` を開く）。モデル名、ブランチなど agy から届く内容はそのまま表示され、`2h 47m` の単位は幅を抑えるため英字のままです。コマンドと `configure` は英語のままです。詳しくは[設定のドキュメント](docs/configuration.md#language)をご覧ください。
+または `statusline.config.json` に `"language": "ja"` と書きます（対話式エディターで `i` から `Settings` を開く）。モデル名、ブランチなど agy から届く内容はそのまま表示され、`2h 47m` の単位は幅を抑えるため英字のままです。コマンドと対話式エディターは英語のままです。詳しくは[設定のドキュメント](docs/configuration.md#language)をご覧ください。
 
 ## ウィジェット
 
@@ -204,7 +204,7 @@ npx agy-powerline init --language ja
 | -------------------------------------------------- | -------------------------------------------------------------------------- |
 | `npx agy-powerline`                                | インストール（必要時）、スクリプト更新、エディター起動                     |
 | `npx agy-powerline init [--yes]`                   | ステータスラインをインストールまたは更新（`--preset`、`--yes` などに対応） |
-| `npx agy-powerline configure`                      | エディターを開く（別名 `config`）                                          |
+| `npx agy-powerline configure`                      | エディターを開く（非推奨・別名 `config`、`npx agy-powerline` を推奨）      |
 | `npx agy-powerline preset <name>`                  | プリセットを適用（一覧は `--list`）                                        |
 | `npx agy-powerline theme <name>`                   | テーマを切り替え（`--list`、`--gallery`）                                  |
 | `npx agy-powerline gradient <name>`                | 各行にグラデーションを適用（`--list`、`off`）                              |
@@ -234,7 +234,7 @@ npx agy-powerline doctor       # すべてが最新か確認
 
 ## プライバシーとセキュリティ
 
-- **ネットワーク通信なし、テレメトリなし。** 表示する情報はすべて、agy がバーに渡すデータ、`.git`、OS から取得します。外部へのリンクは `configure` の `g` だけで、ブラウザーで GitHub のページを開きます。
+- **ネットワーク通信なし、テレメトリなし。** 表示する情報はすべて、agy がバーに渡すデータ、`.git`、OS から取得します。外部へのリンクは対話式エディターの `g` だけで、ブラウザーで GitHub のページを開きます。
 - **設定は安全です。** `init` と `uninstall` は `settings.json` をバックアップし、解析できないファイルは編集しません。
 - **追加しない限り何も実行されません。** ahead/behind の数や、追加した git ウィジェットのファイル数・行数を数えるための短い `git` の呼び出しを除き、バーが実行するコマンドは自分で設定した `exec` ウィジェットだけです。
 - **ランタイム依存パッケージはゼロ**で、CI から [npm provenance](https://docs.npmjs.com/generating-provenance-statements) 付きで公開されています。

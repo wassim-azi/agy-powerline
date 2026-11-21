@@ -51,7 +51,7 @@ async function capsCommand(name, options = {}) {
     console.log(
       currentStyle
         ? `  current  ${CYAN}${currentStyle}${RESET} ${DIM}(${STYLES[currentStyle].name})${RESET}`
-        : `  current  ${CYAN}custom${RESET} ${DIM}(edited in configure or statusline.config.json)${RESET}`
+        : `  current  ${CYAN}custom${RESET} ${DIM}(edited with npx agy-powerline or statusline.config.json)${RESET}`
     );
     console.log(`  config   ${DIM}${getConfigPath()}${RESET}`);
     console.log();
@@ -73,7 +73,7 @@ async function capsCommand(name, options = {}) {
     console.log();
     console.log(` Run ${CYAN}npx agy-powerline caps <style>${RESET} to change cap style.`);
     console.log(
-      ` ${DIM}A style sets start caps, end caps and separators; fine-tune them in configure.${RESET}`
+      ` ${DIM}A style sets start caps, end caps and separators; fine-tune them with npx agy-powerline.${RESET}`
     );
     console.log();
     return;

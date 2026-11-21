@@ -180,7 +180,7 @@ async function askSymbols(rl, print = console.log) {
   print(`\n ${preview({ ...sample, ascii: true }, 1)}`);
   print(` ASCII mode is on: plain-text shapes, no emojis. To change it later, press`);
   print(
-    ` ${CYAN}i${RESET} in ${CYAN}npx agy-powerline configure${RESET} or set "ascii": false in the config.`
+    ` ${CYAN}i${RESET} in ${CYAN}npx agy-powerline${RESET} or set "ascii": false in the config.`
   );
   return true;
 }
@@ -402,7 +402,7 @@ async function initCommand(options = {}) {
     }
     console.log();
     console.log(" Next:");
-    console.log(`${CYAN}  npx agy-powerline configure${RESET}`);
+    console.log(`${CYAN}  npx agy-powerline${RESET}`);
     console.log(
       `${CYAN}  npx agy-powerline preset${RESET} / ${CYAN}layout${RESET} / ${CYAN}theme${RESET}  ${DIM}change one of your choices${RESET}`
     );

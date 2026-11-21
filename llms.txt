@@ -10,7 +10,7 @@
 ## Commands
 - `npx agy-powerline` — Install (if needed), update outdated scripts, and open the editor in an interactive terminal (run `--help` for the command list).
 - `npx agy-powerline init [--yes]` — Install or update the statusline.
-- `npx agy-powerline configure` — Open the editor (alias `config`).
+- `npx agy-powerline configure` — Open the editor (deprecated compatibility alias for `npx agy-powerline`).
 - `npx agy-powerline preset <name>` — Apply a preset (`--list` to see them).
 - `npx agy-powerline theme <name>` — Switch theme (`--list`, `--gallery`).
 - `npx agy-powerline gradient <name>` — Color rows with a gradient (`--list`, `off`); presets: `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono`.
@@ -131,7 +131,7 @@ Default: `~/.agy-powerline/statusline.config.json`; with `AGY_POWERLINE_HOME`, u
 
 ## Rules for assistants
 - Do not edit `~/.gemini/antigravity-cli/settings.json` by hand; run `npx agy-powerline init --yes`.
-- Bare `npx agy-powerline` (in a TTY) and `npx agy-powerline configure` launch an interactive TUI; do not run them on the user's behalf.
+- Bare `npx agy-powerline` (in a TTY) launches an interactive TUI; do not run it on the user's behalf.
 - `import` asks before adding shell commands; never pass `--allow-exec` without approval of the exact commands.
 
 ## Docs

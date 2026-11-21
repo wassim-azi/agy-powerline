@@ -46,7 +46,7 @@ The marker needs no extra data: it comes from the reset time agy already sends a
 - **Only when it gets low:** give a quota widget `showBelow`, for example `{ "id": "weeklyBar", "showBelow": 50 }`, and it stays hidden until half the quota is used.
 - **Argon on Google AI Pro:** add `argonWeekly` and `argonReset` to see Argon's weekly quota even while you work with another model.
 
-Add or remove any of them in `npx agy-powerline configure`, or in the [browser configurator](https://agy-powerline.com/configure/).
+Add or remove any of them in `npx agy-powerline`, or in the [browser configurator](https://agy-powerline.com/configure/).
 
 ## Get a warning before you run out
 

@@ -113,7 +113,7 @@ async function testSymbolsQuestion() {
         no.printed[1].includes("[ 4 Hydrogen High ]") &&
         !no.printed[1].includes("\uE0B4") &&
         /ASCII mode is on/.test(no.printed[2]) &&
-        /configure.*"ascii": false/.test(no.printed[3]),
+        /npx agy-powerline.*"ascii": false/.test(no.printed[3]),
       JSON.stringify(no)
     );
 

@@ -56,7 +56,7 @@ It installs the status bar and opens a live-preview editor where everyone picks 
 **Run:**
 
 ```bash
-npx agy-powerline configure
+npx agy-powerline
 ```
 
 Ideas to try, with the live preview:

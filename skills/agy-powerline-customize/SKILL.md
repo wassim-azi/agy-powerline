@@ -24,10 +24,10 @@ If npx can't download the package (a network, proxy or registry error), run the 
 - `theme` also takes `dark`, `light` and `colorblind`. `gradient off` removes a gradient.
 - `preset` replaces the widget list; theme and layout stay.
 - `import` shows what changes before applying. Pass `--merge` to change only the settings in the file.
-- For anything the commands don't cover (one widget's color, thresholds, a widget of its own), point the user to `npx agy-powerline configure` in their own terminal, or to https://github.com/wassim-azi/agy-powerline/blob/main/docs/configuration.md.
+- For anything the commands don't cover (one widget's color, thresholds, a widget of its own), point the user to `npx agy-powerline` in their own terminal, or to https://github.com/wassim-azi/agy-powerline/blob/main/docs/configuration.md.
 
 ## Rules
 
 - Never edit `~/.gemini/antigravity-cli/settings.json` by hand.
-- Never run `npx agy-powerline configure`: it's an interactive full-screen editor and would hang your shell tool. Suggest it to the user instead.
+- Never run `npx agy-powerline` without arguments (or `configure`): it's an interactive full-screen editor and would hang your shell tool. Suggest it to the user instead.
 - Never pass `--allow-exec` to `npx agy-powerline import` unless the user said yes to the exact commands `import` showed. A file that adds shell commands runs them on every refresh.

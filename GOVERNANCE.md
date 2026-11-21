@@ -17,8 +17,8 @@ agy-powerline is a single-maintainer open source project under the [MIT license]
 - Every change, the maintainer's included, goes through a pull request with the required CI checks; nobody pushes to `main` directly.
 - Bugs, features and changes start as [GitHub issues](https://github.com/wassim-azi/agy-powerline/issues); open questions and ideas go to [Discussions](https://github.com/wassim-azi/agy-powerline/discussions). Anyone can comment.
 - The maintainer makes the final decision, explains it in the issue or pull request, and records user-visible changes in [CHANGELOG.md](CHANGELOG.md).
-- Rules that protect users' machines (no runtime dependencies, no network calls, no shell, never lose user settings) are listed in [AGENTS.md](AGENTS.md#hard-rules) and are not relaxed for a feature.
-- Planned work is in [ROADMAP.md](ROADMAP.md).
+- Rules that protect users' machines (no runtime dependencies, no network calls or telemetry, no reading config from the current directory, no shell, never lose user settings) are listed in [AGENTS.md](AGENTS.md#hard-rules) and are not relaxed for a feature.
+- Planned enhancements are tracked in [GitHub issues](https://github.com/wassim-azi/agy-powerline/issues?q=is%3Aopen+label%3Aenhancement) (longer-term maintainer goals: keeping payload support aligned with new `agy` releases, unifying widget modules, OpenSSF Best Practices Silver badge, and adding a second maintainer for independent review).
 
 ## Releases
 

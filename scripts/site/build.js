@@ -716,7 +716,7 @@ function widgetsPage() {
     })
     .join("\n        ");
   const body = `<h1>agy statusline widgets</h1>
-        <p class="lede">agy-powerline has ${widgets.length} widgets. Each preview below is drawn by the real statusline code from sample data; widgets that read your machine (operating system, user and host, RAM, clock, token totals) have none. Add any of them with <code>npx agy-powerline configure</code>, in the <a href="/configure/">browser configurator</a>, or with its line in <code>statusline.config.json</code>. Widget options are in <a href="/docs/configuration/#widget-options">Configuration</a>.</p>
+        <p class="lede">agy-powerline has ${widgets.length} widgets. Each preview below is drawn by the real statusline code from sample data; widgets that read your machine (operating system, user and host, RAM, clock, token totals) have none. Add any of them with <code>npx agy-powerline</code>, in the <a href="/configure/">browser configurator</a>, or with its line in <code>statusline.config.json</code>. Widget options are in <a href="/docs/configuration/#widget-options">Configuration</a>.</p>
         <nav aria-label="Widgets"><p>${widgets.map((w) => `<a href="#${esc(w.id)}"><code>${esc(w.id)}</code></a>`).join(" ")}</p></nav>
         ${sections}
         <section aria-labelledby="layout-helpers">

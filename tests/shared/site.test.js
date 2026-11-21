@@ -21,6 +21,7 @@ const { SCREENSHOTS, screenshotCopies } = require("../../scripts/gallery/build")
 const { decodePng, resizePng, encodePng } = require("../../scripts/site/png");
 const { cardSlug } = require("../../scripts/site/layout");
 const { quotaPace, formatDuration } = require("../../scripts/site/quota-pace");
+const { faqPageData } = require("../../scripts/site/doc-page");
 const { renderMarkdown } = require("../../scripts/site/markdown");
 const {
   rateVital,
@@ -379,12 +380,22 @@ async function run() {
     const missingRichSchema = indexable.filter(
       (file) => !pageSchemas[file].some((t) => t !== "BreadcrumbList")
     );
-    const faqJson = (
-      pages["faq/index.html"].match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g) ||
-      []
-    )
-      .map((tag) => JSON.parse(tag.replace(/<\/?script[^>]*>/g, "")))
+    const faqJson = [
+      ...pages["faq/index.html"].matchAll(
+        /<script type="application\/ld\+json">([\s\S]*?)<\/script>/g
+      ),
+    ]
+      .map((m) => JSON.parse(m[1]))
       .find((obj) => obj["@type"] === "FAQPage");
+    const entitySafeFaq = faqPageData([
+      ["What about &amp;lt;tag&amp;gt;?", "Keep &amp;amp; and &quot;quotes&quot; intact"],
+    ]);
+    record(
+      "faqPageData decodes HTML entities in one pass without double-unescaping",
+      entitySafeFaq.mainEntity[0].name === "What about &lt;tag&gt;?" &&
+        entitySafeFaq.mainEntity[0].acceptedAnswer.text === 'Keep &amp; and "quotes" intact',
+      JSON.stringify(entitySafeFaq.mainEntity[0])
+    );
     record(
       "every indexable page has page-level JSON-LD beyond BreadcrumbList, and /faq/ has FAQPage",
       missingRichSchema.length === 0 &&

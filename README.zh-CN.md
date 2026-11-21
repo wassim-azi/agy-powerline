@@ -23,7 +23,7 @@
 一眼看到当前模型、Gemini 5h/7d、Claude/GPT 和 Argon 配额、上下文窗口、git 分支等信息。在交互式编辑器中挑选组件、主题和布局。一条命令即可安装，零依赖。
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline 的 configure：输入 argon 添加 Argon 每周配额，然后浏览预设、主题和布局并实时预览状态栏，最后打开 Powerline 标签页" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline 交互式编辑器：输入 argon 添加 Argon 每周配额，然后浏览预设、主题和布局并实时预览状态栏，最后打开 Powerline 标签页" width="850">
 </p>
 
 ## 为什么选择 agy-powerline？
@@ -33,7 +33,7 @@
 | 配额节奏标记 | 配额进度条上的节奏标记让你一眼看出 5h 或 7d 配额能否撑到重置                                   | [配额指南](docs/guides/antigravity-quota.md) · [计算器](https://agy-powerline.com/quota-calculator/) |
 | 多模型方配额 | 并排追踪 Gemini 5h/7d、第三方（Claude/GPT）以及 Gemini 4 Argon 配额                            | [Payload 参考](docs/payload.md#quota-buckets)                                                        |
 | 主题与布局   | 涵盖 `pills`、`lines` 和 `classic` 三种布局的 22 款 WCAG AA 主题（含深色、浅色及色盲友好配色） | [主题画廊](https://agy-powerline.com/themes/)                                                        |
-| 交互式配置器 | 在终端（`npx agy-powerline configure`）或浏览器中使用带实时预览的编辑器定制                    | [网页配置器](https://agy-powerline.com/configure/)                                                   |
+| 交互式配置器 | 在终端（`npx agy-powerline`）或浏览器中使用带实时预览的编辑器定制                              | [网页配置器](https://agy-powerline.com/configure/)                                                   |
 | 安全与隐私   | 零运行时依赖、无网络请求、无遥测，自动备份 `settings.json`                                     | [安全说明](SECURITY.md)                                                                              |
 | 跨平台支持   | 支持 Windows、macOS、Linux 和 WSL，内置诊断工具（`doctor`）                                    | [安装说明](docs/install.md) · [故障排查](docs/troubleshooting.md)                                    |
 
@@ -76,11 +76,11 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 `--yes` 会跳过 agy 无法回答的确认提示，并在备份 `settings.json` 后替换已有的 `statusLine`。
 
-如果终端没有 Nerd Font，可以开启 ASCII 模式（在 `configure` 中按 `i` 打开 `Settings`）。
+如果终端没有 Nerd Font，可以开启 ASCII 模式（在 `npx agy-powerline` 中按 `i` 打开 `Settings`）。
 
 ## 自定义
 
-`npx agy-powerline configure` 会打开一个带有状态栏实时预览的编辑器。用 `←` `→` 在 Widgets、Presets、Themes、Layout、Powerline 和 Settings 之间切换，`↑` `↓` 移动，Enter 选择，`q` 保存并退出。每个界面的按键都显示在底部；完整列表见 [Configuration](docs/configuration.md#configurator-keys)。
+`npx agy-powerline` 会打开一个带有状态栏实时预览的编辑器。用 `←` `→` 在 Widgets、Presets、Themes、Layout、Powerline 和 Settings 之间切换，`↑` `↓` 移动，Enter 选择，`q` 保存并退出。每个界面的按键都显示在底部；完整列表见 [Configuration](docs/configuration.md#configurator-keys)。
 
 更喜欢浏览器？可以[在浏览器中定制状态栏](https://agy-powerline.com/configure/)并实时预览，然后下载或导入配置。
 
@@ -166,7 +166,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 npx agy-powerline init --language zh-CN
 ```
 
-也可以在 `statusline.config.json` 中设置 `"language": "zh-CN"`（或在 `configure` 中按 `i` 打开 `Settings`）。模型名、分支名等来自 agy 的内容会按原文显示，`2h 47m` 的时间单位保持英文缩写以控制宽度。命令行输出与 `configure` 界面保持英文。详情见[语言设置文档](docs/configuration.md#language)。
+也可以在 `statusline.config.json` 中设置 `"language": "zh-CN"`（或在交互式编辑器中按 `i` 打开 `Settings`）。模型名、分支名等来自 agy 的内容会按原文显示，`2h 47m` 的时间单位保持英文缩写以控制宽度。命令行输出与交互式编辑器界面保持英文。详情见[语言设置文档](docs/configuration.md#language)。
 
 ## 组件
 
@@ -200,22 +200,22 @@ npx agy-powerline init --language zh-CN
 
 ## 命令
 
-| 命令                                               | 作用                                               |
-| -------------------------------------------------- | -------------------------------------------------- |
-| `npx agy-powerline`                                | 安装（如有需要）、更新旧脚本并打开编辑器           |
-| `npx agy-powerline init [--yes]`                   | 安装或更新状态栏（支持 `--preset`、`--yes` 等）    |
-| `npx agy-powerline configure`                      | 打开编辑器（别名 `config`）                        |
-| `npx agy-powerline preset <name>`                  | 应用预设（`--list` 查看全部）                      |
-| `npx agy-powerline theme <name>`                   | 切换主题（`--list`、`--gallery`）                  |
-| `npx agy-powerline gradient <name>`                | 为每行应用渐变配色（`--list`、`off`）              |
-| `npx agy-powerline layout <pills\|lines\|classic>` | 切换布局                                           |
-| `npx agy-powerline caps <style>`                   | 切换胶囊形状：`round`、`angled`、`slanted`、`flat` |
-| `npx agy-powerline export [file]`                  | 将配置保存到文件，方便备份或分享                   |
-| `npx agy-powerline import <file>`                  | 显示变更内容后加载配置（`--merge`）                |
-| `npx agy-powerline doctor`                         | 检查安装并说明问题所在                             |
-| `npx agy-powerline report`                         | 生成保护隐私的错误报告                             |
-| `npx agy-powerline uninstall [--delete]`           | 从 agy 中移除（`--delete` 会同时删除其文件）       |
-| `npx agy-powerline render --demo`                  | 用示例数据打印状态栏                               |
+| 命令                                               | 作用                                                            |
+| -------------------------------------------------- | --------------------------------------------------------------- |
+| `npx agy-powerline`                                | 安装（如有需要）、更新旧脚本并打开编辑器                        |
+| `npx agy-powerline init [--yes]`                   | 安装或更新状态栏（支持 `--preset`、`--yes` 等）                 |
+| `npx agy-powerline configure`                      | 打开编辑器（已弃用；别名 `config`，请使用 `npx agy-powerline`） |
+| `npx agy-powerline preset <name>`                  | 应用预设（`--list` 查看全部）                                   |
+| `npx agy-powerline theme <name>`                   | 切换主题（`--list`、`--gallery`）                               |
+| `npx agy-powerline gradient <name>`                | 为每行应用渐变配色（`--list`、`off`）                           |
+| `npx agy-powerline layout <pills\|lines\|classic>` | 切换布局                                                        |
+| `npx agy-powerline caps <style>`                   | 切换胶囊形状：`round`、`angled`、`slanted`、`flat`              |
+| `npx agy-powerline export [file]`                  | 将配置保存到文件，方便备份或分享                                |
+| `npx agy-powerline import <file>`                  | 显示变更内容后加载配置（`--merge`）                             |
+| `npx agy-powerline doctor`                         | 检查安装并说明问题所在                                          |
+| `npx agy-powerline report`                         | 生成保护隐私的错误报告                                          |
+| `npx agy-powerline uninstall [--delete]`           | 从 agy 中移除（`--delete` 会同时删除其文件）                    |
+| `npx agy-powerline render --demo`                  | 用示例数据打印状态栏                                            |
 
 任何命令加上 `--help` 即可查看其选项。
 
@@ -234,7 +234,7 @@ npx agy-powerline doctor       # 检查一切是否为最新
 
 ## 隐私与安全
 
-- **无网络请求，无遥测。** 所有信息都来自 agy 传给状态栏的数据、`.git` 和你的操作系统。唯一的对外链接是 `configure` 中的 `g`，它会在浏览器中打开 GitHub 页面。
+- **无网络请求，无遥测。** 所有信息都来自 agy 传给状态栏的数据、`.git` 和你的操作系统。唯一的对外链接是交互式编辑器中的 `g`，它会在浏览器中打开 GitHub 页面。
 - **你的设置是安全的。** `init` 和 `uninstall` 会备份 `settings.json`，并拒绝编辑无法解析的文件。
 - **你不添加，就不会运行任何命令。** 除了用于统计领先/落后提交数以及所添加 git 组件的文件和行数的快速 `git` 调用外，状态栏只会运行你自己配置的 `exec` 组件。
 - **零运行时依赖**，通过 CI 发布并附带 [npm provenance](https://docs.npmjs.com/generating-provenance-statements)。

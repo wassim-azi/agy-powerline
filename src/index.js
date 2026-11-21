@@ -8,7 +8,7 @@ const fs = require("fs");
 const path = require("path");
 const { parseArgs } = require("util");
 const { initCommand } = require("./cli/init");
-const { configureCommand } = require("./cli/configure");
+const { deprecatedConfigureCommand } = require("./cli/configure");
 const { defaultInteractiveCommand } = require("./cli/default");
 const { themeCommand } = require("./cli/theme");
 const { layoutCommand } = require("./cli/layout");
@@ -96,9 +96,9 @@ const COMMANDS = [
   {
     name: "configure",
     aliases: ["config"],
-    description: "Open the interactive widget, theme, and powerline TUI",
+    description: "Open the interactive TUI (deprecated; run 'agy-powerline' instead)",
     options: {},
-    run: () => configureCommand(),
+    run: () => deprecatedConfigureCommand(),
   },
   {
     name: "theme",

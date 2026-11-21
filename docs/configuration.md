@@ -1,8 +1,8 @@
 # Configuration
 
-Everything about `statusline.config.json`, the file `npx agy-powerline` (or `npx agy-powerline configure`) edits. It lives in the install folder (`~/.agy-powerline/`, or `AGY_POWERLINE_HOME`). The bar reads it on every refresh, so a running `agy` session picks up changes without a restart.
+Everything about `statusline.config.json`, the file `npx agy-powerline` edits. It lives in the install folder (`~/.agy-powerline/`, or `AGY_POWERLINE_HOME`). The bar reads it on every refresh, so a running `agy` session picks up changes without a restart.
 
-Most people never edit it by hand: `configure` covers widgets, order, presets, themes, layout and powerline glyphs. You can also [build your bar in the browser](https://agy-powerline.com/configure/) with live previews, then download or import it. This page is for everything else.
+Most people never edit it by hand: running `npx agy-powerline` opens the interactive editor, covering widgets, order, presets, themes, layout and powerline glyphs. You can also [build your bar in the browser](https://agy-powerline.com/configure/) with live previews, then download or import it. This page is for everything else.
 
 Editors that read JSON Schema, such as VS Code and JetBrains IDEs, complete setting names, widget ids and theme ids and flag typos when the file starts with this line:
 
@@ -81,7 +81,7 @@ Most values come from the JSON Antigravity pipes on stdin; `host`, `os` and `ram
 - Tokens over all your conversations, each opt-in: `tokensToday` (`📈 Today: 1.2M`, the current calendar day, in `clock.timeZone` when set), `tokensWeek` (`📊 7d: 8.4M`, the last 7 days, today included), and `tokensMonth` (`🗓️ 30d: 24.5M`, the last 30 days, today included). They need Node 22.13 or newer (`node:sqlite`); on older Node they stay hidden and `doctor` says so.
   - Input plus output tokens, the same meaning as `totalTokens`; `"split": true` shows `1.0M↑ 245.3K↓`.
   - `"budget": 2000000` adds the share used (`Today: 1.2M (60%)`) and turns to the caution and danger colors at `warn` / `crit` percent used (70 and 90 by default, from `thresholds.contextWarn` / `contextCrit`), with `blink` like the context widgets.
-  - Read from agy's own conversation databases (`~/.gemini/antigravity-cli/conversations/*.db`), read-only: only the token counts, response IDs (so a response counted twice is counted once) and timestamps, never a message or a name. The totals are kept per database in `.usage-cache.json` in the install folder, so a database is read again only when it changes, at most about 100 ms of reading per refresh. Previews (`configure`, `render --demo`) only use that cache, so the widgets show there once the bar has run in agy.
+  - Read from agy's own conversation databases (`~/.gemini/antigravity-cli/conversations/*.db`), read-only: only the token counts, response IDs (so a response counted twice is counted once) and timestamps, never a message or a name. The totals are kept per database in `.usage-cache.json` in the install folder, so a database is read again only when it changes, at most about 100 ms of reading per refresh. Previews (the interactive editor, `render --demo`) only use that cache, so the widgets show there once the bar has run in agy.
 - Prompt cache hit rate (`cacheHit` e.g. `⚡ 85%`: share of the latest prompt read from cache)
 - Custom shell command (`exec`, see [below](#shell-command-widget-exec))
 - Environment variable (`env`, e.g. `{"id": "env", "var": "AWS_PROFILE", "label": "AWS"}` shows `🔧 AWS: dev`; zero subprocesses, hidden when unset or secret-named)
@@ -112,12 +112,12 @@ Any widget accepts these options:
 - **`textColor`**: the text color (on the pill in Pills; the plain text parts in Lines).
 - **`bold`**: `false` drops bold in Pills (on by default); `true` makes a Lines widget bold.
 - **`raw`**: `true` shows only the value, without icon or label: `72.0% rem` instead of `⏳ 5h: 72.0% rem`.
-- **`label`**: your own name before the value, up to 20 columns (a longer one is cut with `…`): `{ "id": "fiveHourPct", "label": "Quota" }` shows `⏳ Quota: 72.0% rem`. `""` removes the name. Widgets that show only their icon (`model`, the meters, `context`...) show a label you set. `raw`, minimalist mode and fitting a row to a narrow terminal still hide it. `exec` and `customText` keep their own options (see below). In `configure`: **Label text**.
-- **`icon`**: your own icon, one emoji or up to two characters: `{ "id": "fiveHourPct", "icon": "🔋" }` shows `🔋 5h: 72.0% rem`. `""` removes the icon; a wider one is ignored. It also replaces icons that change with the state (idle agent, sandbox with network, the `os` widget's system). ASCII mode draws no icons, so it's ignored there. In `configure`: **Icon**.
-- **`depth`** (`cwd` only): an integer from 1 to 10 keeps the root and last N folders, replacing the middle with `…` (`...` in ASCII mode). `/` and `\` paths are supported; invalid values are ignored. `configure` offers 1 to 4; set a higher depth in the config file.
-- **`fish`** (`cwd` and `git`): `true` abbreviates parent folders to their first character (or dot plus first character for hidden folders like `.gemini` → `.g`, keeping the last `depth` folders or 1 by default in full) on `cwd`, and slash-separated branch prefixes (`feature/auth/oauth-login` → `f/a/oauth-login`) on `git`. Can combine with `depth` and `maxWidth`. In `configure`: **Fish style**.
-- **`link`** (`cwd`, `project`, `git`, `gitSha`): opt-in OSC 8 clickable terminal hyperlinks (in `configure`: **Hyperlink**). On `cwd` and `project`, `"file"` (or `true`) links to `file://...` and `"vscode"`, `"cursor"`, or `"zed"` links directly into your editor (`vscode://file/...`, etc.). On `git` and `gitSha`, `true` reads `[remote "origin"]` directly from `.git/config` (zero subprocess spawns, embedded credentials stripped) and links the branch (`/tree/<branch>`) or commit (`/commit/<sha>`), skipping detached HEADs on `git`. Visible clipping (`depth`, `fish`, `maxWidth`) keeps the full target URL while clipping only the displayed text. Automatically suppressed in ASCII mode (`ascii: true`) and when color is off (`NO_COLOR` / `--color none`).
-- **`maxWidth`**: an integer from 4 to 200 clips only the value, with `…` (`...` in ASCII mode). It applies to `cwd`, `project`, `git` (branch only), `title`, `model`, `agent`, `customText`, `exec`, `env` and `gitWorktree`; invalid values are ignored. On `title`, it replaces the built-in 30-column limit. The icon, label, dirty marker, git operation and ahead/behind counts are not included in the limit, and on `exec` the `[cmd]` preview placeholder is never cut. `configure` steps from 10 to 80 columns by 5; set other widths in the config file.
+- **`label`**: your own name before the value, up to 20 columns (a longer one is cut with `…`): `{ "id": "fiveHourPct", "label": "Quota" }` shows `⏳ Quota: 72.0% rem`. `""` removes the name. Widgets that show only their icon (`model`, the meters, `context`...) show a label you set. `raw`, minimalist mode and fitting a row to a narrow terminal still hide it. `exec` and `customText` keep their own options (see below). In the editor: **Label text**.
+- **`icon`**: your own icon, one emoji or up to two characters: `{ "id": "fiveHourPct", "icon": "🔋" }` shows `🔋 5h: 72.0% rem`. `""` removes the icon; a wider one is ignored. It also replaces icons that change with the state (idle agent, sandbox with network, the `os` widget's system). ASCII mode draws no icons, so it's ignored there. In the editor: **Icon**.
+- **`depth`** (`cwd` only): an integer from 1 to 10 keeps the root and last N folders, replacing the middle with `…` (`...` in ASCII mode). `/` and `\` paths are supported; invalid values are ignored. The editor offers 1 to 4; set a higher depth in the config file.
+- **`fish`** (`cwd` and `git`): `true` abbreviates parent folders to their first character (or dot plus first character for hidden folders like `.gemini` → `.g`, keeping the last `depth` folders or 1 by default in full) on `cwd`, and slash-separated branch prefixes (`feature/auth/oauth-login` → `f/a/oauth-login`) on `git`. Can combine with `depth` and `maxWidth`. In the editor: **Fish style**.
+- **`link`** (`cwd`, `project`, `git`, `gitSha`): opt-in OSC 8 clickable terminal hyperlinks (in the editor: **Hyperlink**). On `cwd` and `project`, `"file"` (or `true`) links to `file://...` and `"vscode"`, `"cursor"`, or `"zed"` links directly into your editor (`vscode://file/...`, etc.). On `git` and `gitSha`, `true` reads `[remote "origin"]` directly from `.git/config` (zero subprocess spawns, embedded credentials stripped) and links the branch (`/tree/<branch>`) or commit (`/commit/<sha>`), skipping detached HEADs on `git`. Visible clipping (`depth`, `fish`, `maxWidth`) keeps the full target URL while clipping only the displayed text. Automatically suppressed in ASCII mode (`ascii: true`) and when color is off (`NO_COLOR` / `--color none`).
+- **`maxWidth`**: an integer from 4 to 200 clips only the value, with `…` (`...` in ASCII mode). It applies to `cwd`, `project`, `git` (branch only), `title`, `model`, `agent`, `customText`, `exec`, `env` and `gitWorktree`; invalid values are ignored. On `title`, it replaces the built-in 30-column limit. The icon, label, dirty marker, git operation and ahead/behind counts are not included in the limit, and on `exec` the `[cmd]` preview placeholder is never cut. The editor steps from 10 to 80 columns by 5; set other widths in the config file.
 
 | Option        | Configuration                     | Example                                                                |
 | ------------- | --------------------------------- | ---------------------------------------------------------------------- |
@@ -125,7 +125,7 @@ Any widget accepts these options:
 | Fish style    | `{ "id": "cwd", "fish": true }`   | `~/Documents/repos/app/src` → `~/D/r/a/src`                            |
 | Maximum width | `{ "id": "git", "maxWidth": 10 }` | `feature-with-a-long-name` → `feature-w…` (`feature...` in ASCII mode) |
 
-**Minimalist mode** turns `raw` on for every widget, which makes the bar much narrower on small terminals. Set `"minimalist": true` or toggle **Minimalist mode** in the Settings tab (`i`) in `configure`. A widget with `"raw": false` keeps its label even then.
+**Minimalist mode** turns `raw` on for every widget, which makes the bar much narrower on small terminals. Set `"minimalist": true` or toggle **Minimalist mode** in the Settings tab (`i`) in the editor. A widget with `"raw": false` keeps its label even then.
 
 ## Quota pace marker
 
@@ -136,7 +136,7 @@ Every 5h, 7d, third-party and Argon quota meter carries a marker, a larger dot `
 📅 •••••••••●••  21.0% rem    fill past the marker: at this rate the quota runs out before it resets
 ```
 
-The marker needs no extra data: it comes from the reset time Antigravity already sends and the fixed 5-hour and 7-day window lengths. It's hidden when the reset is further away than the window itself. Turn it off with `"pacing": false` (or **Quota pace marker** in the Settings tab (`i`) in `configure`), or per widget with `"pace": false`.
+The marker needs no extra data: it comes from the reset time Antigravity already sends and the fixed 5-hour and 7-day window lengths. It's hidden when the reset is further away than the window itself. Turn it off with `"pacing": false` (or **Quota pace marker** in the Settings tab (`i`) in the editor), or per widget with `"pace": false`.
 
 ### Pace delta
 
@@ -147,7 +147,7 @@ The percentage widgets (`fiveHourPct`, `weeklyPct` and `quota`) have no meter, s
 📅 7d: 21.0% rem ⇡3%     3 points faster than sustainable: at this rate the quota runs out before it resets
 ```
 
-It's off by default. Turn it on per widget with `"paceDelta": true`, or with **Pace delta** in the widget's options in `configure`:
+It's off by default. Turn it on per widget with `"paceDelta": true`, or with **Pace delta** in the widget's options in the editor:
 
 ```json
 {
@@ -173,7 +173,7 @@ The same percentage widgets (`fiveHourPct`, `weeklyPct`, and `quota`) can also e
 ⏳ 5h: 21.0% rem · ~15:40       exact run-out time ("forecast": "time")
 ```
 
-Set `"forecast": "countdown"`, `"forecast": "time"`, or `"forecast": true` (follows `resetFormat`), or cycle **Run-out forecast** in `configure`:
+Set `"forecast": "countdown"`, `"forecast": "time"`, or `"forecast": true` (follows `resetFormat`), or cycle **Run-out forecast** in the editor:
 
 - Computed statelessly from elapsed window time and quota remaining (zero disk writes).
 - Automatically hides when the quota will last until the reset, during the first 10 minutes of a fresh window, or when the window length is unknown.
@@ -181,11 +181,11 @@ Set `"forecast": "countdown"`, `"forecast": "time"`, or `"forecast": true` (foll
 
 ### Quota perspective (`quotaMode`)
 
-By default (`"quotaMode": "remaining"`), quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) show the percentage remaining (`72.0% rem`). Set `"quotaMode": "used"` — or cycle **Quota display** in the Settings tab (`i`) in `configure` — to display quota consumed instead (`28.0% used`), localized in every supported bar language. Meters continue filling left-to-right by usage consumed alongside the pace marker, and warning/danger thresholds continue triggering at the same usage levels.
+By default (`"quotaMode": "remaining"`), quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) show the percentage remaining (`72.0% rem`). Set `"quotaMode": "used"` — or cycle **Quota display** in the Settings tab (`i`) in the editor — to display quota consumed instead (`28.0% used`), localized in every supported bar language. Meters continue filling left-to-right by usage consumed alongside the pace marker, and warning/danger thresholds continue triggering at the same usage levels.
 
 ## Meter styles
 
-Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"meterStyle"` picks another look for every meter, and `"meter"` on a meter widget (`fiveHourBar`, `weeklyBar`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`, `context`) for that one; the widget's value wins. `configure` sets the per-widget one (Enter on a meter widget, then **Meter**).
+Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"meterStyle"` picks another look for every meter, and `"meter"` on a meter widget (`fiveHourBar`, `weeklyBar`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`, `context`) for that one; the widget's value wins. The editor sets the per-widget one (Enter on a meter widget, then **Meter**).
 
 ```json
 { "meterStyle": "geometric", "widgets": [{ "id": "fiveHourBar", "meter": "blocks" }] }
@@ -223,7 +223,7 @@ Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"m
 ```
 
 - **`format`**: `"countdown"` (`2hr 47m`, the default), `"time"` (`6:33pm`; weekly adds the date, `oct 10, 2:50pm`) or `"both"` (`6:33pm (2hr 47m)`).
-- **`resetFormat`** _(top-level default)_: sets the default format (`"countdown"`, `"time"`, or `"both"`) for all reset timer widgets (`fiveHourReset`, `weeklyReset`, `argonReset`), or cycle **Reset format** in the Settings tab (`i`) in `configure`. A widget's own `"format"` still overrides it.
+- **`resetFormat`** _(top-level default)_: sets the default format (`"countdown"`, `"time"`, or `"both"`) for all reset timer widgets (`fiveHourReset`, `weeklyReset`, `argonReset`), or cycle **Reset format** in the Settings tab (`i`) in the editor. A widget's own `"format"` still overrides it.
 
 How times look is set once for every widget under `"clock"`:
 
@@ -231,7 +231,7 @@ How times look is set once for every widget under `"clock"`:
 { "clock": { "hour12": false, "timeZone": "Europe/Paris", "locale": "fr-FR" } }
 ```
 
-- **`hour12`**: `true` for `6:33pm`, `false` for `18:33`. Left out: 12-hour in the built-in style, or the locale's own habit when `locale` is set. Cycle **Clock format** (`auto (locale)`, `24h`, `12h`) in the Settings tab (`i`) in `configure`.
+- **`hour12`**: `true` for `6:33pm`, `false` for `18:33`. Left out: 12-hour in the built-in style, or the locale's own habit when `locale` is set. Cycle **Clock format** (`auto (locale)`, `24h`, `12h`) in the Settings tab (`i`) in the editor.
 - **`timeZone`**: any IANA zone (`America/New_York`, `Asia/Tokyo`). Default: the machine's local time.
 - **`locale`**: a language tag (`de-DE`, `ja-JP`) for localized month names and time formats (`10. Okt., 14:50`). Default: the compact built-in English style.
 
@@ -247,8 +247,8 @@ The bar's own words follow `"language"`: widget labels (`Reset`, `Context`), `re
 
 - **Codes:** `en` (English, the default), `fr` (French), `es` (Spanish), `ja` (Japanese), `zh-CN` (Simplified Chinese), `ko` (Korean) and `de` (German).
 - **Fallback:** a region code uses its language (`en-GB` gives `en`). A code without messages shows English, and `doctor` says so.
-- **What stays as it is:** model names, branches, folders and everything else agy sends, git operation names (`REBASE`), and numbers (`72.0%`). Dates and times follow `clock.locale` (above). A widget's own `label` is shown as you wrote it. The CLI, `configure` and `doctor` stay in English.
-- **Setting it:** `init --language <code>`, or `render --language <code>` to [try one without saving it](#try-a-look-without-saving-it). In `configure`, open the Settings tab (`i`) and cycle **Bar language**.
+- **What stays as it is:** model names, branches, folders and everything else agy sends, git operation names (`REBASE`), and numbers (`72.0%`). Dates and times follow `clock.locale` (above). A widget's own `label` is shown as you wrote it. The CLI, the interactive editor and `doctor` stay in English.
+- **Setting it:** `init --language <code>`, or `render --language <code>` to [try one without saving it](#try-a-look-without-saving-it). In the editor, open the Settings tab (`i`) and cycle **Bar language**.
 
 ## Alerts and thresholds
 
@@ -270,9 +270,9 @@ Quota and context widgets change color as they get low or full: the theme's ok c
 - **`quotaCrit`** _(default: `10`%)_: remaining quota at which they turn to the danger color.
 - **`contextWarn`** _(default: `70`%)_: used context at which the context widgets turn to the caution color.
 - **`contextCrit`** _(default: `90`%)_: used context at which they turn to the danger color. Antigravity's `exceeds_200k_tokens` also triggers it.
-- **`blink`** _(default: `false`)_: `true` makes danger-level widgets blink; `"warn"` makes caution-level ones blink too. ASCII mode never blinks. Toggle **Alert blink** in the Settings tab (`i`) in `configure`, or cycle **Warning sensitivity** (`default`: 30/10% quota and 70/90% context, `early`: 40/20% and 60/80%, `relaxed`: 20/5% and 80/95%; hand-edited values stay `custom` until cycled or reset).
+- **`blink`** _(default: `false`)_: `true` makes danger-level widgets blink; `"warn"` makes caution-level ones blink too. ASCII mode never blinks. Toggle **Alert blink** in the Settings tab (`i`) in the editor, or cycle **Warning sensitivity** (`default`: 30/10% quota and 70/90% context, `early`: 40/20% and 60/80%, `relaxed`: 20/5% and 80/95%; hand-edited values stay `custom` until cycled or reset).
 - **Per widget**: any quota or context widget takes its own `warn`, `crit` and `blink` (e.g. `{"id": "fiveHourBar", "warn": 20, "crit": 10, "blink": true}`).
-- **Visibility per widget**: quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) and their reset widgets (`fiveHourReset`, `weeklyReset`, `argonReset`) take `showBelow`, a remaining-quota percentage from 0 to 100. The widget hides while more remains and appears at or below the threshold. A reset widget uses its own quota window. Context widgets (`context`, `contextPct`, `contextTokens`) take `showAbove`, a used-context percentage from 0 to 100; they hide below the threshold and appear at or above it, or as soon as Antigravity reports `exceeds_200k_tokens` (the danger color). Both options are unset by default (`always` in `configure`); values that aren't numbers from 0 to 100 are ignored.
+- **Visibility per widget**: quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) and their reset widgets (`fiveHourReset`, `weeklyReset`, `argonReset`) take `showBelow`, a remaining-quota percentage from 0 to 100. The widget hides while more remains and appears at or below the threshold. A reset widget uses its own quota window. Context widgets (`context`, `contextPct`, `contextTokens`) take `showAbove`, a used-context percentage from 0 to 100; they hide below the threshold and appear at or above it, or as soon as Antigravity reports `exceeds_200k_tokens` (the danger color). Both options are unset by default (`always` in the editor); values that aren't numbers from 0 to 100 are ignored.
 
 ```json
 {
@@ -283,7 +283,7 @@ Quota and context widgets change color as they get low or full: the theme's ok c
 }
 ```
 
-- **Context compaction ceiling (`compactionLimit`)**: models with a `1.0M` (`1048576`) context window often trigger Antigravity auto-compaction earlier (e.g. at `256000` or `512000` tokens). Adding `"compactionLimit"` to `context`, `contextPct` or `contextTokens` scales the displayed percentage, meter, token denominator (`149.9K/256.0K`), `warn`/`crit`/`blink` thresholds and `showAbove` against `min(context_window_size, compactionLimit)` (clamped at `100.0%` if used tokens exceed it), and supersedes Antigravity's fixed `exceeds_200k_tokens` danger flag so caution thresholds work smoothly. Unset, non-positive or values `>= context_window_size` leave the widget unchanged. Cycle presets (`off`, `200.0K`, `256.0K`, `512.0K`) under **Compaction limit** in `configure`, or set any positive token count in `statusline.config.json`:
+- **Context compaction ceiling (`compactionLimit`)**: models with a `1.0M` (`1048576`) context window often trigger Antigravity auto-compaction earlier (e.g. at `256000` or `512000` tokens). Adding `"compactionLimit"` to `context`, `contextPct` or `contextTokens` scales the displayed percentage, meter, token denominator (`149.9K/256.0K`), `warn`/`crit`/`blink` thresholds and `showAbove` against `min(context_window_size, compactionLimit)` (clamped at `100.0%` if used tokens exceed it), and supersedes Antigravity's fixed `exceeds_200k_tokens` danger flag so caution thresholds work smoothly. Unset, non-positive or values `>= context_window_size` leave the widget unchanged. Cycle presets (`off`, `200.0K`, `256.0K`, `512.0K`) under **Compaction limit** in the editor, or set any positive token count in `statusline.config.json`:
 
 ```json
 {
@@ -315,13 +315,13 @@ Runs a shell command of your choice and shows the first line of its output:
 - **`color`** _(optional)_: a theme color slot or color name (e.g. `git`, `model`, `warn`, `blue`, `green`, `orange`, `cyan`).
 - **`payload`** _(optional, default: `false`)_: `true` sends the session JSON Antigravity passed to the bar (model, folders, quotas, context, `terminal_width`...) to the command on stdin, as one line. Your account email and the session and conversation IDs are removed first, and control characters are stripped from its text. The output is still cached for `interval` seconds, so a command that follows the session may lag that much; use `"interval": 0` to run it on every refresh. Without `payload`, the command's stdin is empty.
 - **`colors`** _(optional, default: `false`)_: `true` keeps the colors and styles the command prints (SGR sequences such as `\x1b[31m`). Every other escape sequence is still removed, and after a reset in the output the widget gets its own colors back. With `NO_COLOR` or `--color none` the command's colors are dropped too.
-- **Several at once**: unlike most widgets, `exec` can appear more than once (e.g. one for Git stashes, another for the Kubernetes context). `configure` (Enter on the widget) toggles **Session JSON** and **Keep colors**.
+- **Several at once**: unlike most widgets, `exec` can appear more than once (e.g. one for Git stashes, another for the Kubernetes context). The editor (Enter on the widget) toggles **Session JSON** and **Keep colors**.
 
 **Safety rules for `exec`:**
 
 - The command runs on every refresh (subject to `interval`), in the session's working directory, with your user's permissions. Only add commands you would run in any repo.
 - Commands only run from a config you own: the global install (`~/.agy-powerline`) or `AGY_POWERLINE_HOME`. A copy of the scripts anywhere else (for example committed inside a repo) shows `[blocked]`.
-- CLI previews (`configure`, `theme`, `gradient`, `layout`, `preset`, `caps`, `render --demo` and the preview in `doctor`) never run commands; they show `[cmd]` instead. `doctor`'s live check runs your configured statusline once, as Antigravity does, so `exec` widgets run there.
+- CLI previews (`npx agy-powerline`, `theme`, `gradient`, `layout`, `preset`, `caps`, `render --demo` and the preview in `doctor`) never run commands; they show `[cmd]` instead. `doctor`'s live check runs your configured statusline once, as Antigravity does, so `exec` widgets run there.
 - Output is stripped of escape sequences and control characters (all but colors with `"colors": true`) and capped at 80 visible characters.
 
 ### Recipes
@@ -445,11 +445,11 @@ In the TUI, press `p`, then Enter on **Separators**, **Start caps** or **End cap
 
 ### Space between rows
 
-Pills fill the whole height of a terminal line, so stacked rows touch. `"rowGap": true` puts a blank line between rows, in every layout (in Lines and Classic it gives the text more air); it's off by default because the bar then takes more lines (three rows become five). Toggle **Space between rows** in the Settings tab (`i`) in `configure`.
+Pills fill the whole height of a terminal line, so stacked rows touch. `"rowGap": true` puts a blank line between rows, in every layout (in Lines and Classic it gives the text more air); it's off by default because the bar then takes more lines (three rows become five). Toggle **Space between rows** in the Settings tab (`i`) in the editor.
 
 ### Row alignment
 
-By default (`"alignment": "left"`), rows without `separator` items stay left-aligned, while rows with `separator` items stretch flex gaps across the terminal width. Set `"alignment"` — or cycle **Row alignment** in the Settings tab (`i`) in `configure` — to control all rows globally:
+By default (`"alignment": "left"`), rows without `separator` items stay left-aligned, while rows with `separator` items stretch flex gaps across the terminal width. Set `"alignment"` — or cycle **Row alignment** in the Settings tab (`i`) in the editor — to control all rows globally:
 
 - **`"left"`** _(default)_: left-aligns unseparated rows and stretches only at manual `separator` items.
 - **`"center"`**: keeps each row compact (joining any groups with a single space) and centers it inside `terminal_width` (capped by `maxWidth`).
@@ -459,7 +459,7 @@ Narrow terminals still shrink and truncate normally via `fit` before centering o
 
 ## Custom theme
 
-Set `"theme": "custom"` (or run `npx agy-powerline theme custom`), and define a `customTheme` object with Hex (`#RRGGBB` or `#RGB`), RGB array `[r, g, b]`, or `"rgb(r, g, b)"`. `configure` also has a color editor (`t`, then `Custom`).
+Set `"theme": "custom"` (or run `npx agy-powerline theme custom`), and define a `customTheme` object with Hex (`#RRGGBB` or `#RGB`), RGB array `[r, g, b]`, or `"rgb(r, g, b)"`. The editor also has a color editor (`t`, then `Custom`).
 
 ```json
 {
@@ -496,7 +496,7 @@ A gradient gives each row one color sweep from left to right, on top of any them
 { "gradient": "#ff5f6d-#ffc371" }
 ```
 
-Or from the command line: `npx agy-powerline gradient sunset`, `npx agy-powerline gradient "#ff5f6d-#ffc371"`, `npx agy-powerline gradient off`. `npx agy-powerline gradient --list` shows every preset in its colors. You can also cycle **Bar gradient** (`off` and built-in presets, keeping any custom hex gradient in the cycle until reset) in the Settings tab (`i`) in `configure`.
+Or from the command line: `npx agy-powerline gradient sunset`, `npx agy-powerline gradient "#ff5f6d-#ffc371"`, `npx agy-powerline gradient off`. `npx agy-powerline gradient --list` shows every preset in its colors. You can also cycle **Bar gradient** (`off` and built-in presets, keeping any custom hex gradient in the cycle until reset) in the Settings tab (`i`) in the editor.
 
 - **Value:** a preset (`aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono`) or 2 to 6 hex colors joined by `-` (`#` optional, 3 or 6 digits). Anything else is ignored and the bar keeps the theme's colors.
 - **Spacing:** the first widget of each row takes the first color, the last widget the last color, and the ones between evenly spaced colors, mixed in the OKLab color space so the steps look even. Widgets hidden for lack of data, or dropped to fit the terminal, don't count.
@@ -518,15 +518,15 @@ npx agy-powerline import my-bar.json
 - **Replace or merge:** by default the file replaces your whole config, with defaults for whatever it leaves out. `--merge` changes only the settings the file has; `widgets` is then replaced as a whole when the file has it.
 - **Shell commands:** every `exec` command the file would add is printed in full first, and needs its own yes (default No). `--yes` alone doesn't accept them; `--allow-exec` does. Without a terminal to ask in, an import that adds commands is refused unless you pass `--allow-exec`.
 - **Undo:** before writing, your config is copied to `statusline.config.json.bak` next to it; `npx agy-powerline import ~/.agy-powerline/statusline.config.json.bak` brings it back. The bar shows the imported config on its next refresh.
-- `import` refuses files over 256 KB, files that aren't a JSON object, and files exported by a newer major version of agy-powerline. Like `configure`, `export` and `import` refuse to work over a config that has a JSON error.
+- `import` refuses files over 256 KB, files that aren't a JSON object, and files exported by a newer major version of agy-powerline. Like the interactive editor, `export` and `import` refuse to work over a config that has a JSON error.
 
 ## Terminals: ASCII mode, colors, narrow windows
 
-**No Nerd Font?** Enable ASCII mode: caps and separators become plain text (`[` `]`, `<` `>`, `/`; joins default to `>`), dot meters become `#`/`-`, markers become `*`, and emojis turn off. Toggle **ASCII mode** in the Settings tab (`i`) in `configure`, set `"ascii": true`, pass `render --ascii`, or export `AGY_POWERLINE_ASCII=1`.
+**No Nerd Font?** Enable ASCII mode: caps and separators become plain text (`[` `]`, `<` `>`, `/`; joins default to `>`), dot meters become `#`/`-`, markers become `*`, and emojis turn off. Toggle **ASCII mode** in the Settings tab (`i`) in the editor, set `"ascii": true`, pass `render --ascii`, or export `AGY_POWERLINE_ASCII=1`.
 
-**Narrow terminals**: the bar never runs past the `terminal_width` Antigravity reports. By default (`"overflow": "fit"`), a row that is too wide first drops icons and labels (values only, as in [minimalist mode](#widget-options)), then shortens the model name (`4 Hydrogen·High`) and the Lines meters (12 dots instead of 25), then hides its least important widgets one by one (custom text, version and cache counters first; the model and the 5h quota last), and as a last resort is cut with `…`. Set `"overflow": "wrap"` — or cycle **Row overflow** (`fit`, `wrap`) in the Settings tab (`i`) in `configure` — to keep every widget with its full label and wrap overflowing widgets onto continuation rows instead (still cutting any single widget wider than the terminal on its own). Widths count wide emojis and East Asian characters as two columns.
+**Narrow terminals**: the bar never runs past the `terminal_width` Antigravity reports. By default (`"overflow": "fit"`), a row that is too wide first drops icons and labels (values only, as in [minimalist mode](#widget-options)), then shortens the model name (`4 Hydrogen·High`) and the Lines meters (12 dots instead of 25), then hides its least important widgets one by one (custom text, version and cache counters first; the model and the 5h quota last), and as a last resort is cut with `…`. Set `"overflow": "wrap"` — or cycle **Row overflow** (`fit`, `wrap`) in the Settings tab (`i`) in the editor — to keep every widget with its full label and wrap overflowing widgets onto continuation rows instead (still cutting any single widget wider than the terminal on its own). Widths count wide emojis and East Asian characters as two columns.
 
-**Wide terminals**: set `"maxWidth"` to a positive integer (e.g. `120`) — or cycle **Max bar width** (`full`, `100`, `120`, `140`, `160`) in the Settings tab (`i`) in `configure` — to cap the bar's effective width at `Math.min(terminal_width, maxWidth)` instead of stretching flex spaces across an ultrawide window. `"full"` or `null` (default) leaves the bar uncapped.
+**Wide terminals**: set `"maxWidth"` to a positive integer (e.g. `120`) — or cycle **Max bar width** (`full`, `100`, `120`, `140`, `160`) in the Settings tab (`i`) in the editor — to cap the bar's effective width at `Math.min(terminal_width, maxWidth)` instead of stretching flex spaces across an ultrawide window. `"full"` or `null` (default) leaves the bar uncapped.
 
 The README's three-row Pills bar in a 74-column window: values only, the short model name, and the project hidden:
 

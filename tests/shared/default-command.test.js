@@ -9,7 +9,11 @@ const path = require("path");
 const { PassThrough } = require("stream");
 const { spawnSync } = require("child_process");
 const { record, runCli, stripAnsi, ROOT, NODE, PAYLOAD } = require("../helpers");
-const { configureCommand } = require("../../src/cli/configure");
+const {
+  configureCommand,
+  deprecatedConfigureCommand,
+  DEPRECATED_CONFIGURE_DELAY_MS,
+} = require("../../src/cli/configure");
 const { version: VERSION } = require("../../package.json");
 
 function sandbox(name) {
@@ -494,12 +498,71 @@ async function testConfigureCleanup() {
   }
 }
 
+async function testDeprecatedConfigureWarning() {
+  const box = sandbox("deprecated-configure");
+  try {
+    fs.mkdirSync(box.installDir, { recursive: true });
+    const stdin = new PassThrough();
+    const stdout = new PassThrough();
+    const stderr = new PassThrough();
+    stdin.isTTY = true;
+    stdin.setRawMode = () => {};
+    stdout.isTTY = true;
+    stdout.columns = 100;
+    stdout.rows = 30;
+
+    let rendered = "";
+    let warnings = "";
+    let quitSent = false;
+    stderr.on("data", (chunk) => {
+      warnings += chunk.toString("utf8");
+    });
+    stdout.on("data", (chunk) => {
+      rendered += chunk.toString("utf8");
+      if (!quitSent && rendered.includes("Your widgets")) {
+        quitSent = true;
+        stdin.write("q");
+      }
+    });
+
+    const pending = deprecatedConfigureCommand({
+      stdin,
+      stdout,
+      stderr,
+      configDir: box.installDir,
+      delayMs: 30,
+    });
+    // Immediately after invoking, warning is shown but TUI alternate screen must not have opened yet.
+    const openedBeforeDelay = rendered.length > 0;
+    const result = await pending;
+
+    const nonTty = runCli(["configure"], { env: box.env });
+    record(
+      "deprecated configure prints obsolete warning, delays before opening TUI, and defaults to 5s",
+      result === true &&
+        DEPRECATED_CONFIGURE_DELAY_MS === 5000 &&
+        !openedBeforeDelay &&
+        /Warning: The 'configure' parameter.*obsolete.*removed in the next releases.*npx agy-powerline/i.test(
+          warnings
+        ) &&
+        /Opening editor in 1s/.test(warnings) &&
+        rendered.includes("Your widgets") &&
+        nonTty.code === 1 &&
+        /Warning: The 'configure' parameter.*obsolete/i.test(nonTty.stderr),
+      JSON.stringify({ result, openedBeforeDelay, warnings, nonTtyStderr: nonTty.stderr })
+    );
+  } finally {
+    box.cleanup();
+  }
+}
+
 async function run() {
   testPipedStdinAndNonTtyStdout();
   testFreshUnifiedInstall();
   testExistingAndStaleInstall();
   testGuardsAndPartialInstall();
   await testConfigureCleanup();
+  await testDeprecatedConfigureWarning();
 }
 
 module.exports = { run };

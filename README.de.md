@@ -23,7 +23,7 @@
 Behalte Modell, Gemini-5h/7T-, Claude/GPT- und Argon-Kontingente, Kontextfenster, Git-Branch und vieles mehr auf einen Blick im Auge. Wähle Widgets, Themes und Layout in einem interaktiven Editor. Ein Befehl zur Installation, keine Abhängigkeiten.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline configure: das wöchentliche Argon-Kontingent durch Eingabe von argon hinzufügen, danach Vorlagen, Themes und Layouts mit Live-Vorschau der Leiste durchblättern und den Tab Powerline öffnen" width="850">
+  <img src="assets/demo.gif" alt="Interaktiver Editor von agy-powerline: das wöchentliche Argon-Kontingent durch Eingabe von argon hinzufügen, danach Vorlagen, Themes und Layouts mit Live-Vorschau der Leiste durchblättern und den Tab Powerline öffnen" width="850">
 </p>
 
 ## Warum agy-powerline?
@@ -33,7 +33,7 @@ Behalte Modell, Gemini-5h/7T-, Claude/GPT- und Argon-Kontingente, Kontextfenster
 | Kontingent-Tempo           | Tempomarkierungen auf den Anzeigen zeigen, ob dein 5h- oder 7T-Kontingent bis zum Reset ausreicht              | [Kontingent-Guide](docs/guides/antigravity-quota.md) · [Rechner](https://agy-powerline.com/quota-calculator/) |
 | Mehrere Anbieter           | Gemini 5h/7T, Drittanbieter (Claude/GPT) und Gemini 4 Argon nebeneinander verfolgen                            | [Payload-Referenz](docs/payload.md#quota-buckets)                                                             |
 | Themes & Layouts           | 22 WCAG-AA-geprüfte Themes (dunkel, hell und farbenblindfreundlich) für `pills`, `lines` und `classic`         | [Theme-Galerie](https://agy-powerline.com/themes/)                                                            |
-| Interaktive Konfiguratoren | Editor mit Live-Vorschau im Terminal (`npx agy-powerline configure`) oder im Browser                           | [Web-Konfigurator](https://agy-powerline.com/configure/)                                                      |
+| Interaktive Konfiguratoren | Editor mit Live-Vorschau im Terminal (`npx agy-powerline`) oder im Browser                                     | [Web-Konfigurator](https://agy-powerline.com/configure/)                                                      |
 | Sicherheit & Datenschutz   | Null Laufzeitabhängigkeiten, keine Netzwerkaufrufe, keine Telemetrie, automatische Backups von `settings.json` | [Sicherheit](SECURITY.md)                                                                                     |
 | Plattformübergreifend      | Läuft unter Windows, macOS, Linux und WSL mit integrierter Diagnose (`doctor`)                                 | [Installation](docs/install.md) · [Fehlerbehebung](docs/troubleshooting.md)                                   |
 
@@ -76,11 +76,11 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 `--yes` überspringt Rückfragen, die agy nicht beantworten kann, und ersetzt eine vorhandene `statusLine` nach einem Backup von `settings.json`.
 
-Für ein Terminal ohne Nerd Font lässt sich der ASCII-Modus aktivieren (`Settings` über `i` in `configure`).
+Für ein Terminal ohne Nerd Font lässt sich der ASCII-Modus aktivieren (`Settings` über `i` in `npx agy-powerline`).
 
 ## Anpassung
 
-`npx agy-powerline configure` öffnet einen Editor mit Live-Vorschau deiner Statuszeile. Wechsle mit `←` `→` zwischen Widgets, Presets, Themes, Layout, Powerline und Settings, navigiere mit `↑` `↓`, wähle mit Enter aus und speichere und beende mit `q`. Die Tasten für jeden Bildschirm stehen unten; die vollständige Liste findest du unter [Konfiguration](docs/configuration.md#configurator-keys).
+`npx agy-powerline` öffnet einen Editor mit Live-Vorschau deiner Statuszeile. Wechsle mit `←` `→` zwischen Widgets, Presets, Themes, Layout, Powerline und Settings, navigiere mit `↑` `↓`, wähle mit Enter aus und speichere und beende mit `q`. Die Tasten für jeden Bildschirm stehen unten; die vollständige Liste findest du unter [Konfiguration](docs/configuration.md#configurator-keys).
 
 Lieber im Browser? [Stelle deine Leiste im Browser zusammen](https://agy-powerline.com/configure/) – mit Live-Vorschau zum Herunterladen oder Importieren.
 
@@ -166,7 +166,7 @@ Die eigenen Bezeichnungen der Leiste (`Kontingent`, `7T`, `übr.`, die Einheiten
 npx agy-powerline init --language de
 ```
 
-oder `"language": "de"` in `statusline.config.json` (Tab `Settings` über `i` in `configure`). Modellname, Branch und alles, was agy übergibt, bleiben unverändert; die CLI-Befehle und `configure` bleiben auf Englisch. Details in der [Konfigurationsdokumentation](docs/configuration.md#language).
+oder `"language": "de"` in `statusline.config.json` (Tab `Settings` über `i` im interaktiven Editor). Modellname, Branch und alles, was agy übergibt, bleiben unverändert; die CLI-Befehle und der interaktive Editor bleiben auf Englisch. Details in der [Konfigurationsdokumentation](docs/configuration.md#language).
 
 ## Widgets
 
@@ -204,7 +204,7 @@ Ein Widget ohne anzuzeigende Daten blendet sich automatisch aus. Widgets lassen 
 | -------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `npx agy-powerline`                                | Installieren (falls nötig), veraltete Skripte aktualisieren und Editor öffnen    |
 | `npx agy-powerline init [--yes]`                   | Statuszeile installieren oder aktualisieren (unterstützt `--preset`, `--yes`, …) |
-| `npx agy-powerline configure`                      | Den Editor öffnen (Alias `config`)                                               |
+| `npx agy-powerline configure`                      | Den Editor öffnen (veraltet; Alias `config` – nutze `npx agy-powerline`)         |
 | `npx agy-powerline preset <name>`                  | Eine Vorlage anwenden (`--list` zeigt alle an)                                   |
 | `npx agy-powerline theme <name>`                   | Theme wechseln (`--list`, `--gallery`)                                           |
 | `npx agy-powerline gradient <name>`                | Jede Zeile mit einem Farbverlauf einfärben (`--list`, `off`)                     |
@@ -234,7 +234,7 @@ Führe zuerst `npx agy-powerline doctor` aus: Der Befehl prüft die Installation
 
 ## Datenschutz und Sicherheit
 
-- **Keine Netzwerkaufrufe, keine Telemetrie.** Alle Angaben stammen aus den Daten, die agy an die Statuszeile übergibt, aus `.git` und von deinem Betriebssystem. Der einzige externe Link ist `g` in `configure`, womit die GitHub-Seite im Browser geöffnet wird.
+- **Keine Netzwerkaufrufe, keine Telemetrie.** Alle Angaben stammen aus den Daten, die agy an die Statuszeile übergibt, aus `.git` und von deinem Betriebssystem. Der einzige externe Link ist `g` im interaktiven Editor, womit die GitHub-Seite im Browser geöffnet wird.
 - **Deine Einstellungen sind sicher.** `init` und `uninstall` legen ein Backup von `settings.json` an und verweigern Änderungen an einer Datei, die nicht geparst werden kann.
 - **Nichts wird ausgeführt, was du nicht selbst hinzufügst.** Abgesehen von kurzen `git`-Aufrufen für Ahead/Behind-Zähler sowie die Datei- und Zeilenzähler der von dir hinzugefügten Git-Widgets führt die Leiste ausschließlich Befehle aus `exec`-Widgets aus, die du selbst konfigurierst.
 - **Null Laufzeitabhängigkeiten**, veröffentlicht aus der CI mit [npm-Provenance-Nachweis](https://docs.npmjs.com/generating-provenance-statements).
