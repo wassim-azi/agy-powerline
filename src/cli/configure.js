@@ -32,6 +32,8 @@ const {
   resolveResetFormat,
   ALIGNMENT_ORDER,
   resolveAlignment,
+  OVERFLOW_ORDER,
+  resolveOverflow,
   QUOTA_MODE_ORDER,
   resolveQuotaMode,
 } = require("../lib/config");
@@ -1462,6 +1464,11 @@ const QUOTA_MODE_DESCRIPTIONS = {
   used: "28.0% used (quota consumed)",
 };
 
+const OVERFLOW_DESCRIPTIONS = {
+  fit: "shrink labels, drop low-priority widgets, then truncate",
+  wrap: "keep every widget and wrap overflowing ones onto new rows",
+};
+
 const SETTINGS_ROWS = [
   {
     id: "language",
@@ -1527,6 +1534,11 @@ const SETTINGS_ROWS = [
     id: "quotaMode",
     label: "Quota display",
     help: "Show quota bars and percentages as remaining capacity (72.0% rem) or quota consumed (28.0% used). Caution and danger colors trigger at the same usage levels in both modes.",
+  },
+  {
+    id: "overflow",
+    label: "Row overflow",
+    help: "What happens when a row is wider than the terminal: fit (default, shrink labels and drop low-priority widgets) or wrap (keep every widget and break onto continuation rows).",
   },
   {
     id: "ascii",
@@ -1608,6 +1620,10 @@ function settingValue(row) {
 
   if (row.id === "quotaMode") {
     return resolveQuotaMode(config.quotaMode);
+  }
+
+  if (row.id === "overflow") {
+    return resolveOverflow(config.overflow);
   }
 
   return config.ascii ? "on" : "off";
@@ -1733,6 +1749,16 @@ function settingsDetails(row) {
       ...QUOTA_MODE_ORDER.map((mode) => {
         const mark = mode === active ? ui.glyph.on : ui.glyph.off;
         const text = `${mark} ${mode.padEnd(10)} ${QUOTA_MODE_DESCRIPTIONS[mode]}`;
+        return mode === active ? { raw: ui.accentText(text) } : { dim: text };
+      })
+    );
+  } else if (row.id === "overflow") {
+    const active = resolveOverflow(config.overflow);
+    lines.push(
+      "",
+      ...OVERFLOW_ORDER.map((mode) => {
+        const mark = mode === active ? ui.glyph.on : ui.glyph.off;
+        const text = `${mark} ${mode.padEnd(8)} ${OVERFLOW_DESCRIPTIONS[mode]}`;
         return mode === active ? { raw: ui.accentText(text) } : { dim: text };
       })
     );
@@ -2343,6 +2369,16 @@ function toggleOrCycleSetting(row) {
     config.quotaMode = next;
     if (persist()) {
       flashMessage = `Quota display: ${next}`;
+    }
+    return;
+  }
+
+  if (row.id === "overflow") {
+    const current = resolveOverflow(config.overflow);
+    const next = OVERFLOW_ORDER[(OVERFLOW_ORDER.indexOf(current) + 1) % OVERFLOW_ORDER.length];
+    config.overflow = next;
+    if (persist()) {
+      flashMessage = `Row overflow: ${next}`;
     }
     return;
   }

@@ -39,6 +39,7 @@ const SETTINGS = [
   "minimalist",
   "rowGap",
   "alignment",
+  "overflow",
   "maxWidth",
   "resetFormat",
   "quotaMode",

@@ -9,6 +9,7 @@ const {
   VALID_WIDGET_IDS,
   RESET_FORMAT_ORDER,
   ALIGNMENT_ORDER,
+  OVERFLOW_ORDER,
   QUOTA_MODE_ORDER,
   resolveBarMaxWidth,
 } = require("./config");
@@ -83,6 +84,9 @@ function droppedSettings(raw) {
   }
   if (raw.alignment !== undefined && !ALIGNMENT_ORDER.includes(raw.alignment)) {
     dropped.push(`unknown alignment ${visible(JSON.stringify(raw.alignment))}`);
+  }
+  if (raw.overflow !== undefined && !OVERFLOW_ORDER.includes(raw.overflow)) {
+    dropped.push(`unknown overflow ${visible(JSON.stringify(raw.overflow))}`);
   }
   if (
     raw.maxWidth !== undefined &&

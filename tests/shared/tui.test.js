@@ -251,7 +251,7 @@ function testEveryScreenFits() {
   for (const screen of SCREENS) {
     for (const [columns, rows] of SIZES) {
       for (const ascii of [false, true]) {
-        const cursors = screen === "settings" ? [0, 1, 2, 3, 7, 10, 12] : [0, 12];
+        const cursors = screen === "settings" ? [0, 1, 2, 3, 7, 10, 12, 13] : [0, 12];
         for (const cursor of cursors) {
           const out = renderFrame({ config: { ...full, ascii }, screen, columns, rows, cursor });
           const height = out.split("\n").length;
@@ -527,8 +527,16 @@ function testScreenContent() {
       columns: 160,
     })
   );
+  const overflowDetails = strip(
+    renderFrame({
+      config: { ...defaultConfig(), overflow: "wrap" },
+      screen: "settings",
+      cursor: 13,
+      columns: 160,
+    })
+  );
   record(
-    "settings details panel explains clock format, reset format, gradient, sensitivity, maxWidth, alignment and quotaMode options",
+    "settings details panel explains clock format, reset format, gradient, sensitivity, maxWidth, alignment, quotaMode and overflow options",
     /● auto \(locale\)/.test(clockDetails) &&
       /○ 24h/.test(clockDetails) &&
       /○ 12h/.test(clockDetails) &&
@@ -550,7 +558,10 @@ function testScreenContent() {
       /○ spread/.test(alignmentDetails) &&
       /Quota display.? +used/.test(quotaModeDetails) &&
       /○ remaining +72\.0% rem/.test(quotaModeDetails) &&
-      /● used +28\.0% used/.test(quotaModeDetails)
+      /● used +28\.0% used/.test(quotaModeDetails) &&
+      /Row overflow.? +wrap/.test(overflowDetails) &&
+      /○ fit/.test(overflowDetails) &&
+      /● wrap/.test(overflowDetails)
   );
 
   const search = strip(renderFrame({ config: defaultConfig(), screen: "add", search: "quo" }));
@@ -799,6 +810,18 @@ async function testSettingsInteractions() {
       /28\.0% used/.test(qmUsedPreview) &&
       qmBack.saved.quotaMode === "remaining" &&
       qmReset.saved.quotaMode === "remaining"
+  );
+
+  // #215: Row overflow cycles fit -> wrap -> fit and resets on x.
+  const ovSteps = ["i", ...Array(13).fill(DOWN)];
+  const ovWrap = await runConfigureKeys({}, [...ovSteps, "\r"]);
+  const ovBack = await runConfigureKeys({ overflow: "wrap" }, [...ovSteps, "\r"]);
+  const ovReset = await runConfigureKeys({ overflow: "wrap" }, [...ovSteps, "x"]);
+  record(
+    "Settings Row overflow cycles fit -> wrap -> fit and resets on x",
+    ovWrap.saved.overflow === "wrap" &&
+      ovBack.saved.overflow === "fit" &&
+      ovReset.saved.overflow === "fit"
   );
 }
 
