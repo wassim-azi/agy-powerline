@@ -376,13 +376,17 @@ function breadcrumbData(crumbs) {
   };
 }
 
+const HTML_ENTITY_DECODES = {
+  amp: "&",
+  lt: "<",
+  gt: ">",
+  quot: '"',
+  "#39": "'",
+};
+
+// Decode basic HTML entities in one pass so "&amp;lt;" stays "&lt;" without double-unescaping.
 const decodeEntities = (html) =>
-  String(html ?? "")
-    .replace(/&amp;/g, "&")
-    .replace(/&lt;/g, "<")
-    .replace(/&gt;/g, ">")
-    .replace(/&quot;/g, '"')
-    .replace(/&#39;/g, "'");
+  String(html ?? "").replace(/&(amp|lt|gt|quot|#39);/g, (_, entity) => HTML_ENTITY_DECODES[entity]);
 
 function faqPageData(items, { url, lang = "en", id, context = true } = {}) {
   return {
