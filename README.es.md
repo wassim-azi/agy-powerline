@@ -190,7 +190,7 @@ o `"language": "es"` en `statusline.config.json` (`Settings` con `i` en `configu
 | `title`                                                          | El título de la conversación                                                                                                          |
 | `sessionTime`                                                    | Tiempo desde que comenzó la conversación activa                                                                                       |
 | `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | Tokens de sesión, coste estimado (USD) y uso de caché de prompts                                                                      |
-| `tokensToday`, `tokensWeek`                                      | Tokens utilizados hoy y en los últimos 7 días, todas las conversaciones (Node 22.13+)                                                 |
+| `tokensToday`, `tokensWeek`, `tokensMonth`                       | Tokens utilizados hoy, en los últimos 7 días y en los últimos 30 días, todas las conversaciones (Node 22.13+)                         |
 | `ram`                                                            | Memoria utilizada en tu equipo                                                                                                        |
 | `os`                                                             | Sistema en el que se ejecuta agy: Windows, macOS, Linux o WSL                                                                         |
 | `host`                                                           | Usuario actual y nombre de host corto del sistema operativo (`alex@devbox`)                                                           |

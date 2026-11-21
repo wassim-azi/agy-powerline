@@ -170,31 +170,31 @@ oder `"language": "de"` in `statusline.config.json` (Tab `Settings` über `i` in
 
 ## Widgets
 
-| Widget                                                           | Zeigt                                                                                                                 |
-| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `model`                                                          | Das aktuell verwendete Modell                                                                                         |
-| `clock`                                                          | Aktuelle Ortszeit (12/24-Stunden-Format unter `clock` einstellbar)                                                    |
-| `fiveHourBar`, `weeklyBar`                                       | Verbleibendes 5h- / 7T-Kontingent als Anzeige mit [Tempomarkierung](docs/configuration.md#quota-pace-marker)          |
-| `fiveHourPct`, `weeklyPct`                                       | Verbleibendes 5h- / 7T-Kontingent in Prozent                                                                          |
-| `fiveHourReset`, `weeklyReset`                                   | Verbleibende Zeit bis zum Reset des Kontingents oder die Reset-Uhrzeit                                                |
-| `quota`                                                          | Das Kontingent, das am nächsten an der Erschöpfung liegt, samt Reset                                                  |
-| `thirdPartyFiveHour`, `thirdPartyWeekly`                         | Kontingente für Drittanbieter-Modelle                                                                                 |
-| `argonWeekly`, `argonReset`                                      | Eigenes Wochenkontingent von Gemini 4 Argon (Google AI Pro) und dessen Reset                                          |
-| `context`, `contextPct`, `contextTokens`                         | Genutztes Kontextfenster: Anzeige, Prozentsatz oder Token-Anzahl                                                      |
-| `git`                                                            | Branch, nicht committete Änderungen sowie Commits voraus/zurück (ahead/behind)                                        |
-| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Hinzugefügte/gelöschte Zeilen, gestagte/geänderte/ungetrackte/konfliktbehaftete Dateien, Commit-ID, Stashes, Worktree |
-| `project`, `cwd`                                                 | Projektordner, aktueller Ordner                                                                                       |
-| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | Aktiver Agent, Agent-Status (mit Bestätigungs-Flag), Tarif, Sandbox, Artefakte, CLI-Version                           |
-| `tasks`, `queue`                                                 | Laufende Subagenten, Hintergrundaufgaben, eingereihte Benutzernachrichten                                             |
-| `mode`                                                           | Bestätigungsmodus (z. B. `accept-edits`) und Vim-Modus                                                                |
-| `title`                                                          | Titel der aktuellen Unterhaltung                                                                                      |
-| `sessionTime`                                                    | Verstrichene Zeit seit Beginn der aktiven Unterhaltung                                                                |
-| `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | Sitzungs-Tokens, geschätzte Kosten (USD) und Nutzung des Prompt-Caches                                                |
-| `tokensToday`, `tokensWeek`                                      | Heute und in den letzten 7 Tagen genutzte Tokens über alle Unterhaltungen hinweg (Node 22.13+)                        |
-| `ram`                                                            | Belegter Arbeitsspeicher auf deinem Rechner                                                                           |
-| `os`                                                             | System, auf dem agy läuft: Windows, macOS, Linux oder WSL                                                             |
-| `host`                                                           | Aktueller Benutzer und kurzer Hostname des Betriebssystems (`alex@devbox`)                                            |
-| `customText`, `exec`                                             | Eigener Text oder die Ausgabe eines [Shell-Befehls](docs/configuration.md#shell-command-widget-exec)                  |
+| Widget                                                           | Zeigt                                                                                                                   |
+| ---------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `model`                                                          | Das aktuell verwendete Modell                                                                                           |
+| `clock`                                                          | Aktuelle Ortszeit (12/24-Stunden-Format unter `clock` einstellbar)                                                      |
+| `fiveHourBar`, `weeklyBar`                                       | Verbleibendes 5h- / 7T-Kontingent als Anzeige mit [Tempomarkierung](docs/configuration.md#quota-pace-marker)            |
+| `fiveHourPct`, `weeklyPct`                                       | Verbleibendes 5h- / 7T-Kontingent in Prozent                                                                            |
+| `fiveHourReset`, `weeklyReset`                                   | Verbleibende Zeit bis zum Reset des Kontingents oder die Reset-Uhrzeit                                                  |
+| `quota`                                                          | Das Kontingent, das am nächsten an der Erschöpfung liegt, samt Reset                                                    |
+| `thirdPartyFiveHour`, `thirdPartyWeekly`                         | Kontingente für Drittanbieter-Modelle                                                                                   |
+| `argonWeekly`, `argonReset`                                      | Eigenes Wochenkontingent von Gemini 4 Argon (Google AI Pro) und dessen Reset                                            |
+| `context`, `contextPct`, `contextTokens`                         | Genutztes Kontextfenster: Anzeige, Prozentsatz oder Token-Anzahl                                                        |
+| `git`                                                            | Branch, nicht committete Änderungen sowie Commits voraus/zurück (ahead/behind)                                          |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Hinzugefügte/gelöschte Zeilen, gestagte/geänderte/ungetrackte/konfliktbehaftete Dateien, Commit-ID, Stashes, Worktree   |
+| `project`, `cwd`                                                 | Projektordner, aktueller Ordner                                                                                         |
+| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | Aktiver Agent, Agent-Status (mit Bestätigungs-Flag), Tarif, Sandbox, Artefakte, CLI-Version                             |
+| `tasks`, `queue`                                                 | Laufende Subagenten, Hintergrundaufgaben, eingereihte Benutzernachrichten                                               |
+| `mode`                                                           | Bestätigungsmodus (z. B. `accept-edits`) und Vim-Modus                                                                  |
+| `title`                                                          | Titel der aktuellen Unterhaltung                                                                                        |
+| `sessionTime`                                                    | Verstrichene Zeit seit Beginn der aktiven Unterhaltung                                                                  |
+| `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | Sitzungs-Tokens, geschätzte Kosten (USD) und Nutzung des Prompt-Caches                                                  |
+| `tokensToday`, `tokensWeek`, `tokensMonth`                       | Heute, in den letzten 7 Tagen und in den letzten 30 Tagen genutzte Tokens über alle Unterhaltungen hinweg (Node 22.13+) |
+| `ram`                                                            | Belegter Arbeitsspeicher auf deinem Rechner                                                                             |
+| `os`                                                             | System, auf dem agy läuft: Windows, macOS, Linux oder WSL                                                               |
+| `host`                                                           | Aktueller Benutzer und kurzer Hostname des Betriebssystems (`alex@devbox`)                                              |
+| `customText`, `exec`                                             | Eigener Text oder die Ausgabe eines [Shell-Befehls](docs/configuration.md#shell-command-widget-exec)                    |
 
 Ein Widget ohne anzuzeigende Daten blendet sich automatisch aus. Widgets lassen sich umfärben, umbenennen, mit einem anderen Icon versehen, ohne Label darstellen oder mit eigenen Warnschwellen versehen: siehe [Konfiguration](docs/configuration.md).
 

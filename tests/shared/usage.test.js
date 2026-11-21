@@ -8,7 +8,8 @@ const os = require("os");
 const path = require("path");
 const { record, stripAnsi } = require("../helpers");
 const { renderStatusline, defaultConfig, sampleData } = require("../../src/lib/shared");
-const { getConfigDir, setConfigDir } = require("../../src/lib/config");
+const { LAYOUT_ORDER, getConfigDir, setConfigDir } = require("../../src/lib/config");
+const { editFields } = require("../../src/lib/widget-options");
 const { setLogDir, readLog, getLogPath } = require("../../src/lib/log");
 const {
   USAGE_CACHE_NAME,
@@ -265,6 +266,34 @@ async function run() {
       wrong.every((text) => text.includes("Today: 2.5K") && !text.includes("%")),
       wrong.join(" / ")
     );
+
+    // 30-day window includes old.db (20d) while still skipping veryold.db (40d).
+    makeConversationDb(path.join(dir, "veryold.db"), {
+      gens: [generator({ input: 500000, output: 0, id: "vo" }, NOW - 40 * DAY)],
+      mtime: NOW - 40 * DAY,
+    });
+    const opensBeforeMonth = stats.opens;
+    const monthOut = inHome(home, () => render(config({}, [{ id: "tokensMonth" }])));
+    const monthSplit = inHome(home, () =>
+      render(config({}, [{ id: "tokensMonth", split: true, budget: 2000000 }]))
+    );
+    const monthLayouts = LAYOUT_ORDER.every((layout) =>
+      inHome(home, () => render(config({ layout }, [{ id: "tokensMonth" }]))).includes("30d: 1.1M")
+    );
+    const monthFields = new Set(editFields({ id: "tokensMonth" }).map((f) => f.key));
+    record(
+      "tokensMonth sums the last 30 days, supports split/budget across layouts, and skips >31d databases",
+      stats.opens - opensBeforeMonth === 1 &&
+        monthOut.includes("🗓️ 30d: 1.1M") &&
+        monthSplit.includes("30d: 1.1M↑ 1.3K↓ (54%)") &&
+        monthLayouts &&
+        ["split", "budget", "warn", "crit", "blink"].every((key) => monthFields.has(key)),
+      `${stats.opens - opensBeforeMonth} opens | ${monthOut} | ${monthSplit}`
+    );
+    // Clean up veryold.db and old.db cache entry before subsequent exact checks.
+    fs.rmSync(path.join(dir, "veryold.db"), { force: true });
+    clearUsageCache();
+    fs.rmSync(path.join(install, USAGE_CACHE_NAME), { force: true });
 
     // Locked, corrupt or foreign databases are skipped and logged, without a path.
     setLogDir(install, true);

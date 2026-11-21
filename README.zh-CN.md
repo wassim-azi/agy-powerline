@@ -190,7 +190,7 @@ npx agy-powerline init --language zh-CN
 | `title`                                                          | 对话标题                                                                             |
 | `sessionTime`                                                    | 当前活跃对话开始以来的时长                                                           |
 | `totalTokens`、`cost`、`cacheHit`、`cacheRead`、`cacheCreate`    | 会话 token 数、估算费用（USD）和提示缓存使用情况                                     |
-| `tokensToday`、`tokensWeek`                                      | 今天和过去 7 天的 token 用量（所有对话，Node 22.13+）                                |
+| `tokensToday`、`tokensWeek`、`tokensMonth`                       | 今天、过去 7 天和过去 30 天的 token 用量（所有对话，Node 22.13+）                    |
 | `ram`                                                            | 本机已用内存                                                                         |
 | `os`                                                             | agy 运行的操作系统：Windows、macOS、Linux 或 WSL                                     |
 | `host`                                                           | 来自操作系统的当前用户与短主机名（`alex@devbox`）                                    |

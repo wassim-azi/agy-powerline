@@ -141,6 +141,7 @@ const WIDGET_TAGS = {
   clock: { icon: "🕒", name: "Clock", key: "tag_clock", iconOnly: true },
   tokensToday: { icon: "📈", name: "Today", key: "tag_today" },
   tokensWeek: { icon: "📊", name: "7d", key: "tag_7d" },
+  tokensMonth: { icon: "🗓️", name: "30d", key: "tag_30d" },
   customText: { icon: "🏷️", name: "" },
 };
 

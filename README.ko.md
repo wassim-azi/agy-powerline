@@ -190,7 +190,7 @@ npx agy-powerline init --language ko
 | `title`                                                          | 대화 제목                                                                                          |
 | `sessionTime`                                                    | 활성 대화가 시작된 이후 경과 시간                                                                  |
 | `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | 세션 토큰, 예상 비용(USD), 프롬프트 캐시 사용량                                                    |
-| `tokensToday`, `tokensWeek`                                      | 오늘 및 최근 7일간 사용한 토큰, 모든 대화 포함(Node 22.13+)                                        |
+| `tokensToday`, `tokensWeek`, `tokensMonth`                       | 오늘, 최근 7일 및 최근 30일간 사용한 토큰, 모든 대화 포함(Node 22.13+)                             |
 | `ram`                                                            | 시스템 메모리 사용량                                                                               |
 | `os`                                                             | agy가 동작하는 시스템: Windows, macOS, Linux 또는 WSL                                              |
 | `host`                                                           | OS의 현재 사용자와 짧은 호스트명(`alex@devbox`)                                                    |

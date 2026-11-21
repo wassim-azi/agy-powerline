@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **New `tokensMonth` (30-day token usage) widget**: tracks total tokens used over the last 30 days across all Antigravity conversations using existing `.usage-cache.json` daily buckets, supporting `split: true`, `budget` alerts, all 7 bar languages, and `split`/`budget`/`warn`/`crit`/`blink` options in `configure` (#252)
 - **Opt-in fish-style path and branch shortening (`"fish": true`)**: abbreviate parent folders on `cwd` (composing with `depth` and keeping dot-directories like `.gemini` → `.g` and multi-codepoint emoji clusters intact) and slash-separated prefixes on `git` (`feature/auth/oauth-login` → `f/a/oauth-login`), exposed as **Fish style** in `configure` (#253)
 - **New Antigravity CLI 1.4.5 widgets**: added opt-in `cost` (`cost.total_usd`, `cost.estimated`), `agent` (`agent.name`), and `queue` (`pending_input_count`) widgets (#202)
 - **Approval & Mercurial status**: surfaced `tool_confirmation_pending` directly on `agentState` and read Mercurial branch names from `.hg/branch` when `vcs.type` is `"hg"` (#202)

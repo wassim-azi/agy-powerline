@@ -31,6 +31,7 @@ const PACED_WIDGETS = new Set([
   "argonWeekly",
 ]);
 const METER_WIDGETS = new Set([...PACED_WIDGETS, "context"]);
+const USAGE_TOTAL_WIDGETS = new Set(["tokensToday", "tokensWeek", "tokensMonth"]);
 const MAX_WIDTH_WIDGETS = new Set([
   "cwd",
   "project",
@@ -53,9 +54,10 @@ const onOff = (value) => (value ? "on" : "off");
 function editFields(widget, config = {}, options = {}) {
   const quota = QUOTA_WIDGETS.has(widget.id);
   const context = CONTEXT_WIDGETS.has(widget.id);
+  const usageTotal = USAGE_TOTAL_WIDGETS.has(widget.id);
   const thresholds = quota
     ? resolveQuotaThresholds({}, config)
-    : context
+    : context || usageTotal
       ? resolveContextThresholds({}, config)
       : null;
 
@@ -132,6 +134,27 @@ function editFields(widget, config = {}, options = {}) {
       show: (value) => onOff(value),
       help: "Input and output tokens apart (123.1K↑ 355.0K↓) instead of one total.",
     });
+  }
+  if (usageTotal) {
+    fields.push(
+      {
+        key: "split",
+        label: "Split",
+        values: [undefined, true],
+        show: (value) => onOff(value),
+        help: "Input and output tokens apart (1.0M↑ 245.3K↓) instead of one total.",
+      },
+      {
+        key: "budget",
+        label: "Budget",
+        values: [undefined, 500000, 1000000, 2000000, 5000000, 10000000],
+        show: (value) =>
+          typeof value === "number" && Number.isFinite(value) && value > 0
+            ? formatTokens(value)
+            : "off",
+        help: "Token budget: adds the % used and turns to caution and danger colors as usage approaches it.",
+      }
+    );
   }
   if (widget.id === "cost") {
     fields.push(

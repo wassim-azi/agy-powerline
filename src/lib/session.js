@@ -457,7 +457,7 @@ function extractSession(data, config, options = {}) {
     sandboxNet: data.sandbox?.allow_network === true,
     git,
     gitDetails,
-    // Only read when tokensToday or tokensWeek is on the bar.
+    // Only read when tokensToday, tokensWeek or tokensMonth is on the bar.
     usage: resolveUsage(config, { read: options.readUsage === true }),
     terminalWidth: terminalWidth(
       data.terminal_width ?? process.stdout.columns ?? 0,
