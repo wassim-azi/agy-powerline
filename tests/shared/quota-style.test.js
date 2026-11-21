@@ -10,6 +10,7 @@ const {
   normalizeClock,
   formatClockTime,
   formatPaceDelta,
+  formatQuotaForecast,
 } = require("../../src/lib/formatters");
 const { editFields } = require("../../src/lib/widget-options");
 const { droppedSettings } = require("../../src/lib/config-check");
@@ -556,6 +557,102 @@ function testQuotaMode() {
       droppedSettings({ quotaMode: "bogus" }).some((msg) => msg.includes("unknown quota mode")) &&
       JSON.stringify(buildConfigSchema().properties.quotaMode?.enum) ===
         JSON.stringify(["remaining", "used"])
+  );
+
+  // Quota run-out forecast (#251): countdown & exact time, auto-hide guards, compact drop, and configure options.
+  const ahead5h = payload();
+  // 5h window = 18000s. reset_in_seconds = 10800s -> 7200s elapsed (40%).
+  // remaining = 0.25 -> used = 75%. runsOut = 25 * 7200 / 75 = 2400s (40m).
+  ahead5h.quota["gemini-5h"] = {
+    remaining_fraction: 0.25,
+    reset_in_seconds: 10800,
+    reset_time: RESET_AT,
+  };
+  const countdownPills = plain(
+    { widgets: [{ id: "fiveHourPct", forecast: "countdown" }] },
+    ahead5h
+  );
+  const countdownLines = plain(
+    { layout: "lines", widgets: [{ id: "fiveHourPct", forecast: true }] },
+    ahead5h
+  );
+  const countdownQuotaClassic = plain(
+    { layout: "classic", widgets: [{ id: "quota", forecast: "countdown" }] },
+    ahead5h
+  );
+  const timeLines = plain(
+    {
+      layout: "lines",
+      clock: { timeZone: "UTC", hour12: false },
+      widgets: [{ id: "fiveHourPct", forecast: "time" }],
+    },
+    ahead5h
+  );
+  const timeMatch = timeLines.match(/~(\d{2}:\d{2})/);
+  const lastsWeekly = plain(
+    {
+      widgets: [{ id: "fiveHourPct", forecast: "countdown" }],
+    },
+    payload() // default 5h: 72% remaining, 44% elapsed -> lasts until reset
+  );
+  const compactDrop = plain(
+    { widgets: [{ id: "fiveHourPct", forecast: "countdown", compact: true }] },
+    ahead5h
+  );
+  const asciiWeekly = plain(
+    {
+      ascii: true,
+      widgets: [{ id: "weeklyPct", forecast: "countdown" }],
+    },
+    ahead5h // 21% remaining, 76% elapsed -> runs out in ~122170s = ~1d 9h
+  );
+  const frForecast = plain(
+    { language: "fr", widgets: [{ id: "fiveHourPct", forecast: "countdown" }] },
+    ahead5h
+  );
+
+  const earlyFresh = formatQuotaForecast({
+    remaining: 50,
+    resetSeconds: 17900,
+    windowSeconds: 18000,
+    elapsedPct: (100 / 18000) * 100,
+  });
+  const unknownWin = formatQuotaForecast({
+    remaining: 20,
+    resetSeconds: 20000,
+    windowSeconds: 0,
+    elapsedPct: null,
+  });
+
+  const fiveHourFields = editFields({ id: "fiveHourPct" });
+  const forecastField = fiveHourFields.find((f) => f.key === "forecast");
+  const forecastSchema = buildConfigSchema().definitions.widget.properties.forecast;
+
+  record(
+    "forecast renders countdown and exact time across layouts, auto-hides safely, and is exposed in configure/schema",
+    countdownPills.includes("· ~40m") &&
+      countdownLines.includes("· ~40m") &&
+      countdownQuotaClassic.includes("7d 21.0% rem · ~1d 9h · 1d 17h") &&
+      Boolean(timeMatch) &&
+      !lastsWeekly.includes("~") &&
+      !compactDrop.includes("~") &&
+      asciiWeekly.includes(", ~1d 9h") &&
+      frForecast.includes("· ~40m") &&
+      earlyFresh === "" &&
+      unknownWin === "" &&
+      Boolean(forecastField) &&
+      JSON.stringify(forecastSchema?.enum) === JSON.stringify([true, false, "countdown", "time"]),
+    JSON.stringify({
+      countdownPills,
+      countdownLines,
+      countdownQuotaClassic,
+      timeLines,
+      lastsWeekly,
+      compactDrop,
+      asciiWeekly,
+      earlyFresh,
+      unknownWin,
+    })
   );
 }
 

@@ -5,7 +5,7 @@
 
 const os = require("os");
 const path = require("path");
-const { rgb } = require("./colors");
+const { rgb, getActiveDepth } = require("./colors");
 const { t } = require("./i18n");
 
 function formatReset(seconds, lang) {
@@ -252,6 +252,68 @@ function formatPaceDelta(quota, ascii = false) {
   }
 
   return `${delta > 0 ? (ascii ? "^" : "⇡") : ascii ? "v" : "⇣"}${Math.abs(delta)}%`;
+}
+
+const MIN_FORECAST_ELAPSED_SEC = 600;
+
+// Estimates when the quota empties at the current window burn rate, or "" when
+// the quota will last until the reset, is too early in the window, or has no known window.
+function formatQuotaForecast(quota, { format, fallback = "countdown", clock = {}, lang } = {}) {
+  const remaining = Number(quota?.remaining);
+  const resetSeconds = Number(quota?.resetSeconds);
+  const elapsedPct = quota?.elapsedPct == null ? NaN : Number(quota.elapsedPct);
+
+  if (
+    quota?.elapsedPct == null ||
+    !Number.isFinite(elapsedPct) ||
+    elapsedPct <= 0 ||
+    elapsedPct >= 100 ||
+    !Number.isFinite(remaining) ||
+    remaining <= 0 ||
+    remaining >= 100 ||
+    !Number.isFinite(resetSeconds) ||
+    resetSeconds <= 0
+  ) {
+    return "";
+  }
+
+  const winSeconds = Number(quota?.windowSeconds);
+  const elapsedSeconds =
+    Number.isFinite(winSeconds) && winSeconds > resetSeconds
+      ? winSeconds - resetSeconds
+      : (resetSeconds * elapsedPct) / (100 - elapsedPct);
+
+  if (!Number.isFinite(elapsedSeconds) || elapsedSeconds < MIN_FORECAST_ELAPSED_SEC) {
+    return "";
+  }
+
+  const usedPct = 100 - remaining;
+  if (usedPct <= elapsedPct) {
+    return "";
+  }
+
+  const runsOutInSeconds = Math.max(1, Math.floor((remaining * elapsedSeconds) / usedPct));
+  if (!Number.isFinite(runsOutInSeconds) || runsOutInSeconds >= resetSeconds) {
+    return "";
+  }
+
+  const chosen =
+    format === "countdown" || format === "time"
+      ? format
+      : fallback === "time"
+        ? "time"
+        : "countdown";
+
+  if (chosen === "time") {
+    const target = new Date(Date.now() + runsOutInSeconds * 1000);
+    const exact =
+      runsOutInSeconds >= 86400
+        ? `${formatClockDate(target, clock)}, ${formatClockTime(target, clock)}`
+        : formatClockTime(target, clock);
+    return `~${exact}`;
+  }
+
+  return `~${formatReset(runsOutInSeconds, lang)}`;
 }
 function resetInSeconds(quota) {
   const seconds = Number(quota?.reset_in_seconds);
@@ -817,6 +879,101 @@ function closeLink(terminator) {
   return terminator ? `\x1b]8;;${terminator}` : "";
 }
 
+const SAFE_OSC8_URL = /^(?:https?|file|vscode|cursor|zed):\/\//i;
+const PATH_LINK_SCHEMES = new Set([true, "file", "vscode", "cursor", "zed"]);
+
+function encodeUriPath(segments) {
+  return segments
+    .map((seg) =>
+      String(seg).replace(
+        /[\s%#?"<>`{}|^\\]/g,
+        (ch) => `%${ch.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0")}`
+      )
+    )
+    .join("/");
+}
+
+// Converts an absolute filesystem path into a file:// or editor URI while
+// leaving non-ASCII UTF-8 characters unescaped for Windows Explorer / ShellExecute.
+function pathLinkUrl(targetPath, option) {
+  if (!PATH_LINK_SCHEMES.has(option) || typeof targetPath !== "string") {
+    return "";
+  }
+  const raw = targetPath.trim();
+  if (!raw || /[\x00-\x1f\x7f]/.test(raw)) {
+    return "";
+  }
+
+  let normalized;
+  if (/^[A-Za-z]:[\\/]/.test(raw)) {
+    normalized = `/${raw[0].toUpperCase()}:${encodeUriPath(raw.slice(2).split(/[\\/]+/))}`;
+  } else if (/^\\\\[^\\]+[\\/][^\\]+/.test(raw)) {
+    const rest = encodeUriPath(
+      raw
+        .slice(2)
+        .split(/[\\/]+/)
+        .filter(Boolean)
+    );
+    normalized = rest ? `//${rest}` : "";
+  } else if (raw.startsWith("/")) {
+    normalized = `/${encodeUriPath(raw.slice(1).split(/\/+/))}`;
+  } else {
+    return "";
+  }
+
+  if (!normalized) {
+    return "";
+  }
+  const scheme = option === true || option === "file" ? "file" : option;
+  if (scheme === "file") {
+    return normalized.startsWith("//") ? `file:${normalized}` : `file://${normalized}`;
+  }
+  return `${scheme}://file${normalized}`;
+}
+
+function isSafeOsc8Url(url) {
+  return (
+    typeof url === "string" &&
+    url.length > 0 &&
+    !/[\x00-\x1f\x7f\\]/.test(url) &&
+    SAFE_OSC8_URL.test(url)
+  );
+}
+
+// Wraps visible text in an OSC 8 terminal hyperlink when safe and enabled.
+// Suppressed in ASCII mode and no-color mode (NO_COLOR / --color none).
+function osc8Link(text, url, { ascii = false } = {}) {
+  if (!text || ascii || getActiveDepth() === "none" || !isSafeOsc8Url(url)) {
+    return text;
+  }
+  return `\x1b]8;;${url}\x07${text}\x1b]8;;\x07`;
+}
+
+function linkPath(text, fullPath, widget, ascii = false) {
+  const url = widget?.link ? pathLinkUrl(fullPath, widget.link) : "";
+  return osc8Link(text, url, { ascii });
+}
+
+function linkGitBranch(text, fullBranch, session, widget, ascii = false) {
+  if (
+    widget?.link !== true ||
+    !fullBranch ||
+    !session?.gitDetails?.remoteUrl ||
+    (session.gitDetails.detached && session.gitDetails.branch === fullBranch)
+  ) {
+    return text;
+  }
+  const encodedBranch = encodeURIComponent(fullBranch).replace(/%2F/g, "/");
+  return osc8Link(text, `${session.gitDetails.remoteUrl}/tree/${encodedBranch}`, { ascii });
+}
+
+function linkGitSha(sha, session, widget, ascii = false) {
+  if (widget?.link !== true || !sha || !session?.gitDetails?.remoteUrl) {
+    return sha;
+  }
+  return osc8Link(sha, `${session.gitDetails.remoteUrl}/commit/${sha}`, { ascii });
+}
+
 // "+128 −34" as parts, so Lines can color each; zero counts are left out.
 function gitChangeParts(changes, ascii = false) {
   const parts = [];
@@ -1040,6 +1197,7 @@ module.exports = {
   paceIndex,
   paceGlyph,
   formatPaceDelta,
+  formatQuotaForecast,
   resetInSeconds,
   formatTokens,
   formatContextTokens,
@@ -1075,4 +1233,9 @@ module.exports = {
   graphemeWidth,
   cutToWidth,
   closeLink,
+  pathLinkUrl,
+  osc8Link,
+  linkPath,
+  linkGitBranch,
+  linkGitSha,
 };

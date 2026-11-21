@@ -18,7 +18,10 @@ const {
   hasPlantedGitBinary,
   getGitSync,
   resolveGit,
+  resolveGitDetails,
   setGitTimeouts,
+  parseRemoteWebUrl,
+  readOriginUrl,
 } = require("../../src/lib/git");
 
 const strip = (text) => text.replace(/\x1b\[[0-9;]*m/g, "");
@@ -679,6 +682,7 @@ async function run() {
     testGitDetails(root, git);
     testGitOperations(root, git);
     testHgBranchFallback(root);
+    testRemoteUrlAndDetached(root);
   } catch (err) {
     record("git suite ran without errors", false, String(err.stderr || err.message));
   } finally {
@@ -705,6 +709,48 @@ function testHgBranchFallback(root) {
       defaultRes?.branch === "default" &&
       defaultRes?.dirty === true,
     JSON.stringify({ branchRes, defaultRes })
+  );
+}
+
+function testRemoteUrlAndDetached(root) {
+  record(
+    "parseRemoteWebUrl normalizes SSH/HTTPS remotes, strips credentials, and rejects unsafe URLs",
+    parseRemoteWebUrl("git@github.com:wassim-azi/agy-powerline.git") ===
+      "https://github.com/wassim-azi/agy-powerline" &&
+      parseRemoteWebUrl("ssh://git@gitlab.com:2222/group/sub/repo.git") ===
+        "https://gitlab.com/group/sub/repo" &&
+      parseRemoteWebUrl("https://user:secret@bitbucket.org/org/repo.git") ===
+        "https://bitbucket.org/org/repo" &&
+      parseRemoteWebUrl("http://gitea.local:3000/team/app.git") ===
+        "http://gitea.local:3000/team/app" &&
+      parseRemoteWebUrl("ext::sh -c evil") === "" &&
+      parseRemoteWebUrl("https://evil.com/a/b\x07c") === ""
+  );
+
+  const repo = path.join(root, "detached-remote");
+  const commit = "0123456789abcdef0123456789abcdef01234567";
+  fs.mkdirSync(path.join(repo, ".git"), { recursive: true });
+  fs.writeFileSync(path.join(repo, ".git", "HEAD"), `${commit}\n`);
+  fs.writeFileSync(
+    path.join(repo, ".git", "config"),
+    '[remote "origin"]\n\turl = https://token:xyz@github.com/org/demo.git\n'
+  );
+  const details = resolveGitDetails(
+    { cwd: repo },
+    {
+      widgets: [
+        { id: "git", link: true },
+        { id: "gitSha", link: true },
+      ],
+    }
+  );
+  record(
+    "readOriginUrl and resolveGitDetails expose remoteUrl and mark detached HEAD without spawning git",
+    readOriginUrl(path.join(repo, ".git")) === "https://github.com/org/demo" &&
+      details?.remoteUrl === "https://github.com/org/demo" &&
+      details?.detached === true &&
+      details?.sha === commit.slice(0, 7),
+    JSON.stringify(details)
   );
 }
 

@@ -256,6 +256,24 @@ function editFields(widget, config = {}, options = {}) {
           : "Abbreviates branch prefixes before / to their first letter (f/a/login).",
     });
   }
+  if (widget.id === "cwd" || widget.id === "project") {
+    fields.push({
+      key: "link",
+      label: "Hyperlink",
+      values: [undefined, true, "vscode", "cursor", "zed"],
+      show: (value) => (value === true || value === "file" ? "file" : value || "off"),
+      help: "Makes the path a clickable OSC 8 terminal link (file manager or editor). Ignored in ASCII or NO_COLOR mode.",
+    });
+  }
+  if (widget.id === "git" || widget.id === "gitSha") {
+    fields.push({
+      key: "link",
+      label: "Hyperlink",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help: "Links to the branch or commit on origin (read from .git/config with zero spawns).",
+    });
+  }
   if (MAX_WIDTH_WIDGETS.has(widget.id)) {
     fields.push({
       key: "maxWidth",
@@ -348,13 +366,22 @@ function editFields(widget, config = {}, options = {}) {
     });
   }
   if (PACE_DELTA_WIDGETS.has(widget.id)) {
-    fields.push({
-      key: "paceDelta",
-      label: "Pace delta",
-      values: [undefined, true],
-      show: (value) => onOff(value),
-      help: "Adds how far usage is ahead of (⇡) or behind (⇣) an even pace over the window, in points.",
-    });
+    fields.push(
+      {
+        key: "paceDelta",
+        label: "Pace delta",
+        values: [undefined, true],
+        show: (value) => onOff(value),
+        help: "Adds how far usage is ahead of (⇡) or behind (⇣) an even pace over the window, in points.",
+      },
+      {
+        key: "forecast",
+        label: "Run-out forecast",
+        values: [undefined, "countdown", "time"],
+        show: (value) => (value === true ? "on (follows reset format)" : value || "off"),
+        help: "Estimates when quota runs out at current pace; hides when it lasts until reset.",
+      }
+    );
   }
   return fields;
 }

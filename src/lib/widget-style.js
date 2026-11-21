@@ -97,6 +97,13 @@ function showsPaceDelta(widget) {
   return widget?.paceDelta === true && !widget.compact;
 }
 
+const VALID_FORECAST_VALUES = new Set([true, "countdown", "time"]);
+
+// Run-out forecast is opt-in on percentage quota widgets and drops when fitted (compact).
+function showsForecast(widget) {
+  return VALID_FORECAST_VALUES.has(widget?.forecast) && !widget?.compact;
+}
+
 // Each widget's icon and label, shared by both layouts so Pills and Lines
 // read the same. name is the English label (configure shows it), key its
 // message in i18n.js. iconOnly: with emojis on, the icon stands in for the label
@@ -399,6 +406,7 @@ module.exports = {
   isRaw,
   isPaced,
   showsPaceDelta,
+  showsForecast,
   METER_STYLES,
   METER_STYLE_IDS,
   isMeterStyle,
