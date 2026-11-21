@@ -90,20 +90,20 @@ const HOME_TEXT = {
       ],
       [
         "layouts",
-        "3 layouts",
-        "Pills, Lines and Classic, on as many rows as you like. Rows shrink to fit the terminal's width.",
-        "/docs/configuration/",
+        "3 layouts & bar settings",
+        "Pills, Lines and Classic, across as many rows as you like, with alignment, maxWidth and fit or wrap overflow.",
+        "/settings/",
       ],
       [
         "widgets",
         `${n.widgets} widgets`,
-        "Model, context, git, quotas, tokens, session time, agent state, your own shell commands and more.",
+        "Model, context, forecast, clickable links, git, quotas, 30-day tokens, cost, agent state, queue, env and shell commands.",
         "/widgets/",
       ],
       [
         "configure",
         "Configure your way",
-        "A terminal editor with a live preview, a browser configurator, presets, or plain JSON with a schema.",
+        "A terminal editor with live preview, a browser configurator with Settings parity, presets, or JSON with a schema.",
         "/configure/",
       ],
       [

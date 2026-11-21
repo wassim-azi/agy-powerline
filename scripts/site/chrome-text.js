@@ -225,6 +225,7 @@ function buildFooterColumns(repoUrl, npmUrl) {
         ["Docs", "/docs/"],
         ["Configuration", "/docs/configuration/"],
         ["Widgets", "/widgets/"],
+        ["Settings", "/settings/"],
         ["Troubleshooting", "/troubleshooting/"],
         ["Payload reference", "/docs/payload/"],
         ["Guides", "/guides/"],

@@ -347,6 +347,7 @@ const widgetStyle = __require("entry.js", "./widget-style");
 const colors = __require("entry.js", "./colors");
 const widgetOptions = __require("entry.js", "./widget-options");
 const configCheck = __require("entry.js", "./config-check");
+const i18n = __require("entry.js", "./i18n");
 const ansi = __require("entry.js", "./ansi");
 
 const AgyConfigurator = {
@@ -366,6 +367,18 @@ const AgyConfigurator = {
   applyPreset: config.applyPreset,
   LAYOUTS: shared.LAYOUTS,
   LAYOUT_ORDER: shared.LAYOUT_ORDER,
+  RESET_FORMAT_ORDER: config.RESET_FORMAT_ORDER,
+  ALIGNMENT_ORDER: config.ALIGNMENT_ORDER,
+  OVERFLOW_ORDER: config.OVERFLOW_ORDER,
+  QUOTA_MODE_ORDER: config.QUOTA_MODE_ORDER,
+  DEFAULT_THRESHOLDS: config.DEFAULT_THRESHOLDS,
+  resolveResetFormat: config.resolveResetFormat,
+  resolveAlignment: config.resolveAlignment,
+  resolveOverflow: config.resolveOverflow,
+  resolveQuotaMode: config.resolveQuotaMode,
+  resolveBarMaxWidth: config.resolveBarMaxWidth,
+  SUPPORTED_LANGUAGES: i18n.SUPPORTED_LANGUAGES,
+  resolveLanguage: i18n.resolveLanguage,
   STYLES: powerline.STYLES,
   STYLE_ORDER: powerline.STYLE_ORDER,
   detectStyle: powerline.detectStyle,

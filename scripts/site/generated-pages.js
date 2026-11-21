@@ -7,8 +7,17 @@ const fs = require("fs");
 const path = require("path");
 const repo = path.join(__dirname, "..", "..");
 const { renderStatusline, sampleData, defaultConfig } = require(path.join(repo, "src/lib/shared"));
+const {
+  RESET_FORMAT_ORDER,
+  ALIGNMENT_ORDER,
+  OVERFLOW_ORDER,
+  QUOTA_MODE_ORDER,
+  DEFAULT_THRESHOLDS,
+} = require(path.join(repo, "src/lib/config"));
 const { WIDGET_CATALOG } = require(path.join(repo, "src/lib/catalog"));
-const { WIDGET_TAGS } = require(path.join(repo, "src/lib/widget-style"));
+const { WIDGET_TAGS, METER_STYLE_IDS } = require(path.join(repo, "src/lib/widget-style"));
+const { GRADIENT_ORDER } = require(path.join(repo, "src/lib/themes"));
+const { SUPPORTED_LANGUAGES } = require(path.join(repo, "src/lib/i18n"));
 const { ansiToHtml } = require("./ansi");
 const { styleClasses } = require("./style-classes");
 const { esc, absoluteUrl } = require("./layout");
@@ -49,6 +58,11 @@ function docsIndexPage() {
           ],
           ["/widgets/", "Widgets", "Every widget with a live preview and its config line."],
           [
+            "/settings/",
+            "Settings",
+            "Every bar-wide option (alignment, overflow, meters, thresholds) with live previews.",
+          ],
+          [
             "/troubleshooting/",
             "Troubleshooting",
             "doctor, common problems, reporting a bug safely.",
@@ -86,6 +100,7 @@ function docsIndexPage() {
     path: "docs/",
     sources: ["scripts/site/build.js", "scripts/site/generated-pages.js"],
     card: { title: "Everything about the agy statusline", label: "Docs" },
+    markdown: `# agy-powerline docs\n\nEverything about the agy statusline for Google Antigravity CLI.\n\n- [Install](https://agy-powerline.com/install/)\n- [Configuration](https://agy-powerline.com/docs/configuration/)\n- [Widgets](https://agy-powerline.com/widgets/)\n- [Settings](https://agy-powerline.com/settings/)\n- [Troubleshooting](https://agy-powerline.com/troubleshooting/)\n- [Payload reference](https://agy-powerline.com/docs/payload/)\n- [FAQ](https://agy-powerline.com/faq/)\n- [Guides](https://agy-powerline.com/guides/)\n`,
     html: docPage({
       path: "docs/",
       title: "agy-powerline docs - agy statusline documentation",
@@ -95,6 +110,7 @@ function docsIndexPage() {
       crumbs: [CRUMB_HOME, CRUMB_DOCS],
       currentPage: "docs",
       toc: false,
+      alternateMarkdown: "docs/index.html.md",
       structuredData: collectionStructuredData({
         name: "agy-powerline docs",
         description,
@@ -116,6 +132,7 @@ function guidesIndexPage() {
     path: "guides/",
     sources: GUIDES.map((g) => g.source),
     card: { title: "Guides for Antigravity CLI's status bar", label: "Guides" },
+    markdown: `# Guides\n\nStep-by-step guides for Antigravity CLI's status bar.\n\n${GUIDES.map((g) => `- [${g.name}](https://agy-powerline.com/${g.path}): ${g.description}`).join("\n")}\n`,
     html: docPage({
       path: "guides/",
       title: "agy statusline guides - agy-powerline",
@@ -125,6 +142,7 @@ function guidesIndexPage() {
       crumbs: [CRUMB_HOME, CRUMB_GUIDES],
       currentPage: "docs",
       toc: false,
+      alternateMarkdown: "guides/index.html.md",
       structuredData: collectionStructuredData({
         name: "agy statusline guides",
         description,
@@ -211,6 +229,7 @@ function widgetsPage() {
       title: `All ${widgets.length} agy statusline widgets, with previews`,
       label: "Widgets",
     },
+    markdown: `# agy statusline widgets\n\nagy-powerline has ${widgets.length} widgets.\n\n${widgets.map((w) => `- \`${w.id}\` (${w.label}): ${sentence(w.description)}`).join("\n")}\n\n## Layout helpers\n\n${layoutHelpers.map((w) => `- \`${w.id}\`: ${w.description}`).join("\n")}\n`,
     html: docPage({
       path: "widgets/",
       title: "agy statusline widgets - every agy-powerline widget",
@@ -220,6 +239,7 @@ function widgetsPage() {
       crumbs: [CRUMB_HOME, CRUMB_DOCS, { name: "Widgets", path: "widgets/" }],
       currentPage: "docs",
       toc: false,
+      alternateMarkdown: "widgets/index.html.md",
       structuredData: collectionStructuredData({
         name: "agy statusline widgets",
         description,
@@ -229,6 +249,393 @@ function widgetsPage() {
       extraCss: `
       .widget pre {
         margin-top: 0;
+      }
+      .widget .term {
+        padding: 10px 12px;
+      }
+${styles.css()}`,
+    }),
+  };
+}
+
+function settingRenderData({ width = 96, remainingFiveHour, contextUsed } = {}) {
+  const data = sampleData();
+  data.cwd = FAKE_DIR;
+  data.workspace = { current_dir: FAKE_DIR, project_dir: FAKE_DIR };
+  data.terminal_width = width;
+  if (remainingFiveHour !== undefined) {
+    data.quota = {
+      ...data.quota,
+      "gemini-5h": { ...data.quota["gemini-5h"], remaining_fraction: remainingFiveHour },
+    };
+  }
+  if (contextUsed !== undefined) {
+    data.context_window = {
+      ...data.context_window,
+      used_percentage: contextUsed,
+      remaining_percentage: 100 - contextUsed,
+    };
+  }
+  return data;
+}
+
+function settingDemo(label, config, { width = 96, remainingFiveHour, contextUsed } = {}, styles) {
+  const data = settingRenderData({ width, remainingFiveHour, contextUsed });
+  const merged = { ...defaultConfig(), ...config };
+  const out = renderStatusline(data, merged, { color: "truecolor", flexGaps: true });
+  return `<div class="setting-demo">
+            <div class="setting-demo-label">${esc(label)}</div>
+            <div class="screen-wrap"><div class="term-frame" data-bg="dark"><div class="term" data-bg="dark"><div class="screen">${ansiToHtml(out, { styles })}</div></div></div></div>
+          </div>`;
+}
+
+function settingsPage() {
+  const styles = styleClasses();
+  const baseRow = [
+    { id: "model" },
+    { id: "context" },
+    { id: "git" },
+    { id: "fiveHourBar" },
+    { id: "fiveHourReset" },
+  ];
+  const entries = [
+    {
+      id: "language",
+      key: "language",
+      title: "Bar language",
+      defaultVal: '"en"',
+      options: SUPPORTED_LANGUAGES.join(", "),
+      desc: "Translates labels, time units, and captions rendered inside the bar while keeping payload values intact.",
+      snippet: '{\n  "language": "fr"\n}',
+      demos: [
+        settingDemo('language: "en" (default)', { language: "en", widgets: baseRow }, {}, styles),
+        settingDemo('language: "fr"', { language: "fr", widgets: baseRow }, {}, styles),
+      ],
+    },
+    {
+      id: "clock-hour12",
+      key: "clock.hour12",
+      title: "Clock format",
+      defaultVal: "null (auto)",
+      options: "null (auto locale), false (24h), true (12h)",
+      desc: "Controls 12-hour vs 24-hour formatting for exact reset timestamps and the clock widget.",
+      snippet: '{\n  "resetFormat": "time",\n  "clock": { "hour12": false }\n}',
+      demos: [
+        settingDemo(
+          "clock.hour12: true (12h)",
+          { resetFormat: "time", clock: { hour12: true }, widgets: [{ id: "fiveHourReset" }] },
+          {},
+          styles
+        ),
+        settingDemo(
+          "clock.hour12: false (24h)",
+          { resetFormat: "time", clock: { hour12: false }, widgets: [{ id: "fiveHourReset" }] },
+          {},
+          styles
+        ),
+      ],
+    },
+    {
+      id: "resetFormat",
+      key: "resetFormat",
+      title: "Reset format",
+      defaultVal: '"countdown"',
+      options: RESET_FORMAT_ORDER.join(", "),
+      desc: "Sets the global default for reset countdown widgets unless overridden per widget with format.",
+      snippet: '{\n  "resetFormat": "both"\n}',
+      demos: RESET_FORMAT_ORDER.map((fmt) =>
+        settingDemo(
+          `resetFormat: "${fmt}"`,
+          { resetFormat: fmt, widgets: [{ id: "fiveHourBar" }, { id: "fiveHourReset" }] },
+          {},
+          styles
+        )
+      ),
+    },
+    {
+      id: "gradient",
+      key: "gradient",
+      title: "Bar gradient",
+      defaultVal: "off (unset)",
+      options: `off, ${GRADIENT_ORDER.join(", ")}, or "#hex1-#hex2"`,
+      desc: "Sweeps one smooth color gradient across all pills on each row instead of per-widget slot colors.",
+      snippet: '{\n  "gradient": "sunset"\n}',
+      demos: [
+        settingDemo("Theme colors (off)", { widgets: baseRow }, {}, styles),
+        settingDemo('gradient: "aurora"', { gradient: "aurora", widgets: baseRow }, {}, styles),
+        settingDemo('gradient: "sunset"', { gradient: "sunset", widgets: baseRow }, {}, styles),
+      ],
+    },
+    {
+      id: "meterStyle",
+      key: "meterStyle",
+      title: "Meter style",
+      defaultVal: "layout default",
+      options: METER_STYLE_IDS.join(", "),
+      desc: "Overrides the meter glyph shape globally across quota and context widgets. Per-widget meter options still win.",
+      snippet: '{\n  "meterStyle": "blocks"\n}',
+      demos: [
+        settingDemo(
+          "meterStyle: blocks",
+          { meterStyle: "blocks", widgets: [{ id: "fiveHourBar" }] },
+          {},
+          styles
+        ),
+        settingDemo(
+          "meterStyle: shade",
+          { meterStyle: "shade", widgets: [{ id: "fiveHourBar" }] },
+          {},
+          styles
+        ),
+        settingDemo(
+          "meterStyle: pips",
+          { meterStyle: "pips", widgets: [{ id: "fiveHourBar" }] },
+          {},
+          styles
+        ),
+        settingDemo(
+          "meterStyle: cells (Pills)",
+          { meterStyle: "cells", widgets: [{ id: "fiveHourBar" }] },
+          {},
+          styles
+        ),
+      ],
+    },
+    {
+      id: "emojis",
+      key: "emojis",
+      title: "Emojis",
+      defaultVal: "true",
+      options: "true, false",
+      desc: "Shows or hides widget icons globally across the bar. Disabled automatically while ascii is true.",
+      snippet: '{\n  "emojis": false\n}',
+      demos: [
+        settingDemo("emojis: true (default)", { emojis: true, widgets: baseRow }, {}, styles),
+        settingDemo("emojis: false", { emojis: false, widgets: baseRow }, {}, styles),
+      ],
+    },
+    {
+      id: "minimalist",
+      key: "minimalist",
+      title: "Minimalist mode",
+      defaultVal: "false",
+      options: "false, true",
+      desc: "Displays raw values only while hiding labels and icons unless a widget explicitly configures a label.",
+      snippet: '{\n  "minimalist": true\n}',
+      demos: [
+        settingDemo(
+          "minimalist: false (default)",
+          { minimalist: false, widgets: baseRow },
+          {},
+          styles
+        ),
+        settingDemo("minimalist: true", { minimalist: true, widgets: baseRow }, {}, styles),
+      ],
+    },
+    {
+      id: "pacing",
+      key: "pacing",
+      title: "Quota pace marker",
+      defaultVal: "true",
+      options: "true, false",
+      desc: "Draws the elapsed-window marker inside quota meters so you can see whether usage outpaces the clock.",
+      snippet: '{\n  "pacing": false\n}',
+      demos: [
+        settingDemo(
+          "pacing: true (default)",
+          { pacing: true, widgets: [{ id: "fiveHourBar" }] },
+          {},
+          styles
+        ),
+        settingDemo(
+          "pacing: false",
+          { pacing: false, widgets: [{ id: "fiveHourBar" }] },
+          {},
+          styles
+        ),
+      ],
+    },
+    {
+      id: "thresholds",
+      key: "thresholds",
+      title: "Warning sensitivity & alert blink",
+      defaultVal: `quota ${DEFAULT_THRESHOLDS.quotaWarn}%/${DEFAULT_THRESHOLDS.quotaCrit}%, context ${DEFAULT_THRESHOLDS.contextWarn}%/${DEFAULT_THRESHOLDS.contextCrit}%, blink false`,
+      options:
+        'quotaWarn, quotaCrit, contextWarn, contextCrit (0-100); blink: false (off), true (danger), "warn" (caution + danger)',
+      desc: "Sets caution and danger color breakpoints for quotas and context, plus optional ANSI blink alerts.",
+      snippet:
+        '{\n  "thresholds": {\n    "quotaWarn": 40,\n    "quotaCrit": 20,\n    "contextWarn": 60,\n    "contextCrit": 80,\n    "blink": "warn"\n  }\n}',
+      demos: [
+        settingDemo(
+          "Normal quota (72% rem)",
+          { widgets: [{ id: "fiveHourBar" }, { id: "context" }] },
+          { remainingFiveHour: 0.72, contextUsed: 42 },
+          styles
+        ),
+        settingDemo(
+          "Caution (22% rem / 75% ctx)",
+          { widgets: [{ id: "fiveHourBar" }, { id: "context" }] },
+          { remainingFiveHour: 0.22, contextUsed: 75 },
+          styles
+        ),
+        settingDemo(
+          "Danger (6% rem / 95% ctx)",
+          { widgets: [{ id: "fiveHourBar" }, { id: "context" }] },
+          { remainingFiveHour: 0.06, contextUsed: 95 },
+          styles
+        ),
+      ],
+    },
+    {
+      id: "rowGap",
+      key: "rowGap",
+      title: "Space between rows",
+      defaultVal: "false",
+      options: "false, true",
+      desc: "Inserts a blank line between statusline rows so multi-row Pills or Lines layouts breathe cleanly.",
+      snippet: '{\n  "rowGap": true\n}',
+      demos: [
+        settingDemo("rowGap: false (default)", { rowGap: false }, {}, styles),
+        settingDemo("rowGap: true", { rowGap: true }, {}, styles),
+      ],
+    },
+    {
+      id: "maxWidth",
+      key: "maxWidth",
+      title: "Max bar width",
+      defaultVal: 'null ("full")',
+      options: '"full" / null, or positive integer columns (1..1000)',
+      desc: "Caps bar width on wide monitors instead of stretching separators across the full terminal width.",
+      snippet: '{\n  "maxWidth": 72\n}',
+      demos: [
+        settingDemo("maxWidth: full (96 cols terminal)", { maxWidth: null }, { width: 96 }, styles),
+        settingDemo("maxWidth: 72 cols cap", { maxWidth: 72 }, { width: 96 }, styles),
+      ],
+    },
+    {
+      id: "alignment",
+      key: "alignment",
+      title: "Row alignment",
+      defaultVal: '"left"',
+      options: ALIGNMENT_ORDER.join(", "),
+      desc: "Positions widgets horizontally on each row: left-aligned with explicit separators, centered, or evenly spread.",
+      snippet: '{\n  "alignment": "center"\n}',
+      demos: ALIGNMENT_ORDER.map((align) =>
+        settingDemo(
+          `alignment: "${align}"`,
+          { alignment: align, widgets: [{ id: "model" }, { id: "context" }, { id: "git" }] },
+          { width: 92 },
+          styles
+        )
+      ),
+    },
+    {
+      id: "quotaMode",
+      key: "quotaMode",
+      title: "Quota display",
+      defaultVal: '"remaining"',
+      options: QUOTA_MODE_ORDER.join(", "),
+      desc: "Displays quota meters and percentages as remaining capacity (rem) or consumed usage (used).",
+      snippet: '{\n  "quotaMode": "used"\n}',
+      demos: QUOTA_MODE_ORDER.map((mode) =>
+        settingDemo(
+          `quotaMode: "${mode}"`,
+          { quotaMode: mode, widgets: [{ id: "fiveHourBar" }, { id: "weeklyBar" }] },
+          {},
+          styles
+        )
+      ),
+    },
+    {
+      id: "overflow",
+      key: "overflow",
+      title: "Row overflow",
+      defaultVal: '"fit"',
+      options: OVERFLOW_ORDER.join(", "),
+      desc: "Decides what happens on narrow terminals: fit shrinks labels and drops lower-priority items, while wrap keeps everything onto new rows.",
+      snippet: '{\n  "overflow": "wrap"\n}',
+      demos: OVERFLOW_ORDER.map((mode) =>
+        settingDemo(`overflow: "${mode}" (54 cols)`, { overflow: mode }, { width: 54 }, styles)
+      ),
+    },
+    {
+      id: "ascii",
+      key: "ascii",
+      title: "ASCII mode",
+      defaultVal: "false",
+      options: "false, true",
+      desc: "Replaces Nerd Font powerline caps, emojis, and Unicode box/meter glyphs with plain ASCII characters.",
+      snippet: '{\n  "ascii": true\n}',
+      demos: [
+        settingDemo("ascii: false (default)", { ascii: false, widgets: baseRow }, {}, styles),
+        settingDemo("ascii: true", { ascii: true, widgets: baseRow }, {}, styles),
+      ],
+    },
+  ];
+
+  const sections = entries
+    .map(
+      (s) => `<section class="widget" aria-labelledby="${esc(s.id)}">
+          <h2 id="${esc(s.id)}">${esc(s.title)} <code>${esc(s.key)}</code></h2>
+          <p>${esc(s.desc)}</p>
+          <p class="setting-meta"><strong>Default:</strong> <code>${esc(s.defaultVal)}</code> · <strong>Options:</strong> ${esc(s.options)}</p>
+          ${s.demos.join("\n          ")}
+          <pre tabindex="0"><code>${esc(s.snippet)}</code></pre>
+        </section>`
+    )
+    .join("\n        ");
+
+  const body = `<h1>agy statusline settings</h1>
+        <p class="lede">Every bar-wide option in <code>statusline.config.json</code> and the CLI <code>Settings</code> tab. Every bar below is rendered by the real statusline code from sample data. Try them interactively in the <a href="/configure/">browser configurator</a>.</p>
+        <nav aria-label="Settings"><p>${entries.map((s) => `<a href="#${esc(s.id)}"><code>${esc(s.key)}</code></a>`).join(" ")}</p></nav>
+        ${sections}`;
+  const description =
+    "Every global option in agy-powerline for Antigravity CLI: alignment, overflow, quotaMode, resetFormat, meterStyle, maxWidth and thresholds with live previews.";
+  return {
+    path: "settings/",
+    sources: [
+      "src/lib/config.js",
+      "src/lib/widget-style.js",
+      "src/lib/i18n.js",
+      "scripts/site/generated-pages.js",
+    ],
+    card: {
+      title: "Every global agy statusline setting, with previews",
+      label: "Settings",
+    },
+    markdown: `# agy statusline settings\n\n${entries.map((s) => `## ${s.key}\n${s.desc}\n- Default: \`${s.defaultVal}\`\n- Options: ${s.options}`).join("\n\n")}\n`,
+    html: docPage({
+      path: "settings/",
+      title: "agy statusline settings - every global option explained",
+      description,
+      bodyHtml: body,
+      headings: [],
+      crumbs: [CRUMB_HOME, CRUMB_DOCS, { name: "Settings", path: "settings/" }],
+      currentPage: "docs",
+      toc: false,
+      alternateMarkdown: "settings/index.html.md",
+      structuredData: collectionStructuredData({
+        name: "agy statusline settings",
+        description,
+        path: "settings/",
+        items: entries.map((s) => ({ name: s.key, url: absoluteUrl(`settings/#${s.id}`) })),
+      }),
+      extraCss: `
+      .setting-meta {
+        font-size: 0.9rem;
+        color: var(--muted);
+      }
+      .setting-demo {
+        margin-bottom: 10px;
+      }
+      .setting-demo-label {
+        font-size: 0.78rem;
+        font-family: var(--font-mono);
+        color: var(--muted);
+        margin-bottom: 4px;
+      }
+      .widget pre {
+        margin-top: 4px;
       }
       .widget .term {
         padding: 10px 12px;
@@ -319,6 +726,7 @@ function calculatorPage() {
     path: "quota-calculator/",
     sources: ["scripts/site/quota-pace.js"],
     card: { title: "Will your Antigravity quota last until it resets?", label: "Calculator" },
+    markdown: `# Antigravity quota pace calculator\n\nCalculate whether your Antigravity CLI 5-hour or 7-day quota will last until its reset based on remaining percentage and time left.\n\nUse the interactive calculator at [agy-powerline.com/quota-calculator/](https://agy-powerline.com/quota-calculator/).\n`,
     html: docPage({
       path: "quota-calculator/",
       title: "Antigravity quota pace calculator - will your quota last?",
@@ -329,6 +737,7 @@ function calculatorPage() {
       crumbs: [CRUMB_HOME, { name: "Quota calculator", path: "quota-calculator/" }],
       currentPage: "",
       toc: false,
+      alternateMarkdown: "quota-calculator/index.html.md",
       structuredData: {
         "@context": "https://schema.org",
         "@type": "WebApplication",
@@ -437,5 +846,6 @@ module.exports = {
   docsIndexPage,
   guidesIndexPage,
   widgetsPage,
+  settingsPage,
   calculatorPage,
 };

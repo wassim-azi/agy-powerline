@@ -472,6 +472,7 @@ function buildHomeHtml({ lang = "en" } = {}) {
     currentPage: "home",
     pagePath,
     lang,
+    alternateMarkdown: `${pagePath}index.html.md`,
     alternates: [
       ...SITE_LANGUAGES.map((l) => ({ hreflang: l.lang, path: l.href.slice(1) })),
       { hreflang: "x-default", path: "" },
@@ -489,7 +490,7 @@ function buildHomeHtml({ lang = "en" } = {}) {
 
 const THEMES_PAGE = {
   path: "themes/",
-  title: "agy statusline themes - 20 themes for Antigravity CLI",
+  title: `agy statusline themes - ${galleryThemes().length} themes for Antigravity CLI`,
   description:
     "Every agy-powerline theme for the agy statusline, drawn by the real code on dark and light terminals, with contrast figures and a color-blindness simulation.",
 };
@@ -528,12 +529,12 @@ function buildThemesHtml({ standalone = false } = {}) {
   const themes = buildThemes(styles);
   const cards = themes.map((t) => card(t, styles)).join("\n");
   const template = fs.readFileSync(path.join(__dirname, "themes.html"), "utf8");
-  const title = THEMES_PAGE.title.replace("20", String(themes.length));
   const page = injectSiteChrome(template.replace(/\{\{count\}\}/g, String(themes.length)), {
-    title,
+    title: THEMES_PAGE.title,
     description: THEMES_PAGE.description,
     currentPage: "themes",
     pagePath: THEMES_PAGE.path,
+    alternateMarkdown: "themes/index.html.md",
     structuredData: themesStructuredData(themes),
     pageCss: styles.css(),
     standalone,
