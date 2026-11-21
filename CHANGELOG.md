@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Live preview controls in `configure`**: cycle preview scenarios (`,`, `.` between `Normal`, `Near limits`, and `Agent & modes`) and simulated bar widths (`-`, `+`/`=` through `60`, `80`, `100`, `120` columns, and full panel width) without modifying saved config (#256)
 - **Opt-in OSC 8 clickable hyperlinks (`"link"`)**: wrap `cwd` and `project` in `file://`, `vscode://file/`, `cursor://file/`, or `zed://file/` links and `git` / `gitSha` in normalized `https://` branch/commit links read directly from `.git/config` (zero spawns, credentials stripped), automatically suppressed in ASCII and no-color modes and stripped in web previews (#255)
 - **Opt-in quota run-out forecast (`"forecast"`)**: added `"forecast"` (`true`, `"countdown"`, or `"time"`) on `quota`, `fiveHourPct`, and `weeklyPct` to estimate when quota will run out at the current window burn rate, auto-hiding when pace lasts until reset, during the first 10 minutes, or on narrow terminals, with `configure` and schema support (#251)
 - **Zero-spawn `env` widget**: display environment variables (`{ "id": "env", "var": "AWS_PROFILE" }`) in-process without spawning a shell, auto-hiding when unset or matching credential patterns (`TOKEN`, `SECRET`, `KEY`, `PASS`, `PWD`, `AUTH`, etc.), supporting `label`, `icon`, `maxWidth`, `raw`, and `configure` editing (#254)
