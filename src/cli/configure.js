@@ -50,7 +50,7 @@ const {
   resolveColorDepth,
 } = require("../lib/colors");
 const { makeUi, wrapText } = require("./tui-style");
-const { visibleWidth, stripControl } = require("../lib/formatters");
+const { visibleWidth, stripControl, splitGraphemes } = require("../lib/formatters");
 const {
   STYLES,
   STYLE_ORDER,
@@ -885,11 +885,13 @@ function onEdit(key) {
       setOption(field.key, text || undefined);
       textInput = null;
     } else if (key.name === "backspace" || key.name === "delete") {
-      textInput = Array.from(textInput).slice(0, -1).join("");
+      // A whole character: an emoji with its skin tone or ZWJ parts, a
+      // letter with its accent.
+      textInput = splitGraphemes(textInput).slice(0, -1).join("");
     } else if (key.sequence && !key.ctrl && !key.meta && !/[\x00-\x1f\x7f]/.test(key.sequence)) {
-      // An emoji arrives as one key with two UTF-16 units, so count code points.
+      // Count whole grapheme clusters so multi-codepoint emojis fit icon maxLength.
       const max = field?.maxLength ?? TEXT_MAX;
-      if (Array.from(textInput + key.sequence).length <= max) {
+      if (splitGraphemes(textInput + key.sequence).length <= max) {
         textInput += key.sequence;
       }
     }

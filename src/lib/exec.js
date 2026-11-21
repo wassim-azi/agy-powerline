@@ -14,7 +14,7 @@ try {
 } catch {
   // worker_threads is absent in the browser configurator bundle.
 }
-const { stripControl, sanitizeDeep } = require("./formatters");
+const { stripControl, sanitizeDeep, splitGraphemes } = require("./formatters");
 const { RESET, getActiveDepth } = require("./colors");
 const { logWarning } = require("./log");
 const { t } = require("./i18n");
@@ -106,13 +106,14 @@ function cacheKey(cmd, cwd = "") {
 const SGR_SPLIT = /(\x1b\[[0-9;]*m)/;
 const SGR_ALL = /\x1b\[([0-9;]*)m/g;
 
-// Command output is untrusted text: strip terminal control and cap length.
+// Command output is untrusted text: strip terminal control and cap length,
+// counted in grapheme clusters so the cut never splits an emoji or accent.
 // With colors, SGR sequences survive and the visible text alone is capped;
 // the output then ends with a reset so its colors can't leak past it.
 function sanitizeExecOutput(text, { colors = false } = {}) {
   if (!colors) {
     const clean = stripControl(text).trim();
-    const chars = Array.from(clean);
+    const chars = splitGraphemes(clean);
 
     if (chars.length <= MAX_OUTPUT_CHARS) {
       return clean;
@@ -126,7 +127,7 @@ function sanitizeExecOutput(text, { colors = false } = {}) {
     .map((part, i) => (i % 2 ? part : stripControl(part)));
   const visible = parts.filter((_, i) => i % 2 === 0).join("");
   const lead = visible.length - visible.trimStart().length;
-  const chars = Array.from(visible.trim());
+  const chars = splitGraphemes(visible.trim());
   const cut = chars.length > MAX_OUTPUT_CHARS;
   const budget = cut ? MAX_OUTPUT_CHARS - 1 : chars.length;
   let skip = lead;
@@ -140,10 +141,15 @@ function sanitizeExecOutput(text, { colors = false } = {}) {
       styled = true;
       continue;
     }
-    for (const char of Array.from(parts[i])) {
+    for (let char of splitGraphemes(parts[i])) {
       if (skip > 0) {
-        skip -= char.length;
-        continue;
+        // Leading whitespace is skipped; a mark joined to it stays.
+        if (char.length <= skip) {
+          skip -= char.length;
+          continue;
+        }
+        char = char.slice(skip);
+        skip = 0;
       }
       if (used === budget) {
         break;

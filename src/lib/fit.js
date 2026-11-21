@@ -3,7 +3,7 @@
 
 "use strict";
 
-const { charWidth, visibleWidth } = require("./formatters");
+const { visibleWidth, cutToWidth, closeLink } = require("./formatters");
 
 // When a row is wider than the terminal, widgets are dropped in this order,
 // first entry first. Ids not listed (custom ones) go before all of them.
@@ -62,8 +62,6 @@ const LAYOUT_IDS = new Set(["separator", "lineBreak"]);
 // Ends a cut line; ASCII mode uses "..." so it stays plain ASCII.
 const ELLIPSIS = { unicode: "…", ascii: "..." };
 const RESET = "\x1b[0m";
-// One escape sequence: SGR colors, or an OSC 8 hyperlink.
-const ESCAPE = /^(\x1b\[[0-9;]*[a-zA-Z]|\x1b\]8;;[^\x1b\x07]*(\x07|\x1b\\))/;
 
 function dropRank(id) {
   return DROP_ORDER.indexOf(id);
@@ -230,29 +228,8 @@ function truncateLine(line, width, ascii = false) {
   }
 
   const ellipsis = ascii ? ELLIPSIS.ascii : ELLIPSIS.unicode;
-  const budget = width - ellipsis.length;
-  let out = "";
-  let used = 0;
-  let rest = line;
-
-  while (rest) {
-    const escape = rest.match(ESCAPE);
-    if (escape) {
-      out += escape[0];
-      rest = rest.slice(escape[0].length);
-      continue;
-    }
-    const char = String.fromCodePoint(rest.codePointAt(0));
-    const charCols = charWidth(char.codePointAt(0));
-    if (used + charCols > budget) {
-      break;
-    }
-    out += char;
-    used += charCols;
-    rest = rest.slice(char.length);
-  }
-
-  return out + RESET + ellipsis;
+  const { out, link } = cutToWidth(line, width - ellipsis.length);
+  return out + closeLink(link) + RESET + ellipsis;
 }
 
 function truncateLines(text, width, ascii = false) {
