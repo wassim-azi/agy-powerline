@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Opt-in fish-style path and branch shortening (`"fish": true`)**: abbreviate parent folders on `cwd` (composing with `depth` and keeping dot-directories like `.gemini` → `.g` and multi-codepoint emoji clusters intact) and slash-separated prefixes on `git` (`feature/auth/oauth-login` → `f/a/oauth-login`), exposed as **Fish style** in `configure` (#253)
 - **New Antigravity CLI 1.4.5 widgets**: added opt-in `cost` (`cost.total_usd`, `cost.estimated`), `agent` (`agent.name`), and `queue` (`pending_input_count`) widgets (#202)
 - **Approval & Mercurial status**: surfaced `tool_confirmation_pending` directly on `agentState` and read Mercurial branch names from `.hg/branch` when `vcs.type` is `"hg"` (#202)
 - **Expanded debug dumps**: included `agent`, `cost`, `model.effort`, `pending_input_count`, `tool_confirmation_pending`, and `quota.*.remaining_amount` in `AGY_POWERLINE_DEBUG=1` payload dumps (#202)

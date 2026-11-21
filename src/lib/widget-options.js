@@ -211,6 +211,18 @@ function editFields(widget, config = {}, options = {}) {
       help: "Keeps the root and last folders, replacing the middle with an ellipsis.",
     });
   }
+  if (widget.id === "cwd" || widget.id === "git") {
+    fields.push({
+      key: "fish",
+      label: "Fish style",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help:
+        widget.id === "cwd"
+          ? "Abbreviates parent folders to their first letter (~/D/r/app)."
+          : "Abbreviates branch prefixes before / to their first letter (f/a/login).",
+    });
+  }
   if (MAX_WIDTH_WIDGETS.has(widget.id)) {
     fields.push({
       key: "maxWidth",

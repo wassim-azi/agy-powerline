@@ -16,6 +16,8 @@ const {
   limitWidth,
   isValidMaxWidth,
   shortenPath,
+  fishPath,
+  fishBranch,
   isValidDepth,
   visibleWidth,
   charWidth,
@@ -492,6 +494,60 @@ function testWidgetWidthAndDepth() {
       output
     );
   }
+
+  record(
+    "fishPath abbreviates parent folders, keeps hidden-dir dots, preserves emoji/graphemes and UNC/drive roots, and composes with depth",
+    fishPath("~/Documents/repos/.gemini/agy-powerline") === "~/D/r/.g/agy-powerline" &&
+      fishPath("~/Documents/repos/agy-powerline", 2) === "~/D/repos/agy-powerline" &&
+      fishPath("/usr/local/bin") === "/u/l/bin" &&
+      fishPath("C:\\Users\\wassim\\projects\\app") === "C:\\U\\w\\p\\app" &&
+      fishPath("\\\\server\\share\\alpha\\beta\\gamma") === "\\\\server\\share\\a\\b\\gamma" &&
+      fishPath("//server/share/alpha/beta/gamma") === "//server/share/a/b/gamma" &&
+      fishPath("~/🚀-launch/👩‍💻-work/app") === "~/🚀/👩‍💻/app" &&
+      fishPath("~/e\u0301clair/sub") === "~/e\u0301/sub" &&
+      fishPath("~/only-one") === "~/only-one" &&
+      fishPath("~") === "~" &&
+      fishPath("/") === "/"
+  );
+
+  record(
+    "fishBranch abbreviates slash-separated prefixes and preserves emoji/dot prefixes",
+    fishBranch("feature/auth/oauth-login") === "f/a/oauth-login" &&
+      fishBranch("fix/🚀-ui/button") === "f/🚀/button" &&
+      fishBranch(".github/workflows/ci") === ".g/w/ci" &&
+      fishBranch("main") === "main"
+  );
+
+  for (const layout of LAYOUT_ORDER) {
+    const cwdData = {
+      ...fixture("antigravity-1.3.0.json"),
+      cwd: "/Users/someone/Documents/repos/.gemini/agy-powerline",
+    };
+    const fishCwd = render(cwdData, [{ id: "cwd", fish: true }], { layout });
+    const fishDepthCwd = render(cwdData, [{ id: "cwd", fish: true, depth: 2 }], { layout });
+    const gitData = {
+      ...fixture("antigravity-1.3.0.json"),
+      vcs: { type: "git", branch: "feature/auth/oauth-login", dirty: true },
+    };
+    const fishGit = render(gitData, [{ id: "git", fish: true }], { layout });
+    const fishGitCapped = render(gitData, [{ id: "git", fish: true, maxWidth: 10 }], { layout });
+    record(
+      `${layout} renders fish: true for cwd and git without disturbing dirty markers`,
+      fishCwd.includes("/U/s/D/r/.g/agy-powerline") &&
+        fishDepthCwd.includes("/U/s/D/r/.gemini/agy-powerline") &&
+        fishGit.includes("f/a/oauth-login") &&
+        (layout === "pills" ? fishGit.includes("●") : fishGit.includes("*")) &&
+        fishGitCapped.includes("f/a/oauth…"),
+      `${fishCwd} | ${fishDepthCwd} | ${fishGit} | ${fishGitCapped}`
+    );
+  }
+
+  const cwdFishField = widgetEditFields({ id: "cwd" }).find((f) => f.key === "fish");
+  const gitFishField = widgetEditFields({ id: "git" }).find((f) => f.key === "fish");
+  record(
+    "configure editFields exposes fish toggle for cwd and git",
+    Boolean(cwdFishField && gitFishField && cwdFishField.show(true) === "on")
+  );
 
   const cjk = limitWidth("A猫BC", { maxWidth: 4 });
   const cjkAscii = limitWidth("A猫BC", { maxWidth: 4 }, true);
