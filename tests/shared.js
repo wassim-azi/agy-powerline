@@ -24,6 +24,7 @@ registerSuite("i18n", "./shared/i18n.test");
 registerSuite("git", "./shared/git.test");
 registerSuite("usage", "./shared/usage.test");
 registerSuite("session time", "./shared/session-time.test");
+registerSuite("syscalls", "./shared/syscalls.test");
 registerSuite("problem log", "./shared/log.test");
 registerSuite("payload dump", "./shared/payload-dump.test");
 registerSuite("cli", "./shared/cli.test");
