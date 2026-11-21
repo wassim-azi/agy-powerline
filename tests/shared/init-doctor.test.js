@@ -82,7 +82,11 @@ function fakeRl(answers) {
 async function testSymbolsQuestion() {
   const { askSymbols, askChoices } = require("../../src/cli/init");
   const saved = process.env.AGY_POWERLINE_ASCII;
+  const savedNoColor = process.env.NO_COLOR;
+  const savedColor = process.env.AGY_POWERLINE_COLOR;
   delete process.env.AGY_POWERLINE_ASCII;
+  delete process.env.NO_COLOR;
+  process.env.AGY_POWERLINE_COLOR = "truecolor";
   const log = console.log;
   try {
     const ask = async (answer) => {
@@ -145,6 +149,16 @@ async function testSymbolsQuestion() {
       delete process.env.AGY_POWERLINE_ASCII;
     } else {
       process.env.AGY_POWERLINE_ASCII = saved;
+    }
+    if (savedNoColor === undefined) {
+      delete process.env.NO_COLOR;
+    } else {
+      process.env.NO_COLOR = savedNoColor;
+    }
+    if (savedColor === undefined) {
+      delete process.env.AGY_POWERLINE_COLOR;
+    } else {
+      process.env.AGY_POWERLINE_COLOR = savedColor;
     }
   }
 

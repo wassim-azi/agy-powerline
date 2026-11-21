@@ -270,7 +270,7 @@ function killProcessTree(pid) {
   }
   if (process.platform === "win32") {
     try {
-      execFileSync("taskkill", ["/T", "/F", "/PID", String(pid)], {
+      execFileSync("taskkill.exe", ["/F", "/T", "/PID", String(pid)], {
         stdio: "ignore",
         windowsHide: true,
         timeout: 2000,
@@ -335,6 +335,9 @@ function runExecWorker(data) {
       windowsHide: true,
       stdio: [input === undefined ? "ignore" : "pipe", "pipe", "ignore"],
     });
+    // The caller gets a second chance to terminate the shell if this worker
+    // exits while Windows is still unwinding its process tree.
+    Atomics.store(sab, 1, child.pid || 0);
   } catch (err) {
     finish({ status: null, signal: null, errorCode: err?.code, timedOut: false, stdout: "" });
     return;
@@ -408,7 +411,7 @@ function runExecCommand(cmd, cwd, timeoutMs, input) {
   if (!workerThreads) {
     return { status: null, signal: null, timedOut: false, stdout: "" };
   }
-  const sab = new Int32Array(new SharedArrayBuffer(4));
+  const sab = new Int32Array(new SharedArrayBuffer(8));
   const { port1, port2 } = new workerThreads.MessageChannel();
   const worker = new workerThreads.Worker(__filename, {
     workerData: {
@@ -424,17 +427,24 @@ function runExecCommand(cmd, cwd, timeoutMs, input) {
   });
   worker.unref();
 
+  let result;
   try {
     const waitStatus = Atomics.wait(sab, 0, 0, timeoutMs + WORKER_WAIT_HEADROOM_MS);
     const msg = workerThreads.receiveMessageOnPort(port2)?.message;
     if (msg) {
-      return msg;
+      result = msg;
+      return result;
     }
     if (waitStatus === "timed-out") {
-      return { status: null, signal: "SIGTERM", timedOut: true, stdout: "" };
+      result = { status: null, signal: "SIGTERM", timedOut: true, stdout: "" };
+      return result;
     }
-    return { status: null, signal: null, timedOut: false, stdout: "" };
+    result = { status: null, signal: null, timedOut: false, stdout: "" };
+    return result;
   } finally {
+    if (result?.timedOut) {
+      killProcessTree(Atomics.load(sab, 1));
+    }
     try {
       port2.close();
     } catch {

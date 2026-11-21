@@ -100,11 +100,21 @@ function registerSuites(groupName, suites) {
     return;
   }
 
+  const parallelSuites = suites.filter(([, , options]) => !options?.serial);
+  const serialSuites = suites.filter(([, , options]) => options?.serial);
+
   describe(groupName, { concurrency: resolveConcurrency() }, () => {
-    for (const [name, modulePath] of suites) {
+    for (const [name, modulePath] of parallelSuites) {
       registerSuite(name, modulePath, { isolated: true });
     }
   });
+
+  // Windows can deny taskkill while another worker is launching processes in
+  // the same job. Keep process-tree cleanup assertions isolated without
+  // giving up parallelism for the independent suites.
+  for (const [name, modulePath] of serialSuites) {
+    registerSuite(name, modulePath, { isolated: true });
+  }
 }
 
 module.exports = { registerSuite, registerSuites };

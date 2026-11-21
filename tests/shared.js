@@ -14,7 +14,7 @@ registerSuites("shared", [
   ["cli", "./shared/cli.test"],
   ["init and doctor", "./shared/init-doctor.test"],
   ["install safety", "./shared/install-safety.test"],
-  ["exec options", "./shared/exec-options.test"],
+  ["exec options", "./shared/exec-options.test", { serial: true }],
   ["fuzz", "./shared/fuzz.test"],
   ["configurator screens", "./shared/tui.test"],
   ["fit to terminal", "./shared/fit.test"],

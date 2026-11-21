@@ -337,7 +337,7 @@ function testUsageStderr() {
 
 // An exec command handed the payload may never read it, exit before reading
 // it, or hang: none of these may break or stall the bar.
-function testExecPayloadFailures() {
+async function testExecPayloadFailures() {
   const { clearExecCache } = require("../../src/lib/shared");
   // Bigger than a pipe buffer, so the write is still going when the command exits.
   const data = { ...sampleData(), cwd: process.cwd(), filler: "x".repeat(200000) };
@@ -377,7 +377,7 @@ function testExecPayloadFailures() {
     );
   }
   clearExecCache();
-  testBundledExecTreeTimeout();
+  await testBundledExecTreeTimeout();
 }
 
 function isPidAlive(pid) {
@@ -392,9 +392,19 @@ function isPidAlive(pid) {
   }
 }
 
+async function waitForPidsExit(pids, timeoutMs = 1000) {
+  const deadline = Date.now() + timeoutMs;
+  let alive = pids.filter(isPidAlive);
+  while (alive.length && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    alive = pids.filter(isPidAlive);
+  }
+  return alive;
+}
+
 // A bundled statusline refresh must not stall on grandchildren that keep stdout
 // open or leave those children alive after timeout.
-function testBundledExecTreeTimeout() {
+async function testBundledExecTreeTimeout() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "agy-exec-tree-runtime-"));
   const installDir = path.join(root, ".agy-powerline");
   const script = path.join(root, "spawn-tree.js");
@@ -444,7 +454,7 @@ function testBundledExecTreeTimeout() {
     if (recorded) {
       pids = JSON.parse(fs.readFileSync(pidFile, "utf8"));
     }
-    const stillRunning = pids.filter((pid) => isPidAlive(pid));
+    const stillRunning = await waitForPidsExit(pids);
     const entries = readLog(path.join(installDir, LOG_NAME));
 
     record(
@@ -465,6 +475,7 @@ function testBundledExecTreeTimeout() {
         // Already exited.
       }
     }
+    await waitForPidsExit(pids);
     fs.rmSync(root, { recursive: true, force: true });
   }
 }
@@ -517,7 +528,7 @@ async function run() {
   testGitLookup();
   testWrongPayloadTypes();
   testBadGradients();
-  testExecPayloadFailures();
+  await testExecPayloadFailures();
   testUsageStderr();
   await Promise.all([testConcurrentExecCache(), testStdoutEpipe(), testStdoutErrorIsLogged()]);
   testRuntimeRenderOverrides();
