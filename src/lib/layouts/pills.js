@@ -576,11 +576,28 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       );
 
     case "cost": {
-      const text = formatCost(session.cost);
+      const text = formatCost(session.cost, widget, ascii, session.lang);
       if (!text) {
         return null;
       }
-      return pill(colors.meta, lbl(text));
+      const budget = widget?.budget;
+      const pct =
+        typeof budget === "number" && Number.isFinite(budget) && budget > 0
+          ? (session.cost.totalUsd * 100) / budget
+          : null;
+      if (pct === null) {
+        return pill(colors.meta, lbl(text));
+      }
+      // A budget alerts like the context and token usage widgets: caution, then danger.
+      const thresh = resolveContextThresholds(widget, config);
+      const level = pct >= thresh.crit ? "crit" : pct >= thresh.warn ? "warn" : "normal";
+      const color = contextColor(pct, colors.meta, false, {
+        crit: thresh.crit,
+        warn: thresh.warn,
+        critColor: colors.warn,
+        warnColor: colors.caution,
+      });
+      return pill(color, lbl(text), !ascii && shouldBlink(level, thresh.blink));
     }
 
     case "tokensToday":

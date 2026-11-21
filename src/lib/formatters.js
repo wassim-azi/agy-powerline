@@ -668,16 +668,35 @@ function formatMode(approval, vim) {
   return [approval === "default" ? "" : approval, vim].filter(Boolean).join(", ");
 }
 
-function formatCost(cost) {
+function formatUsd(value) {
+  const usd = Number(value);
+  if (!Number.isFinite(usd) || usd < 0) {
+    return "";
+  }
+  if (usd > 0 && usd < 0.0001) {
+    return "<$0.0001";
+  }
+  return usd > 0 && usd < 0.00995 ? `$${usd.toFixed(4)}` : `$${usd.toFixed(2)}`;
+}
+
+function formatCost(cost, widget = {}, ascii = false, lang) {
   if (!cost || typeof cost !== "object") {
     return "";
   }
   const usd = Number(cost.totalUsd);
-  if (!Number.isFinite(usd) || usd < 0) {
+  const amount = formatUsd(usd);
+  if (!amount) {
     return "";
   }
-  const amount = usd > 0 && usd < 0.01 ? `$${usd.toFixed(4)}` : `$${usd.toFixed(2)}`;
-  return cost.estimated ? `~${amount}` : amount;
+  const total = cost.estimated ? `~${amount}` : amount;
+  const sub = widget?.split === true && cost.subagentUsd > 0 ? formatUsd(cost.subagentUsd) : "";
+  const withSub = sub ? `${total}${ascii ? ", " : " · "}${t("subagents", lang)} ${sub}` : total;
+  const budget = widget?.budget;
+  const pct =
+    typeof budget === "number" && Number.isFinite(budget) && budget > 0
+      ? (usd * 100) / budget
+      : null;
+  return pct === null ? withSub : `${withSub} (${Math.round(pct)}%)`;
 }
 
 // Cuts text to `max` terminal columns, ending with an ellipsis when cut.

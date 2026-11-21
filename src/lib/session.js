@@ -182,10 +182,11 @@ function currentUserAndHost() {
 }
 
 function extractCost(raw) {
-  if (!raw || typeof raw !== "object" || raw.total_usd == null) {
+  const rawTotal = raw && typeof raw === "object" ? (raw.total_usd ?? raw.total_cost_usd) : null;
+  if (rawTotal == null) {
     return null;
   }
-  const totalUsd = Number(raw.total_usd);
+  const totalUsd = Number(rawTotal);
   if (!Number.isFinite(totalUsd) || totalUsd < 0 || totalUsd > Number.MAX_SAFE_INTEGER) {
     return null;
   }

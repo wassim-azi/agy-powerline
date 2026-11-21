@@ -8,7 +8,7 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { record } = require("../helpers");
-const { renderStatusline, defaultConfig, sampleData } = require("../../src/lib/shared");
+const { renderStatusline, defaultConfig, sampleData, BLINK } = require("../../src/lib/shared");
 const {
   shortModelName,
   shouldBlink,
@@ -1247,6 +1247,18 @@ function testContextCompactionLimit() {
     "config schema documents compactionLimit",
     buildConfigSchema().definitions.widget.properties.compactionLimit?.type === "number"
   );
+  const costFields = widgetEditFields({ id: "cost" });
+  const costSplitField = costFields.find(({ key }) => key === "split");
+  const costBudgetField = costFields.find(({ key }) => key === "budget");
+  record(
+    "configure exposes split and budget options on cost widget",
+    Boolean(costSplitField) &&
+      costSplitField.show(undefined) === "off" &&
+      costSplitField.show(true) === "on" &&
+      Boolean(costBudgetField) &&
+      costBudgetField.show(undefined) === "off" &&
+      costBudgetField.show(5) === "$5.00"
+  );
 }
 
 function testSplitTokens() {
@@ -1360,14 +1372,62 @@ function testAntigravityLatestPayloadFields() {
       [{ id: "cost" }],
       { layout }
     );
+    const tinyOut = render(
+      { ...real, cost: { total_usd: 0.00003, estimated: false } },
+      [{ id: "cost" }],
+      { layout }
+    );
+    const boundaryOut = render(
+      { ...real, cost: { total_usd: 0.00996, estimated: false } },
+      [{ id: "cost" }],
+      { layout }
+    );
+    const splitOut = render(
+      { ...real, cost: { total_usd: 0.4213, subagent_usd: 0.126, estimated: false } },
+      [{ id: "cost", split: true }],
+      { layout }
+    );
+    const splitAsciiOut = render(
+      { ...real, cost: { total_usd: 0.4213, subagent_usd: 0.126, estimated: false } },
+      [{ id: "cost", split: true }],
+      { layout, ascii: true }
+    );
+    const budgetOut = render(
+      { ...real, cost: { total_usd: 4.5, subagent_usd: 1.2, estimated: false } },
+      [{ id: "cost", split: true, budget: 5, blink: true }],
+      { layout }
+    );
+    const budgetColored = renderStatusline(
+      { ...real, terminal_width: 0, cost: { total_usd: 4.6, estimated: false } },
+      { ...defaultConfig(), layout, widgets: [{ id: "cost", budget: 5, blink: true }] },
+      { color: "truecolor" }
+    );
     const hiddenCost = render({ ...real, cost: undefined }, [{ id: "cost" }], { layout });
     record(
-      `${layout} cost renders total_usd, ~estimated, sub-cent precision, and auto-hides when missing`,
+      `${layout} cost renders total_usd, ~estimated, <$0.0001, boundary rounding, split subagent_usd, budget %, and auto-hides when missing`,
       costOut.includes("$0.42") &&
+        !costOut.includes("subagents") &&
         estOut.includes("~$0.42") &&
         microOut.includes("$0.0042") &&
+        tinyOut.includes("<$0.0001") &&
+        boundaryOut.includes("$0.01") &&
+        !boundaryOut.includes("$0.0100") &&
+        splitOut.includes("$0.42 · subagents $0.13") &&
+        splitAsciiOut.includes("$0.42, subagents $0.13") &&
+        budgetOut.includes("$4.50 · subagents $1.20 (90%)") &&
+        budgetColored.includes(BLINK) &&
         hiddenCost.trim() === "",
-      JSON.stringify({ costOut, estOut, microOut, hiddenCost })
+      JSON.stringify({
+        costOut,
+        estOut,
+        microOut,
+        tinyOut,
+        boundaryOut,
+        splitOut,
+        splitAsciiOut,
+        budgetOut,
+        hiddenCost,
+      })
     );
 
     const agentOut = render({ ...real, agent: { name: "security-reviewer" } }, [{ id: "agent" }], {
