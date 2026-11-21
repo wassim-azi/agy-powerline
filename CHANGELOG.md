@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Context percentage fallback**: ignore null, boolean, and empty or whitespace-only percentage values so valid remaining percentages or current token usage are used instead (#245)
 - **Gemini & Argon model pool matching in `quota`**: inspect both `model.display_name` and `model.id` and recognize unprefixed Gemini codenames (`argon`, `hydrogen`, `neon`, `carbon`) in `tightestQuota()` so non-prefixed display names do not fall back to the `3p-*` quota pool (#242)
 - **Fast open-stdin payload completion**: resolve `readStdin()` in `statusline.js` as soon as a complete JSON object arrives instead of waiting out the 1000 ms open-stdin timeout (#218)
 - **3P 5h quota in live preview and demo data**: removed `disabled: true` from `quota["3p-5h"]` in `sampleData()` so `thirdPartyFiveHour` (`🧪 3P 5h`) renders in `configure`, `render --demo`, `/widgets/`, and the browser configurator, and split the third-party and Argon rows in the `quotas` preset so all 10 widgets fit within 80 columns (#234)
