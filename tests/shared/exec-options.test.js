@@ -103,6 +103,45 @@ function checkPayload() {
       widgetCacheKey({ cmd: "x", colors: true }, "/"),
     ]).size === 3
   );
+
+  record(
+    "payload cache keys include the session payload JSON when payload is enabled",
+    new Set([
+      widgetCacheKey({ cmd: "x", payload: true }, "/"),
+      widgetCacheKey({ cmd: "x", payload: true }, "/", '{"model":{"id":"a"}}'),
+      widgetCacheKey({ cmd: "x", payload: true }, "/", '{"model":{"id":"b"}}'),
+    ]).size === 3 &&
+      widgetCacheKey({ cmd: "x" }, "/", '{"model":{"id":"a"}}') ===
+        widgetCacheKey({ cmd: "x" }, "/", '{"model":{"id":"b"}}')
+  );
+
+  clearExecCache();
+  const cachedPayloadWidget = [
+    {
+      id: "exec",
+      cmd: readPayload("p.model.id"),
+      payload: true,
+      interval: 60,
+      timeout: 5000,
+    },
+  ];
+  const firstPayloadOut = renderStatusline(
+    { ...JSON.parse(PAYLOAD), cwd: process.cwd(), model: { id: "gemini-4-argon" } },
+    { ...defaultConfig(), widgets: cachedPayloadWidget },
+    RUN
+  );
+  const secondPayloadOut = renderStatusline(
+    { ...JSON.parse(PAYLOAD), cwd: process.cwd(), model: { id: "gemini-4-hydrogen" } },
+    { ...defaultConfig(), widgets: cachedPayloadWidget },
+    RUN
+  );
+  record(
+    'cached exec widgets with "payload": true do not collide across different session payloads',
+    firstPayloadOut.includes("gemini-4-argon") &&
+      secondPayloadOut.includes("gemini-4-hydrogen") &&
+      !secondPayloadOut.includes("gemini-4-argon"),
+    `${firstPayloadOut} / ${secondPayloadOut}`
+  );
 }
 
 function checkColors() {

@@ -215,8 +215,12 @@ function execPayloadJson(payload) {
 }
 
 // Widgets that share a command but not its options must not share its output.
-function widgetCacheKey(widget, cwd) {
-  const variant = `${widget.payload === true ? "\0payload" : ""}${widget.colors === true ? "\0colors" : ""}`;
+function widgetCacheKey(widget, cwd, execPayload = "") {
+  const payloadVariant =
+    widget.payload === true
+      ? `\0payload${typeof execPayload === "string" && execPayload ? `:${execPayload}` : ""}`
+      : "";
+  const variant = `${payloadVariant}${widget.colors === true ? "\0colors" : ""}`;
   return cacheKey(`${String(widget.cmd).trim()}${variant}`, cwd);
 }
 
@@ -231,7 +235,7 @@ function execWidgetOutput(widget, session = {}) {
     // Fitting the bar to the terminal can draw a row several times; a command
     // still runs at most once per refresh, even with "interval": 0.
     const memo = session.execMemo;
-    const key = widgetCacheKey(widget, session.cwd || process.cwd());
+    const key = widgetCacheKey(widget, session.cwd || process.cwd(), session.execPayload);
     if (memo?.has(key)) {
       return memo.get(key);
     }
@@ -441,7 +445,7 @@ function runExecWidget(widget, session = {}) {
   }
 
   const cwd = session.cwd || process.cwd();
-  const key = widgetCacheKey(widget, cwd);
+  const key = widgetCacheKey(widget, cwd, session.execPayload);
   const now = Date.now();
   const input = widget.payload === true ? `${session.execPayload || "{}"}\n` : undefined;
 
