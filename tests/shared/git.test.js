@@ -15,6 +15,8 @@ const {
   STATUS_CACHE_NAME,
   clearGitDetailsCache,
   hasRiskyRepoConfig,
+  hasPlantedGitBinary,
+  getGitSync,
   resolveGit,
   setGitTimeouts,
 } = require("../../src/lib/git");
@@ -71,6 +73,23 @@ function countGitCalls(fn) {
       calls += 1;
     }
     return original(file, ...rest);
+  };
+  try {
+    fn();
+  } finally {
+    childProcess.execFileSync = original;
+  }
+  return calls;
+}
+
+function captureGitCalls(fn) {
+  const original = childProcess.execFileSync;
+  const calls = [];
+  childProcess.execFileSync = (file, args, options, ...rest) => {
+    if (file === "git") {
+      calls.push({ args, env: options?.env });
+    }
+    return original(file, args, options, ...rest);
   };
   try {
     fn();
@@ -300,6 +319,59 @@ function testGitDetails(root, git) {
     "so does a repo config that includes another file",
     hasRiskyRepoConfig(path.join(included, ".git"), path.join(included, ".git"))
   );
+
+  const riskyCases = [
+    ["same-line filter section", '[core] bare = false [filter "evil"] clean = true\n'],
+    ["promisor setting", '[remote "origin"]\npromisor = true\n'],
+    ["partialclone setting", "[extensions]\npartialclone = origin\n"],
+    ["sshCommand setting", "[core]\nsshCommand = echo unsafe\n"],
+  ];
+  for (const [label, config] of riskyCases) {
+    const dir = path.join(root, `risky-${label.replace(/[^a-z]+/gi, "-")}`);
+    fs.mkdirSync(dir);
+    write(path.join(dir, "config"), config);
+    record(`risky config detects ${label}`, hasRiskyRepoConfig(dir, dir));
+  }
+
+  record("getGitSync handles a missing Git directory", getGitSync(null, "main").ahead === 0);
+
+  const syncRepo = path.join(root, "promisor-sync");
+  const syncGitDir = path.join(syncRepo, ".git");
+  fs.mkdirSync(path.join(syncGitDir, "refs", "heads"), { recursive: true });
+  fs.mkdirSync(path.join(syncGitDir, "refs", "remotes", "origin"), { recursive: true });
+  write(path.join(syncGitDir, "HEAD"), "ref: refs/heads/main\n");
+  write(path.join(syncGitDir, "refs", "heads", "main"), "a".repeat(40));
+  write(path.join(syncGitDir, "refs", "remotes", "origin", "main"), "b".repeat(40));
+  write(
+    path.join(syncGitDir, "config"),
+    '[branch "main"]\n\tremote = origin\n\tmerge = refs/heads/main\n[remote "origin"]\n\tpromisor = true\n'
+  );
+  record(
+    "getGitSync skips Git for a promisor repository",
+    countGitCalls(() => getGitSync(syncGitDir, "main", syncRepo)) === 0
+  );
+
+  const plantedDir = path.join(root, "planted-git");
+  fs.mkdirSync(plantedDir);
+  for (const name of ["git.exe", "git.com", "git.cmd", "git.bat"]) {
+    write(path.join(plantedDir, name), "");
+  }
+  record(
+    "Windows planted Git executable detection covers CreateProcess extensions",
+    hasPlantedGitBinary(plantedDir)
+  );
+
+  if (process.platform === "win32") {
+    write(
+      path.join(syncGitDir, "config"),
+      '[branch "main"]\n\tremote = origin\n\tmerge = refs/heads/main\n'
+    );
+    write(path.join(syncRepo, "git.exe"), "");
+    record(
+      "getGitSync and getGitDetails skip a workspace-planted Git executable",
+      countGitCalls(() => render(syncRepo, ["gitFiles"])) === 0
+    );
+  }
 }
 
 // A rebase, merge, cherry-pick, revert or bisect in progress, on real repos.
@@ -480,6 +552,31 @@ async function run() {
     record(
       "lines layout shows ahead/behind",
       /⇡2 ⇣1/.test(render(payload, { ...defaultConfig(), layout: "lines" }))
+    );
+
+    const secureCalls = captureGitCalls(() =>
+      renderStatusline(
+        payload,
+        {
+          ...defaultConfig(),
+          widgets: [{ id: "git" }, { id: "gitChanges" }, { id: "gitFiles" }],
+        },
+        { color: "none", env: {} }
+      )
+    );
+    record(
+      "every Git subprocess disables network protocols, lazy fetch and interactive prompts",
+      secureCalls.length >= 3 &&
+        secureCalls.every(
+          ({ args, env }) =>
+            args.includes("protocol.allow=never") &&
+            env?.GIT_NO_LAZY_FETCH === "1" &&
+            env?.GIT_OPTIONAL_LOCKS === "0" &&
+            env?.GIT_TERMINAL_PROMPT === "0" &&
+            env?.GCM_INTERACTIVE === "Never" &&
+            env?.NoDefaultCurrentDirectoryInExePath === "1"
+        ),
+      JSON.stringify(secureCalls.map(({ args, env }) => ({ args, env })))
     );
 
     const sameBranch = render({ ...payload, vcs: { type: "git", branch: "main" } });

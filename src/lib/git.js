@@ -60,7 +60,7 @@ function findGitDir(cwd) {
 
       if (stat.isFile()) {
         const text = fs.readFileSync(gitPath, "utf8");
-        const match = text.match(/^gitdir:\s*(.+)$/m);
+        const match = text.match(/^gitdir:[ \t]*(\S.*)$/m);
 
         if (match) {
           return path.resolve(dir, match[1].trim());
@@ -205,7 +205,7 @@ function getGitInfo(cwd) {
       return null;
     }
 
-    const sync = getGitSync(gitDir, branch);
+    const sync = getGitSync(gitDir, branch, cwd);
 
     return {
       branch,
@@ -369,13 +369,22 @@ function saveSync(file, key, sync) {
   }
 }
 
-function getGitSync(gitDir, branch) {
+function getGitSync(gitDir, branch, cwd) {
   if (!gitDir || !isSafeBranchName(branch)) {
     return { ahead: 0, behind: 0 };
   }
 
   try {
+    cwd = cwd || path.dirname(gitDir);
     const commonDir = commonGitDir(gitDir);
+    if (hasRiskyRepoConfig(gitDir, commonDir)) {
+      logWarning("GIT_CONFIG_SKIPPED");
+      return { ahead: 0, behind: 0 };
+    }
+    if (process.platform === "win32" && hasPlantedGitBinary(cwd)) {
+      return { ahead: 0, behind: 0 };
+    }
+
     const localHash = readRef(commonDir, `refs/heads/${branch}`);
     const upstream = upstreamRef(commonDir, branch);
 
@@ -401,15 +410,24 @@ function getGitSync(gitDir, branch) {
     const out = execFileSync(
       "git",
       // The branch's own upstream: during a rebase HEAD is detached and has none.
-      ["rev-list", "--left-right", "--count", `${branch}...${branch}@{upstream}`, "--"],
+      [
+        "-c",
+        "protocol.allow=never",
+        "rev-list",
+        "--left-right",
+        "--count",
+        `${branch}...${branch}@{upstream}`,
+        "--",
+      ],
       {
-        cwd: path.dirname(gitDir),
+        cwd,
         timeout: timeouts.sync,
         stdio: ["ignore", "pipe", "ignore"],
         encoding: "utf8",
         // Antigravity may run the statusline without a console; without this,
         // Windows flashes a window for every git call.
         windowsHide: true,
+        env: safeGitEnv(),
       }
     ).trim();
 
@@ -456,6 +474,8 @@ const STATUS_TTL_MS = 5000;
 const STATUS_ARGS = [
   "--no-optional-locks",
   "-c",
+  "protocol.allow=never",
+  "-c",
   "core.fsmonitor=false",
   "-c",
   "core.untrackedCache=false",
@@ -466,6 +486,8 @@ const STATUS_ARGS = [
 ];
 const DIFF_ARGS = [
   "--no-optional-locks",
+  "-c",
+  "protocol.allow=never",
   "-c",
   "core.fsmonitor=false",
   "diff",
@@ -481,7 +503,34 @@ const DIFF_ARGS = [
 // and diff run the programs it names: filters on changed files, diff drivers,
 // fsmonitor hooks, and anything an included file adds. A repo config with any
 // of these is read for SHA, stash and worktree only; git itself isn't started.
-const RISKY_CONFIG = /^\s*(\[\s*(filter|include|includeif|diff)\b|fsmonitor\s*=)/im;
+const RISKY_CONFIG =
+  /(\[\s*(filter|include|includeif|diff)\b|(?:^|\s)(fsmonitor|promisor|partialclone|sshcommand)\s*=)/im;
+
+const PLANTED_GIT_BINARIES = ["git.exe", "git.com", "git.cmd", "git.bat"];
+
+function hasPlantedGitBinary(cwd) {
+  if (typeof cwd !== "string" || !cwd) {
+    return false;
+  }
+  return PLANTED_GIT_BINARIES.some((name) => {
+    try {
+      return fs.statSync(path.join(cwd, name)).isFile();
+    } catch {
+      return false;
+    }
+  });
+}
+
+function safeGitEnv() {
+  return {
+    ...process.env,
+    GIT_NO_LAZY_FETCH: "1",
+    GIT_OPTIONAL_LOCKS: "0",
+    GIT_TERMINAL_PROMPT: "0",
+    GCM_INTERACTIVE: "Never",
+    NoDefaultCurrentDirectoryInExePath: "1",
+  };
+}
 
 const statusMemory = new Map();
 
@@ -575,6 +624,7 @@ function runGitDetail(cwd, args) {
       encoding: "utf8",
       maxBuffer: 16 * 1024 * 1024,
       windowsHide: true,
+      env: safeGitEnv(),
     });
   } catch (err) {
     if (err.code === "ETIMEDOUT" || err.signal === "SIGTERM") {
@@ -668,6 +718,9 @@ function getGitDetails(cwd, needs = {}) {
     const wantsGit = needs.status || (needs.diff && commit);
     if (wantsGit && hasRiskyRepoConfig(gitDir, commonDir)) {
       logWarning("GIT_CONFIG_SKIPPED");
+      return details;
+    }
+    if (wantsGit && process.platform === "win32" && hasPlantedGitBinary(cwd)) {
       return details;
     }
 
@@ -819,6 +872,7 @@ module.exports = {
   STATUS_ARGS,
   DIFF_ARGS,
   hasRiskyRepoConfig,
+  hasPlantedGitBinary,
   parseStatus,
   parseShortstat,
   getGitDetails,
