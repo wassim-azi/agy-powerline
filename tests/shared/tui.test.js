@@ -823,6 +823,21 @@ async function testSettingsInteractions() {
       ovBack.saved.overflow === "fit" &&
       ovReset.saved.overflow === "fit"
   );
+
+  // #247: Backspace in text input deletes whole grapheme clusters (ZWJ, skin tone, VS16, combining mark).
+  const bsSteps = ["\r", DOWN, DOWN, "\r"];
+  const afterOne = await runConfigureKeys(
+    { widgets: [{ id: "customText", text: "a👩\u200d💻👍🏽❤️e\u0301" }] },
+    [...bsSteps, "\x7f", "\r", "\x1b"]
+  );
+  const afterFour = await runConfigureKeys(
+    { widgets: [{ id: "customText", text: "a👩\u200d💻👍🏽❤️e\u0301" }] },
+    [...bsSteps, "\x7f", "\x7f", "\x7f", "\x7f", "\r", "\x1b"]
+  );
+  record(
+    "Widget text Backspace deletes whole grapheme clusters",
+    afterOne.saved.widgets[0].text === "a👩\u200d💻👍🏽❤️" && afterFour.saved.widgets[0].text === "a"
+  );
 }
 
 module.exports = { run };

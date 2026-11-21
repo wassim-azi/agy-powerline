@@ -582,17 +582,180 @@ function charWidth(code) {
 }
 
 function visibleWidth(text) {
-  const stripped = String(text).replace(
-    /\x1b\[[0-9;]*[a-zA-Z]|\x1b\]8;;[^\x1b\x07]*(\x07|\x1b\\)/g,
-    ""
-  );
+  // Each run between escapes is measured on its own, the way cutToWidth()
+  // walks it, so a cut line never measures wider than the cut allowed.
   let width = 0;
+  for (const run of String(text).split(ESCAPE_SPLIT)) {
+    width += textWidth(run);
+  }
+  return width;
+}
 
-  for (const char of stripped) {
-    width += charWidth(char.codePointAt(0));
+// Our own escapes, kept whole when text is measured or cut: SGR and other
+// CSI sequences, and OSC 8 hyperlinks (URL and terminator captured).
+const ESCAPE_SPLIT = /\x1b\[[0-?]*[ -/]*[@-~]|\x1b\]8;;[^\x1b\x07]*(?:\x07|\x1b\\)/;
+const ESCAPE_ALL = /\x1b\[[0-?]*[ -/]*[@-~]|\x1b\]8;;([^\x1b\x07]*)(\x07|\x1b\\)/g;
+
+// Characters that can join the one before them into a single grapheme
+// cluster. Text without any (most of the bar) is measured code point by
+// code point, which is both faster and the same result.
+const JOINING =
+  /\u200c|\u200d|[\p{M}\p{Emoji_Modifier}\u1100-\u11ff\ua960-\ua97f\uac00-\ud7a3\ud7b0-\ud7ff\uff9e\uff9f\u{1f1e6}-\u{1f1ff}\u{e0020}-\u{e007f}]/u;
+const EXTEND = /^(?:\u200c|[\p{M}\p{Emoji_Modifier}\u{e0020}-\u{e007f}\uff9e\uff9f])$/u;
+const PICTOGRAPHIC = /^\p{Extended_Pictographic}$/u;
+const EMOJI = /^\p{Emoji}$/u;
+
+function isRegional(code) {
+  return code >= 0x1f1e6 && code <= 0x1f1ff;
+}
+
+// Hangul jamo sequences (L V T) and precomposed syllables (LV, LVT).
+function hangulJoins(prev, code) {
+  const L = (c) => (c >= 0x1100 && c <= 0x115f) || (c >= 0xa960 && c <= 0xa97c);
+  const V = (c) => (c >= 0x1160 && c <= 0x11a7) || (c >= 0xd7b0 && c <= 0xd7c6);
+  const T = (c) => (c >= 0x11a8 && c <= 0x11ff) || (c >= 0xd7cb && c <= 0xd7fb);
+  const syllable = (c) => c >= 0xac00 && c <= 0xd7a3;
+  const LV = (c) => syllable(c) && (c - 0xac00) % 28 === 0;
+  const LVT = (c) => syllable(c) && (c - 0xac00) % 28 !== 0;
+  return (
+    (L(prev) && (L(code) || V(code) || syllable(code))) ||
+    ((LV(prev) || V(prev)) && (V(code) || T(code))) ||
+    ((LVT(prev) || T(prev)) && T(code))
+  );
+}
+
+// Splits text into grapheme clusters, following Unicode's rules (UAX #29)
+// for what a terminal shows as one character: a base with its combining
+// marks, variation selectors, skin tones and tags; emoji joined by ZWJ; flag
+// pairs; Hangul jamo. Not Intl.Segmenter: the first one built starts ICU,
+// about 16 ms (a sixth of a refresh), and its clusters change with Node's
+// ICU version. Prepended marks and Indic conjuncts stay split, which only
+// matters for where a cut may fall: their width is the sum either way.
+function splitGraphemes(text) {
+  const str = String(text ?? "");
+  if (!JOINING.test(str)) {
+    return Array.from(str);
   }
 
+  const clusters = [];
+  let cluster = "";
+  let first = 0;
+  let prev = 0;
+  let regionals = 0;
+  for (const char of str) {
+    const code = char.codePointAt(0);
+    const joins =
+      cluster !== "" &&
+      code >= 0x300 &&
+      (code === 0x200d ||
+        EXTEND.test(char) ||
+        (prev === 0x200d &&
+          PICTOGRAPHIC.test(char) &&
+          PICTOGRAPHIC.test(String.fromCodePoint(first))) ||
+        (isRegional(code) && isRegional(first) && regionals === 1) ||
+        hangulJoins(prev, code));
+    if (joins) {
+      cluster += char;
+    } else {
+      if (cluster) {
+        clusters.push(cluster);
+      }
+      cluster = char;
+      first = code;
+      regionals = 0;
+    }
+    if (isRegional(code)) {
+      regionals++;
+    }
+    prev = code;
+  }
+  if (cluster) {
+    clusters.push(cluster);
+  }
+  return clusters;
+}
+
+// Terminal columns for one grapheme cluster. Emoji sequences (a flag, a ZWJ
+// sequence, an emoji with VS16 or a keycap) draw as one wide glyph; anything
+// else keeps the sum of its code points, as before, so CJK, combining marks
+// and scripts the terminal draws piece by piece don't measure narrower.
+function graphemeWidth(cluster) {
+  const value = String(cluster ?? "");
+  const first = value.codePointAt(0);
+  if (first === undefined) {
+    return 0;
+  }
+  if (value.length === (first > 0xffff ? 2 : 1)) {
+    return charWidth(first);
+  }
+  if (
+    isRegional(first) ||
+    ((value.includes("\u200d") || value.includes("\ufe0f")) &&
+      EMOJI.test(String.fromCodePoint(first)))
+  ) {
+    return 2;
+  }
+  let width = 0;
+  for (const char of value) {
+    width += charWidth(char.codePointAt(0));
+  }
   return width;
+}
+
+// Width of text without escapes.
+function textWidth(text) {
+  let width = 0;
+  if (!JOINING.test(text)) {
+    for (const char of text) {
+      width += charWidth(char.codePointAt(0));
+    }
+    return width;
+  }
+  for (const cluster of splitGraphemes(text)) {
+    width += graphemeWidth(cluster);
+  }
+  return width;
+}
+
+// The start of `text` that fits in `budget` columns: grapheme clusters are
+// never split, and our escapes are kept whole. `link` is the terminator of
+// an OSC 8 hyperlink still open where the text was cut ("" if none), so the
+// caller can close it before adding an ellipsis.
+function cutToWidth(text, budget) {
+  const value = String(text);
+  let out = "";
+  let width = 0;
+  let link = "";
+  let last = 0;
+  const take = (run) => {
+    for (const cluster of splitGraphemes(run)) {
+      const w = graphemeWidth(cluster);
+      if (width + w > budget) {
+        return false;
+      }
+      out += cluster;
+      width += w;
+    }
+    return true;
+  };
+
+  for (const match of value.matchAll(ESCAPE_ALL)) {
+    if (!take(value.slice(last, match.index))) {
+      return { out, link };
+    }
+    out += match[0];
+    if (match[2] !== undefined) {
+      link = match[1] ? match[2] : "";
+    }
+    last = match.index + match[0].length;
+  }
+  take(value.slice(last));
+  return { out, link };
+}
+
+// Ends an open OSC 8 hyperlink with the terminator it was opened with.
+function closeLink(terminator) {
+  return terminator ? `\x1b]8;;${terminator}` : "";
 }
 
 // "+128 −34" as parts, so Lines can color each; zero counts are left out.
@@ -720,32 +883,8 @@ function clipText(text, max, ascii = false) {
     return value;
   }
   const ellipsis = ascii ? "..." : "…";
-  let out = "";
-  let width = 0;
-  let index = 0;
-  const escape = /\x1b(?:\[[0-?]*[ -/]*[@-~]|\]8;;[^\x1b\x07]*(?:\x07|\x1b\\))/y;
-  while (index < value.length) {
-    if (value[index] === "\x1b") {
-      escape.lastIndex = index;
-      const match = escape.exec(value);
-      if (match) {
-        out += match[0];
-        index += match[0].length;
-        continue;
-      }
-    }
-
-    const code = value.codePointAt(index);
-    const char = String.fromCodePoint(code);
-    const w = charWidth(code);
-    if (width + w > max - ellipsis.length) {
-      break;
-    }
-    out += char;
-    width += w;
-    index += char.length;
-  }
-  const clipped = out.trimEnd() + ellipsis;
+  const { out, link } = cutToWidth(value, max - ellipsis.length);
+  const clipped = out.trimEnd() + closeLink(link) + ellipsis;
   return /\x1b\[[0-?]*[ -/]*m/.test(clipped) ? `${clipped}\x1b[0m` : clipped;
 }
 
@@ -871,4 +1010,8 @@ module.exports = {
   label,
   charWidth,
   visibleWidth,
+  splitGraphemes,
+  graphemeWidth,
+  cutToWidth,
+  closeLink,
 };

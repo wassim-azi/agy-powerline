@@ -19,6 +19,8 @@ const {
   isValidDepth,
   visibleWidth,
   charWidth,
+  splitGraphemes,
+  clipText,
   formatTokens,
 } = require("../../src/lib/formatters");
 const { buildCustomTheme, THEMES } = require("../../src/lib/themes");
@@ -521,6 +523,49 @@ function testWidgetWidthAndDepth() {
       charWidth(0x00ad) === 1 &&
       charWidth(0x202f) === 1 &&
       limitWidth("ab\u200bcdef", { maxWidth: 5 }) === "ab\u200bcd…"
+  );
+
+  const coder = "👩\u200d💻";
+  const family = "👨\u200d👩\u200d👧\u200d👦";
+  record(
+    "visibleWidth counts emoji sequences and accented letters as one character",
+    visibleWidth(coder) === 2 &&
+      visibleWidth(family) === 2 &&
+      visibleWidth("🇫🇷") === 2 &&
+      visibleWidth("👍🏽") === 2 &&
+      visibleWidth("❤️") === 2 &&
+      visibleWidth("▶️") === 2 &&
+      visibleWidth("1️⃣") === 2 &&
+      visibleWidth("e\u0301") === 1 &&
+      visibleWidth("a\u200db") === 2 &&
+      visibleWidth(`\x1b[31m🇫🇷${coder}\x1b[0m`) === 4
+  );
+
+  record(
+    "splitGraphemes keeps emoji sequences, flags, accents and Hangul jamo whole",
+    JSON.stringify(splitGraphemes(`a${coder}🇫🇷🇩🇪👍🏽e\u0301\u1100\u1161\u11a8${family}`)) ===
+      JSON.stringify(["a", coder, "🇫🇷", "🇩🇪", "👍🏽", "e\u0301", "\u1100\u1161\u11a8", family]) &&
+      JSON.stringify(splitGraphemes("a\u200db🇫🇷🇩")) === JSON.stringify(["a\u200d", "b", "🇫🇷", "🇩"])
+  );
+
+  record(
+    "clipText never splits a grapheme cluster or leaves a dangling joiner",
+    clipText(`${coder}${coder}`, 3) === `${coder}…` &&
+      clipText(`${family}${family}`, 3) === `${family}…` &&
+      clipText("🇫🇷🇩🇪", 3) === "🇫🇷…" &&
+      clipText("👍🏽👍🏽", 3) === "👍🏽…" &&
+      clipText(`${coder}${coder}${coder}`, 5, true) === `${coder}...` &&
+      clipText(`${coder}${coder}`, 3, true) === "..." &&
+      clipText("e\u0301e\u0301e\u0301", 2) === "e\u0301…"
+  );
+
+  const url = "https://example.invalid";
+  record(
+    "clipText closes an open OSC 8 hyperlink before the ellipsis",
+    clipText(`\x1b]8;;${url}\x07abcdef\x1b]8;;\x07`, 4) === `\x1b]8;;${url}\x07abc\x1b]8;;\x07…` &&
+      clipText(`\x1b]8;;${url}\x1b\\abcdef\x1b]8;;\x1b\\`, 4) ===
+        `\x1b]8;;${url}\x1b\\abc\x1b]8;;\x1b\\…` &&
+      clipText(`\x1b]8;;${url}\x07ab\x1b]8;;\x07cdef`, 4) === `\x1b]8;;${url}\x07ab\x1b]8;;\x07c…`
   );
 
   const gitSession = {

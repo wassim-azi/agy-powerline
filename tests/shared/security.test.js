@@ -8,12 +8,8 @@ const os = require("os");
 const path = require("path");
 const { spawnSync } = require("child_process");
 const { record, NODE, PAYLOAD, stageInstall, runCli } = require("../helpers");
-const {
-  renderStatusline,
-  defaultConfig,
-  sanitizeExecOutput,
-  clearExecCache,
-} = require("../../src/lib/shared");
+const { renderStatusline, defaultConfig, clearExecCache } = require("../../src/lib/shared");
+const { sanitizeExecOutput } = require("../../src/lib/exec");
 const { isTrustedInstallDir, GLOBAL_DIR } = require("../../src/lib/paths");
 const { stripControl } = require("../../src/lib/formatters");
 
@@ -193,6 +189,16 @@ async function run() {
   record(
     "sanitizeExecOutput caps output length",
     Array.from(sanitizeExecOutput("🌿".repeat(500))).length === 80
+  );
+
+  const coder = "👩\u200d💻";
+  record(
+    "sanitizeExecOutput caps output by grapheme cluster, never splitting one",
+    sanitizeExecOutput(`${"a".repeat(78)}${coder}👍🏽`) === `${"a".repeat(78)}${coder}👍🏽` &&
+      sanitizeExecOutput(`${"a".repeat(78)}👍🏽xx`) === `${"a".repeat(78)}👍🏽…` &&
+      sanitizeExecOutput(`\x1b[32m${"a".repeat(78)}${coder}xx`, { colors: true }) ===
+        `\x1b[32m${"a".repeat(78)}${coder}…\x1b[0m` &&
+      sanitizeExecOutput(`\x1b[32m \u0301ok`, { colors: true }) === "\x1b[32m\u0301ok\x1b[0m"
   );
 
   clearExecCache();
