@@ -141,6 +141,8 @@ let editIndex = 0;
 let textInput = null;
 // Preserves a custom hex-stop gradient loaded at session start across cycles.
 let customGradientSpec = null;
+let previewScenario = "default";
+let previewWidthOverride = null;
 let activeStdin = process.stdin;
 let activeStdout = process.stdout;
 let activeResolve = null;
@@ -336,6 +338,98 @@ let columnsOverride = null;
 let rowsOverride = null;
 let ui;
 
+const PREVIEW_WIDTH_STEPS = [60, 80, 100, 120, null];
+
+const PREVIEW_SCENARIOS = [
+  { id: "default", label: "Normal", build: (base) => base },
+  {
+    id: "alerts",
+    label: "Near limits",
+    build: (base) => {
+      const now = Date.now();
+      return {
+        ...base,
+        exceeds_200k_tokens: true,
+        context_window: {
+          ...base.context_window,
+          used_percentage: 91,
+          remaining_percentage: 9,
+        },
+        quota: {
+          ...base.quota,
+          "gemini-5h": {
+            remaining_fraction: 0.08,
+            reset_time: new Date(now + 42 * 60 * 1000).toISOString(),
+            reset_in_seconds: 42 * 60,
+          },
+          "gemini-weekly": {
+            remaining_fraction: 0.03,
+            reset_time: new Date(now + 5 * 3600 * 1000).toISOString(),
+            reset_in_seconds: 5 * 3600,
+          },
+          "gemini-argon-wtu-weekly": {
+            remaining_fraction: 0.07,
+            reset_time: new Date(now + 8 * 3600 * 1000).toISOString(),
+            reset_in_seconds: 8 * 3600,
+          },
+          "3p-5h": {
+            remaining_fraction: 0.09,
+            reset_time: new Date(now + 35 * 60 * 1000).toISOString(),
+            reset_in_seconds: 35 * 60,
+          },
+          "3p-weekly": {
+            remaining_fraction: 0.04,
+            reset_time: new Date(now + 9 * 3600 * 1000).toISOString(),
+            reset_in_seconds: 9 * 3600,
+          },
+        },
+      };
+    },
+  },
+  {
+    id: "agent",
+    label: "Agent & modes",
+    build: (base) => ({
+      ...base,
+      agent: { name: "reviewer" },
+      agent_state: "thinking",
+      tool_confirmation_pending: true,
+      pending_input_count: 3,
+      task_count: 2,
+      cycle_mode: "accept-edits",
+      vim: { mode: "NORMAL" },
+      sandbox: { enabled: true, allow_network: true },
+    }),
+  },
+];
+
+function previewScenarioEntry() {
+  return PREVIEW_SCENARIOS.find((entry) => entry.id === previewScenario) || PREVIEW_SCENARIOS[0];
+}
+
+function activePreviewData() {
+  return previewScenarioEntry().build(previewData);
+}
+
+function stepScenario(dir) {
+  const index = PREVIEW_SCENARIOS.findIndex((entry) => entry.id === previewScenario);
+  const current = index === -1 ? 0 : index;
+  const next =
+    PREVIEW_SCENARIOS[(current + dir + PREVIEW_SCENARIOS.length) % PREVIEW_SCENARIOS.length];
+  previewScenario = next.id;
+  flashMessage = `Preview scenario: ${next.label}`;
+}
+
+function stepPreviewWidth(dir) {
+  const index = PREVIEW_WIDTH_STEPS.indexOf(previewWidthOverride);
+  const current = index === -1 ? PREVIEW_WIDTH_STEPS.length - 1 : index;
+  previewWidthOverride =
+    PREVIEW_WIDTH_STEPS[(current + dir + PREVIEW_WIDTH_STEPS.length) % PREVIEW_WIDTH_STEPS.length];
+  flashMessage = previewWidthOverride
+    ? `Preview width: ${previewWidthOverride} cols`
+    : "Preview width: full panel";
+}
+
 // Window sizes where the editor changes shape: from MEDIUM columns the
 // descriptions line up in a column; from WIDE the list gets a details panel
 // next to it.
@@ -424,11 +518,12 @@ function currentPreset() {
 function previewParts(width) {
   const preview = previewConfig();
   const { dot } = ui.glyph;
-  previewData.terminal_width = width - 4;
+  const targetWidth = previewWidthOverride ? Math.min(width - 4, previewWidthOverride) : width - 4;
+  const statusData = { ...activePreviewData(), terminal_width: targetWidth };
   let rendered;
 
   try {
-    rendered = renderStatusline(previewData, preview, { color: getActiveDepth() });
+    rendered = renderStatusline(statusData, preview, { color: getActiveDepth() });
   } catch (error) {
     rendered = `Preview failed: ${error.message}`;
   }
@@ -436,9 +531,12 @@ function previewParts(width) {
   const layout = LAYOUTS[preview.layout]?.name ?? preview.layout;
   const style =
     preview.layout === "pills" ? ` ${dot} ${detectStyle(preview.powerline) ?? "custom"}` : "";
+  const scenario = previewScenarioEntry();
+  const scenarioTag = scenario.id !== "default" ? ` ${dot} ${scenario.label}` : "";
+  const widthTag = previewWidthOverride ? ` ${dot} ${targetWidth} cols` : "";
   const pending = previewPending();
   const note = pending ? ` ${ui.accentText(`${dot} ${pending} preview, enter to apply`)}` : "";
-  const title = `Live preview ${dim(`${dot} ${layout} ${dot} ${preview.theme}${style}`)}${note}`;
+  const title = `Live preview ${dim(`${dot} ${layout} ${dot} ${preview.theme}${style}${scenarioTag}${widthTag}`)}${note}`;
 
   return { title, bar: String(rendered).split("\n") };
 }
@@ -623,7 +721,7 @@ function widgetPreview(widget) {
   let rendered = "";
   try {
     rendered = renderStatusline(
-      { ...previewData, terminal_width: width },
+      { ...activePreviewData(), terminal_width: width },
       { ...previewConfig(), widgets: [widget] },
       { color: getActiveDepth() }
     );
@@ -762,6 +860,12 @@ function drawMain() {
       ["n", "new row"],
       ["x", "remove"],
       ["d", "reset"],
+      ...(frameWidth() >= MEDIUM
+        ? [
+            [",/.", "scenario"],
+            ["-/+", "preview width"],
+          ]
+        : []),
       ["g", "star"],
       ["q", "save & quit"],
     ],
@@ -1831,6 +1935,8 @@ function renderFrame(options = {}) {
   editIndex = options.editIndex ?? 0;
   textInput = options.textInput ?? null;
   previewData = options.data || sampleData();
+  previewScenario = options.scenario || "default";
+  previewWidthOverride = options.previewWidth ?? null;
   columnsOverride = options.columns || 100;
   rowsOverride = options.rows || 50;
   scrollTop = options.scroll || 0;
@@ -1842,6 +1948,8 @@ function renderFrame(options = {}) {
   } finally {
     columnsOverride = null;
     rowsOverride = null;
+    previewScenario = "default";
+    previewWidthOverride = null;
     setActiveDepth(previousDepth);
   }
 }
@@ -2608,6 +2716,29 @@ function onKey(_str, key) {
 
   flashMessage = "";
 
+  if (!typing && !key.ctrl && !key.meta) {
+    if (key.sequence === "-") {
+      stepPreviewWidth(-1);
+      draw();
+      return;
+    }
+    if (key.sequence === "+" || key.sequence === "=") {
+      stepPreviewWidth(1);
+      draw();
+      return;
+    }
+    if (key.sequence === ",") {
+      stepScenario(-1);
+      draw();
+      return;
+    }
+    if (key.sequence === ".") {
+      stepScenario(1);
+      draw();
+      return;
+    }
+  }
+
   if (switchTab(key)) {
     draw();
     return;
@@ -2713,6 +2844,8 @@ function start(options = {}) {
   textInput = null;
   editIndex = 0;
   customGradientSpec = config.gradient && !GRADIENTS[config.gradient] ? config.gradient : null;
+  previewScenario = "default";
+  previewWidthOverride = null;
   scrollTop = 0;
   scrollScreen = null;
   flashMessage = options.flash || "";

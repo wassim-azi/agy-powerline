@@ -47,6 +47,7 @@ async function run() {
   testDepthIsRestored();
   testTabKeys();
   await testSettingsInteractions();
+  await testPreviewControls();
 }
 
 // Numbers, badges and the preview title say what is a widget, what is in
@@ -837,6 +838,74 @@ async function testSettingsInteractions() {
   record(
     "Widget text Backspace deletes whole grapheme clusters",
     afterOne.saved.widgets[0].text === "a👩\u200d💻👍🏽❤️" && afterFour.saved.widgets[0].text === "a"
+  );
+}
+
+async function testPreviewControls() {
+  const alertConfig = {
+    ...defaultConfig(),
+    widgets: [{ id: "fiveHourPct" }, { id: "contextPct" }, { id: "mode" }, { id: "sandbox" }],
+  };
+  const wideRowConfig = {
+    ...defaultConfig(),
+    widgets: [{ id: "model" }, { id: "contextBar" }, { id: "git" }, { id: "title" }],
+  };
+  const normal = strip(renderFrame({ config: alertConfig, columns: 160 }));
+  const alerts = strip(renderFrame({ config: alertConfig, columns: 160, scenario: "alerts" }));
+  const agent = strip(renderFrame({ config: alertConfig, columns: 160, scenario: "agent" }));
+  const wideBar = strip(renderFrame({ config: wideRowConfig, columns: 160 }));
+  const narrowed = strip(renderFrame({ config: wideRowConfig, columns: 160, previewWidth: 60 }));
+
+  record(
+    "preview scenario option renders alerts and agent & modes without changing default output",
+    !/Near limits/.test(normal) &&
+      /Live preview .* · Near limits/.test(alerts) &&
+      /91\.0%/.test(alerts) &&
+      /8\.0% rem/.test(alerts) &&
+      /Live preview .* · Agent & modes/.test(agent) &&
+      /NORMAL/.test(agent) &&
+      /sandbox \(net\)/.test(agent)
+  );
+
+  const previewRow = (frame) => {
+    const lines = frame.split("\n");
+    const start = lines.findIndex((line) => /Live preview/.test(line));
+    return lines.slice(start + 1).find((line) => /Gemini 4 Hydrogen/.test(line)) || "";
+  };
+  const fullPreviewRow = previewRow(wideBar);
+  const narrowPreviewRow = previewRow(narrowed);
+  record(
+    "preview width override updates the preview header and fits the bar within the requested width",
+    !/\b60 cols\b/.test(wideBar) &&
+      /Live preview .* · 60 cols/.test(narrowed) &&
+      /Fix the config loader/.test(fullPreviewRow) &&
+      !/Fix the config loader/.test(narrowPreviewRow)
+  );
+
+  // Interactive keypresses: . / , cycle scenarios; - / + step preview width; typing in Add stays intact.
+  const cycled = await runConfigureKeys(alertConfig, [".", ".", ",", "-", "-", "+", "+"]);
+  const [toAlerts, toAgent, backAlerts, w120, w100, back120, backFull] = cycled.frames;
+  record(
+    "interactive , / . and - / + keys cycle preview scenario and width without altering saved config",
+    /Preview scenario: Near limits/.test(toAlerts) &&
+      /· Near limits/.test(toAlerts) &&
+      /Preview scenario: Agent & modes/.test(toAgent) &&
+      /· Near limits/.test(backAlerts) &&
+      /Preview width: 120 cols/.test(w120) &&
+      /· 120 cols/.test(w120) &&
+      /Preview width: 100 cols/.test(w100) &&
+      /· 100 cols/.test(w100) &&
+      /Preview width: 120 cols/.test(back120) &&
+      /Preview width: full panel/.test(backFull) &&
+      !/\bcols\b/.test(backFull) &&
+      cycled.saved.widgets.length === alertConfig.widgets.length
+  );
+
+  const searchKeys = await runConfigureKeys(alertConfig, ["a", "-", ".", "\x7f", "\x7f", "\r"]);
+  const addFrame = searchKeys.frames[2] || "";
+  record(
+    "typing - or . while filtering widgets in Add stays search input instead of switching preview",
+    !/Preview width:/.test(addFrame) && !/Preview scenario:/.test(addFrame)
   );
 }
 

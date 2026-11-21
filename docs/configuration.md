@@ -50,6 +50,8 @@ Enter on a widget opens its options: color, label (shown or value only), and wha
 | `p`                    | Powerline (joins, style, separators, start and end caps)                                                                        |
 | `i`                    | Settings (language, clock format, reset format, gradient, emojis, minimalist, pace, sensitivity, blink, gaps, max width, ASCII) |
 | `d`                    | Reset configuration to defaults                                                                                                 |
+| `,` / `.`              | Cycle live preview scenario (`Normal`, `Near limits`, `Agent & modes`)                                                          |
+| `-` / `+` (`=`)        | Step simulated live preview bar width (`60`, `80`, `100`, `120` columns, or full panel width)                                   |
 | `g`                    | Open GitHub repository in browser (⭐ Repo)                                                                                     |
 | Enter                  | Confirm selection or toggle/cycle setting in lists                                                                              |
 | Esc                    | Back to previous list / widget list                                                                                             |
