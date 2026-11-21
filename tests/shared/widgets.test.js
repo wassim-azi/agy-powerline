@@ -18,6 +18,7 @@ const {
   shortenPath,
   isValidDepth,
   visibleWidth,
+  formatTokens,
 } = require("../../src/lib/formatters");
 const { buildCustomTheme, THEMES } = require("../../src/lib/themes");
 const { buildSegment } = require("../../src/lib/layouts/pills");
@@ -1277,6 +1278,13 @@ function testSplitTokens() {
   record(
     "lines totalTokens split shows input and output",
     /123\.1K↑ 355\.0K↓/.test(render(real, split, { layout: "lines" }))
+  );
+  record(
+    "formatTokens rolls over to 1.0M at 999,950 instead of rounding to 1000.0K",
+    formatTokens(999_949) === "999.9K" &&
+      formatTokens(999_950) === "1.0M" &&
+      formatTokens(999_999) === "1.0M" &&
+      formatTokens(1_000_000) === "1.0M"
   );
 }
 

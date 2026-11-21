@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Home path boundary and token rollover rounding**: require a path-separator boundary in `homePath()` so sibling directories like `/home/alex` do not match `/home/al`, and roll `formatTokens()` over to `"1.0M"` at `999,950` instead of formatting `999,950..999,999` as `"1000.0K"` (#246)
 - **Session-scoped `exec` payload cache keys**: include the sanitized session payload in `widgetCacheKey()` when `"payload": true` so concurrent sessions or model switches in the same working directory do not serve stale cached output (#250)
 - **Context percentage fallback**: ignore null, boolean, and empty or whitespace-only percentage values so valid remaining percentages or current token usage are used instead (#245)
 - **Gemini & Argon model pool matching in `quota`**: inspect both `model.display_name` and `model.id` and recognize unprefixed Gemini codenames (`argon`, `hydrogen`, `neon`, `carbon`) in `tightestQuota()` so non-prefixed display names do not fall back to the `3p-*` quota pool (#242)
