@@ -453,8 +453,7 @@ async function run() {
     )
   );
 
-  const contextPercent = (context_window) =>
-    contextUsedPercent({ context_window });
+  const contextPercent = (context_window) => contextUsedPercent({ context_window });
   record(
     "null used percentage falls back to remaining percentage",
     contextPercent({ used_percentage: null, remaining_percentage: 55 }) === 45
