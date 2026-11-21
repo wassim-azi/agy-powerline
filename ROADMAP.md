@@ -4,10 +4,7 @@ What agy-powerline plans for the year to October 2027. Plans can change; the [is
 
 ## Planned
 
-### Features
-
-- **Pace delta** on the same widgets: how far ahead of or behind a sustainable pace you are, e.g. `⇡15%` faster than sustainable or `⇣10%` of headroom.
-- **Themes named after their palettes**, so they're easy to find: `dark-dracula`, `dark-tokyo-night` and `dark-catppuccin-macchiato` (the current ids keep working), and the other Catppuccin flavors (Latte, Frappé, Mocha), each passing the contrast tests.
+Feature enhancements are tracked in [GitHub issues](https://github.com/wassim-azi/agy-powerline/issues) labelled `enhancement`.
 
 ### Reliability and contributors
 

@@ -97,35 +97,40 @@ The codebase is organized into small, focused modules without heavy frameworks o
 agy-powerline/
 ├── src/
 │   ├── index.js              # CLI entry point (Node's built-in util.parseArgs)
-│   ├── cli/                  # One file per command (init, configure, theme, gradient, layout,
-│   │                         # preset, caps, export, import, doctor, report, uninstall), bundle.js
-│   │                         # (the one-file installed runtime), tui-style.js and config-guard.js
+│   ├── cli/                  # One file per command (default, init, configure [interactive editor TUI +
+│   │                         # deprecated alias], theme, gradient, layout, preset, caps, export, import,
+│   │                         # doctor, report, uninstall), bundle.js (builds the one-file installed runtime),
+│   │                         # tui-style.js, repo-url.js and config-guard.js
 │   ├── lib/
 │   │   ├── shared.js         # renderStatusline(), the rendering entry point
 │   │   ├── session.js        # Extracts & normalizes fields from Antigravity's JSON payload
+│   │   ├── usage.js          # Read-only conversation SQLite reader + .usage-cache.json
 │   │   ├── catalog.js        # Widget ids, labels, descriptions and summaries
-│   │   ├── config.js         # Configuration loading, validation, defaults and presets
+│   │   ├── config.js         # Configuration loading, validation, defaults, LAYOUT_ORDER and presets
+│   │   ├── config-check.js   # Known-key/value checks used by doctor and schema tests
 │   │   ├── widget-style.js   # Each widget's icon and label (WIDGET_TAGS), colors, raw and pace options
-│   │   ├── fit.js            # Keeps rows within the terminal width (DROP_ORDER)
+│   │   ├── widget-options.js # Shared per-widget option descriptors for the editor TUI and schema
+│   │   ├── fit.js            # Keeps rows within the terminal width (DROP_ORDER / wrap overflow)
 │   │   ├── colors.js         # Truecolor / 256 / NO_COLOR ANSI escape sequences
 │   │   ├── themes.js         # Built-in themes (dark-*, light-*, colorblind-*)
 │   │   ├── powerline.js      # Caps, separators and powerline styles
-│   │   ├── formatters.js     # Text helpers, sanitizing (stripControl, sanitizeDeep)
+│   │   ├── formatters.js     # Text helpers, OSC 8 links, sanitizing (stripControl, sanitizeDeep)
 │   │   ├── i18n.js           # The bar's own words in each language (MESSAGES, t())
-│   │   ├── git.js            # Branch, dirty state and ahead/behind, with a timeout
+│   │   ├── git.js            # Branch, dirty state, stashes, worktrees and ahead/behind, with timeouts
 │   │   ├── exec.js           # The exec (shell command) widget
 │   │   ├── log.js            # Local problem log
 │   │   ├── payload-dump.js   # Privacy-safe payload dumps for bug reports
-│   │   ├── mock-data.js      # Sample payload for render --demo and the configure preview
+│   │   ├── mock-data.js      # Sample payload for render --demo and the interactive editor preview
 │   │   ├── paths.js          # Cross-platform paths, safe settings writes, RUNTIME_FILES
 │   │   ├── run.js, prompt.js # Command runner for doctor; yes/no prompts
 │   │   └── layouts/
 │   │       ├── pills.js      # Powerline capsule layout
-│   │       └── lines.js      # Colored-text layout with 25-dot meters
+│   │       └── lines.js      # Colored-text lines layout and Classic layout (25-dot / block meters)
 │   └── runtime/
 │       └── statusline.js     # Runtime script executed by Antigravity on every refresh; init
 │                             # joins it with RUNTIME_FILES into one installed statusline.js
-├── docs/                     # User docs beyond the README: configuration, install, troubleshooting
+├── docs/                     # User docs beyond the README: configuration, install, troubleshooting, payload, faq, guides/
+├── skills/                   # Antigravity plugin skills (setup and customize), tested by plugin.test.js
 ├── tests/
 │   ├── shared.js             # node:test entry for the cross-platform suites
 │   ├── platform.js           # node:test entry for the current OS's launcher suite
@@ -136,9 +141,14 @@ agy-powerline/
 │   ├── shared/               # Cross-platform rendering & configuration tests
 │   └── platform/             # Windows / macOS / Linux launcher tests
 └── scripts/
-    ├── gallery/              # npm run gallery / screenshots: previews of every theme
+    ├── configurator/         # npm run configurator: builds the browser configurator bundle
+    ├── demo/                 # VHS tape (demo.tape) that records assets/demo.gif
+    ├── gallery/              # npm run gallery / screenshots: home.html, themes.html and theme SVGs
     ├── hooks/                # Git hooks: pre-commit (Prettier, ESLint), commit-msg
-    └── release/              # Plugin archives attached to each GitHub release
+    ├── release/              # Plugin archives attached to each GitHub release
+    └── site/                 # agy-powerline.com builder (build.js [MARKDOWN_PAGES, GUIDES], layout.js, doc-page.js,
+                              # markdown.js, home-text.js, images.js [og/manifest.json, assets/site/art/],
+                              # config-schema.js, content/{about,privacy}.md, assets/site/fonts/)
 ```
 
 ---
@@ -156,12 +166,12 @@ In `src/lib/catalog.js`, add your widget definition to `WIDGET_CATALOG`:
   id: "my_widget",
   label: "My Widget",
   unique: true,
-  description: "one sentence for the configure details panel",
+  description: "one sentence for the editor details panel",
   summary: "six words at most",
 },
 ```
 
-`summary` is what the configure lists show next to the label, so keep it to six words; `description` is the full sentence in the details panel.
+`summary` is what the interactive editor lists show next to the label, so keep it to six words; `description` is the full sentence in the details panel.
 
 ### 2. Whitelist the widget ID and give it a drop rank
 
@@ -225,7 +235,7 @@ Run `npm test` to ensure it passes, then `npm run test:update` if the bar's outp
 
 ### 5. Document it
 
-Add the widget to the widget table in `README.md` (and the same row in every translation, `README.<lang>.md`; a description in English is fine if you don't speak the language) and to the Widgets list in `docs/configuration.md`, and add a `CHANGELOG.md` entry. Add every new command, widget, theme or preset to the root `llms.txt` too. The `readme` test suite fails if a README misses the widget.
+Add the widget to the widget table in `README.md` (and the same row in every translation, `README.<lang>.md`; a description in English is fine if you don't speak the language) and to the Widgets list in `docs/configuration.md`, add a `CHANGELOG.md` entry, and update `src/lib/widget-options.js` (if configurable), `scripts/site/config-schema.js`, `scripts/configurator/` (`npm run configurator`), and `llms.txt` (plus `npm run site:images` if Chrome is available and the widget count / share card changed). The `readme`, `configurator`, and `site` suites check these invariants.
 
 ---
 
@@ -337,7 +347,7 @@ Pull requests are **squash-merged**: your PR becomes one commit on `main`, and t
   - Entries go under `## [Unreleased]` at the top of the file; create that section if it's missing. Never add entries to a version that's already released: a change belongs to the first release tag that contains it (`git tag --contains <commit>`).
   - One line per change, written for users, under the [Keep a Changelog](https://keepachangelog.com/en/1.0.0/) heading that fits (`### Added`, `### Changed`, `### Fixed`, `### Removed`, `### Security`), ending with the issue or PR number when there is one, e.g. `- Battery widget shows charging state (#42)`. The release notes are written from these lines.
 - Don't change `version` in `package.json`; the maintainer sets it at release time.
-- **Credits are the maintainer's job.** When your PR is merged, the maintainer adds `thanks @you` to its changelog line and adds you to the contributors table in the READMEs. Leave the table and `.all-contributorsrc` as they are in your PR (a new README translation copies the table and adds its file name to `files` in `.all-contributorsrc`).
+- **Credits are the maintainer's job.** When merging an outside contribution, the maintainer adds `(#42, thanks @login)` to its changelog line and runs `npx all-contributors-cli@6.26.1 add <login> <types>` (types such as `code`, `doc`, `design`, `translation`), which updates `.all-contributorsrc` and the table between the `ALL-CONTRIBUTORS-LIST` markers in every README listed in its `files` (`.github/workflows/thanks.yml` thanks the contributor on merge). Leave the table and `.all-contributorsrc` as they are in your PR (a new README translation copies the table as it is and adds its file name to `files` in `.all-contributorsrc`).
 
 At release time the maintainer renames `## [Unreleased]` to the new version and date.
 
@@ -357,7 +367,7 @@ Releases are the maintainer's job:
 
 ## 🔍 Code Review
 
-Every pull request is reviewed before it's merged; `.github/CODEOWNERS` requests the maintainer's review. A review is done on GitHub: the reviewer reads the whole diff, runs anything the CI can't check (a visual change in a real terminal, the `configure` TUI), and approves or asks for changes in comments. Pull requests are squash-merged once approved and green.
+Every pull request is reviewed before it's merged; `.github/CODEOWNERS` requests the maintainer's review. A review is done on GitHub: the reviewer reads the whole diff, runs anything the CI can't check (a visual change in a real terminal, the interactive editor TUI), and approves or asks for changes in comments. Pull requests are squash-merged once approved and green.
 
 The reviewer checks that:
 
