@@ -502,7 +502,8 @@ const DIFF_ARGS = [
 // and diff run the programs it names: filters on changed files, diff drivers,
 // fsmonitor hooks, and anything an included file adds. A repo config with any
 // of these is read for SHA, stash and worktree only; git itself isn't started.
-const RISKY_CONFIG = /(\[\s*(filter|include|includeif|diff)\b|(?:^|\s)(fsmonitor|promisor|partialclone|sshcommand)\s*=)/im;
+const RISKY_CONFIG =
+  /(\[\s*(filter|include|includeif|diff)\b|(?:^|\s)(fsmonitor|promisor|partialclone|sshcommand)\s*=)/im;
 
 const PLANTED_GIT_BINARIES = ["git.exe", "git.com", "git.cmd", "git.bat"];
 
