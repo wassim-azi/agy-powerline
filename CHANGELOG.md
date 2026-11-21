@@ -36,6 +36,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- **Width-preserving scrubbing in debug payload dumps**: scrub `vcs.branch` and `conversation_title` with `maskPreservingWidth()` in `AGY_POWERLINE_DEBUG=1` and `--dump-payload` captures so branch and title placeholders preserve exact terminal column widths (including multi-width CJK and emoji clusters) and separator structure without leaking private text (#258)
 - **Git subprocess hardening**: detect same-line risky config sections and partial-clone settings, skip unsafe repositories before both ahead/behind and working-tree Git calls, disable Git network protocols and lazy fetching, and prevent Windows from resolving a planted Git executable from the workspace (#249)
 
 ### Fixed

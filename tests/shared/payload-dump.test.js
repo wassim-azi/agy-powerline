@@ -7,7 +7,13 @@ const fs = require("fs");
 const os = require("os");
 const path = require("path");
 const { record } = require("../helpers");
-const { dumpTarget, safePayload, writePayloadDump } = require("../../src/lib/payload-dump");
+const {
+  dumpTarget,
+  maskPreservingWidth,
+  safePayload,
+  writePayloadDump,
+} = require("../../src/lib/payload-dump");
+const { stripControl, visibleWidth } = require("../../src/lib/formatters");
 
 const HOME_KEYS = ["HOME", "USERPROFILE", "AGY_POWERLINE_HOME"];
 
@@ -185,6 +191,61 @@ function testLatestPayloadFieldsPreserved() {
   );
 }
 
+function testWidthPreservingScrubbing() {
+  const samples = [
+    "",
+    "Fix security bug in AcmeCorp billing service",
+    "feat/auth-123",
+    "日本語テスト",
+    "Fix 🐛 in 日本語 service",
+    "👩‍💻 dev 👍🏽 🇫🇷 ❤️ cafe\u0301\u200b\ufeff",
+    "\x1b[31msecret-token\x1b[0m \x1b]8;;https://evil.example\x07click\x1b]8;;\x07",
+  ];
+  const allMatchWidth = samples.every(
+    (s) => visibleWidth(maskPreservingWidth(s)) === visibleWidth(stripControl(s))
+  );
+  record(
+    "maskPreservingWidth preserves exact terminal column width for ASCII, combining marks, CJK, and emoji",
+    allMatchWidth &&
+      maskPreservingWidth("feat/日本語-🚀") === "xxxx/全全全-🌿" &&
+      maskPreservingWidth("hi") === "xx" &&
+      !maskPreservingWidth("Fix AcmeCorp billing").includes("AcmeCorp") &&
+      !maskPreservingWidth("\x1b[31msecret\x1b[0m").includes("\x1b"),
+    samples
+      .map((s) => `${JSON.stringify(s)} -> ${JSON.stringify(maskPreservingWidth(s))}`)
+      .join("; ")
+  );
+
+  const safe = safePayload({
+    vcs: { type: "git", branch: "feat/client-日本語-👩‍💻", dirty: true },
+    conversation_title: "Fix 🐛 AcmeCorp billing in 日本語",
+  });
+  record(
+    "safePayload preserves exact column widths of branches and conversation titles without leaking text",
+    visibleWidth(safe.vcs.branch) === visibleWidth("feat/client-日本語-👩‍💻") &&
+      visibleWidth(safe.conversation_title) === visibleWidth("Fix 🐛 AcmeCorp billing in 日本語") &&
+      !safe.vcs.branch.includes("client") &&
+      !safe.vcs.branch.includes("日本語") &&
+      !safe.conversation_title.includes("AcmeCorp") &&
+      !safe.conversation_title.includes("billing") &&
+      safePayload({ vcs: { branch: "main" } }).vcs.branch === "xxxx" &&
+      safePayload({ conversation_title: "hi" }).conversation_title === "xx",
+    JSON.stringify(safe)
+  );
+
+  const longMixed = safePayload({
+    vcs: { type: "git", branch: "feat/" + "日本語🚀".repeat(30) },
+    conversation_title: "Fix " + "日本語🚀".repeat(60),
+  });
+  record(
+    "safePayload caps long multi-width branch and title placeholders cleanly within column limits",
+    visibleWidth(longMixed.vcs.branch) <= 100 &&
+      visibleWidth(longMixed.conversation_title) <= 200 &&
+      !/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/.test(longMixed.vcs.branch) &&
+      !/[\uD800-\uDBFF](?![\uDC00-\uDFFF])/.test(longMixed.conversation_title)
+  );
+}
+
 async function run() {
   testWrongTypes();
   testDumpTarget();
@@ -192,6 +253,7 @@ async function run() {
   testInvalidJsonDump();
   testFailedWrite();
   testLatestPayloadFieldsPreserved();
+  testWidthPreservingScrubbing();
 }
 
 module.exports = { run };
