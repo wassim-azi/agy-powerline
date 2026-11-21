@@ -276,16 +276,19 @@ function tightestQuota(data, lang) {
     }
   }
 
-  const model = firstText(data?.model?.display_name, data?.model?.id).toLowerCase();
+  const model = [data?.model?.display_name, data?.model?.id]
+    .filter((value) => typeof value === "string")
+    .join(" ")
+    .toLowerCase();
   const inGroup = (group) => usable.filter((quota) => bucketGroup(quota.key) === group);
   let pool;
-  if (!model.startsWith("gemini")) {
-    pool = inGroup("3p");
-  } else if (model.includes("argon")) {
+  if (model.includes("argon")) {
     pool = inGroup("argon");
     pool = pool.length ? pool : inGroup("gemini");
-  } else {
+  } else if (/gemini|hydrogen|neon|carbon/.test(model)) {
     pool = inGroup("gemini");
+  } else {
+    pool = inGroup("3p");
   }
   pool = pool.length ? pool : usable;
 

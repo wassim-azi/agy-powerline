@@ -816,6 +816,30 @@ function testTightestQuota() {
     argon
   );
 
+  // Unprefixed Gemini codenames or model.id-only Gemini tags still route to
+  // the Argon or Gemini pools instead of falling into 3p.
+  const unprefixedArgon = render(
+    { ...argonPayload, model: { id: "gemini-4-argon", display_name: "4 Argon (High)" } },
+    quota
+  );
+  const unprefixedHydrogen = render(
+    { ...real, model: { id: "hydrogen-high", display_name: "Hydrogen (High)" } },
+    quota
+  );
+  const idOnlyGemini = render(
+    { ...real, model: { id: "gemini-4-flash", display_name: "Custom Flash" } },
+    quota
+  );
+  record(
+    "quota matches Argon and Gemini pools across both display_name and id codenames",
+    /Argon 7d 8\.2% rem/.test(unprefixedArgon) &&
+      /7d 28\.6% rem/.test(unprefixedHydrogen) &&
+      !/3P/.test(unprefixedHydrogen) &&
+      /7d 28\.6% rem/.test(idOnlyGemini) &&
+      !/3P/.test(idOnlyGemini),
+    `${unprefixedArgon} | ${unprefixedHydrogen} | ${idOnlyGemini}`
+  );
+
   // Ultra: no Argon bucket, Argon counts toward the Gemini buckets.
   const ultra = render({ ...real, model: argonModel }, quota);
   record(
