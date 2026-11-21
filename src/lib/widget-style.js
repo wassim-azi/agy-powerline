@@ -190,11 +190,8 @@ const METER_STYLES = {
   dots: ["●", "●"],
   blocks: ["█", "░"],
   shade: ["▓", "░"],
-  line: ["━", "─"],
-  geometric: ["▰", "▱"],
   squares: ["■", "□"],
   braille: ["⣿", "⣀"],
-  bars: ["▮", "▯"],
   rings: ["●", "○"],
   ramp: ["█", "░"],
 };

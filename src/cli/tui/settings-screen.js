@@ -3,7 +3,7 @@
 
 "use strict";
 
-const { defaultConfig, DEFAULT_THRESHOLDS } = require("../../lib/shared");
+const { defaultConfig, DEFAULT_THRESHOLDS, themeColors } = require("../../lib/shared");
 const {
   RESET_FORMAT_ORDER,
   resolveResetFormat,
@@ -14,11 +14,12 @@ const {
   QUOTA_MODE_ORDER,
   resolveQuotaMode,
 } = require("../../lib/config");
+const { METER_STYLES, METER_STYLE_IDS } = require("../../lib/widget-style");
 const { GRADIENTS, GRADIENT_ORDER, gradientStops } = require("../../lib/themes");
 const { SUPPORTED_LANGUAGES, resolveLanguage } = require("../../lib/i18n");
-const { fg, getActiveDepth } = require("../../lib/colors");
+const { fg, bg, mix, getActiveDepth } = require("../../lib/colors");
 const { RESET, moveCursor, backToMain, persist } = require("./state");
-const { dim, screenFrame } = require("./frame");
+const { dim, tabKeys, screenFrame } = require("./frame");
 
 const LANGUAGE_LABELS = {
   en: "English (en)",
@@ -107,6 +108,11 @@ const SETTINGS_ROWS = [
     id: "gradient",
     label: "Bar gradient",
     help: "Sweep one color gradient across each row on top of the theme. Custom hex gradients stay in the cycle until reset.",
+  },
+  {
+    id: "meterStyle",
+    label: "Meter style",
+    help: "Shape used for quota and context meters across the bar. Cells applies to Pills (Lines draws dots, Classic draws blocks); per-widget Meter options still win.",
   },
   {
     id: "emojis",
@@ -202,6 +208,53 @@ function gradientValue(config) {
   return GRADIENTS[config.gradient]?.name ?? `custom (${config.gradient})`;
 }
 
+function renderMeterSample(state, styleId) {
+  const ascii = state.config.ascii === true;
+  const plain = getActiveDepth() === "none";
+  if (ascii) {
+    return "#####-----";
+  }
+  const colors = themeColors(state.config.theme, state.config.customTheme);
+  const ok = colors.fiveHour;
+  const caution = colors.caution;
+  const danger = colors.warn;
+  const track = colors.track;
+  const paint = (color, ch) => (plain ? ch : `${fg(color)}${ch}`);
+  const end = plain ? "" : RESET;
+
+  if (!styleId) {
+    return state.config.layout === "pills"
+      ? `${paint(ok, "•••●•")}${paint(track, "•••••")}${end}`
+      : state.config.layout === "classic"
+        ? `${paint(ok, "█████░░░░░")}${end}`
+        : `${paint(ok, "●●●●●")}${paint(track, "●●●●●")}${end}`;
+  }
+  if (styleId === "cells") {
+    if (plain) {
+      return "#####.....  (Pills only)";
+    }
+    const dark = mix(ok, [0, 0, 0], 0.45);
+    return `${bg(ok)}     ${bg(dark)}     ${RESET}  ${dim(state, "Pills only")}`;
+  }
+  if (styleId === "ramp") {
+    if (plain) {
+      return "█████░░░░░";
+    }
+    const stops = [0, 0.25, 0.5, 0.75, 1].map((t) =>
+      t <= 0.5 ? mix(ok, caution, t * 2) : mix(caution, danger, (t - 0.5) * 2)
+    );
+    return stops.map((c) => `${fg(c)}█`).join("") + `${fg(track)}░░░░░${RESET}`;
+  }
+  const [full, blank, pace] = METER_STYLES[styleId] || METER_STYLES.dots;
+  if (styleId === "rings") {
+    return `${paint(ok, full.repeat(5))}${paint(mix(ok, track, 0.5), blank.repeat(5))}${end}`;
+  }
+  if (pace) {
+    return `${paint(ok, full.repeat(3))}${paint(colors.meta, pace)}${paint(ok, full)}${paint(track, blank.repeat(5))}${end}`;
+  }
+  return `${paint(ok, full.repeat(5))}${paint(track, blank.repeat(5))}${end}`;
+}
+
 function settingValue(config, row) {
   if (row.id === "language") {
     const code = resolveLanguage(config.language);
@@ -218,6 +271,10 @@ function settingValue(config, row) {
 
   if (row.id === "gradient") {
     return gradientValue(config);
+  }
+
+  if (row.id === "meterStyle") {
+    return config.meterStyle || "layout default";
   }
 
   if (row.id === "emojis") {
@@ -326,6 +383,24 @@ function settingsDetails(state, row) {
           : { raw: `${dim(state, text)}${swatch}` };
       })
     );
+  } else if (row.id === "meterStyle") {
+    const active = config.meterStyle || null;
+    const choices = [
+      { id: null, label: "layout default" },
+      ...METER_STYLE_IDS.map((id) => ({ id, label: id })),
+    ];
+    lines.push(
+      "",
+      ...choices.map((item) => {
+        const isCurrent = item.id === active;
+        const mark = isCurrent ? state.ui.glyph.on : state.ui.glyph.off;
+        const text = `${mark} ${item.label.padEnd(15)}`;
+        const sample = renderMeterSample(state, item.id);
+        return isCurrent
+          ? { raw: `${state.ui.accentText(text)}  ${sample}` }
+          : { raw: `${dim(state, text)}  ${sample}` };
+      })
+    );
   } else if (row.id === "sensitivity") {
     const thresholds = config.thresholds || {};
     const qw = thresholds.quotaWarn ?? DEFAULT_THRESHOLDS.quotaWarn;
@@ -400,7 +475,6 @@ function settingsDetails(state, row) {
       })
     );
   }
-  lines.push("", "Enter cycles or toggles; x resets to default.");
   return { title: row.label, lines };
 }
 
@@ -413,14 +487,16 @@ function drawSettings(state) {
   return screenFrame(state, {
     title: "Settings",
     items,
-    notes: ["Bar-wide defaults that apply across layouts and presets."],
+    notes: [
+      "Enter / Space cycles or toggles; x resets to default.",
+      "Bar-wide defaults that apply across layouts and presets.",
+    ],
     details: settingsDetails(state, SETTINGS_ROWS[state.cursor]),
-    keys: [
+    keys: tabKeys(state, [
       [state.ui.glyph.upDown, "move"],
       ["enter", "toggle / cycle"],
       ["x", "reset"],
-      ["esc", "back"],
-    ],
+    ]),
   });
 }
 
@@ -485,6 +561,22 @@ function toggleOrCycleSetting(state, row) {
     }
     if (persist(state)) {
       state.flashMessage = `Bar gradient: ${gradientValue(config)}`;
+    }
+    return;
+  }
+
+  if (row.id === "meterStyle") {
+    const choices = [undefined, ...METER_STYLE_IDS];
+    const current = config.meterStyle || undefined;
+    const idx = choices.indexOf(current);
+    const next = choices[(idx + 1) % choices.length];
+    if (next === undefined) {
+      delete config.meterStyle;
+    } else {
+      config.meterStyle = next;
+    }
+    if (persist(state)) {
+      state.flashMessage = `Meter style: ${next || "layout default"}`;
     }
     return;
   }
@@ -605,6 +697,8 @@ function resetSetting(state, row) {
     config.clock = { ...(config.clock || {}), hour12: defaults.clock.hour12 };
   } else if (row.id === "gradient") {
     delete config.gradient;
+  } else if (row.id === "meterStyle") {
+    delete config.meterStyle;
   } else if (row.id === "sensitivity") {
     config.thresholds = {
       ...(config.thresholds || {}),

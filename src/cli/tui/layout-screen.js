@@ -5,7 +5,7 @@
 
 const { LAYOUTS, LAYOUT_ORDER } = require("../../lib/shared");
 const { moveCursor, backToMain, persist } = require("./state");
-const { screenFrame } = require("./frame");
+const { tabKeys, screenFrame } = require("./frame");
 
 // Three short paragraphs per layout, each under 90 columns so a wide panel
 // shows them unwrapped.
@@ -22,7 +22,7 @@ const LAYOUT_HELP = {
   ],
   classic: [
     "Colored text on the terminal background, with | dividers between widgets.",
-    "Meters draw as blocks in one color: █ filled, ░ empty and │ as the pace marker.",
+    "Meters draw as blocks in one color: █ filled, ░ empty and ┃ as the pace marker.",
     "Powerline shapes don't apply; the theme, widgets and Settings do.",
   ],
 };
@@ -42,11 +42,10 @@ function drawLayout(state) {
       title: hovered.name,
       lines: LAYOUT_HELP[hovered.id].flatMap((line, i) => (i ? ["", line] : [line])),
     },
-    keys: [
+    keys: tabKeys(state, [
       [state.ui.glyph.upDown, "preview"],
       ["enter", "apply"],
-      ["esc", "back"],
-    ],
+    ]),
   });
 }
 

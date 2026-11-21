@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Studio canvas & quick interactions in the interactive editor**: active-pane focus borders, `Live preview` right-border scenario/width status (`Scenario · ... (, / .)` & `Width · ... (- / +)`), truecolor dark/light terminal canvas tinting on `Live preview`, row group dividers (`── Row 1 ──`) in `Your widgets`, multi-state/multi-layout mini-previews + quick-actions strip in Widget Details, a global `Meter style` setting in `Settings` (`i`), a `?` shortcut overlay, `/` type-to-filter in `Themes` and `Presets`, `Space` cycling in `Edit`, DEC synchronized redraws, and SGR mouse click/wheel support (#275)
 - **Live preview controls in the interactive editor**: cycle preview scenarios (`,`, `.` between `Normal`, `Near limits`, and `Agent & modes`) and simulated bar widths (`-`, `+`/`=` through `60`, `80`, `100`, `120` columns, and full panel width) without modifying saved config (#256)
 - **Opt-in OSC 8 clickable hyperlinks (`"link"`)**: wrap `cwd` and `project` in `file://`, `vscode://file/`, `cursor://file/`, or `zed://file/` links and `git` / `gitSha` in normalized `https://` branch/commit links read directly from `.git/config` (zero spawns, credentials stripped), automatically suppressed in ASCII and no-color modes and stripped in web previews (#255)
 - **Opt-in quota run-out forecast (`"forecast"`)**: added `"forecast"` (`true`, `"countdown"`, or `"time"`) on `quota`, `fiveHourPct`, and `weeklyPct` to estimate when quota will run out at the current window burn rate, auto-hiding when pace lasts until reset, during the first 10 minutes, or on narrow terminals, with interactive editor and schema support (#251)
@@ -48,6 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **TUI & meter polish**: resolved distinct host OS icons (`os` vs `ram`) in the widget list, unified tab keycap hints across active/inactive tabs, aligned footer hints across `Settings` and sub-tabs, grouped `Settings` panel notes, replaced the stale `docs/configuration.md` option note and `r` pace-marker wording in `Edit`, unified `Classic` meters on `┃` instead of `│` dividers, and fixed `dark-mono` healthy `context` widgets using gray (`colors.context`) in `Lines` / `Classic` (#275)
 - **Grapheme-safe width, truncation, Backspace, and OSC 8 cleanup**: measure and truncate ZWJ emoji (`👩‍💻`), flags (`🇫🇷`), skin-tone modifiers (`👍🏽`), VS16 emoji (`❤️`), keycaps (`1️⃣`), Hangul jamo, and combining marks as whole grapheme clusters across `visibleWidth()`, `clipText()`, `truncateLines()`, `sanitizeExecOutput()`, and interactive editor text editing (Backspace and `maxLength`), and close open OSC 8 hyperlinks before appending the ellipsis on truncation (#247)
 - **Escape stripping and zero-width characters**: `stripControl()` now removes escapes with intermediate bytes (`ESC ( B` from `tput sgr0`, `ESC # 8`), DCS / SOS / PM / APC control strings with their body, and 8-bit C1 control strings and CSI, so `exec` output and payload text no longer leave `(B` or `0;1|x` in the bar; invisible format characters (zero-width space, bidi marks, word joiner, BOM, tag and ideographic variation selectors) now count as zero columns when fitting the bar (#248)
 - **Home path boundary and token rollover rounding**: require a path-separator boundary in `homePath()` so sibling directories like `/home/alex` do not match `/home/al`, and roll `formatTokens()` over to `"1.0M"` at `999,950` instead of formatting `999,950..999,999` as `"1000.0K"` (#246)
@@ -60,6 +62,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **French (`fr`) and Spanish (`es`) translations**: fixed the nested blockquote, untranslated `Mise à jour` comments, outdated security statement, and `5h/7j` / `repère de rythme` consistency in `README.fr.md`, added the missing overview and plugin sections across `README.fr.md` and `README.es.md`, and refined the live-preview editor phrasing on `/fr/` and `/es/` (#229)
 - **Japanese (`ja`) translation**: changed `now` (`今すぐ` -> `今`) and documented the 80-column width constraint on `subagent`/`subagents` in `src/lib/i18n.js`, completed the untranslated widget and command rows and missing sections in `README.ja.md`, and localized the header `Docs` nav label on `/ja/` (#227)
 - **Simplified Chinese (`zh-CN`) and Korean (`ko`) translations**: fixed preset, context-window, and language-setting descriptions in `README.ko.md` and `/ko/`, completed untranslated widget and command rows in `README.zh-CN.md`, and localized the header `Docs` nav label (#225)
+
+### Removed
+
+- **`line`, `geometric`, and `bars` meter styles**: streamlined `METER_STYLES` to 9 distinct styles (`pips`, `cells`, `dots`, `blocks`, `shade`, `squares`, `braille`, `rings`, `ramp`); legacy configs with removed IDs safely fall back to layout defaults (#275)
 
 ## [1.11.4] - 2026-11-13
 

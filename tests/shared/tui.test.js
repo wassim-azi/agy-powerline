@@ -16,8 +16,11 @@ const {
   sampleData,
 } = require("../../src/lib/shared");
 const { GRADIENT_ORDER } = require("../../src/lib/themes");
+const { SETTINGS_ROWS } = require("../../src/cli/tui/settings-screen");
 const { visibleWidth } = require("../../src/lib/formatters");
 const { WIDGET_CATALOG } = require("../../src/lib/catalog");
+
+const settingIdx = (id) => SETTINGS_ROWS.findIndex((row) => row.id === id);
 
 const SCREENS = [
   "main",
@@ -48,6 +51,7 @@ async function run() {
   testTabKeys();
   await testSettingsInteractions();
   await testPreviewControls();
+  await testModernUiPolish();
 }
 
 // Numbers, badges and the preview title say what is a widget, what is in
@@ -179,7 +183,7 @@ function testWidgetEditor() {
       /Caution at.? +25%/.test(bar) &&
       /Danger at.? +default \(10%\)/.test(bar) &&
       /Pace marker/.test(bar) &&
-      /Meter.? +theme default/.test(bar) &&
+      /Meter.? +default \(pips\)/.test(bar) &&
       /Format.? +countdown/.test(edit(2)) &&
       /Text.? +Prod/.test(edit(3)) &&
       /Command.? +echo hi/.test(edit(4))
@@ -252,7 +256,20 @@ function testEveryScreenFits() {
   for (const screen of SCREENS) {
     for (const [columns, rows] of SIZES) {
       for (const ascii of [false, true]) {
-        const cursors = screen === "settings" ? [0, 1, 2, 3, 7, 10, 12, 13] : [0, 12];
+        const cursors =
+          screen === "settings"
+            ? [
+                0,
+                1,
+                2,
+                3,
+                settingIdx("meterStyle"),
+                settingIdx("sensitivity"),
+                settingIdx("maxWidth"),
+                settingIdx("quotaMode"),
+                settingIdx("overflow"),
+              ]
+            : [0, 12];
         for (const cursor of cursors) {
           const out = renderFrame({ config: { ...full, ascii }, screen, columns, rows, cursor });
           const height = out.split("\n").length;
@@ -261,6 +278,23 @@ function testEveryScreenFits() {
             overflows.push(`${screen} ${size}: ${widest(out)} wide, ${height} tall`);
           }
         }
+      }
+    }
+  }
+  for (const [columns, rows] of SIZES) {
+    for (const ascii of [false, true]) {
+      const helpOut = renderFrame({
+        config: { ...full, ascii },
+        screen: "main",
+        columns,
+        rows,
+        showHelp: true,
+      });
+      const helpHeight = helpOut.split("\n").length;
+      if (widest(helpOut) > columns - 1 || helpHeight > rows - 1) {
+        overflows.push(
+          `help ${columns}x${rows}${ascii ? "/ascii" : ""}: ${widest(helpOut)} wide, ${helpHeight} tall`
+        );
       }
     }
   }
@@ -369,7 +403,8 @@ function testWidthTiers() {
   record(
     "the list and the details panel share a wide window evenly, with the widget drawn alone",
     Math.abs(left + 1 - right) <= 1 &&
-      (wide.match(/Gemini 4 Hydrogen \(High\)/g) || []).length === 2 &&
+      (wide.match(/Gemini 4 Hydrogen \(High\)/g) || []).length >= 2 &&
+      /Lines layout/.test(wide) &&
       /the model in use/.test(wide),
     `${left + 1} / ${right}`
   );
@@ -409,7 +444,15 @@ function testAsciiAndNoColor() {
     }
   }
 
-  for (const cursor of [0, 1, 2, 3, 7, 10]) {
+  for (const cursor of [
+    0,
+    1,
+    2,
+    3,
+    settingIdx("meterStyle"),
+    settingIdx("sensitivity"),
+    settingIdx("maxWidth"),
+  ]) {
     const out = strip(
       renderFrame({
         config: { ...defaultConfig(), ascii: true, gradient: "sunset" },
@@ -500,7 +543,15 @@ function testScreenContent() {
         thresholds: { quotaWarn: 25, quotaCrit: 12, contextWarn: 65, contextCrit: 85 },
       },
       screen: "settings",
-      cursor: 7,
+      cursor: settingIdx("sensitivity"),
+      columns: 160,
+    })
+  );
+  const meterStyleDetails = strip(
+    renderFrame({
+      config: { ...defaultConfig(), meterStyle: "squares" },
+      screen: "settings",
+      cursor: settingIdx("meterStyle"),
       columns: 160,
     })
   );
@@ -508,7 +559,7 @@ function testScreenContent() {
     renderFrame({
       config: { ...defaultConfig(), maxWidth: 110 },
       screen: "settings",
-      cursor: 10,
+      cursor: settingIdx("maxWidth"),
       columns: 160,
     })
   );
@@ -516,7 +567,7 @@ function testScreenContent() {
     renderFrame({
       config: { ...defaultConfig(), alignment: "center" },
       screen: "settings",
-      cursor: 11,
+      cursor: settingIdx("alignment"),
       columns: 160,
     })
   );
@@ -524,7 +575,7 @@ function testScreenContent() {
     renderFrame({
       config: { ...defaultConfig(), quotaMode: "used" },
       screen: "settings",
-      cursor: 12,
+      cursor: settingIdx("quotaMode"),
       columns: 160,
     })
   );
@@ -532,12 +583,12 @@ function testScreenContent() {
     renderFrame({
       config: { ...defaultConfig(), overflow: "wrap" },
       screen: "settings",
-      cursor: 13,
+      cursor: settingIdx("overflow"),
       columns: 160,
     })
   );
   record(
-    "settings details panel explains clock format, reset format, gradient, sensitivity, maxWidth, alignment, quotaMode and overflow options",
+    "settings details panel explains clock format, reset format, gradient, meterStyle, sensitivity, maxWidth, alignment, quotaMode and overflow options",
     /● auto \(locale\)/.test(clockDetails) &&
       /○ 24h/.test(clockDetails) &&
       /○ 12h/.test(clockDetails) &&
@@ -547,6 +598,9 @@ function testScreenContent() {
       /Bar gradient.? +custom \(#ff5f6d-#ffc371\)/.test(gradientDetails) &&
       /● custom \(#ff5f6d-#ffc371\)/.test(gradientDetails) &&
       /Aurora/.test(gradientDetails) &&
+      /Meter style.? +squares/.test(meterStyleDetails) &&
+      /● squares/.test(meterStyleDetails) &&
+      /■■■■■□□□□□/.test(meterStyleDetails) &&
       /Warning sensitivity.? +custom/.test(sensitivityCustom) &&
       /Active: quota 25% \/ 12% left, context 65% \/ 85% used/.test(sensitivityCustom) &&
       /● custom +quota 25%\/12%, context 65%\/85%/.test(sensitivityCustom) &&
@@ -739,19 +793,17 @@ async function testSettingsInteractions() {
     contextCrit: 85,
     blink: true,
   };
-  const keepCustom = await runConfigureKeys({ thresholds: customThresholds }, [
-    "i",
-    ...Array(7).fill(DOWN),
-  ]);
+  const sensDown = Array(settingIdx("sensitivity")).fill(DOWN);
+  const keepCustom = await runConfigureKeys({ thresholds: customThresholds }, ["i", ...sensDown]);
   const toEarly = await runConfigureKeys({ thresholds: customThresholds }, [
     "i",
-    ...Array(7).fill(DOWN),
+    ...sensDown,
     "\r",
     "\r",
   ]);
   const resetSens = await runConfigureKeys(
     { thresholds: { quotaWarn: 40, quotaCrit: 20, contextWarn: 60, contextCrit: 80, blink: true } },
-    ["i", ...Array(7).fill(DOWN), "x"]
+    ["i", ...sensDown, "x"]
   );
   record(
     "Settings Warning sensitivity preserves custom thresholds and blink, cycles presets, and resets",
@@ -768,7 +820,7 @@ async function testSettingsInteractions() {
   );
 
   // #210: Max bar width cycles full -> 100 -> 120 -> 140 -> 160 -> full and resets on x.
-  const mwSteps = ["i", ...Array(10).fill(DOWN)];
+  const mwSteps = ["i", ...Array(settingIdx("maxWidth")).fill(DOWN)];
   const mwTo100 = await runConfigureKeys({}, [...mwSteps, "\r"]);
   const mwTo120 = await runConfigureKeys({ maxWidth: 100 }, [...mwSteps, "\r"]);
   const mwCustomToFull = await runConfigureKeys({ maxWidth: 110 }, [...mwSteps, "\r"]);
@@ -782,7 +834,7 @@ async function testSettingsInteractions() {
   );
 
   // #214: Row alignment cycles left -> center -> spread -> left and resets on x.
-  const alignSteps = ["i", ...Array(11).fill(DOWN)];
+  const alignSteps = ["i", ...Array(settingIdx("alignment")).fill(DOWN)];
   const alignCenter = await runConfigureKeys({}, [...alignSteps, "\r"]);
   const alignSpread = await runConfigureKeys({ alignment: "center" }, [...alignSteps, "\r"]);
   const alignReset = await runConfigureKeys({ alignment: "spread" }, [...alignSteps, "x"]);
@@ -800,7 +852,7 @@ async function testSettingsInteractions() {
   );
 
   // #211: Quota display cycles remaining -> used -> remaining, updates preview, and resets on x.
-  const qmSteps = ["i", ...Array(12).fill(DOWN)];
+  const qmSteps = ["i", ...Array(settingIdx("quotaMode")).fill(DOWN)];
   const qmUsed = await runConfigureKeys({}, [...qmSteps, "\r"]);
   const qmBack = await runConfigureKeys({ quotaMode: "used" }, [...qmSteps, "\r"]);
   const qmReset = await runConfigureKeys({ quotaMode: "used" }, [...qmSteps, "x"]);
@@ -814,7 +866,7 @@ async function testSettingsInteractions() {
   );
 
   // #215: Row overflow cycles fit -> wrap -> fit and resets on x.
-  const ovSteps = ["i", ...Array(13).fill(DOWN)];
+  const ovSteps = ["i", ...Array(settingIdx("overflow")).fill(DOWN)];
   const ovWrap = await runConfigureKeys({}, [...ovSteps, "\r"]);
   const ovBack = await runConfigureKeys({ overflow: "wrap" }, [...ovSteps, "\r"]);
   const ovReset = await runConfigureKeys({ overflow: "wrap" }, [...ovSteps, "x"]);
@@ -856,9 +908,11 @@ async function testPreviewControls() {
   const wideBar = strip(renderFrame({ config: wideRowConfig, columns: 160 }));
   const narrowed = strip(renderFrame({ config: wideRowConfig, columns: 160, previewWidth: 60 }));
 
+  const previewHeader = (frame) =>
+    frame.split("\n").find((line) => /Live preview/.test(line)) || "";
   record(
     "preview scenario option renders alerts and agent & modes without changing default output",
-    !/Near limits/.test(normal) &&
+    !/Near limits/.test(previewHeader(normal)) &&
       /Live preview .* · Near limits/.test(alerts) &&
       /91\.0%/.test(alerts) &&
       /8\.0% rem/.test(alerts) &&
@@ -906,6 +960,123 @@ async function testPreviewControls() {
   record(
     "typing - or . while filtering widgets in Add stays search input instead of switching preview",
     !/Preview width:/.test(addFrame) && !/Preview scenario:/.test(addFrame)
+  );
+}
+
+async function testModernUiPolish() {
+  const DOWN = "\x1b[B";
+
+  // Row grouping, distinct OS vs RAM icons, uniform tab keys, and stage status pills.
+  const mainFull = strip(renderFrame({ config: defaultConfig(), columns: 160 }));
+  const mainOsRam = strip(
+    renderFrame({
+      config: { ...defaultConfig(), widgets: [{ id: "ram" }, { id: "lineBreak" }, { id: "os" }] },
+      columns: 160,
+    })
+  );
+  const mainAscii = strip(
+    renderFrame({ config: { ...defaultConfig(), ascii: true }, columns: 160 })
+  );
+  record(
+    "Your widgets groups rows visually and distinguishes OS and RAM icons",
+    /── Row 1 ──/.test(mainFull) &&
+      /── Row 2 ──/.test(mainFull) &&
+      /── Row 1 ──/.test(mainOsRam) &&
+      /── Row 2 ──/.test(mainOsRam) &&
+      /-- Row 1 --/.test(mainAscii) &&
+      /💻\s+RAM Usage/.test(mainOsRam) &&
+      !/💻\s+Operating System/.test(mainOsRam)
+  );
+
+  record(
+    "active and inactive tabs keep keycap hints and every tab shares help & quit footer keys",
+    /Widgets w/.test(mainFull) &&
+      ["presets", "themes", "layout", "powerline", "settings"].every((screen) => {
+        const out = strip(renderFrame({ config: defaultConfig(), screen, columns: 160 }));
+        return /\?.*all keys/.test(out) && /q.*save & quit/.test(out);
+      })
+  );
+
+  // Stale OPTIONS hint gone, quick actions + multi-state mini-preview present.
+  const quotaDetails = strip(renderFrame({ config: defaultConfig(), cursor: 4, columns: 160 }));
+  record(
+    "widget details show Enter customization hint, multi-state preview, and quick actions strip",
+    !/docs\/configuration\.md/.test(quotaDetails) &&
+      /Press Enter to customize/.test(quotaDetails) &&
+      (/Near limits/.test(quotaDetails) || /Lines layout/.test(quotaDetails)) &&
+      /enter Edit · ⇧↑↓ Reorder/.test(quotaDetails)
+  );
+
+  // Stage right-border status + light-theme truecolor background tinting with 256/none/ASCII fallback.
+  const lightRaw = renderFrame({
+    config: { ...defaultConfig(), theme: "light-paper" },
+    columns: 120,
+    color: "truecolor",
+  });
+  const light256 = renderFrame({
+    config: { ...defaultConfig(), theme: "light-paper" },
+    columns: 120,
+    color: "256",
+  });
+  const lightPlain = renderFrame({
+    config: { ...defaultConfig(), theme: "light-paper" },
+    columns: 120,
+    color: "none",
+  });
+  const lightAscii = renderFrame({
+    config: { ...defaultConfig(), theme: "light-paper", ascii: true },
+    columns: 120,
+    color: "truecolor",
+  });
+  record(
+    "Live preview shows stage status on its top border and tints truecolor canvas for light themes",
+    /Scenario · Normal \(, \/ \.\) {2}Width · full \(- \/ \+\)/.test(strip(lightRaw)) &&
+      lightRaw.includes("\x1b[48;2;245;245;240m") &&
+      !light256.includes("\x1b[48;2;245;245;240m") &&
+      !/\x1b\[[34]8;/.test(lightPlain) &&
+      !lightAscii.includes("\x1b[48;2;245;245;240m")
+  );
+
+  // dark-mono healthy context renders gray (#c8c8c8) rather than fiveHour green (#73c991).
+  const monoContext = renderStatusline(
+    sampleData(),
+    { ...defaultConfig(), theme: "dark-mono", layout: "lines", widgets: [{ id: "context" }] },
+    { color: "truecolor", env: {} }
+  );
+  record(
+    "dark-mono renders healthy Context Bar in context gray rather than fiveHour green",
+    monoContext.includes("\x1b[38;2;200;200;200m") &&
+      !monoContext.includes("\x1b[38;2;115;201;145m")
+  );
+
+  // Settings Meter style cycling & reset, Space in Edit, ? modal, / filter, and SGR mouse click/wheel.
+  const msSteps = ["i", ...Array(settingIdx("meterStyle")).fill(DOWN)];
+  const msPips = await runConfigureKeys({}, [...msSteps, "\r"]);
+  const msReset = await runConfigureKeys({ meterStyle: "rings" }, [...msSteps, "x"]);
+  const editSpace = await runConfigureKeys({ widgets: [{ id: "model" }] }, [
+    "\r",
+    ...Array(4).fill(DOWN),
+    " ",
+  ]);
+  const helpFlow = await runConfigureKeys({}, ["?", "\x1b"]);
+  const themeFilter = await runConfigureKeys({}, ["t", "/", "d", "r", "a", "c", "\r"]);
+  const presetFilter = await runConfigureKeys({}, ["o", "/", "q", "u", "o", "\r"]);
+  const mouseFlow = await runConfigureKeys({ widgets: [{ id: "model" }, { id: "cwd" }] }, [
+    "\x1b[<65;10;12M", // wheel down -> cursor 1 (cwd)
+    "\x1b[<0;18;5M", // left click Presets tab (row 5, col 18)
+  ]);
+
+  record(
+    "Settings meterStyle cycles & resets, Space cycles Edit, ? shows help, / filters Themes & Presets, and SGR mouse navigates",
+    msPips.saved.meterStyle === "pips" &&
+      msReset.saved.meterStyle === undefined &&
+      editSpace.saved.widgets[0].short === true &&
+      /Keyboard & Mouse Shortcuts/.test(helpFlow.frames[0] || "") &&
+      !/Keyboard & Mouse Shortcuts/.test(helpFlow.frames[1] || "") &&
+      themeFilter.saved.theme === "dark-dracula" &&
+      presetFilter.saved.widgets.some((w) => w.id === "fiveHourBar") &&
+      /Working Directory/.test(mouseFlow.frames[0] || "") &&
+      /Presets/.test(mouseFlow.frames[1] || "")
   );
 }
 

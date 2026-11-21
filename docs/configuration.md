@@ -188,7 +188,7 @@ By default (`"quotaMode": "remaining"`), quota widgets (`quota`, `fiveHourBar`, 
 Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"meterStyle"` picks another look for every meter, and `"meter"` on a meter widget (`fiveHourBar`, `weeklyBar`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`, `context`) for that one; the widget's value wins. The editor sets the per-widget one (Enter on a meter widget, then **Meter**).
 
 ```json
-{ "meterStyle": "geometric", "widgets": [{ "id": "fiveHourBar", "meter": "blocks" }] }
+{ "meterStyle": "squares", "widgets": [{ "id": "fiveHourBar", "meter": "blocks" }] }
 ```
 
 | Id                  | Filled                       | Empty                  | Example (50%)           |
@@ -198,11 +198,8 @@ Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"m
 | `dots` (Lines' own) | `●`                          | `●` in a track color   | the default Lines meter |
 | `blocks`            | `█`                          | `░`                    | `█████░░░░░`            |
 | `shade`             | `▓`                          | `░`                    | `▓▓▓▓▓░░░░░`            |
-| `line`              | `━`                          | `─`                    | `━━━━━─────`            |
-| `geometric`         | `▰`                          | `▱`                    | `▰▰▰▰▰▱▱▱▱▱`            |
 | `squares`           | `■`                          | `□`                    | `■■■■■□□□□□`            |
 | `braille`           | `⣿`                          | `⣀`                    | `⣿⣿⣿⣿⣿⣀⣀⣀⣀⣀`            |
-| `bars`              | `▮`                          | `▯`                    | `▮▮▮▮▮▯▯▯▯▯`            |
 | `rings`             | `●`                          | `○`, faded             | `●●●●●○○○○○`            |
 | `ramp`              | `█`, ok to caution to danger | `░` in the track color | `█████░░░░░`            |
 
@@ -210,7 +207,7 @@ Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"m
 - `pips` marks the pace with a larger dot `●` instead of `┃`. In Pills it draws on the pill's color: filled dots in the pill's text color, empty ones in the pill's color moved toward it until they reach a 3:1 contrast, so both show on bright and deep pills alike.
 - `ramp` shades each filled cell by its place along the meter, from the theme's ok color through caution to danger, so a fuller meter ends in a warmer color; `rings` keeps the fill's color and fades the empty rings toward the track. Both show their colors in Lines and Classic.
 - In Pills the other glyph styles draw on the pill's color: filled glyphs in the pill's text color, empty ones dimmed. In Lines the filled part keeps its ok, caution or danger color and the empty part the track color.
-- In Classic every style draws its empty part in the same color as the fill, with a thin `│` as the pace marker.
+- In Classic every style draws its empty part in the same color as the fill, with a heavy `┃` (or `●` for `pips`) as the pace marker.
 - Meters keep their width (12 columns in Pills, 25 in Lines and Classic, 12 when fitted to a narrow terminal) and the pace marker stays where it is.
 - ASCII mode always draws `#` and `-` (and `|` for the pace marker), whatever the style.
 

@@ -137,8 +137,8 @@ function cases() {
     { color: "truecolor" },
   ]);
   list.push([
-    "lines · meter geometric",
-    { ...base, layout: "lines", meterStyle: "geometric" },
+    "lines · meter squares",
+    { ...base, layout: "lines", meterStyle: "squares" },
     { color: "truecolor" },
   ]);
   list.push([

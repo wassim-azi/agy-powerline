@@ -190,7 +190,7 @@ async function defaultInteractiveCommand(options = {}) {
 
     if (isFresh) {
       installed = true;
-      flash = "Installed! Press i for ASCII";
+      flash = "Installed! Try Presets (o) or Themes (t)";
     } else {
       updatedScripts = writeScripts;
       if (updatedScripts && !updatedSettings) {
