@@ -16,7 +16,7 @@ Yes: Windows, macOS, Linux and WSL. On Windows agy runs the bar through `cmd /c`
 
 ## Do I need to restart agy?
 
-Once, after installing, so agy reads the new `statusLine` setting. After that, changes you make with `configure`, `theme`, `layout` or the other commands show on the bar's next refresh, without a restart.
+Once, after installing, so agy reads the new `statusLine` setting. After that, changes you make with `npx agy-powerline`, `theme`, `layout` or the other commands show on the bar's next refresh, without a restart.
 
 ## Does it send any data anywhere?
 
@@ -32,7 +32,7 @@ The Gemini 5-hour and 7-day quotas, the third-party (Claude and GPT) 5-hour and 
 
 ## The bar shows boxes or question marks. How do I fix it?
 
-Your terminal font lacks the powerline glyphs. Install a [Nerd Font](https://www.nerdfonts.com/), or turn on **ASCII mode** in the Settings tab (`i`) in `configure`. See [Fix broken powerline symbols](guides/nerd-font-symbols.md).
+Your terminal font lacks the powerline glyphs. Install a [Nerd Font](https://www.nerdfonts.com/), or turn on **ASCII mode** in the Settings tab (`i`) in the editor (`npx agy-powerline`). See [Fix broken powerline symbols](guides/nerd-font-symbols.md).
 
 ## Why does `render --demo` show widgets my live bar doesn't?
 

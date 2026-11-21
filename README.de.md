@@ -166,7 +166,7 @@ Die eigenen Bezeichnungen der Leiste (`Kontingent`, `7T`, `übr.`, die Einheiten
 npx agy-powerline init --language de
 ```
 
-oder `"language": "de"` in `statusline.config.json` (Tab `Settings` über `i` in `configure`). Modellname, Branch und alles, was agy übergibt, bleiben unverändert; die CLI-Befehle und `configure` bleiben auf Englisch. Details in der [Konfigurationsdokumentation](docs/configuration.md#language).
+oder `"language": "de"` in `statusline.config.json` (Tab `Settings` über `i` im interaktiven Editor). Modellname, Branch und alles, was agy übergibt, bleiben unverändert; die CLI-Befehle und der interaktive Editor bleiben auf Englisch. Details in der [Konfigurationsdokumentation](docs/configuration.md#language).
 
 ## Widgets
 
@@ -204,7 +204,7 @@ Ein Widget ohne anzuzeigende Daten blendet sich automatisch aus. Widgets lassen 
 | -------------------------------------------------- | -------------------------------------------------------------------------------- |
 | `npx agy-powerline`                                | Installieren (falls nötig), veraltete Skripte aktualisieren und Editor öffnen    |
 | `npx agy-powerline init [--yes]`                   | Statuszeile installieren oder aktualisieren (unterstützt `--preset`, `--yes`, …) |
-| `npx agy-powerline configure`                      | Den Editor öffnen (Alias `config`)                                               |
+| `npx agy-powerline configure`                      | Den Editor öffnen (veraltet; Alias `config` – nutze `npx agy-powerline`)         |
 | `npx agy-powerline preset <name>`                  | Eine Vorlage anwenden (`--list` zeigt alle an)                                   |
 | `npx agy-powerline theme <name>`                   | Theme wechseln (`--list`, `--gallery`)                                           |
 | `npx agy-powerline gradient <name>`                | Jede Zeile mit einem Farbverlauf einfärben (`--list`, `off`)                     |
@@ -234,7 +234,7 @@ Führe zuerst `npx agy-powerline doctor` aus: Der Befehl prüft die Installation
 
 ## Datenschutz und Sicherheit
 
-- **Keine Netzwerkaufrufe, keine Telemetrie.** Alle Angaben stammen aus den Daten, die agy an die Statuszeile übergibt, aus `.git` und von deinem Betriebssystem. Der einzige externe Link ist `g` in `configure`, womit die GitHub-Seite im Browser geöffnet wird.
+- **Keine Netzwerkaufrufe, keine Telemetrie.** Alle Angaben stammen aus den Daten, die agy an die Statuszeile übergibt, aus `.git` und von deinem Betriebssystem. Der einzige externe Link ist `g` im interaktiven Editor, womit die GitHub-Seite im Browser geöffnet wird.
 - **Deine Einstellungen sind sicher.** `init` und `uninstall` legen ein Backup von `settings.json` an und verweigern Änderungen an einer Datei, die nicht geparst werden kann.
 - **Nichts wird ausgeführt, was du nicht selbst hinzufügst.** Abgesehen von kurzen `git`-Aufrufen für Ahead/Behind-Zähler sowie die Datei- und Zeilenzähler der von dir hinzugefügten Git-Widgets führt die Leiste ausschließlich Befehle aus `exec`-Widgets aus, die du selbst konfigurierst.
 - **Null Laufzeitabhängigkeiten**, veröffentlicht aus der CI mit [npm-Provenance-Nachweis](https://docs.npmjs.com/generating-provenance-statements).

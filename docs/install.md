@@ -17,9 +17,9 @@ What `npx agy-powerline` and `npx agy-powerline init` do, where files go, and ho
 
 In an interactive terminal, running `npx agy-powerline` with no arguments handles both installation and configuration in one step:
 
-- **First install:** checks Node/WSL and Windows path safety, verifies `settings.json` is valid JSON, copies the runtime scripts to `~/.agy-powerline`, writes a default `statusline.config.json` (with `$schema`), backs up and wires `settings.json` (asking before replacing an existing `statusLine`), and opens `configure` right away. After you quit the editor, it prints where files were written and reminds you to restart `agy`.
-- **Already installed:** verifies the scripts and `settings.json` entry, refreshes `statusline.js`, `statusline.cmd` (on Windows), and `install.json` if the CLI version is newer (without touching `statusline.config.json` or any appended render flags), aborts cleanly if `statusline.config.json` has a JSON error, and opens `configure`.
-- **Partial or broken install:** repairs missing scripts or `settings.json` wiring (respecting existing `statusline.config.json` and `settings.json` prompts) before opening `configure`.
+- **First install:** checks Node/WSL and Windows path safety, verifies `settings.json` is valid JSON, copies the runtime scripts to `~/.agy-powerline`, writes a default `statusline.config.json` (with `$schema`), backs up and wires `settings.json` (asking before replacing an existing `statusLine`), and opens the interactive editor right away. After you quit the editor, it prints where files were written and reminds you to restart `agy`.
+- **Already installed:** verifies the scripts and `settings.json` entry, refreshes `statusline.js`, `statusline.cmd` (on Windows), and `install.json` if the CLI version is newer (without touching `statusline.config.json` or any appended render flags), aborts cleanly if `statusline.config.json` has a JSON error, and opens the interactive editor.
+- **Partial or broken install:** repairs missing scripts or `settings.json` wiring (respecting existing `statusline.config.json` and `settings.json` prompts) before opening the interactive editor.
 - **Non-TTY / piped input:** when stdin is piped JSON, `npx agy-powerline` renders the bar and exits; when stdout is redirected (not a TTY), it prints `--help` instead of starting the TUI. Pass `--help` (or `-h` / `help`) to view all commands and options.
 
 ## What `init` does
@@ -28,12 +28,12 @@ In an interactive terminal, running `npx agy-powerline` with no arguments handle
 
 On a first install in a terminal (no `statusline.config.json` yet, no `--yes`), `init` asks four questions, each with a preview of the bar it gives:
 
-1. **Symbols:** a sample of the bar and "Do these shapes look right? (Y/n)". Answer `n` if you see boxes or question marks: your terminal's font lacks the Powerline symbols, so `init` turns on [ASCII mode](configuration.md#terminals-ascii-mode-colors-narrow-windows) (`"ascii": true`) and shows the sample again in plain text. Enter keeps the symbols. The Settings tab (`i`) in `configure` changes **ASCII mode** later.
+1. **Symbols:** a sample of the bar and "Do these shapes look right? (Y/n)". Answer `n` if you see boxes or question marks: your terminal's font lacks the Powerline symbols, so `init` turns on [ASCII mode](configuration.md#terminals-ascii-mode-colors-narrow-windows) (`"ascii": true`) and shows the sample again in plain text. Enter keeps the symbols. The Settings tab (`i`) in `npx agy-powerline` changes **ASCII mode** later.
 2. **Preset:** `default`, `compact`, `agent`, `git`, `tokens`, `quotas` or `full`. Enter keeps `default`.
 3. **Layout:** `pills` or `lines`. Enter keeps `pills`.
 4. **Terminal background:** dark, light or color-blind, then the themes for it (Enter keeps `dark-aurora`, `light-paper` or `colorblind-dark`).
 
-Answer the last three with the number of a choice. `npx agy-powerline preset`, `layout`, `theme` and `configure` change your choice later. Without a terminal, or with `--yes`, nothing is asked and you get the default bar, with ASCII mode off. Running `init` again never replaces your config.
+Answer the last three with the number of a choice. `npx agy-powerline preset`, `layout`, `theme` and `npx agy-powerline` change your choice later. Without a terminal, or with `--yes`, nothing is asked and you get the default bar, with ASCII mode off. Running `init` again never replaces your config.
 
 For scripted installs, `--preset <id>`, `--layout <id>` and `--theme <id>` set those choices and skip their question, with or without `--yes`. The theme also takes `dark`, `light` and `colorblind`. `--language <code>` sets the [language](configuration.md#language) of the bar's own words. Each value is checked before anything is written: an unknown one stops `init` with the list of valid ids. With an existing config, the flags change only those settings in it, and `init` says so.
 
@@ -81,7 +81,7 @@ agy plugin install https://github.com/wassim-azi/agy-powerline   # or /plugin in
 - **`agy-powerline-setup`** checks that Node.js is 20 or newer, runs `npx -y agy-powerline@latest init --yes`, then `npx agy-powerline doctor`, sums up the result and asks you to restart agy once. If npx can't reach npm, it runs the same commands from the plugin's own copy instead ([Install without npm](#install-without-npm)). Run it with `/agy-powerline-setup`, or just ask agy to set up agy-powerline.
 - **`agy-powerline-customize`** maps requests such as "make it light", "show only one line" or "add a gradient" to the `theme`, `preset`, `layout`, `caps`, `gradient`, `export` and `import` commands: it lists the choices first, then applies one and shows the preview.
 
-The skills run commands through agy's shell tool, so agy asks you before each one, as for any command. They never edit `settings.json` by hand, never start `configure` (an interactive editor) and never pass `--allow-exec` to `import` without your yes to the commands shown.
+The skills run commands through agy's shell tool, so agy asks you before each one, as for any command. They never edit `settings.json` by hand, never start `npx agy-powerline` without arguments (an interactive editor) and never pass `--allow-exec` to `import` without your yes to the commands shown.
 
 agy copies the plugin to `~/.gemini/config/plugins/agy-powerline/`. The bar itself still runs from `~/.agy-powerline`, where `init` installs it.
 

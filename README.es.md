@@ -23,7 +23,7 @@
 Consulta de un vistazo tu modelo, las cuotas de Gemini (5h/7d), Claude/GPT y Argon, la ventana de contexto, la rama de Git y mucho más. Elige widgets, temas y diseño desde un editor interactivo. Un solo comando para instalar, sin dependencias.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="configure de agy-powerline: añade la cuota semanal de Argon escribiendo argon, luego navega por los preajustes, temas y diseños con una vista previa en tiempo real de la barra, y abre la pestaña Powerline" width="850">
+  <img src="assets/demo.gif" alt="editor interactivo de agy-powerline: añade la cuota semanal de Argon escribiendo argon, luego navega por los preajustes, temas y diseños con una vista previa en tiempo real de la barra, y abre la pestaña Powerline" width="850">
 </p>
 
 ## ¿Por qué agy-powerline?
@@ -166,7 +166,7 @@ Las palabras propias de la barra (`Modelo`, `Reinicio`, `rest.`, `entrada`/`sali
 npx agy-powerline init --language es
 ```
 
-o `"language": "es"` en `statusline.config.json` (`Settings` con `i` en `configure`). El nombre del modelo, la rama y todo lo que envía agy quedan tal cual; los comandos y `configure` siguen en inglés. Detalles en la [documentación de configuración](docs/configuration.md#language).
+o `"language": "es"` en `statusline.config.json` (`Settings` con `i` en el editor interactivo). El nombre del modelo, la rama y todo lo que envía agy quedan tal cual; los comandos y el editor interactivo siguen en inglés. Detalles en la [documentación de configuración](docs/configuration.md#language).
 
 ## Widgets
 
@@ -204,7 +204,7 @@ Un widget sin nada que mostrar se oculta automáticamente. Los widgets se pueden
 | -------------------------------------------------- | ---------------------------------------------------------------------- |
 | `npx agy-powerline`                                | Instala (si hace falta), actualiza scripts y abre el editor            |
 | `npx agy-powerline init [--yes]`                   | Instala o actualiza la barra de estado (admite `--preset`, `--yes`, …) |
-| `npx agy-powerline configure`                      | Abre el editor (alias `config`)                                        |
+| `npx agy-powerline configure`                      | Abre el editor (obsoleto; alias `config`, usa `npx agy-powerline`)     |
 | `npx agy-powerline preset <name>`                  | Aplica un preajuste (`--list` para verlos)                             |
 | `npx agy-powerline theme <name>`                   | Cambia el tema (`--list`, `--gallery`)                                 |
 | `npx agy-powerline gradient <name>`                | Colorea cada fila con un gradiente (`--list`, `off`)                   |
@@ -234,7 +234,7 @@ Ejecuta primero `npx agy-powerline doctor`: comprueba la instalación y te indic
 
 ## Privacidad y seguridad
 
-- **Sin llamadas de red ni telemetría.** Todo proviene de los datos que agy envía a la barra, de `.git` y de tu sistema operativo. El único enlace saliente es la tecla `g` en `configure`, que abre la página de GitHub en tu navegador.
+- **Sin llamadas de red ni telemetría.** Todo proviene de los datos que agy envía a la barra, de `.git` y de tu sistema operativo. El único enlace saliente es la tecla `g` en el editor interactivo, que abre la página de GitHub en tu navegador.
 - **Tus configuraciones están a salvo.** `init` y `uninstall` crean una copia de seguridad de `settings.json` y se niegan a editar un archivo que no puedan analizar.
 - **Nada se ejecuta a menos que tú lo añadas.** Aparte de llamadas rápidas a `git` para recuentos de ahead/behind y para el número de archivos y líneas de los widgets de git que añadas, los únicos comandos que la barra ejecuta son los widgets `exec` que configures tú mismo.
 - **Cero dependencias en tiempo de ejecución**, publicado desde CI con [procedencia de npm](https://docs.npmjs.com/generating-provenance-statements).

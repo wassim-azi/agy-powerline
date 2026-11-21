@@ -23,7 +23,7 @@
 Consultez d’un coup d’œil le modèle utilisé, les quotas Gemini sur 5h/7j, ceux de Claude/GPT et d’Argon, la fenêtre de contexte, la branche Git et bien plus encore. Choisissez les widgets, les thèmes et la disposition dans un éditeur interactif. Une seule commande suffit pour l’installation, sans aucune dépendance.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="configure d’agy-powerline : ajout du quota hebdomadaire d’Argon en tapant argon, puis parcours des préréglages, des thèmes et des dispositions avec un aperçu en direct de la barre, et ouverture de l’onglet Powerline" width="850">
+  <img src="assets/demo.gif" alt="éditeur interactif d’agy-powerline : ajout du quota hebdomadaire d’Argon en tapant argon, puis parcours des préréglages, des thèmes et des dispositions avec un aperçu en direct de la barre, et ouverture de l’onglet Powerline" width="850">
 </p>
 
 ## Pourquoi agy-powerline ?
@@ -166,7 +166,7 @@ Les mots de la barre elle-même (`7j`, `Réinit`, `rest.`, les unités de `1j 17
 npx agy-powerline init --language fr
 ```
 
-ou `"language": "fr"` dans `statusline.config.json` (`Settings` via `i` dans `configure`). Le nom du modèle, la branche et tout ce qu’envoie agy restent tels quels ; les commandes et `configure` restent en anglais. Détails dans la [documentation de configuration](docs/configuration.md#language).
+ou `"language": "fr"` dans `statusline.config.json` (`Settings` via `i` dans l’éditeur interactif). Le nom du modèle, la branche et tout ce qu’envoie agy restent tels quels ; les commandes et l’éditeur interactif restent en anglais. Détails dans la [documentation de configuration](docs/configuration.md#language).
 
 ## Widgets
 
@@ -204,7 +204,7 @@ Un widget qui n’a rien à afficher se masque automatiquement. Vous pouvez pers
 | -------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `npx agy-powerline`                                | Installer (si besoin), mettre à jour les scripts et ouvrir l’éditeur                |
 | `npx agy-powerline init [--yes]`                   | Installer ou mettre à jour la barre d’état (prend en charge `--preset`, `--yes`, …) |
-| `npx agy-powerline configure`                      | Ouvrir l’éditeur (alias `config`)                                                   |
+| `npx agy-powerline configure`                      | Ouvrir l’éditeur (obsolète ; alias `config`, utilisez `npx agy-powerline`)          |
 | `npx agy-powerline preset <name>`                  | Appliquer un préréglage (`--list` pour afficher la liste)                           |
 | `npx agy-powerline theme <name>`                   | Changer de thème (`--list`, `--gallery`)                                            |
 | `npx agy-powerline gradient <name>`                | Colorer chaque ligne avec un dégradé (`--list`, `off`)                              |
@@ -234,7 +234,7 @@ Commencez par exécuter `npx agy-powerline doctor` : cette commande vérifie l�
 
 ## Confidentialité et sécurité
 
-- **Aucun appel réseau, aucune télémétrie.** Toutes les informations proviennent des données transmises par agy à la barre d’état, de `.git` et de votre système d’exploitation. Le seul lien externe est accessible avec la touche `g` dans `configure`, qui ouvre la page GitHub dans votre navigateur.
+- **Aucun appel réseau, aucune télémétrie.** Toutes les informations proviennent des données transmises par agy à la barre d’état, de `.git` et de votre système d’exploitation. Le seul lien externe est accessible avec la touche `g` dans l’éditeur interactif, qui ouvre la page GitHub dans votre navigateur.
 - **Vos paramètres sont protégés.** `init` et `uninstall` sauvegardent `settings.json` et refusent de modifier un fichier qu’ils ne parviennent pas à analyser.
 - **Rien ne s’exécute sans que vous l’ayez ajouté.** À l’exception de brèves commandes `git` pour compter les commits en avance ou en retard ainsi que le nombre de fichiers et de lignes des widgets Git que vous ajoutez, les seules commandes exécutées par la barre sont celles des widgets `exec` que vous configurez vous-même.
 - **Aucune dépendance à l’exécution**, avec une publication depuis la CI et une [attestation de provenance npm](https://docs.npmjs.com/generating-provenance-statements).

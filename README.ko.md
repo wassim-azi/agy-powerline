@@ -166,7 +166,7 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`npx agy-powerl
 npx agy-powerline init --language ko
 ```
 
-또는 `statusline.config.json`에 `"language": "ko"`를 설정하세요(`configure`에서 `i`로 `Settings` 열기). 모델명, 브랜치 등 agy가 전달하는 값은 그대로 표시되며, `2h 47m` 같은 시간 단위는 폭을 줄이기 위해 영문 약어를 유지합니다. CLI 출력과 `configure` 화면은 영어로 유지됩니다. 자세한 내용은 [언어 설정 문서](docs/configuration.md#language)를 참고하세요.
+또는 `statusline.config.json`에 `"language": "ko"`를 설정하세요(인터랙티브 에디터에서 `i`로 `Settings` 열기). 모델명, 브랜치 등 agy가 전달하는 값은 그대로 표시되며, `2h 47m` 같은 시간 단위는 폭을 줄이기 위해 영문 약어를 유지합니다. CLI 출력과 인터랙티브 에디터 화면은 영어로 유지됩니다. 자세한 내용은 [언어 설정 문서](docs/configuration.md#language)를 참고하세요.
 
 ## 위젯
 
@@ -200,22 +200,22 @@ npx agy-powerline init --language ko
 
 ## 명령
 
-| 명령                                               | 하는 일                                                        |
-| -------------------------------------------------- | -------------------------------------------------------------- |
-| `npx agy-powerline`                                | 설치(필요 시), 스크립트 업데이트 및 에디터 열기                |
-| `npx agy-powerline init [--yes]`                   | 스테이터스라인 설치 또는 업데이트(`--preset`, `--yes` 등 지원) |
-| `npx agy-powerline configure`                      | 에디터 열기(`config` 별칭)                                     |
-| `npx agy-powerline preset <name>`                  | 프리셋 적용(`--list`로 목록 확인)                              |
-| `npx agy-powerline theme <name>`                   | 테마 전환(`--list`, `--gallery`)                               |
-| `npx agy-powerline gradient <name>`                | 각 행을 그라데이션으로 색칠(`--list`, `off`)                   |
-| `npx agy-powerline layout <pills\|lines\|classic>` | 레이아웃 전환                                                  |
-| `npx agy-powerline caps <style>`                   | 캡슐 모양 전환: `round`, `angled`, `slanted`, `flat`           |
-| `npx agy-powerline export [file]`                  | 구성을 파일로 저장, 백업하거나 공유할 때 사용                  |
-| `npx agy-powerline import <file>`                  | 변경 내용을 보여준 뒤 구성 불러오기(`--merge`)                 |
-| `npx agy-powerline doctor`                         | 설치 상태 확인과 문제 설명                                     |
-| `npx agy-powerline report`                         | 개인정보를 포함하지 않는 버그 리포트 작성                      |
-| `npx agy-powerline uninstall [--delete]`           | agy에서 제거(`--delete`는 파일도 삭제)                         |
-| `npx agy-powerline render --demo`                  | 샘플 데이터로 바 출력                                          |
+| 명령                                               | 하는 일                                                                   |
+| -------------------------------------------------- | ------------------------------------------------------------------------- |
+| `npx agy-powerline`                                | 설치(필요 시), 스크립트 업데이트 및 에디터 열기                           |
+| `npx agy-powerline init [--yes]`                   | 스테이터스라인 설치 또는 업데이트(`--preset`, `--yes` 등 지원)            |
+| `npx agy-powerline configure`                      | 에디터 열기(지원 중단 예정; `config` 별칭, `npx agy-powerline` 사용 권장) |
+| `npx agy-powerline preset <name>`                  | 프리셋 적용(`--list`로 목록 확인)                                         |
+| `npx agy-powerline theme <name>`                   | 테마 전환(`--list`, `--gallery`)                                          |
+| `npx agy-powerline gradient <name>`                | 각 행을 그라데이션으로 색칠(`--list`, `off`)                              |
+| `npx agy-powerline layout <pills\|lines\|classic>` | 레이아웃 전환                                                             |
+| `npx agy-powerline caps <style>`                   | 캡슐 모양 전환: `round`, `angled`, `slanted`, `flat`                      |
+| `npx agy-powerline export [file]`                  | 구성을 파일로 저장, 백업하거나 공유할 때 사용                             |
+| `npx agy-powerline import <file>`                  | 변경 내용을 보여준 뒤 구성 불러오기(`--merge`)                            |
+| `npx agy-powerline doctor`                         | 설치 상태 확인과 문제 설명                                                |
+| `npx agy-powerline report`                         | 개인정보를 포함하지 않는 버그 리포트 작성                                 |
+| `npx agy-powerline uninstall [--delete]`           | agy에서 제거(`--delete`는 파일도 삭제)                                    |
+| `npx agy-powerline render --demo`                  | 샘플 데이터로 바 출력                                                     |
 
 모든 명령은 `--help`로 옵션을 확인할 수 있습니다.
 
@@ -234,7 +234,7 @@ npx agy-powerline doctor       # 모든 것이 최신인지 확인
 
 ## 개인정보 및 보안
 
-- **네트워크 요청 없음, 텔레메트리 없음.** 모든 정보는 agy가 바에 넘겨주는 데이터, `.git`, OS에서 옵니다. 외부 링크는 `configure`의 `g` 하나뿐이며, 브라우저에서 GitHub 페이지를 엽니다.
+- **네트워크 요청 없음, 텔레메트리 없음.** 모든 정보는 agy가 바에 넘겨주는 데이터, `.git`, OS에서 옵니다. 외부 링크는 인터랙티브 에디터의 `g` 하나뿐이며, 브라우저에서 GitHub 페이지를 엽니다.
 - **설정은 안전합니다.** `init`과 `uninstall`은 `settings.json`을 백업하고, 해석할 수 없는 파일은 편집하지 않습니다.
 - **직접 추가하지 않는 한 아무것도 실행되지 않습니다.** ahead/behind 개수와 git 위젯의 파일/줄 수를 세는 짧은 `git` 호출 외에, 바가 실행하는 명령은 직접 설정한 `exec` 위젯뿐입니다.
 - **런타임 의존성 0**, CI에서 [npm provenance](https://docs.npmjs.com/generating-provenance-statements)와 함께 게시됩니다.

@@ -10,7 +10,7 @@
 ## Commands
 - `npx agy-powerline` — Install (if needed), update outdated scripts, and open the editor in an interactive terminal (run `--help` for the command list).
 - `npx agy-powerline init [--yes]` — Install or update the statusline.
-- `npx agy-powerline configure` — Open the editor (compatibility alias for `npx agy-powerline`).
+- `npx agy-powerline configure` — Open the editor (deprecated compatibility alias for `npx agy-powerline`).
 - `npx agy-powerline preset <name>` — Apply a preset (`--list` to see them).
 - `npx agy-powerline theme <name>` — Switch theme (`--list`, `--gallery`).
 - `npx agy-powerline gradient <name>` — Color rows with a gradient (`--list`, `off`); presets: `aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono`.

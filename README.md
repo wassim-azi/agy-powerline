@@ -188,22 +188,22 @@ A widget with nothing to show hides itself. Widgets can be recolored, renamed, g
 
 ## Commands
 
-| Command                                            | What it does                                                       |
-| -------------------------------------------------- | ------------------------------------------------------------------ |
-| `npx agy-powerline`                                | Install (if needed), update outdated scripts, and open the editor  |
-| `npx agy-powerline init [--yes]`                   | Install or update the statusline (supports `--preset`, `--yes`, …) |
-| `npx agy-powerline configure`                      | Open the editor (alias `config`)                                   |
-| `npx agy-powerline preset <name>`                  | Apply a preset (`--list` to see them)                              |
-| `npx agy-powerline theme <name>`                   | Switch theme (`--list`, `--gallery`)                               |
-| `npx agy-powerline gradient <name>`                | Color each row with a gradient (`--list`, `off`)                   |
-| `npx agy-powerline layout <pills\|lines\|classic>` | Switch layout                                                      |
-| `npx agy-powerline caps <style>`                   | Switch the pill shape: `round`, `angled`, `slanted`, `flat`        |
-| `npx agy-powerline export [file]`                  | Save your config to a file, to back it up or share it              |
-| `npx agy-powerline import <file>`                  | Load a config, after showing what changes (`--merge`)              |
-| `npx agy-powerline doctor`                         | Check the install and explain what's wrong                         |
-| `npx agy-powerline report`                         | Write a privacy-safe bug report                                    |
-| `npx agy-powerline uninstall [--delete]`           | Remove it from agy (`--delete` also removes its files)             |
-| `npx agy-powerline render --demo`                  | Print the bar with sample data                                     |
+| Command                                            | What it does                                                           |
+| -------------------------------------------------- | ---------------------------------------------------------------------- |
+| `npx agy-powerline`                                | Install (if needed), update outdated scripts, and open the editor      |
+| `npx agy-powerline init [--yes]`                   | Install or update the statusline (supports `--preset`, `--yes`, …)     |
+| `npx agy-powerline configure`                      | Open the editor (deprecated; alias `config` — use `npx agy-powerline`) |
+| `npx agy-powerline preset <name>`                  | Apply a preset (`--list` to see them)                                  |
+| `npx agy-powerline theme <name>`                   | Switch theme (`--list`, `--gallery`)                                   |
+| `npx agy-powerline gradient <name>`                | Color each row with a gradient (`--list`, `off`)                       |
+| `npx agy-powerline layout <pills\|lines\|classic>` | Switch layout                                                          |
+| `npx agy-powerline caps <style>`                   | Switch the pill shape: `round`, `angled`, `slanted`, `flat`            |
+| `npx agy-powerline export [file]`                  | Save your config to a file, to back it up or share it                  |
+| `npx agy-powerline import <file>`                  | Load a config, after showing what changes (`--merge`)                  |
+| `npx agy-powerline doctor`                         | Check the install and explain what's wrong                             |
+| `npx agy-powerline report`                         | Write a privacy-safe bug report                                        |
+| `npx agy-powerline uninstall [--delete]`           | Remove it from agy (`--delete` also removes its files)                 |
+| `npx agy-powerline render --demo`                  | Print the bar with sample data                                         |
 
 Run any command with `--help` for its options.
 
@@ -222,7 +222,7 @@ Run `npx agy-powerline doctor` first: it checks the install and tells you how to
 
 ## Privacy and security
 
-- **No network calls, no telemetry.** Everything comes from the data agy passes to the bar, from `.git` and from your OS. The only link out is `g` in `configure`, which opens the GitHub page in your browser.
+- **No network calls, no telemetry.** Everything comes from the data agy passes to the bar, from `.git` and from your OS. The only link out is `g` in the interactive editor, which opens the GitHub page in your browser.
 - **Your settings are safe.** `init` and `uninstall` back up `settings.json` and refuse to edit a file they can't parse.
 - **Nothing runs unless you add it.** Apart from quick `git` calls for ahead/behind counts and for the file and line counts of the git widgets you add, the only commands the bar runs are `exec` widgets you configure yourself.
 - **Zero runtime dependencies**, published from CI with [npm provenance](https://docs.npmjs.com/generating-provenance-statements).
