@@ -757,12 +757,42 @@ async function run() {
     // The widget previews are drawn on the build machine: none may show its
     // host name or home folder.
     const widgetsPage = pages["widgets/index.html"] || "";
+    const settingsHtml = pages["settings/index.html"] || "";
+    const hubAlternates = [
+      "",
+      "fr/",
+      "es/",
+      "ja/",
+      "zh-cn/",
+      "ko/",
+      "de/",
+      "themes/",
+      "configure/",
+      "docs/",
+      "guides/",
+      "widgets/",
+      "settings/",
+      "quota-calculator/",
+    ].filter(
+      (p) =>
+        !fs.existsSync(path.join(out, p, "index.html.md")) ||
+        !pages[`${p}index.html`].includes('type="text/markdown"')
+    );
     record(
-      "the widget page shows nothing about the machine that built it",
+      "the settings and widget pages show nothing about the machine that built them, and hub pages publish index.html.md alternates",
       widgetsPage.length > 0 &&
+        settingsHtml.length > 0 &&
+        settingsHtml.includes("meterStyle") &&
+        settingsHtml.includes("alignment") &&
+        settingsHtml.includes("overflow") &&
+        hubAlternates.length === 0 &&
         !widgetsPage.includes(os.hostname()) &&
         !widgetsPage.includes(os.homedir()) &&
-        !widgetsPage.includes(os.homedir().replace(/\\/g, "/"))
+        !widgetsPage.includes(os.homedir().replace(/\\/g, "/")) &&
+        !settingsHtml.includes(os.hostname()) &&
+        !settingsHtml.includes(os.homedir()) &&
+        !settingsHtml.includes(os.homedir().replace(/\\/g, "/")),
+      hubAlternates.join(", ")
     );
 
     // The calculator's math: 72% left with 2hr 47m to go in a 5-hour window

@@ -62,6 +62,7 @@ const {
   docsIndexPage,
   guidesIndexPage,
   widgetsPage,
+  settingsPage,
   calculatorPage,
 } = require("./generated-pages");
 
@@ -362,11 +363,14 @@ const HOME_SOURCES = [
 // Every page of the site, with what its share card shows.
 function sitePages() {
   const markdownPages = [...MARKDOWN_PAGES.map((p) => markdownPage(p)), ...GUIDES.map(guidePage)];
+  const homeMd = `# agy-powerline\n\n> Statusline for Google Antigravity CLI (\`agy\`). Zero runtime dependencies, no telemetry.\n\nInstall: \`npx agy-powerline\` (or \`npx agy-powerline init --yes\`).\n\n- [Documentation](https://agy-powerline.com/docs/)\n- [Widgets](https://agy-powerline.com/widgets/)\n- [Settings](https://agy-powerline.com/settings/)\n- [Themes](https://agy-powerline.com/themes/)\n- [Browser configurator](https://agy-powerline.com/configure/)\n`;
   return [
     {
       path: "",
       sources: HOME_SOURCES,
       html: buildHomeHtml({ lang: "en" }),
+      markdown: homeMd,
+      skipLlmsFull: true,
       card: { title: stripTags(HOME_TEXT.en.heroTitle), label: "Antigravity CLI" },
       images: SCREENSHOTS.map((name) => screenshotUrl(name)),
     },
@@ -374,6 +378,8 @@ function sitePages() {
       path: "fr/",
       sources: HOME_SOURCES,
       html: buildHomeHtml({ lang: "fr" }),
+      markdown: homeMd,
+      skipLlmsFull: true,
       card: { title: stripTags(HOME_TEXT.fr.heroTitle), label: "Antigravity CLI", lang: "fr" },
       images: SCREENSHOTS.map((name) => screenshotUrl(name)),
     },
@@ -381,6 +387,8 @@ function sitePages() {
       path: "es/",
       sources: HOME_SOURCES,
       html: buildHomeHtml({ lang: "es" }),
+      markdown: homeMd,
+      skipLlmsFull: true,
       card: { title: stripTags(HOME_TEXT.es.heroTitle), label: "Antigravity CLI", lang: "es" },
       images: SCREENSHOTS.map((name) => screenshotUrl(name)),
     },
@@ -388,6 +396,8 @@ function sitePages() {
       path: "ja/",
       sources: HOME_SOURCES,
       html: buildHomeHtml({ lang: "ja" }),
+      markdown: homeMd,
+      skipLlmsFull: true,
       card: { title: stripTags(HOME_TEXT.ja.heroTitle), label: "Antigravity CLI", lang: "ja" },
       images: SCREENSHOTS.map((name) => screenshotUrl(name)),
     },
@@ -395,6 +405,8 @@ function sitePages() {
       path: "zh-cn/",
       sources: HOME_SOURCES,
       html: buildHomeHtml({ lang: "zh-CN" }),
+      markdown: homeMd,
+      skipLlmsFull: true,
       card: {
         title: stripTags(HOME_TEXT["zh-CN"].heroTitle),
         label: "Antigravity CLI",
@@ -406,6 +418,8 @@ function sitePages() {
       path: "ko/",
       sources: HOME_SOURCES,
       html: buildHomeHtml({ lang: "ko" }),
+      markdown: homeMd,
+      skipLlmsFull: true,
       card: {
         title: stripTags(HOME_TEXT.ko.heroTitle),
         label: "Antigravity CLI",
@@ -417,6 +431,8 @@ function sitePages() {
       path: "de/",
       sources: HOME_SOURCES,
       html: buildHomeHtml({ lang: "de" }),
+      markdown: homeMd,
+      skipLlmsFull: true,
       card: {
         title: stripTags(HOME_TEXT.de.heroTitle),
         label: "Antigravity CLI",
@@ -428,12 +444,14 @@ function sitePages() {
       path: THEMES_PAGE.path,
       sources: ["scripts/gallery/themes.html", "scripts/gallery/build.js", "src/lib/themes.js"],
       html: buildThemesHtml(),
+      markdown: `# agy statusline themes\n\nBrowse every dark, light, and color-blind safe theme with contrast metrics and simulated previews at [agy-powerline.com/themes/](https://agy-powerline.com/themes/).\n`,
       card: { title: "Themes for the agy statusline", label: "Themes" },
     },
     configuratorPage(),
     docsIndexPage(),
     guidesIndexPage(),
     widgetsPage(),
+    settingsPage(),
     calculatorPage(),
     ...markdownPages,
   ];
@@ -445,6 +463,7 @@ function configuratorPage() {
     path: "configure/",
     sources: ["scripts/configurator/template.html", "scripts/configurator/page.js"],
     html,
+    markdown: `# agy statusline configurator\n\nInteractive browser editor for \`statusline.config.json\` with Widgets, Appearance, Settings tabs, live preview, shareable URL hash, and \`npx agy-powerline import\`. Open [agy-powerline.com/configure/](https://agy-powerline.com/configure/).\n`,
     files: { [script.path]: script.code },
     card: { title: "Build your agy statusline in the browser", label: "Configurator" },
   };
@@ -493,6 +512,11 @@ function cardPages() {
       label: "Widgets",
     },
     {
+      path: "settings/",
+      title: "Every global agy statusline setting, with previews",
+      label: "Settings",
+    },
+    {
       path: "quota-calculator/",
       title: "Will your Antigravity quota last until it resets?",
       label: "Calculator",
@@ -512,7 +536,7 @@ function buildSite(outDir) {
   const copy = (from, rel) => write(rel, fs.readFileSync(path.join(repo, from)));
 
   const pages = sitePages();
-  const markdownPages = pages.filter((page) => page.markdown);
+  const markdownPages = pages.filter((page) => page.markdown && !page.skipLlmsFull);
 
   for (const page of pages) {
     write(path.join(page.path, "index.html"), page.html);

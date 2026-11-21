@@ -155,6 +155,7 @@ const LINKS = {
   "install/": ["Install", "One command, what it changes, upgrades and removal."],
   "docs/configuration/": ["Configuration", "Every setting, from widgets to themes."],
   "widgets/": ["Widgets", "Every widget, with a preview."],
+  "settings/": ["Settings", "Global bar-wide options with live previews."],
   "troubleshooting/": ["Troubleshooting", "doctor, common problems, bug reports."],
   "docs/payload/": ["Payload reference", "What agy sends to a status line."],
   "faq/": ["FAQ", "Short answers to the common questions."],
@@ -176,7 +177,7 @@ const LINKS = {
 };
 
 const SIDEBAR = [
-  ["Get started", ["install/", "docs/configuration/", "widgets/", "troubleshooting/"]],
+  ["Get started", ["install/", "docs/configuration/", "widgets/", "settings/", "troubleshooting/"]],
   [
     "Guides",
     [
@@ -193,7 +194,7 @@ const SIDEBAR = [
 
 const NEXT_STEPS = {
   "install/": ["docs/configuration/", "guides/antigravity-quota/", "troubleshooting/"],
-  "docs/configuration/": ["widgets/", "themes/", "configure/"],
+  "docs/configuration/": ["widgets/", "settings/", "configure/"],
   "troubleshooting/": ["guides/nerd-font-symbols/", "faq/", "install/"],
   "docs/payload/": ["guides/add-statusline-to-antigravity-cli/", "widgets/", "docs/configuration/"],
   "faq/": ["install/", "security/", "troubleshooting/"],
@@ -206,7 +207,8 @@ const NEXT_STEPS = {
   "guides/nerd-font-symbols/": ["troubleshooting/", "themes/", "docs/configuration/"],
   "guides/moving-from-gemini-cli/": ["install/", "guides/antigravity-quota/", "themes/"],
   "guides/workshop/": ["install/", "guides/antigravity-quota/", "configure/"],
-  "widgets/": ["docs/configuration/", "configure/", "themes/"],
+  "widgets/": ["settings/", "docs/configuration/", "configure/"],
+  "settings/": ["configure/", "docs/configuration/", "widgets/"],
   "quota-calculator/": ["guides/antigravity-quota/", "install/", "widgets/"],
 };
 

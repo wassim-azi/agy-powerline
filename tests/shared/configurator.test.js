@@ -15,7 +15,8 @@ const { spawnSync } = require("child_process");
 const { record, ROOT, NODE } = require("../helpers");
 const { THEME_ORDER } = require("../../src/lib/themes");
 const { WIDGET_CATALOG } = require("../../src/lib/catalog");
-const { defaultConfig } = require("../../src/lib/shared");
+const { METER_STYLE_IDS } = require("../../src/lib/widget-style");
+const { defaultConfig, mergeConfig } = require("../../src/lib/shared");
 const { buildBrowserBundle } = require("../../scripts/configurator/bundle");
 const page = require("../../scripts/configurator/page");
 
@@ -116,13 +117,75 @@ async function run() {
       missingWidgets.map((w) => w.id).join(", ")
     );
 
-    // Config round-trip through URL hash
-    const initial = defaultConfig();
+    const missingMeterStyles = METER_STYLE_IDS.filter((id) => !html.includes(`value="${id}"`));
+    record(
+      "the configurator exposes Widgets/Appearance/Settings tabs and every Settings option",
+      html.includes('id="cfgTabWidgets"') &&
+        html.includes('id="cfgTabAppearance"') &&
+        html.includes('id="cfgTabSettings"') &&
+        html.includes('id="clockFormatSelect"') &&
+        html.includes('id="resetFormatSelect"') &&
+        html.includes('id="meterStyleSelect"') &&
+        html.includes('id="sensitivitySelect"') &&
+        html.includes('id="blinkSelect"') &&
+        html.includes('id="maxWidthSelect"') &&
+        html.includes('id="alignmentSelect"') &&
+        html.includes('id="quotaModeSelect"') &&
+        html.includes('id="overflowSelect"') &&
+        html.includes('id="resetConfigBtn"') &&
+        missingMeterStyles.length === 0,
+      missingMeterStyles.join(", ")
+    );
+
+    // Config round-trip through URL hash (including bar-wide Settings parity fields)
+    const initial = mergeConfig({
+      ...defaultConfig(),
+      resetFormat: "both",
+      meterStyle: "blocks",
+      maxWidth: 120,
+      alignment: "center",
+      quotaMode: "used",
+      overflow: "wrap",
+      clock: { hour12: false },
+      thresholds: { ...defaultConfig().thresholds, quotaWarn: 40, blink: "warn" },
+    });
     const hash = page.encodeConfig(initial);
     const decoded = page.decodeConfig(hash);
     record(
-      "a config round-trips through the URL hash",
-      JSON.stringify(initial) === JSON.stringify(decoded)
+      "a config with all global Settings round-trips through the URL hash",
+      JSON.stringify(initial) === JSON.stringify(decoded) &&
+        decoded.meterStyle === "blocks" &&
+        decoded.maxWidth === 120 &&
+        decoded.alignment === "center" &&
+        decoded.quotaMode === "used" &&
+        decoded.overflow === "wrap" &&
+        decoded.resetFormat === "both" &&
+        decoded.clock.hour12 === false &&
+        decoded.thresholds.blink === "warn"
+    );
+
+    const earlyCfg = page.applyThresholdPreset(defaultConfig(), "early");
+    const customPreserved = page.detectThresholdPreset({
+      quotaWarn: 35,
+      quotaCrit: 12,
+      contextWarn: 70,
+      contextCrit: 90,
+    });
+    const hour12Cfg = page.setClockHour12(defaultConfig(), "24h");
+    const cappedCfg = page.setMaxWidth(defaultConfig(), "140");
+    const uncappedCfg = page.setMaxWidth(cappedCfg, "full");
+    record(
+      "configurator Settings helpers handle presets, clock format, blink and maxWidth cleanly",
+      page.detectThresholdPreset(defaultConfig().thresholds) === "default" &&
+        page.detectThresholdPreset(earlyCfg.thresholds) === "early" &&
+        customPreserved === "custom" &&
+        page.getClockHour12Mode(hour12Cfg) === "24h" &&
+        page.getClockHour12Mode(page.setClockHour12(hour12Cfg, "auto")) === "auto" &&
+        page.normalizeBlink("warn") === "warn" &&
+        page.normalizeBlink("true") === true &&
+        page.normalizeBlink("false") === false &&
+        cappedCfg.maxWidth === 140 &&
+        uncappedCfg.maxWidth === undefined
     );
 
     // Pasted config validation

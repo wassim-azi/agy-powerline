@@ -93,6 +93,27 @@
         padding: 14px 16px;
       }
 
+      /* Editor Tabs */
+      .config-tabs-wrap {
+        display: grid;
+        gap: 16px;
+      }
+      .config-tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        border-bottom: 1px solid var(--line);
+        padding-bottom: 10px;
+      }
+      .tab-panel[hidden] {
+        display: none;
+      }
+      .form-hint {
+        color: var(--muted);
+        font-size: 0.78rem;
+        line-height: 1.4;
+      }
+
       /* Sections & Panels */
       .panels {
         display: grid;
@@ -551,122 +572,290 @@
         and confirm before running it.
       </div>
 
-      <div class="panels panels-2col">
-        <!-- Left: Active Widgets -->
-        <section class="card" aria-label="Your Widgets">
-          <h2 class="card-title">
-            Your Widgets <span id="widgetCount" class="tag">0 widgets</span>
-          </h2>
-          <p class="card-subtitle">Click Up/Down to reorder, gear to configure, x to remove.</p>
-          <div class="active-rows" id="activeWidgetsList"></div>
-          <div class="palette-special">
-            <button type="button" class="btn-special" id="addSeparatorBtn">+ Flex Space</button>
-            <button type="button" class="btn-special" id="addLineBreakBtn">+ New Row</button>
-          </div>
-        </section>
+      <div class="config-tabs-wrap">
+        <div class="tabs config-tabs" role="tablist" aria-label="Configurator sections">
+          <button
+            type="button"
+            class="tab"
+            role="tab"
+            id="cfgTabWidgets"
+            aria-controls="panelWidgets"
+            aria-selected="true"
+          >
+            Widgets
+          </button>
+          <button
+            type="button"
+            class="tab"
+            role="tab"
+            id="cfgTabAppearance"
+            aria-controls="panelAppearance"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            Appearance
+          </button>
+          <button
+            type="button"
+            class="tab"
+            role="tab"
+            id="cfgTabSettings"
+            aria-controls="panelSettings"
+            aria-selected="false"
+            tabindex="-1"
+          >
+            Settings
+          </button>
+        </div>
 
-        <!-- Right: Widget Palette -->
-        <section class="card" aria-label="Widget Palette">
-          <h2 class="card-title">Widget Palette</h2>
-          <p class="card-subtitle">Click any widget to add it to your bar.</p>
-          <input
-            type="search"
-            class="palette-search"
-            id="paletteSearch"
-            placeholder="Filter widgets..."
-            aria-label="Filter widgets"
-          />
-          <div class="palette-list" id="paletteGrid"><!--PALETTE_ITEMS--></div>
-        </section>
-      </div>
+        <div id="panelWidgets" class="tab-panel" role="tabpanel" aria-labelledby="cfgTabWidgets">
+          <div class="panels panels-2col">
+            <!-- Left: Active Widgets -->
+            <section class="card" aria-label="Your Widgets">
+              <h2 class="card-title">
+                Your Widgets <span id="widgetCount" class="tag">0 widgets</span>
+              </h2>
+              <p class="card-subtitle">Click Up/Down to reorder, gear to configure, x to remove.</p>
+              <div class="active-rows" id="activeWidgetsList"></div>
+              <div class="palette-special">
+                <button type="button" class="btn-special" id="addSeparatorBtn">+ Flex Space</button>
+                <button type="button" class="btn-special" id="addLineBreakBtn">+ New Row</button>
+              </div>
+            </section>
 
-      <!-- Look & Feel -->
-      <section class="card" aria-label="Look and Style">
-        <h2 class="card-title">Look &amp; Style</h2>
-        <div class="form-grid">
-          <div class="form-group">
-            <label class="form-label" for="presetSelect">Preset</label>
-            <select class="form-select" id="presetSelect">
-              <!--PRESET_OPTIONS-->
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="themeSelect">Theme</label>
-            <select class="form-select" id="themeSelect">
-              <!--THEME_OPTIONS-->
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="layoutSelect">Layout</label>
-            <select class="form-select" id="layoutSelect">
-              <option value="pills">Pills (powerline capsules)</option>
-              <option value="lines">Lines (minimalist stacked rows)</option>
-              <option value="classic">Classic (text with █░ block meters)</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="languageSelect">Bar language</label>
-            <select class="form-select" id="languageSelect">
-              <!--LANGUAGE_OPTIONS-->
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="capSelect">Powerline Caps</label>
-            <select class="form-select" id="capSelect">
-              <!--CAP_OPTIONS-->
-            </select>
-          </div>
-          <div class="form-group">
-            <label class="form-label" for="gradientSelect">Gradient</label>
-            <select class="form-select" id="gradientSelect">
-              <!--GRADIENT_OPTIONS-->
-            </select>
-          </div>
-          <div class="form-group" id="customGradientGroup" style="display: none">
-            <span class="form-label">Custom Gradient Stops</span>
-            <div style="display: flex; gap: 8px; align-items: center">
+            <!-- Right: Widget Palette -->
+            <section class="card" aria-label="Widget Palette">
+              <h2 class="card-title">Widget Palette</h2>
+              <p class="card-subtitle">Click any widget to add it to your bar.</p>
               <input
-                type="color"
-                id="gradColor1"
-                value="#00c9a7"
-                aria-label="Gradient start color"
+                type="search"
+                class="palette-search"
+                id="paletteSearch"
+                placeholder="Filter widgets..."
+                aria-label="Filter widgets"
               />
-              <span>to</span>
-              <input type="color" id="gradColor2" value="#a18cd1" aria-label="Gradient end color" />
+              <div class="palette-list" id="paletteGrid"><!--PALETTE_ITEMS--></div>
+            </section>
+          </div>
+        </div>
+
+        <div
+          id="panelAppearance"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="cfgTabAppearance"
+          hidden
+        >
+          <section class="card" aria-label="Look and Style">
+            <h2 class="card-title">Appearance &amp; Layout</h2>
+            <p class="card-subtitle">
+              Pick a preset, theme palette, layout, powerline caps, or gradient.
+            </p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="presetSelect">Preset</label>
+                <select class="form-select" id="presetSelect">
+                  <!--PRESET_OPTIONS-->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="themeSelect">Theme</label>
+                <select class="form-select" id="themeSelect">
+                  <!--THEME_OPTIONS-->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="layoutSelect">Layout</label>
+                <select class="form-select" id="layoutSelect">
+                  <option value="pills">Pills (powerline capsules)</option>
+                  <option value="lines">Lines (minimalist stacked rows)</option>
+                  <option value="classic">Classic (text with █░ block meters)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="capSelect">Powerline Caps</label>
+                <select class="form-select" id="capSelect">
+                  <!--CAP_OPTIONS-->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="gradientSelect">Gradient</label>
+                <select class="form-select" id="gradientSelect">
+                  <!--GRADIENT_OPTIONS-->
+                </select>
+              </div>
+              <div class="form-group" id="customGradientGroup" style="display: none">
+                <span class="form-label">Custom Gradient Stops</span>
+                <div style="display: flex; gap: 8px; align-items: center">
+                  <input
+                    type="color"
+                    id="gradColor1"
+                    value="#00c9a7"
+                    aria-label="Gradient start color"
+                  />
+                  <span>to</span>
+                  <input
+                    type="color"
+                    id="gradColor2"
+                    value="#a18cd1"
+                    aria-label="Gradient end color"
+                  />
+                </div>
+              </div>
             </div>
-          </div>
+
+            <div style="margin-top: 8px">
+              <span class="form-label">Color Depth</span>
+              <fieldset class="seg" style="margin-top: 4px">
+                <legend class="sr-only">Color depth</legend>
+                <input
+                  type="radio"
+                  name="colorDepth"
+                  id="depthTruecolor"
+                  value="truecolor"
+                  checked
+                />
+                <label for="depthTruecolor">Truecolor (24-bit)</label>
+                <input type="radio" name="colorDepth" id="depth256" value="256" />
+                <label for="depth256">256 colors</label>
+                <input type="radio" name="colorDepth" id="depthNone" value="none" />
+                <label for="depthNone">Plain / None</label>
+              </fieldset>
+            </div>
+          </section>
         </div>
 
-        <div style="margin-top: 8px">
-          <span class="form-label">Options &amp; Flags</span>
-          <div class="toggles-list">
-            <label class="toggle-item"
-              ><input type="checkbox" id="toggleEmojis" checked /> Emojis</label
-            >
-            <label class="toggle-item"><input type="checkbox" id="toggleAscii" /> ASCII Mode</label>
-            <label class="toggle-item"
-              ><input type="checkbox" id="toggleMinimalist" /> Minimalist (values only)</label
-            >
-            <label class="toggle-item"
-              ><input type="checkbox" id="togglePacing" checked /> Pacing marker</label
-            >
-            <label class="toggle-item"><input type="checkbox" id="toggleRowGap" /> Row gap</label>
-          </div>
-        </div>
+        <div
+          id="panelSettings"
+          class="tab-panel"
+          role="tabpanel"
+          aria-labelledby="cfgTabSettings"
+          hidden
+        >
+          <section class="card" aria-label="Settings">
+            <h2 class="card-title">
+              Settings
+              <a class="btn btn-secondary btn-sm" href="/settings/">Settings guide →</a>
+            </h2>
+            <p class="card-subtitle">
+              Global bar-wide defaults matching the CLI <code>Settings</code> tab.
+            </p>
+            <div class="form-grid">
+              <div class="form-group">
+                <label class="form-label" for="languageSelect">Bar language</label>
+                <select class="form-select" id="languageSelect">
+                  <!--LANGUAGE_OPTIONS-->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="clockFormatSelect">Clock format</label>
+                <select class="form-select" id="clockFormatSelect">
+                  <option value="auto">auto (locale)</option>
+                  <option value="24h">24h (18:33)</option>
+                  <option value="12h">12h (6:33pm)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="resetFormatSelect">Reset format</label>
+                <select class="form-select" id="resetFormatSelect">
+                  <option value="countdown">countdown (2hr 47m)</option>
+                  <option value="time">time (6:33pm)</option>
+                  <option value="both">both (6:33pm (2hr 47m))</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="meterStyleSelect">Meter style</label>
+                <select class="form-select" id="meterStyleSelect">
+                  <!--METER_STYLE_OPTIONS-->
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="sensitivitySelect">Warning sensitivity</label>
+                <select class="form-select" id="sensitivitySelect">
+                  <option value="default">default (30%/10% · 70%/90%)</option>
+                  <option value="early">early (40%/20% · 60%/80%)</option>
+                  <option value="relaxed">relaxed (20%/5% · 80%/95%)</option>
+                  <option value="custom" disabled hidden>custom (preserved)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="blinkSelect">Alert blink</label>
+                <select class="form-select" id="blinkSelect">
+                  <option value="false">off (false)</option>
+                  <option value="true">danger (true)</option>
+                  <option value="warn">caution + danger ("warn")</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="maxWidthSelect">Max bar width</label>
+                <select class="form-select" id="maxWidthSelect">
+                  <option value="full">full (terminal width)</option>
+                  <option value="100">100 cols</option>
+                  <option value="120">120 cols</option>
+                  <option value="140">140 cols</option>
+                  <option value="160">160 cols</option>
+                  <option value="custom">custom cols…</option>
+                </select>
+              </div>
+              <div class="form-group" id="customMaxWidthGroup" style="display: none">
+                <label class="form-label" for="maxWidthCustomInput">Custom maxWidth</label>
+                <input
+                  type="number"
+                  class="form-input"
+                  id="maxWidthCustomInput"
+                  min="20"
+                  max="1000"
+                  step="1"
+                  value="96"
+                />
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="alignmentSelect">Row alignment</label>
+                <select class="form-select" id="alignmentSelect">
+                  <option value="left">left (default)</option>
+                  <option value="center">center (compact)</option>
+                  <option value="spread">spread (even gaps)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="quotaModeSelect">Quota display</label>
+                <select class="form-select" id="quotaModeSelect">
+                  <option value="remaining">remaining (72.0% rem)</option>
+                  <option value="used">used (28.0% used)</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="overflowSelect">Row overflow</label>
+                <select class="form-select" id="overflowSelect">
+                  <option value="fit">fit (shrink &amp; drop)</option>
+                  <option value="wrap">wrap (continuation rows)</option>
+                </select>
+              </div>
+            </div>
 
-        <div style="margin-top: 8px">
-          <span class="form-label">Color Depth</span>
-          <fieldset class="seg" style="margin-top: 4px">
-            <legend class="sr-only">Color depth</legend>
-            <input type="radio" name="colorDepth" id="depthTruecolor" value="truecolor" checked />
-            <label for="depthTruecolor">Truecolor (24-bit)</label>
-            <input type="radio" name="colorDepth" id="depth256" value="256" />
-            <label for="depth256">256 colors</label>
-            <input type="radio" name="colorDepth" id="depthNone" value="none" />
-            <label for="depthNone">Plain / None</label>
-          </fieldset>
+            <div style="margin-top: 8px">
+              <span class="form-label">Options &amp; Flags</span>
+              <div class="toggles-list">
+                <label class="toggle-item"
+                  ><input type="checkbox" id="toggleEmojis" checked /> Emojis</label
+                >
+                <label class="toggle-item"
+                  ><input type="checkbox" id="toggleAscii" /> ASCII Mode</label
+                >
+                <label class="toggle-item"
+                  ><input type="checkbox" id="toggleMinimalist" /> Minimalist (values only)</label
+                >
+                <label class="toggle-item"
+                  ><input type="checkbox" id="togglePacing" checked /> Pacing marker</label
+                >
+                <label class="toggle-item"
+                  ><input type="checkbox" id="toggleRowGap" /> Row gap</label
+                >
+              </div>
+            </div>
+          </section>
         </div>
-      </section>
+      </div>
 
       <!-- Output & Share -->
       <section class="card" aria-label="Output &amp; Apply">
@@ -683,6 +872,9 @@
           <button type="button" class="btn btn-primary" id="copyJsonBtn">Copy JSON</button>
           <button type="button" class="btn btn-secondary" id="downloadBtn">
             Download statusline.config.json
+          </button>
+          <button type="button" class="btn btn-secondary" id="resetConfigBtn">
+            Reset defaults
           </button>
         </div>
 
@@ -810,6 +1002,17 @@
         const customGradientGroup = document.getElementById("customGradientGroup");
         const gradColor1 = document.getElementById("gradColor1");
         const gradColor2 = document.getElementById("gradColor2");
+        const clockFormatSelect = document.getElementById("clockFormatSelect");
+        const resetFormatSelect = document.getElementById("resetFormatSelect");
+        const meterStyleSelect = document.getElementById("meterStyleSelect");
+        const sensitivitySelect = document.getElementById("sensitivitySelect");
+        const blinkSelect = document.getElementById("blinkSelect");
+        const maxWidthSelect = document.getElementById("maxWidthSelect");
+        const customMaxWidthGroup = document.getElementById("customMaxWidthGroup");
+        const maxWidthCustomInput = document.getElementById("maxWidthCustomInput");
+        const alignmentSelect = document.getElementById("alignmentSelect");
+        const quotaModeSelect = document.getElementById("quotaModeSelect");
+        const overflowSelect = document.getElementById("overflowSelect");
         const toggleEmojis = document.getElementById("toggleEmojis");
         const toggleAscii = document.getElementById("toggleAscii");
         const toggleMinimalist = document.getElementById("toggleMinimalist");
@@ -868,6 +1071,11 @@
               (id) => `<option value="${id}">${Agy.GRADIENTS[id].name}</option>`
             ).join("") +
             '<option value="custom">Custom gradient</option>';
+
+          // Meter styles
+          meterStyleSelect.innerHTML =
+            '<option value="">Layout default</option>' +
+            Agy.METER_STYLE_IDS.map((id) => `<option value="${id}">${id}</option>`).join("");
         }
 
         // Render preview
@@ -885,6 +1093,36 @@
           themeSelect.value = state.config.theme || "dark-aurora";
           layoutSelect.value = state.config.layout || "pills";
           languageSelect.value = state.config.language || "en";
+          clockFormatSelect.value = Page.getClockHour12Mode(state.config);
+          resetFormatSelect.value = Agy.resolveResetFormat(state.config.resetFormat);
+          meterStyleSelect.value = state.config.meterStyle || "";
+          sensitivitySelect.value = Page.detectThresholdPreset(state.config.thresholds);
+          blinkSelect.value = String(Page.normalizeBlink(state.config.thresholds?.blink));
+
+          const mw = state.config.maxWidth;
+          if (!mw) {
+            maxWidthSelect.value = "full";
+            customMaxWidthGroup.style.display = "none";
+          } else if ([100, 120, 140, 160].includes(mw)) {
+            maxWidthSelect.value = String(mw);
+            customMaxWidthGroup.style.display = "none";
+          } else {
+            maxWidthSelect.value = "custom";
+            customMaxWidthGroup.style.display = "grid";
+            maxWidthCustomInput.value = String(mw);
+          }
+
+          alignmentSelect.value = Agy.resolveAlignment(state.config.alignment);
+          quotaModeSelect.value = Agy.resolveQuotaMode(state.config.quotaMode);
+          overflowSelect.value = Agy.resolveOverflow(state.config.overflow);
+
+          if (state.config.color && state.config.color !== "auto") {
+            state.depth = state.config.color;
+            const depthRadio = document.querySelector(
+              `input[name="colorDepth"][value="${state.depth}"]`
+            );
+            if (depthRadio) depthRadio.checked = true;
+          }
 
           const currentStyle = Agy.detectStyle(state.config.powerline);
           capSelect.value = currentStyle || "round";
@@ -1067,6 +1305,43 @@
 
         // Event listeners
         function setupEvents() {
+          // Configurator section tabs
+          const tabBtns = [...document.querySelectorAll('.config-tabs [role="tab"]')];
+          const activateTab = (tab) => {
+            for (const btn of tabBtns) {
+              const selected = btn === tab;
+              btn.setAttribute("aria-selected", selected ? "true" : "false");
+              btn.tabIndex = selected ? 0 : -1;
+              const panel = document.getElementById(btn.getAttribute("aria-controls"));
+              if (panel) panel.hidden = !selected;
+            }
+          };
+          tabBtns.forEach((btn, idx) => {
+            btn.addEventListener("click", () => activateTab(btn));
+            btn.addEventListener("keydown", (e) => {
+              if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+              e.preventDefault();
+              const next =
+                tabBtns[
+                  (idx + (e.key === "ArrowRight" ? 1 : -1) + tabBtns.length) % tabBtns.length
+                ];
+              activateTab(next);
+              next.focus();
+            });
+          });
+
+          // Reset defaults
+          document.getElementById("resetConfigBtn").addEventListener("click", () => {
+            state.config = Agy.defaultConfig();
+            state.depth = "truecolor";
+            state.openOptions.clear();
+            document.getElementById("depthTruecolor").checked = true;
+            document.getElementById("termBgDark").checked = true;
+            state.termBg = "dark";
+            syncControls();
+            showToast("Reset to default config");
+          });
+
           // Palette click
           paletteGrid.addEventListener("click", (e) => {
             const btn = e.target.closest(".btn-palette-item");
@@ -1208,6 +1483,67 @@
 
           languageSelect.addEventListener("change", (e) => {
             state.config.language = e.target.value;
+            syncControls();
+          });
+
+          clockFormatSelect.addEventListener("change", (e) => {
+            state.config = Page.setClockHour12(state.config, e.target.value);
+            syncControls();
+          });
+
+          resetFormatSelect.addEventListener("change", (e) => {
+            state.config.resetFormat = e.target.value;
+            syncControls();
+          });
+
+          meterStyleSelect.addEventListener("change", (e) => {
+            if (e.target.value) state.config.meterStyle = e.target.value;
+            else delete state.config.meterStyle;
+            syncControls();
+          });
+
+          sensitivitySelect.addEventListener("change", (e) => {
+            state.config = Page.applyThresholdPreset(state.config, e.target.value);
+            syncControls();
+          });
+
+          blinkSelect.addEventListener("change", (e) => {
+            state.config.thresholds = {
+              ...Agy.DEFAULT_THRESHOLDS,
+              ...(state.config.thresholds || {}),
+              blink: Page.normalizeBlink(e.target.value),
+            };
+            syncControls();
+          });
+
+          maxWidthSelect.addEventListener("change", (e) => {
+            const val = e.target.value;
+            if (val === "custom") {
+              customMaxWidthGroup.style.display = "grid";
+              state.config = Page.setMaxWidth(state.config, maxWidthCustomInput.value || 96);
+            } else {
+              state.config = Page.setMaxWidth(state.config, val);
+            }
+            syncControls();
+          });
+
+          maxWidthCustomInput.addEventListener("change", (e) => {
+            state.config = Page.setMaxWidth(state.config, e.target.value);
+            syncControls();
+          });
+
+          alignmentSelect.addEventListener("change", (e) => {
+            state.config.alignment = e.target.value;
+            syncControls();
+          });
+
+          quotaModeSelect.addEventListener("change", (e) => {
+            state.config.quotaMode = e.target.value;
+            syncControls();
+          });
+
+          overflowSelect.addEventListener("change", (e) => {
+            state.config.overflow = e.target.value;
             syncControls();
           });
 

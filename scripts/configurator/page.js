@@ -19,6 +19,7 @@ if (typeof require !== "undefined") {
       ...require("../../src/lib/colors"),
       ...require("../../src/lib/widget-options"),
       ...require("../../src/lib/config-check"),
+      ...require("../../src/lib/i18n"),
       ...require("../site/ansi"),
     };
   } catch {
@@ -264,6 +265,83 @@ function hasExecWidgets(widgets) {
   return Array.isArray(widgets) && widgets.some((w) => w && w.id === "exec");
 }
 
+const THRESHOLD_PRESETS = {
+  default: { quotaWarn: 30, quotaCrit: 10, contextWarn: 70, contextCrit: 90 },
+  early: { quotaWarn: 40, quotaCrit: 20, contextWarn: 60, contextCrit: 80 },
+  relaxed: { quotaWarn: 20, quotaCrit: 5, contextWarn: 80, contextCrit: 95 },
+};
+
+function detectThresholdPreset(thresholds = {}) {
+  const agy = getAgy();
+  const base = (agy && agy.DEFAULT_THRESHOLDS) || THRESHOLD_PRESETS.default;
+  const qw = thresholds.quotaWarn ?? base.quotaWarn;
+  const qc = thresholds.quotaCrit ?? base.quotaCrit;
+  const cw = thresholds.contextWarn ?? base.contextWarn;
+  const cc = thresholds.contextCrit ?? base.contextCrit;
+  for (const [id, preset] of Object.entries(THRESHOLD_PRESETS)) {
+    if (
+      preset.quotaWarn === qw &&
+      preset.quotaCrit === qc &&
+      preset.contextWarn === cw &&
+      preset.contextCrit === cc
+    ) {
+      return id;
+    }
+  }
+  return "custom";
+}
+
+function applyThresholdPreset(config, id) {
+  const preset = THRESHOLD_PRESETS[id];
+  if (!preset) return config;
+  const agy = getAgy();
+  const base = (agy && agy.DEFAULT_THRESHOLDS) || THRESHOLD_PRESETS.default;
+  return {
+    ...config,
+    thresholds: {
+      blink: base.blink ?? false,
+      ...(config.thresholds || {}),
+      ...preset,
+    },
+  };
+}
+
+function normalizeBlink(value) {
+  if (value === true || value === "true") return true;
+  if (value === "warn") return "warn";
+  return false;
+}
+
+function getClockHour12Mode(config) {
+  const hour12 = config?.clock?.hour12;
+  if (hour12 === true) return "12h";
+  if (hour12 === false) return "24h";
+  return "auto";
+}
+
+function setClockHour12(config, mode) {
+  const nextClock = { ...(config.clock || {}) };
+  if (mode === "12h") nextClock.hour12 = true;
+  else if (mode === "24h") nextClock.hour12 = false;
+  else delete nextClock.hour12;
+  return { ...config, clock: nextClock };
+}
+
+function setMaxWidth(config, value) {
+  const next = { ...config };
+  if (value === null || value === undefined || value === "" || value === "full") {
+    delete next.maxWidth;
+    return next;
+  }
+  const n = Number(value);
+  if (Number.isInteger(n) && n >= 1) {
+    next.maxWidth = Math.min(n, 1000);
+  } else {
+    delete next.maxWidth;
+  }
+  return next;
+}
+
 const pageApi = {
   encodeConfig,
   decodeConfig,
@@ -278,6 +356,13 @@ const pageApi = {
   updateWidget,
   widgetRows,
   hasExecWidgets,
+  THRESHOLD_PRESETS,
+  detectThresholdPreset,
+  applyThresholdPreset,
+  normalizeBlink,
+  getClockHour12Mode,
+  setClockHour12,
+  setMaxWidth,
   MAX_SHARE_URL_LENGTH,
 };
 

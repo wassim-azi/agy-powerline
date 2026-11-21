@@ -22,7 +22,7 @@ const {
   GRADIENT_ORDER,
 } = require("../../src/lib/themes");
 const { WIDGET_CATALOG } = require("../../src/lib/catalog");
-const { WIDGET_TAGS } = require("../../src/lib/widget-style");
+const { WIDGET_TAGS, METER_STYLE_IDS } = require("../../src/lib/widget-style");
 const { PRESETS, PRESET_ORDER, defaultConfig } = require("../../src/lib/config");
 const { STYLES, STYLE_ORDER } = require("../../src/lib/powerline");
 const { SUPPORTED_LANGUAGES } = require("../../src/lib/i18n");
@@ -79,6 +79,13 @@ function buildLanguageOptions() {
   }).join("\n");
 }
 
+function buildMeterStyleOptions() {
+  return [
+    '<option value="">Layout default</option>',
+    ...METER_STYLE_IDS.map((id) => `<option value="${id}">${id}</option>`),
+  ].join("\n");
+}
+
 // The renderer and the page logic, in a file of their own rather than inline:
 // search engines read the module paths and sample paths in an inline script
 // ("./themes", "/proc/version") as links, then report them as missing pages.
@@ -107,6 +114,7 @@ function buildConfiguratorPage() {
     description,
     currentPage: "configurator",
     pagePath: "configure/",
+    alternateMarkdown: "configure/index.html.md",
     structuredData: [
       breadcrumbData([
         { name: "agy-powerline", path: "" },
@@ -143,6 +151,7 @@ function buildConfiguratorPage() {
       .replace("<!--CAP_OPTIONS-->", buildCapOptions())
       .replace("<!--GRADIENT_OPTIONS-->", buildGradientOptions())
       .replace("<!--LANGUAGE_OPTIONS-->", buildLanguageOptions())
+      .replace("<!--METER_STYLE_OPTIONS-->", buildMeterStyleOptions())
       .replace(
         "<!--APP_SCRIPT-->",
         `<script src="/${script.path}" integrity="${script.integrity}"></script>`
@@ -175,4 +184,5 @@ module.exports = {
   buildPresetOptions,
   buildCapOptions,
   buildGradientOptions,
+  buildMeterStyleOptions,
 };
