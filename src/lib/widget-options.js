@@ -133,6 +133,27 @@ function editFields(widget, config = {}, options = {}) {
       help: "Input and output tokens apart (123.1K↑ 355.0K↓) instead of one total.",
     });
   }
+  if (widget.id === "cost") {
+    fields.push(
+      {
+        key: "split",
+        label: "Split",
+        values: [undefined, true],
+        show: (value) => onOff(value),
+        help: "Includes subagent spend ($0.42 · subagents $0.13) when subagents were used.",
+      },
+      {
+        key: "budget",
+        label: "Budget",
+        values: [undefined, 1, 2, 5, 10, 20, 50],
+        show: (value) =>
+          typeof value === "number" && Number.isFinite(value) && value > 0
+            ? `$${value.toFixed(2)}`
+            : "off",
+        help: "Session spend budget in USD: adds the % used and turns to caution and danger colors as spend approaches it.",
+      }
+    );
+  }
   if (RESET_WIDGETS.has(widget.id)) {
     fields.push({
       key: "format",

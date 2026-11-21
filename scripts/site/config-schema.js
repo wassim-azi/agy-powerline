@@ -199,8 +199,15 @@ function buildConfigSchema() {
           meterStyle: { enum: [...METER_STYLE_IDS] },
           format: { enum: ["countdown", "time", "both"], description: "Reset widgets." },
           short: { type: "boolean", description: "model: the short model name." },
-          split: { type: "boolean", description: "Token widgets: input and output apart." },
-          budget: { type: "number", minimum: 1, description: "tokensToday / tokensWeek." },
+          split: {
+            type: "boolean",
+            description: "Token widgets (input/output apart) or cost (include subagent spend).",
+          },
+          budget: {
+            type: "number",
+            minimum: 0.01,
+            description: "tokensToday, tokensWeek, or cost.",
+          },
           text: { type: "string", description: "customText: the text to show." },
         },
       },

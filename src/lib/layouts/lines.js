@@ -660,11 +660,28 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       );
 
     case "cost": {
-      const text = formatCost(session.cost);
+      const text = formatCost(session.cost, widget, ascii, session.lang);
       if (!text) {
         return null;
       }
-      return fg(palette.text) + tag() + text + RESET;
+      const budget = widget?.budget;
+      const pct =
+        typeof budget === "number" && Number.isFinite(budget) && budget > 0
+          ? (session.cost.totalUsd * 100) / budget
+          : null;
+      const thresh = resolveContextThresholds(widget, config);
+      const level =
+        pct === null
+          ? "normal"
+          : pct >= thresh.crit
+            ? "crit"
+            : pct >= thresh.warn
+              ? "warn"
+              : "normal";
+      const color =
+        level === "crit" ? palette.quotaCrit : level === "warn" ? palette.quotaHigh : palette.text;
+      const blinkSeq = !ascii && shouldBlink(level, thresh.blink) ? BLINK : "";
+      return blinkSeq + fg(palette.text) + tag() + fg(color) + text + RESET;
     }
 
     case "tokensToday":
