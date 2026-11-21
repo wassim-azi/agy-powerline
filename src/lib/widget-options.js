@@ -21,32 +21,169 @@ const {
   WIDGET_TAGS,
   LABEL_MAX,
 } = require("./widget-style");
+const {
+  WIDGET_DEF_BY_ID,
+  PACED_WIDGETS,
+  METER_WIDGETS,
+  USAGE_TOTAL_WIDGETS,
+  MAX_WIDTH_WIDGETS,
+} = require("./widgets");
 
-// Widgets that take each option, as the layouts read them.
-const PACED_WIDGETS = new Set([
-  "fiveHourBar",
-  "weeklyBar",
-  "thirdPartyFiveHour",
-  "thirdPartyWeekly",
-  "argonWeekly",
-]);
-const METER_WIDGETS = new Set([...PACED_WIDGETS, "context"]);
-const USAGE_TOTAL_WIDGETS = new Set(["tokensToday", "tokensWeek", "tokensMonth"]);
-const MAX_WIDTH_WIDGETS = new Set([
-  "cwd",
-  "project",
-  "git",
-  "title",
-  "model",
-  "agent",
-  "customText",
-  "exec",
-  "env",
-  "gitWorktree",
-]);
 const COLOR_SLOTS = ["model", "context", "git", "weekly", "thirdParty", "fiveHour", "meta"];
 
 const onOff = (value) => (value ? "on" : "off");
+
+// Declarative option builders referenced by each widget's `options` array in
+// src/lib/widgets.js. Keeping them in one map avoids scattering per-id checks.
+const OPTION_BUILDERS = {
+  short: () => [
+    {
+      key: "short",
+      label: "Short name",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help: "4 Hydrogen·High instead of Gemini 4 Hydrogen (High).",
+    },
+  ],
+  splitTokens: () => [
+    {
+      key: "split",
+      label: "Split",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help: "Input and output tokens apart (123.1K↑ 355.0K↓) instead of one total.",
+    },
+  ],
+  splitUsage: () => [
+    {
+      key: "split",
+      label: "Split",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help: "Input and output tokens apart (1.0M↑ 245.3K↓) instead of one total.",
+    },
+  ],
+  budgetTokens: () => [
+    {
+      key: "budget",
+      label: "Budget",
+      values: [undefined, 500000, 1000000, 2000000, 5000000, 10000000],
+      show: (value) =>
+        typeof value === "number" && Number.isFinite(value) && value > 0
+          ? formatTokens(value)
+          : "off",
+      help: "Token budget: adds the % used and turns to caution and danger colors as usage approaches it.",
+    },
+  ],
+  splitCost: () => [
+    {
+      key: "split",
+      label: "Split",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help: "Includes subagent spend ($0.42 · subagents $0.13) when subagents were used.",
+    },
+  ],
+  budgetCost: () => [
+    {
+      key: "budget",
+      label: "Budget",
+      values: [undefined, 1, 2, 5, 10, 20, 50],
+      show: (value) =>
+        typeof value === "number" && Number.isFinite(value) && value > 0
+          ? `$${value.toFixed(2)}`
+          : "off",
+      help: "Session spend budget in USD: adds the % used and turns to caution and danger colors as spend approaches it.",
+    },
+  ],
+  text: () => [
+    {
+      key: "text",
+      label: "Text",
+      text: true,
+      show: (value) => value || "(empty: hidden)",
+      help: "The badge's text. Enter to type, Enter again to keep it, Esc to cancel.",
+    },
+  ],
+  envVar: () => [
+    {
+      key: "var",
+      label: "Variable",
+      text: true,
+      show: (value) => value || "(unset: hidden)",
+      help: "Environment variable name (e.g. NODE_ENV, AWS_PROFILE). Enter to type, Enter again to keep it.",
+    },
+  ],
+  exec: (_widget, options) => {
+    const isFixed = !options.editableCmd;
+    return [
+      {
+        key: "cmd",
+        label: "Command",
+        fixed: isFixed,
+        text: !isFixed,
+        show: (value) => value || "(none)",
+        help: options.cmdHelp
+          ? options.cmdHelp
+          : "The command runs only in agy, from your install folder.",
+      },
+      {
+        key: "payload",
+        label: "Session JSON",
+        values: [undefined, true],
+        show: (value) => onOff(value),
+        help: "Sends the session JSON to the command on stdin, without your email or session IDs.",
+      },
+      {
+        key: "colors",
+        label: "Keep colors",
+        values: [undefined, true],
+        show: (value) => onOff(value),
+        help: "Keeps the colors the command prints; other escape sequences are still removed.",
+      },
+    ];
+  },
+  depth: () => [
+    {
+      key: "depth",
+      label: "Folder depth",
+      values: [undefined, 1, 2, 3, 4],
+      show: (value) =>
+        !isValidDepth(value) ? "full path" : `${value} folder${value === 1 ? "" : "s"}`,
+      help: "Keeps the root and last folders, replacing the middle with an ellipsis.",
+    },
+  ],
+  fish: (widget) => [
+    {
+      key: "fish",
+      label: "Fish style",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help:
+        widget.id === "cwd"
+          ? "Abbreviates parent folders to their first letter (~/D/r/app)."
+          : "Abbreviates branch prefixes before / to their first letter (f/a/login).",
+    },
+  ],
+  pathLink: () => [
+    {
+      key: "link",
+      label: "Hyperlink",
+      values: [undefined, true, "vscode", "cursor", "zed"],
+      show: (value) => (value === true || value === "file" ? "file" : value || "off"),
+      help: "Makes the path a clickable OSC 8 terminal link (file manager or editor). Ignored in ASCII or NO_COLOR mode.",
+    },
+  ],
+  gitLink: () => [
+    {
+      key: "link",
+      label: "Hyperlink",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help: "Links to the branch or commit on origin (read from .git/config with zero spawns).",
+    },
+  ],
+};
 
 // The options of one widget: cycle fields step through values, number fields
 // step by 5 with the arrows, text fields take typing, and fixed ones only show
@@ -118,66 +255,16 @@ function editFields(widget, config = {}, options = {}) {
     );
   }
 
-  if (widget.id === "model") {
-    fields.push({
-      key: "short",
-      label: "Short name",
-      values: [undefined, true],
-      show: (value) => onOff(value),
-      help: "4 Hydrogen·High instead of Gemini 4 Hydrogen (High).",
-    });
-  }
-  if (widget.id === "totalTokens") {
-    fields.push({
-      key: "split",
-      label: "Split",
-      values: [undefined, true],
-      show: (value) => onOff(value),
-      help: "Input and output tokens apart (123.1K↑ 355.0K↓) instead of one total.",
-    });
-  }
-  if (usageTotal) {
-    fields.push(
-      {
-        key: "split",
-        label: "Split",
-        values: [undefined, true],
-        show: (value) => onOff(value),
-        help: "Input and output tokens apart (1.0M↑ 245.3K↓) instead of one total.",
-      },
-      {
-        key: "budget",
-        label: "Budget",
-        values: [undefined, 500000, 1000000, 2000000, 5000000, 10000000],
-        show: (value) =>
-          typeof value === "number" && Number.isFinite(value) && value > 0
-            ? formatTokens(value)
-            : "off",
-        help: "Token budget: adds the % used and turns to caution and danger colors as usage approaches it.",
+  const def = WIDGET_DEF_BY_ID[widget.id];
+  if (def?.options) {
+    for (const optionKey of def.options) {
+      const builder = OPTION_BUILDERS[optionKey];
+      if (builder) {
+        fields.push(...builder(widget, options));
       }
-    );
+    }
   }
-  if (widget.id === "cost") {
-    fields.push(
-      {
-        key: "split",
-        label: "Split",
-        values: [undefined, true],
-        show: (value) => onOff(value),
-        help: "Includes subagent spend ($0.42 · subagents $0.13) when subagents were used.",
-      },
-      {
-        key: "budget",
-        label: "Budget",
-        values: [undefined, 1, 2, 5, 10, 20, 50],
-        show: (value) =>
-          typeof value === "number" && Number.isFinite(value) && value > 0
-            ? `$${value.toFixed(2)}`
-            : "off",
-        help: "Session spend budget in USD: adds the % used and turns to caution and danger colors as spend approaches it.",
-      }
-    );
-  }
+
   if (RESET_WIDGETS.has(widget.id)) {
     fields.push({
       key: "format",
@@ -185,93 +272,6 @@ function editFields(widget, config = {}, options = {}) {
       values: [undefined, "countdown", "time", "both"],
       show: (value) => value ?? `${config.resetFormat || "countdown"} (default)`,
       help: "countdown (2hr 47m), time (6:33pm) or both (6:33pm (2hr 47m)). Default follows Reset format in Settings.",
-    });
-  }
-  if (widget.id === "customText") {
-    fields.push({
-      key: "text",
-      label: "Text",
-      text: true,
-      show: (value) => value || "(empty: hidden)",
-      help: "The badge's text. Enter to type, Enter again to keep it, Esc to cancel.",
-    });
-  }
-  if (widget.id === "env") {
-    fields.push({
-      key: "var",
-      label: "Variable",
-      text: true,
-      show: (value) => value || "(unset: hidden)",
-      help: "Environment variable name (e.g. NODE_ENV, AWS_PROFILE). Enter to type, Enter again to keep it.",
-    });
-  }
-  if (widget.id === "exec") {
-    const isFixed = !options.editableCmd;
-    fields.push({
-      key: "cmd",
-      label: "Command",
-      fixed: isFixed,
-      text: !isFixed,
-      show: (value) => value || "(none)",
-      help: options.cmdHelp
-        ? options.cmdHelp
-        : "The command runs only in agy, from your install folder.",
-    });
-    fields.push(
-      {
-        key: "payload",
-        label: "Session JSON",
-        values: [undefined, true],
-        show: (value) => onOff(value),
-        help: "Sends the session JSON to the command on stdin, without your email or session IDs.",
-      },
-      {
-        key: "colors",
-        label: "Keep colors",
-        values: [undefined, true],
-        show: (value) => onOff(value),
-        help: "Keeps the colors the command prints; other escape sequences are still removed.",
-      }
-    );
-  }
-  if (widget.id === "cwd") {
-    fields.push({
-      key: "depth",
-      label: "Folder depth",
-      values: [undefined, 1, 2, 3, 4],
-      show: (value) =>
-        !isValidDepth(value) ? "full path" : `${value} folder${value === 1 ? "" : "s"}`,
-      help: "Keeps the root and last folders, replacing the middle with an ellipsis.",
-    });
-  }
-  if (widget.id === "cwd" || widget.id === "git") {
-    fields.push({
-      key: "fish",
-      label: "Fish style",
-      values: [undefined, true],
-      show: (value) => onOff(value),
-      help:
-        widget.id === "cwd"
-          ? "Abbreviates parent folders to their first letter (~/D/r/app)."
-          : "Abbreviates branch prefixes before / to their first letter (f/a/login).",
-    });
-  }
-  if (widget.id === "cwd" || widget.id === "project") {
-    fields.push({
-      key: "link",
-      label: "Hyperlink",
-      values: [undefined, true, "vscode", "cursor", "zed"],
-      show: (value) => (value === true || value === "file" ? "file" : value || "off"),
-      help: "Makes the path a clickable OSC 8 terminal link (file manager or editor). Ignored in ASCII or NO_COLOR mode.",
-    });
-  }
-  if (widget.id === "git" || widget.id === "gitSha") {
-    fields.push({
-      key: "link",
-      label: "Hyperlink",
-      values: [undefined, true],
-      show: (value) => onOff(value),
-      help: "Links to the branch or commit on origin (read from .git/config with zero spawns).",
     });
   }
   if (MAX_WIDTH_WIDGETS.has(widget.id)) {

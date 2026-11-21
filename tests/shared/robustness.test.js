@@ -337,7 +337,7 @@ function testUsageStderr() {
 
 // An exec command handed the payload may never read it, exit before reading
 // it, or hang: none of these may break or stall the bar.
-function testExecPayloadFailures() {
+async function testExecPayloadFailures() {
   const { clearExecCache } = require("../../src/lib/shared");
   // Bigger than a pipe buffer, so the write is still going when the command exits.
   const data = { ...sampleData(), cwd: process.cwd(), filler: "x".repeat(200000) };
@@ -377,7 +377,7 @@ function testExecPayloadFailures() {
     );
   }
   clearExecCache();
-  testBundledExecTreeTimeout();
+  await testBundledExecTreeTimeout();
 }
 
 function isPidAlive(pid) {
@@ -392,9 +392,19 @@ function isPidAlive(pid) {
   }
 }
 
+async function waitForPidsExit(pids, timeoutMs = 1000) {
+  const deadline = Date.now() + timeoutMs;
+  let alive = pids.filter(isPidAlive);
+  while (alive.length && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    alive = pids.filter(isPidAlive);
+  }
+  return alive;
+}
+
 // A bundled statusline refresh must not stall on grandchildren that keep stdout
 // open or leave those children alive after timeout.
-function testBundledExecTreeTimeout() {
+async function testBundledExecTreeTimeout() {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), "agy-exec-tree-runtime-"));
   const installDir = path.join(root, ".agy-powerline");
   const script = path.join(root, "spawn-tree.js");
@@ -444,7 +454,7 @@ function testBundledExecTreeTimeout() {
     if (recorded) {
       pids = JSON.parse(fs.readFileSync(pidFile, "utf8"));
     }
-    const stillRunning = pids.filter((pid) => isPidAlive(pid));
+    const stillRunning = await waitForPidsExit(pids);
     const entries = readLog(path.join(installDir, LOG_NAME));
 
     record(
@@ -465,6 +475,7 @@ function testBundledExecTreeTimeout() {
         // Already exited.
       }
     }
+    await waitForPidsExit(pids);
     fs.rmSync(root, { recursive: true, force: true });
   }
 }
@@ -517,11 +528,9 @@ async function run() {
   testGitLookup();
   testWrongPayloadTypes();
   testBadGradients();
-  testExecPayloadFailures();
+  await testExecPayloadFailures();
   testUsageStderr();
-  await testConcurrentExecCache();
-  await testStdoutEpipe();
-  await testStdoutErrorIsLogged();
+  await Promise.all([testConcurrentExecCache(), testStdoutEpipe(), testStdoutErrorIsLogged()]);
   testRuntimeRenderOverrides();
 
   const sandbox = fs.mkdtempSync(path.join(os.tmpdir(), "agy-verify-bad-json-"));
@@ -695,20 +704,6 @@ function runWithOpenStdin(statuslinePath, input) {
 }
 
 async function testOpenStdin(statuslinePath) {
-  const silent = await runWithOpenStdin(statuslinePath, "");
-  record(
-    "runtime exits quietly when stdin stays open and empty",
-    silent.code === 0 && silent.stdout === "" && silent.ms < 5000,
-    `code ${silent.code}, ${silent.ms} ms, stdout ${JSON.stringify(silent.stdout)}`
-  );
-
-  const full = await runWithOpenStdin(statuslinePath, `\uFEFF${PAYLOAD}\n`);
-  record(
-    "runtime renders a complete payload immediately even when stdin stays open",
-    full.code === 0 && /Gemini/.test(full.stdout) && full.ms < 800,
-    `code ${full.code}, ${full.ms} ms`
-  );
-
   // Split right after an inner "}" and mid-way through a 4-byte UTF-8 sequence
   // so readStdin waits for the root object to close without corrupting UTF-8.
   const multiBytePayload = JSON.stringify({
@@ -718,18 +713,36 @@ async function testOpenStdin(statuslinePath) {
   const innerClose = multiBytePayload.indexOf("}") + 1;
   const buf = Buffer.from(multiBytePayload, "utf8");
   const rocketIndex = buf.indexOf(Buffer.from("🚀", "utf8"));
-  const chunked = await runWithOpenStdin(statuslinePath, [
-    buf.subarray(0, innerClose),
-    buf.subarray(innerClose, rocketIndex + 2),
-    buf.subarray(rocketIndex + 2),
+
+  const [silent, full, chunked, partial] = await Promise.all([
+    runWithOpenStdin(statuslinePath, ""),
+    runWithOpenStdin(statuslinePath, `\uFEFF${PAYLOAD}\n`),
+    runWithOpenStdin(statuslinePath, [
+      buf.subarray(0, innerClose),
+      buf.subarray(innerClose, rocketIndex + 2),
+      buf.subarray(rocketIndex + 2),
+    ]),
+    runWithOpenStdin(statuslinePath, PAYLOAD.slice(0, 40)),
   ]);
+
+  record(
+    "runtime exits quietly when stdin stays open and empty",
+    silent.code === 0 && silent.stdout === "" && silent.ms < 5000,
+    `code ${silent.code}, ${silent.ms} ms, stdout ${JSON.stringify(silent.stdout)}`
+  );
+
+  record(
+    "runtime renders a complete payload immediately even when stdin stays open",
+    full.code === 0 && /Gemini/.test(full.stdout) && full.ms < 800,
+    `code ${full.code}, ${full.ms} ms`
+  );
+
   record(
     "runtime waits across partial chunks and split UTF-8 bytes on open stdin then resolves immediately",
     chunked.code === 0 && /Gemini/.test(chunked.stdout) && chunked.ms < 800,
     `code ${chunked.code}, ${chunked.ms} ms`
   );
 
-  const partial = await runWithOpenStdin(statuslinePath, PAYLOAD.slice(0, 40));
   record(
     "runtime exits quietly on a payload cut off by the stdin deadline",
     partial.code === 0 && partial.stdout === "" && partial.ms < 5000,

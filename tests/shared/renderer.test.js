@@ -31,7 +31,7 @@ function withMemory(usedShare, fn) {
   }
 }
 
-async function run() {
+function runChecks() {
   const config = {
     ...defaultConfig(),
     widgets: [{ id: "model" }, { id: "cwd" }, { id: "git" }],
@@ -749,6 +749,27 @@ async function run() {
     "Lines layout renders critical alerts with blink",
     linesAlertOut.includes(BLINK) && /5\.0% rem/.test(stripAnsi(linesAlertOut))
   );
+}
+
+async function run() {
+  const savedNoColor = process.env.NO_COLOR;
+  const savedColor = process.env.AGY_POWERLINE_COLOR;
+  delete process.env.NO_COLOR;
+  process.env.AGY_POWERLINE_COLOR = "truecolor";
+  try {
+    runChecks();
+  } finally {
+    if (savedNoColor === undefined) {
+      delete process.env.NO_COLOR;
+    } else {
+      process.env.NO_COLOR = savedNoColor;
+    }
+    if (savedColor === undefined) {
+      delete process.env.AGY_POWERLINE_COLOR;
+    } else {
+      process.env.AGY_POWERLINE_COLOR = savedColor;
+    }
+  }
 }
 
 module.exports = { run };

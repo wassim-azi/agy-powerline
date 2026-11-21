@@ -311,7 +311,17 @@ function isPidAlive(pid) {
   }
 }
 
-function checkTimeoutKillsTree() {
+async function waitForPidsExit(pids, timeoutMs = 1000) {
+  const deadline = Date.now() + timeoutMs;
+  let alive = pids.filter(isPidAlive);
+  while (alive.length && Date.now() < deadline) {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+    alive = pids.filter(isPidAlive);
+  }
+  return alive;
+}
+
+async function checkTimeoutKillsTree() {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agy-exec-tree-"));
   const script = path.join(dir, "spawn-child.js");
   const pidFile = path.join(dir, "pids.json");
@@ -337,7 +347,7 @@ function checkTimeoutKillsTree() {
     if (recorded) {
       pids = JSON.parse(fs.readFileSync(pidFile, "utf8"));
     }
-    const stillRunning = pids.filter((pid) => isPidAlive(pid));
+    const stillRunning = await waitForPidsExit(pids);
 
     record(
       "a timed-out exec command terminates the child and grandchild processes it started",
@@ -352,6 +362,7 @@ function checkTimeoutKillsTree() {
         // Already exited.
       }
     }
+    await waitForPidsExit(pids);
     fs.rmSync(dir, { recursive: true, force: true });
   }
 }
@@ -362,7 +373,7 @@ async function run() {
     checkColors();
     checkRecipe();
     checkCcusageRecipe();
-    checkTimeoutKillsTree();
+    await checkTimeoutKillsTree();
   } finally {
     clearExecCache();
   }

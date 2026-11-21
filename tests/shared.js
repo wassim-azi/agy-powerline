@@ -4,41 +4,44 @@
 "use strict";
 
 // Cross-platform suites. Run with `npm run test:shared`.
-const { registerSuite } = require("./register");
+// Ordered slowest-first (LPT) so parallel isolated workers finish together.
+const { registerSuites } = require("./register");
 
-registerSuite("command shape", "./shared/command-shape.test");
-registerSuite("paths", "./shared/paths.test");
-registerSuite("renderer", "./shared/renderer.test");
-registerSuite("exec cache", "./shared/exec-cache.test");
-registerSuite("exec options", "./shared/exec-options.test");
-registerSuite("colors", "./shared/color.test");
-registerSuite("themes", "./shared/themes.test");
-registerSuite("gradients", "./shared/gradient.test");
-registerSuite("powerline", "./shared/powerline.test");
-registerSuite("quota and style", "./shared/quota-style.test");
-registerSuite("fit to terminal", "./shared/fit.test");
-registerSuite("meters", "./shared/meters.test");
-registerSuite("widgets", "./shared/widgets.test");
-registerSuite("configurator screens", "./shared/tui.test");
-registerSuite("i18n", "./shared/i18n.test");
-registerSuite("git", "./shared/git.test");
-registerSuite("usage", "./shared/usage.test");
-registerSuite("session time", "./shared/session-time.test");
-registerSuite("syscalls", "./shared/syscalls.test");
-registerSuite("problem log", "./shared/log.test");
-registerSuite("payload dump", "./shared/payload-dump.test");
-registerSuite("cli", "./shared/cli.test");
-registerSuite("readme", "./shared/readme.test");
-registerSuite("gallery", "./shared/gallery.test");
-registerSuite("configurator", "./shared/configurator.test");
-registerSuite("site", "./shared/site.test");
-registerSuite("plugin", "./shared/plugin.test");
-registerSuite("robustness", "./shared/robustness.test");
-registerSuite("security", "./shared/security.test");
-registerSuite("fuzz", "./shared/fuzz.test");
-registerSuite("install safety", "./shared/install-safety.test");
-registerSuite("init and doctor", "./shared/init-doctor.test");
-registerSuite("default command", "./shared/default-command.test");
-registerSuite("snapshots", "./shared/snapshots.test");
-registerSuite("commit messages", "./shared/commit-message.test");
-registerSuite("license", "./shared/license.test");
+registerSuites("shared", [
+  ["robustness", "./shared/robustness.test"],
+  ["git", "./shared/git.test"],
+  ["site", "./shared/site.test"],
+  ["cli", "./shared/cli.test"],
+  ["init and doctor", "./shared/init-doctor.test"],
+  ["install safety", "./shared/install-safety.test"],
+  ["exec options", "./shared/exec-options.test", { serial: true }],
+  ["fuzz", "./shared/fuzz.test"],
+  ["configurator screens", "./shared/tui.test"],
+  ["fit to terminal", "./shared/fit.test"],
+  ["problem log", "./shared/log.test"],
+  ["default command", "./shared/default-command.test"],
+  ["renderer", "./shared/renderer.test"],
+  ["widgets", "./shared/widgets.test"],
+  ["security", "./shared/security.test"],
+  ["gallery", "./shared/gallery.test"],
+  ["plugin", "./shared/plugin.test"],
+  ["syscalls", "./shared/syscalls.test"],
+  ["session time", "./shared/session-time.test"],
+  ["meters", "./shared/meters.test"],
+  ["themes", "./shared/themes.test"],
+  ["powerline", "./shared/powerline.test"],
+  ["snapshots", "./shared/snapshots.test"],
+  ["usage", "./shared/usage.test"],
+  ["i18n", "./shared/i18n.test"],
+  ["readme", "./shared/readme.test"],
+  ["configurator", "./shared/configurator.test"],
+  ["license", "./shared/license.test"],
+  ["quota and style", "./shared/quota-style.test"],
+  ["payload dump", "./shared/payload-dump.test"],
+  ["exec cache", "./shared/exec-cache.test"],
+  ["paths", "./shared/paths.test"],
+  ["colors", "./shared/color.test"],
+  ["command shape", "./shared/command-shape.test"],
+  ["gradients", "./shared/gradient.test"],
+  ["commit messages", "./shared/commit-message.test"],
+]);

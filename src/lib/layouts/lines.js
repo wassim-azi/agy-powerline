@@ -17,34 +17,12 @@ const {
 } = require("../colors");
 const { gradientStops, terminalBackground } = require("../themes");
 const {
-  basenameOf,
-  homePath,
   formatResetText,
-  formatClockTime,
   paceIndex,
   paceGlyph,
   formatPaceDelta,
   formatQuotaForecast,
-  formatGitSync,
-  formatGitOperation,
-  gitChangeParts,
-  gitFileParts,
-  formatTasks,
-  formatMode,
-  formatCost,
-  limitWidth,
-  shortenPath,
-  fishPath,
-  fishBranch,
-  linkPath,
-  linkGitBranch,
-  linkGitSha,
-  formatTokens,
   formatContextTokens,
-  shortModelName,
-  formatTokenSplit,
-  formatUsage,
-  formatSessionTime,
   resolveQuotaThresholds,
   resolveContextThresholds,
   shouldBlink,
@@ -73,6 +51,7 @@ const {
   subagentDetail,
   readEnvValue,
 } = require("../widget-style");
+const { renderWidget } = require("../widgets");
 const { t } = require("../i18n");
 
 const LINES = NAMED_COLORS;
@@ -324,30 +303,54 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
     return null;
   }
 
-  switch (id) {
-    case "clock":
-      return fg(palette.text) + tag() + formatClockTime(new Date(), config.clock) + RESET;
+  const resolveLinesColor = (slot) => {
+    if (slot === "caution") {
+      return palette.quotaHigh || palette.yellow || LINES.yellow;
+    }
+    return palette[slot] || palette.text;
+  };
 
-    case "model":
-      if (!session.model) {
-        return null;
-      }
-      return (
-        fg(palette.model) +
-        tag() +
-        limitWidth(
-          widget?.short ? shortModelName(session.model, ascii) : session.model,
-          widget,
-          ascii
-        ) +
-        RESET
-      );
-
-    case "quota": {
-      const quota = session.tightestQuota;
-      if (!quota) {
-        return null;
-      }
+  return renderWidget(id, {
+    session,
+    widget,
+    config,
+    emojis,
+    ascii,
+    raw,
+    isLines: true,
+    osIcons: OS_ICONS,
+    ramCaution: RAM_CAUTION,
+    ramDanger: RAM_DANGER,
+    titleMax: TITLE_MAX,
+    subagentDetail,
+    readEnvValue,
+    widgetTag,
+    execWidgetOutput,
+    text: (value, { linesColor = "text", icon } = {}) =>
+      fg(resolveLinesColor(linesColor)) + tag(icon) + value + RESET,
+    taggedText: (tagText, value) => fg(palette.text) + tagText + value + RESET,
+    valueWithLevel: (value, level) => {
+      const col =
+        level === "danger"
+          ? palette.quotaCrit
+          : level === "caution"
+            ? palette.quotaHigh
+            : palette.text;
+      return fg(palette.text) + tag() + fg(col) + value + RESET;
+    },
+    cacheHit: (pct) => {
+      const color =
+        pct >= 80
+          ? palette.quotaLow || palette.green || LINES.green
+          : pct >= 50
+            ? palette.quotaMed || palette.orange || LINES.orange
+            : palette.text;
+      return fg(palette.text) + tag() + fg(color) + `${pct}%` + RESET;
+    },
+    quotaMeter: (quota) => quotaMeter(quota),
+    quotaPct: (quota) => quotaPct(quota),
+    quotaReset: (quota, _colorSlot, weekly = false) => quotaReset(quota, weekly),
+    tightestQuota: (quota) => {
       const { view, blinkSeq, color } = quotaState(quota);
       const reset = quota.reset ? `${ascii ? ", " : " · "}${quota.reset}` : "";
       return (
@@ -362,69 +365,8 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         reset +
         RESET
       );
-    }
-
-    case "agent":
-      if (!session.agentName) {
-        return null;
-      }
-      return fg(palette.text) + tag() + limitWidth(session.agentName, widget, ascii) + RESET;
-
-    case "agentState": {
-      if (!session.agentState && !session.toolConfirmation) {
-        return null;
-      }
-      const state = session.agentState ? session.agentState.replace(/_/g, " ") : "";
-      const text = session.toolConfirmation
-        ? state
-          ? `${state} (${t("confirm", session.lang)})`
-          : t("confirm", session.lang)
-        : state;
-      const idle = session.agentState === "idle" && !session.toolConfirmation;
-      const color = idle
-        ? DIM
-        : fg(
-            session.toolConfirmation || session.agentState === "error"
-              ? palette.quotaCrit || palette.agent || palette.magenta || LINES.magenta
-              : palette.agent || palette.magenta || LINES.magenta
-          );
-      return color + tag(idle ? "🟢" : undefined) + text + RESET;
-    }
-
-    case "fiveHourBar":
-      return session.fiveHour ? quotaMeter(session.fiveHour) : null;
-
-    case "fiveHourPct":
-      return session.fiveHour ? quotaPct(session.fiveHour) : null;
-
-    case "fiveHourReset":
-      return quotaReset(session.fiveHour, false);
-
-    case "weeklyBar":
-      return session.weekly ? quotaMeter(session.weekly) : null;
-
-    case "weeklyPct":
-      return session.weekly ? quotaPct(session.weekly) : null;
-
-    case "weeklyReset":
-      return quotaReset(session.weekly, true);
-
-    case "thirdPartyFiveHour":
-      if (!session.thirdPartyFiveHour || session.thirdPartyFiveHour.disabled) {
-        return null;
-      }
-      return quotaMeter(session.thirdPartyFiveHour);
-
-    case "thirdPartyWeekly":
-      return session.thirdPartyWeekly ? quotaMeter(session.thirdPartyWeekly) : null;
-
-    case "argonWeekly":
-      return session.argonWeekly ? quotaMeter(session.argonWeekly) : null;
-
-    case "argonReset":
-      return quotaReset(session.argonWeekly, true);
-
-    case "context": {
+    },
+    contextBar: () => {
       const { thresh, size, pct, over200k, blinkSeq, color } = contextState();
       return (
         blinkSeq +
@@ -442,16 +384,14 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         `(${pct.toFixed(1)}%)${over200k}` +
         RESET
       );
-    }
-
-    case "contextPct": {
+    },
+    contextPct: () => {
       const { pct, over200k, blinkSeq, color } = contextState();
       return (
         blinkSeq + fg(palette.text) + tag() + fg(color) + `${pct.toFixed(1)}%${over200k}` + RESET
       );
-    }
-
-    case "contextTokens": {
+    },
+    contextTokens: () => {
       const { size, blinkSeq, color } = contextState();
       return (
         blinkSeq +
@@ -461,251 +401,9 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         formatContextTokens(session.usedTokens, size) +
         RESET
       );
-    }
-
-    case "cwd": {
-      const home = homePath(session.cwd);
-      const pathText =
-        widget?.fish === true
-          ? fishPath(home, widget?.depth)
-          : shortenPath(home, widget?.depth, ascii);
-      const dirname = limitWidth(pathText, widget, ascii, session.lang);
-      if (!dirname) {
-        return null;
-      }
-      return fg(palette.location) + tag() + linkPath(dirname, session.cwd, widget, ascii) + RESET;
-    }
-
-    case "project": {
-      const proj = limitWidth(basenameOf(session.project), widget, ascii);
-      if (!proj) {
-        return null;
-      }
-      return fg(palette.location) + tag() + linkPath(proj, session.project, widget, ascii) + RESET;
-    }
-
-    case "os": {
-      if (!session.os) {
-        return null;
-      }
-      return fg(palette.location) + tag(OS_ICONS[session.os]) + session.os + RESET;
-    }
-
-    case "host": {
-      if (!session.hostname) {
-        return null;
-      }
-      const name = session.username ? `${session.username}@${session.hostname}` : session.hostname;
-      return fg(palette.location) + tag() + name + RESET;
-    }
-
-    case "git": {
-      if (!session.git || !session.git.branch) {
-        return null;
-      }
-      const opStr = widget.operation === false ? "" : formatGitOperation(session.git.operation);
-      const syncStr = formatGitSync(session.git.ahead, session.git.behind, ascii);
-      const syncPart = syncStr ? ` ${syncStr}` : "";
-      const rawBranch = widget?.fish === true ? fishBranch(session.git.branch) : session.git.branch;
-      const branch = linkGitBranch(
-        limitWidth(rawBranch, widget, ascii),
-        session.git.branch,
-        session,
-        widget,
-        ascii
-      );
-      return (
-        fg(palette.git) +
-        tag() +
-        "(" +
-        branch +
-        (session.git.dirty ? `${fg(palette.gitDirty)}*` : "") +
-        (opStr ? `${fg(palette.gitDirty)} ${opStr}` : "") +
-        (syncPart ? `${fg(palette.git)}${syncPart}` : "") +
-        fg(palette.git) +
-        ")" +
-        RESET
-      );
-    }
-
-    case "gitChanges": {
-      const parts = gitChangeParts(session.gitDetails?.changes, ascii);
-      if (!parts.length) {
-        return null;
-      }
-      const shade = { added: palette.quotaLow, removed: palette.quotaCrit };
-      return (
-        fg(palette.git) +
-        tag() +
-        parts.map((part) => fg(shade[part.kind]) + part.text).join(" ") +
-        RESET
-      );
-    }
-
-    case "gitFiles": {
-      const parts = gitFileParts(session.gitDetails?.files, ascii);
-      if (!parts.length) {
-        return null;
-      }
-      const shade = (kind) => (kind === "conflicts" ? palette.quotaCrit : palette.git);
-      return (
-        fg(palette.git) +
-        tag() +
-        parts.map((part) => fg(shade(part.kind)) + part.text).join(" ") +
-        RESET
-      );
-    }
-
-    case "gitSha":
-      if (!session.gitDetails?.sha) {
-        return null;
-      }
-      return (
-        fg(palette.git) + tag() + linkGitSha(session.gitDetails.sha, session, widget, ascii) + RESET
-      );
-
-    case "gitStash":
-      if (!(session.gitDetails?.stash > 0)) {
-        return null;
-      }
-      return fg(palette.git) + tag() + session.gitDetails.stash + RESET;
-
-    case "gitWorktree":
-      if (!session.gitDetails?.worktree) {
-        return null;
-      }
-      return (
-        fg(palette.git) + tag() + limitWidth(session.gitDetails.worktree, widget, ascii) + RESET
-      );
-
-    case "plan":
-      if (!session.plan) {
-        return null;
-      }
-      return fg(palette.text) + tag() + session.plan + RESET;
-
-    case "artifacts":
-      if (!session.artifacts) {
-        return null;
-      }
-      return fg(palette.text) + tag() + String(session.artifacts) + RESET;
-
-    case "queue":
-      if (!session.pendingInputs) {
-        return null;
-      }
-      return fg(palette.text) + tag() + String(session.pendingInputs) + RESET;
-
-    case "tasks": {
-      const text = formatTasks(
-        session.subagents,
-        session.tasks,
-        session.lang,
-        subagentDetail(session, widget, ascii)
-      );
-      if (!text) {
-        return null;
-      }
-      return fg(palette.text) + tag() + text + RESET;
-    }
-
-    case "mode": {
-      const text = formatMode(session.approvalMode, session.vimMode);
-      if (!text) {
-        return null;
-      }
-      // An approval mode like accept-edits changes what the agent may do alone.
-      const approval = session.approvalMode && session.approvalMode !== "default";
-      const color = approval ? palette.quotaHigh || palette.yellow || LINES.yellow : palette.text;
-      return fg(color) + tag() + text + RESET;
-    }
-
-    case "title":
-      if (!session.title) {
-        return null;
-      }
-      return fg(palette.text) + tag() + limitWidth(session.title, widget, ascii, TITLE_MAX) + RESET;
-
-    case "sessionTime": {
-      const text = formatSessionTime(session.sessionStartMs, Date.now(), session.lang);
-      return text ? fg(palette.text) + tag() + text + RESET : null;
-    }
-
-    case "sandbox": {
-      if (!session.sandbox) {
-        return null;
-      }
-      const net = session.sandboxNet;
-      const color = net ? palette.quotaMed || palette.orange || LINES.orange : palette.git;
-      const text = t(net ? "sandbox_net" : "sandbox_isolated", session.lang);
-      return fg(color) + tag(net ? "🌐" : undefined) + text + RESET;
-    }
-
-    case "ram": {
-      if (session.ramPct == null) {
-        return null;
-      }
-      const ramCol =
-        session.ramPct >= RAM_DANGER
-          ? palette.quotaCrit
-          : session.ramPct >= RAM_CAUTION
-            ? palette.quotaHigh
-            : palette.text;
-      return fg(palette.text) + tag() + fg(ramCol) + `${session.ramPct}%` + RESET;
-    }
-
-    case "version":
-      if (!session.version) {
-        return null;
-      }
-      return fg(palette.text) + tag() + `v${session.version}` + RESET;
-
-    case "cacheRead":
-      if (session.cacheRead == null) {
-        return null;
-      }
-      return fg(palette.text) + tag() + formatTokens(session.cacheRead) + RESET;
-
-    case "cacheCreate":
-      if (session.cacheCreate == null) {
-        return null;
-      }
-      return fg(palette.text) + tag() + formatTokens(session.cacheCreate) + RESET;
-
-    case "cacheHit": {
-      const pct = session.cacheHitPct ?? 0;
-      const color =
-        pct >= 80
-          ? palette.quotaLow || palette.green || LINES.green
-          : pct >= 50
-            ? palette.quotaMed || palette.orange || LINES.orange
-            : palette.text;
-      return fg(palette.text) + tag() + fg(color) + `${pct}%` + RESET;
-    }
-
-    case "totalTokens":
-      if (!session.totalTokens) {
-        return null;
-      }
-      return (
-        fg(palette.text) +
-        tag() +
-        (widget?.split
-          ? formatTokenSplit(session.inputTokens, session.outputTokens, ascii, session.lang)
-          : formatTokens(session.totalTokens)) +
-        RESET
-      );
-
-    case "cost": {
-      const text = formatCost(session.cost, widget, ascii, session.lang);
-      if (!text) {
-        return null;
-      }
-      const budget = widget?.budget;
-      const pct =
-        typeof budget === "number" && Number.isFinite(budget) && budget > 0
-          ? (session.cost.totalUsd * 100) / budget
-          : null;
+    },
+    budgetText: (text, pct) => {
+      // A budget alerts like the context widgets: caution, then danger.
       const thresh = resolveContextThresholds(widget, config);
       const level =
         pct === null
@@ -719,75 +417,59 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         level === "crit" ? palette.quotaCrit : level === "warn" ? palette.quotaHigh : palette.text;
       const blinkSeq = !ascii && shouldBlink(level, thresh.blink) ? BLINK : "";
       return blinkSeq + fg(palette.text) + tag() + fg(color) + text + RESET;
-    }
-
-    case "tokensToday":
-    case "tokensWeek":
-    case "tokensMonth": {
-      const period = { tokensToday: "today", tokensWeek: "week", tokensMonth: "month" }[id];
-      const usage = formatUsage(session.usage?.[period], widget, ascii, session.lang);
-      if (!usage) {
-        return null;
-      }
-      // A budget alerts like the context widgets: caution, then danger.
-      const thresh = resolveContextThresholds(widget, config);
-      const level =
-        usage.pct === null
-          ? "normal"
-          : usage.pct >= thresh.crit
-            ? "crit"
-            : usage.pct >= thresh.warn
-              ? "warn"
-              : "normal";
-      const color =
-        level === "crit" ? palette.quotaCrit : level === "warn" ? palette.quotaHigh : palette.text;
-      const blinkSeq = !ascii && shouldBlink(level, thresh.blink) ? BLINK : "";
-      return blinkSeq + fg(palette.text) + tag() + fg(color) + usage.text + RESET;
-    }
-
-    case "customText": {
-      if (!widget?.text) {
-        return null;
-      }
-      return fg(palette.text) + tag() + limitWidth(widget.text, widget, ascii) + RESET;
-    }
-
-    case "env": {
-      const entry = readEnvValue(widget, session, ascii);
-      if (!entry) {
-        return null;
-      }
-      const envWidget = widget?.label === undefined ? { ...widget, label: entry.name } : widget;
-      const envTag = widgetTag("env", {
-        emojis,
-        raw,
-        widget: envWidget,
-        ascii,
-        lang: session.lang,
-      });
-      return fg(palette.text) + envTag + entry.value + RESET;
-    }
-
-    case "exec": {
-      // Only real output is cut: the [cmd] preview and blocked markers stay whole.
-      const output =
-        session.execMode === "run"
-          ? limitWidth(execWidgetOutput(widget, session), widget, ascii)
-          : execWidgetOutput(widget, session);
-      if (!output) {
-        return null;
-      }
+    },
+    gitBranch: ({ branch, dirty, opStr, syncPart }) =>
+      fg(palette.git) +
+      tag() +
+      "(" +
+      branch +
+      (dirty ? `${fg(palette.gitDirty)}*` : "") +
+      (opStr ? `${fg(palette.gitDirty)} ${opStr}` : "") +
+      (syncPart ? `${fg(palette.git)}${syncPart}` : "") +
+      fg(palette.git) +
+      ")" +
+      RESET,
+    gitChanges: (parts) => {
+      const shade = { added: palette.quotaLow, removed: palette.quotaCrit };
+      return (
+        fg(palette.git) +
+        tag() +
+        parts.map((part) => fg(shade[part.kind]) + part.text).join(" ") +
+        RESET
+      );
+    },
+    gitFiles: (parts) => {
+      const shade = (kind) => (kind === "conflicts" ? palette.quotaCrit : palette.git);
+      return (
+        fg(palette.git) +
+        tag() +
+        parts.map((part) => fg(shade(part.kind)) + part.text).join(" ") +
+        RESET
+      );
+    },
+    agentState: ({ text, idle, critical }) => {
+      const color = idle
+        ? DIM
+        : fg(
+            critical
+              ? palette.quotaCrit || palette.agent || palette.magenta || LINES.magenta
+              : palette.agent || palette.magenta || LINES.magenta
+          );
+      return color + tag(idle ? "🟢" : undefined) + text + RESET;
+    },
+    sandbox: ({ text, net }) => {
+      const color = net ? palette.quotaMed || palette.orange || LINES.orange : palette.git;
+      return fg(color) + tag(net ? "🌐" : undefined) + text + RESET;
+    },
+    execSegment: (output) => {
       const icon = widget.icon !== undefined ? widget.icon : "⚡";
       const named = widget.label && !raw ? `${widget.label}: ` : "";
       // buildLinesRows already swapped the widget's color into the palette.
       const col = palette.location;
       const iconPart = emojis && icon && !raw ? `${icon} ` : "";
       return fg(col) + iconPart + named + restoreAfterReset(output, fg(col)) + RESET;
-    }
-
-    default:
-      return null;
-  }
+    },
+  });
 }
 
 // A widget's own color and text color become a palette for that widget only.
