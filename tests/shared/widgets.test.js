@@ -23,8 +23,10 @@ const {
   charWidth,
   splitGraphemes,
   clipText,
+  pathLinkUrl,
   formatTokens,
 } = require("../../src/lib/formatters");
+const { ansiToHtml } = require("../../scripts/site/ansi");
 const { buildCustomTheme, THEMES } = require("../../src/lib/themes");
 const { buildSegment } = require("../../src/lib/layouts/pills");
 const { buildLinesSegment, deriveLinesPalette } = require("../../src/lib/layouts/lines");
@@ -51,7 +53,7 @@ function render(data, widgets, options = {}) {
         widgets,
         ...(options.clock ? { clock: options.clock } : {}),
       },
-      { color: options.color || "none" }
+      { color: options.color || "none", ...(options.env ? { env: options.env } : {}) }
     )
   );
 }
@@ -103,6 +105,8 @@ async function run() {
   testHost();
   testCustomLabelAndIcon();
   testAntigravityLatestPayloadFields();
+  testEnvWidget();
+  testOsc8Links();
 }
 
 function testCustomLabelAndIcon() {
@@ -709,6 +713,7 @@ function testWidgetWidthAndDepth() {
     "agent",
     "customText",
     "exec",
+    "env",
     "gitWorktree",
   ];
   const depthField = widgetEditFields({ id: "cwd" }).find(({ key }) => key === "depth");
@@ -1619,6 +1624,177 @@ function testAntigravityLatestPayloadFields() {
       initialOut.includes("0.0%"),
       initialOut
     );
+  }
+}
+
+function testEnvWidget() {
+  const real = fixture("antigravity-1.3.0.json");
+  const env = { AWS_PROFILE: "prod-admin", NODE_ENV: "production" };
+
+  for (const layout of LAYOUT_ORDER) {
+    const basic = render(real, [{ id: "env", var: "AWS_PROFILE" }], { layout, env });
+    const custom = render(
+      real,
+      [{ id: "env", var: "AWS_PROFILE", label: "AWS", icon: "🌿", maxWidth: 6 }],
+      { layout, env }
+    );
+    const noLabel = render(real, [{ id: "env", var: "AWS_PROFILE", label: "" }], { layout, env });
+    const raw = render(real, [{ id: "env", var: "NODE_ENV", raw: true }], { layout, env });
+    const multi = render(
+      real,
+      [
+        { id: "env", var: "AWS_PROFILE", label: "AWS" },
+        { id: "env", var: "NODE_ENV", label: "ENV" },
+      ],
+      { layout, env }
+    );
+    const unset = render(real, [{ id: "env", var: "DOES_NOT_EXIST" }], { layout, env });
+    const empty = render(real, [{ id: "env", var: "EMPTY_VAR" }], {
+      layout,
+      env: { ...env, EMPTY_VAR: "   " },
+    });
+
+    record(
+      `${layout} env renders var, label, icon, maxWidth, raw, multiple widgets, and hides when unset`,
+      basic.includes("AWS_PROFILE: prod-admin") &&
+        custom.includes("🌿 AWS: prod-…") &&
+        noLabel.includes("🔧 prod-admin") &&
+        !noLabel.includes("AWS_PROFILE") &&
+        raw.trim() === "production" &&
+        multi.includes("AWS: prod-admin") &&
+        multi.includes("ENV: production") &&
+        unset.trim() === "" &&
+        empty.trim() === "",
+      JSON.stringify({ basic, custom, noLabel, raw, multi, unset, empty })
+    );
+  }
+
+  const fields = widgetEditFields({ id: "env", var: "NODE_ENV" });
+  const schema = buildConfigSchema();
+  const varProp = schema.definitions.widget.properties.var;
+  record(
+    "env exposes var, label, icon, and maxWidth in configure and var in config schema",
+    Boolean(
+      fields.some((f) => f.key === "var" && f.text === true) &&
+      fields.some((f) => f.key === "label") &&
+      fields.some((f) => f.key === "icon") &&
+      fields.some((f) => f.key === "maxWidth") &&
+      MAX_WIDTH_WIDGETS.has("env") &&
+      varProp &&
+      varProp.type === "string"
+    )
+  );
+}
+
+function testOsc8Links() {
+  const real = fixture("antigravity-1.3.0.json");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "agy-osc8-"));
+
+  try {
+    const repoDir = path.join(root, "café project");
+    const subDir = path.join(repoDir, "nested", "deep folder");
+    fs.mkdirSync(path.join(repoDir, ".git", "refs", "heads", "feature"), { recursive: true });
+    fs.mkdirSync(subDir, { recursive: true });
+    const sha = "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678";
+    fs.writeFileSync(path.join(repoDir, ".git", "HEAD"), "ref: refs/heads/feature/auth-v2\n");
+    fs.writeFileSync(path.join(repoDir, ".git", "refs", "heads", "feature", "auth-v2"), `${sha}\n`);
+    fs.writeFileSync(
+      path.join(repoDir, ".git", "config"),
+      '[remote "origin"]\n\turl = git@github.com:wassim-azi/agy-powerline.git\n'
+    );
+
+    const payload = {
+      ...real,
+      cwd: subDir,
+      workspace: { current_dir: subDir, project_dir: repoDir },
+      vcs: { type: "git", branch: "feature/auth-v2", dirty: true },
+    };
+    const expectedCwdUrl = pathLinkUrl(subDir, "file");
+    const expectedVscodeUrl = pathLinkUrl(repoDir, "vscode");
+
+    for (const layout of LAYOUT_ORDER) {
+      const linked = render(
+        payload,
+        [
+          { id: "cwd", link: true, fish: true, maxWidth: 16 },
+          { id: "project", link: "vscode" },
+          { id: "git", link: true, fish: true, maxWidth: 12 },
+          { id: "gitSha", link: true },
+        ],
+        { layout, color: "truecolor" }
+      );
+      const suppressedAscii = render(
+        payload,
+        [
+          { id: "cwd", link: true },
+          { id: "git", link: true },
+          { id: "gitSha", link: true },
+        ],
+        { layout, ascii: true, color: "truecolor" }
+      );
+      const suppressedNoColor = render(
+        payload,
+        [
+          { id: "cwd", link: true },
+          { id: "project", link: "cursor" },
+          { id: "git", link: true },
+          { id: "gitSha", link: true },
+        ],
+        { layout, color: "none" }
+      );
+
+      record(
+        `${layout} OSC 8 link wraps cwd, project, git branch, and gitSha cleanly`,
+        linked.includes(`\x1b]8;;${expectedCwdUrl}\x07`) &&
+          linked.includes(`\x1b]8;;${expectedVscodeUrl}\x07`) &&
+          linked.includes(
+            "\x1b]8;;https://github.com/wassim-azi/agy-powerline/tree/feature/auth-v2\x07f/auth-v2\x1b]8;;\x07"
+          ) &&
+          linked.includes(
+            `\x1b]8;;https://github.com/wassim-azi/agy-powerline/commit/${sha.slice(0, 7)}\x07${sha.slice(0, 7)}\x1b]8;;\x07`
+          ) &&
+          !suppressedAscii.includes("\x1b]8;;") &&
+          !suppressedNoColor.includes("\x1b]8;;"),
+        linked
+      );
+    }
+
+    const winFile = pathLinkUrl("C:\\Users\\François\\café #1", true);
+    const winCursor = pathLinkUrl("C:\\Users\\alex\\app", "cursor");
+    const relIgnored = pathLinkUrl("relative/path", true);
+    const previewHtml = ansiToHtml(
+      render(
+        payload,
+        [
+          { id: "cwd", link: true },
+          { id: "git", link: true },
+        ],
+        {
+          layout: "pills",
+          color: "truecolor",
+        }
+      )
+    );
+
+    const cwdLinkField = widgetEditFields({ id: "cwd" }).find((f) => f.key === "link");
+    const gitLinkField = widgetEditFields({ id: "git" }).find((f) => f.key === "link");
+    const shaLinkField = widgetEditFields({ id: "gitSha" }).find((f) => f.key === "link");
+    const linkSchema = buildConfigSchema().definitions.widget.properties.link;
+
+    record(
+      "pathLinkUrl preserves non-ASCII UTF-8, ansiToHtml strips OSC 8, and link is configurable",
+      winFile === "file:///C:/Users/François/café%20%231" &&
+        winCursor === "cursor://file/C:/Users/alex/app" &&
+        relIgnored === "" &&
+        !previewHtml.includes("]8;;") &&
+        previewHtml.includes("f") &&
+        Boolean(cwdLinkField && gitLinkField && shaLinkField) &&
+        Array.isArray(linkSchema?.enum) &&
+        linkSchema.enum.includes("vscode"),
+      JSON.stringify({ winFile, winCursor, relIgnored, previewHtml })
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
   }
 }
 

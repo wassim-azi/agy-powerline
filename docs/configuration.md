@@ -82,6 +82,7 @@ Most values come from the JSON Antigravity pipes on stdin; `host`, `os` and `ram
   - Read from agy's own conversation databases (`~/.gemini/antigravity-cli/conversations/*.db`), read-only: only the token counts, response IDs (so a response counted twice is counted once) and timestamps, never a message or a name. The totals are kept per database in `.usage-cache.json` in the install folder, so a database is read again only when it changes, at most about 100 ms of reading per refresh. Previews (`configure`, `render --demo`) only use that cache, so the widgets show there once the bar has run in agy.
 - Prompt cache hit rate (`cacheHit` e.g. `⚡ 85%`: share of the latest prompt read from cache)
 - Custom shell command (`exec`, see [below](#shell-command-widget-exec))
+- Environment variable (`env`, e.g. `{"id": "env", "var": "AWS_PROFILE", "label": "AWS"}` shows `🔧 AWS: dev`; zero subprocesses, hidden when unset or secret-named)
 - Custom text badge (`customText`, e.g. `{"id": "customText", "text": "Production"}` shows `🏷️ Production`; hidden without `text`)
 - Active non-default agent (`agent` e.g. `🧩 reviewer`: hidden when using the default agent), plan tier, agent state (`agentState`, including pending tool confirmation when `tool_confirmation_pending` is `true`), CLI version
 - Artifact count
@@ -113,7 +114,8 @@ Any widget accepts these options:
 - **`icon`**: your own icon, one emoji or up to two characters: `{ "id": "fiveHourPct", "icon": "🔋" }` shows `🔋 5h: 72.0% rem`. `""` removes the icon; a wider one is ignored. It also replaces icons that change with the state (idle agent, sandbox with network, the `os` widget's system). ASCII mode draws no icons, so it's ignored there. In `configure`: **Icon**.
 - **`depth`** (`cwd` only): an integer from 1 to 10 keeps the root and last N folders, replacing the middle with `…` (`...` in ASCII mode). `/` and `\` paths are supported; invalid values are ignored. `configure` offers 1 to 4; set a higher depth in the config file.
 - **`fish`** (`cwd` and `git`): `true` abbreviates parent folders to their first character (or dot plus first character for hidden folders like `.gemini` → `.g`, keeping the last `depth` folders or 1 by default in full) on `cwd`, and slash-separated branch prefixes (`feature/auth/oauth-login` → `f/a/oauth-login`) on `git`. Can combine with `depth` and `maxWidth`. In `configure`: **Fish style**.
-- **`maxWidth`**: an integer from 4 to 200 clips only the value, with `…` (`...` in ASCII mode). It applies to `cwd`, `project`, `git` (branch only), `title`, `model`, `agent`, `customText`, `exec` and `gitWorktree`; invalid values are ignored. On `title`, it replaces the built-in 30-column limit. The icon, label, dirty marker, git operation and ahead/behind counts are not included in the limit, and on `exec` the `[cmd]` preview placeholder is never cut. `configure` steps from 10 to 80 columns by 5; set other widths in the config file.
+- **`link`** (`cwd`, `project`, `git`, `gitSha`): opt-in OSC 8 clickable terminal hyperlinks (in `configure`: **Hyperlink**). On `cwd` and `project`, `"file"` (or `true`) links to `file://...` and `"vscode"`, `"cursor"`, or `"zed"` links directly into your editor (`vscode://file/...`, etc.). On `git` and `gitSha`, `true` reads `[remote "origin"]` directly from `.git/config` (zero subprocess spawns, embedded credentials stripped) and links the branch (`/tree/<branch>`) or commit (`/commit/<sha>`), skipping detached HEADs on `git`. Visible clipping (`depth`, `fish`, `maxWidth`) keeps the full target URL while clipping only the displayed text. Automatically suppressed in ASCII mode (`ascii: true`) and when color is off (`NO_COLOR` / `--color none`).
+- **`maxWidth`**: an integer from 4 to 200 clips only the value, with `…` (`...` in ASCII mode). It applies to `cwd`, `project`, `git` (branch only), `title`, `model`, `agent`, `customText`, `exec`, `env` and `gitWorktree`; invalid values are ignored. On `title`, it replaces the built-in 30-column limit. The icon, label, dirty marker, git operation and ahead/behind counts are not included in the limit, and on `exec` the `[cmd]` preview placeholder is never cut. `configure` steps from 10 to 80 columns by 5; set other widths in the config file.
 
 | Option        | Configuration                     | Example                                                                |
 | ------------- | --------------------------------- | ---------------------------------------------------------------------- |
@@ -159,6 +161,21 @@ It's off by default. Turn it on per widget with `"paceDelta": true`, or with **P
 - The delta keeps the widget's color, which follows the share left (`warn`, `crit`); it doesn't turn to the danger color on its own.
 - It's independent of `"pacing"` and `"pace"`, which only set the meters' marker.
 - On a terminal too narrow for the row, the delta goes before any widget is dropped.
+
+### Run-out forecast (`forecast`)
+
+The same percentage widgets (`fiveHourPct`, `weeklyPct`, and `quota`) can also estimate when quota runs out at your current burn rate across the current window:
+
+```
+⏳ 5h: 21.0% rem · ~1hr 12m     countdown until exhaustion
+⏳ 5h: 21.0% rem · ~15:40       exact run-out time ("forecast": "time")
+```
+
+Set `"forecast": "countdown"`, `"forecast": "time"`, or `"forecast": true` (follows `resetFormat`), or cycle **Run-out forecast** in `configure`:
+
+- Computed statelessly from elapsed window time and quota remaining (zero disk writes).
+- Automatically hides when the quota will last until the reset, during the first 10 minutes of a fresh window, or when the window length is unknown.
+- Drops before any widget when fitting a row to a narrow terminal (`compact`).
 
 ### Quota perspective (`quotaMode`)
 
@@ -341,10 +358,10 @@ Each one is a widget to add to `widgets`. `node -e` commands work the same in Wi
 }
 ```
 
-**AWS profile.** The environment agy was started with:
+**AWS profile.** The environment agy was started with (reads the environment directly with zero subprocesses, and automatically blocks secret-named variables like `*TOKEN*` or `*KEY*`):
 
 ```json
-{ "id": "exec", "cmd": "node -e \"console.log(process.env.AWS_PROFILE || '')\"", "label": "AWS" }
+{ "id": "env", "var": "AWS_PROFILE", "label": "AWS" }
 ```
 
 **Days left until a date.**

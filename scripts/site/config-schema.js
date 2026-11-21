@@ -184,6 +184,11 @@ function buildConfigSchema() {
             description:
               "cwd and git: abbreviate parent folders or branch prefixes to their first letter.",
           },
+          link: {
+            enum: [true, false, "file", "vscode", "cursor", "zed"],
+            description:
+              "cwd, project (file/vscode/cursor/zed/true) and git, gitSha (true/false): opt-in OSC 8 clickable hyperlink.",
+          },
           warn: percent("Caution level for this widget."),
           crit: percent("Danger level for this widget."),
           blink: { enum: [true, false, "warn"] },
@@ -201,6 +206,11 @@ function buildConfigSchema() {
             description:
               "quota, fiveHourPct, weeklyPct: show how far usage is ahead of or behind an even pace.",
           },
+          forecast: {
+            enum: [true, false, "countdown", "time"],
+            description:
+              "quota, fiveHourPct, weeklyPct: estimate when quota runs out at your current pace (true follows resetFormat).",
+          },
           meterStyle: { enum: [...METER_STYLE_IDS] },
           format: { enum: ["countdown", "time", "both"], description: "Reset widgets." },
           short: { type: "boolean", description: "model: the short model name." },
@@ -214,6 +224,11 @@ function buildConfigSchema() {
             description: "tokensToday, tokensWeek, tokensMonth, or cost.",
           },
           text: { type: "string", description: "customText: the text to show." },
+          var: {
+            type: "string",
+            pattern: "^[A-Za-z_][A-Za-z0-9_]{0,127}$",
+            description: "env: environment variable name to display (hidden when unset).",
+          },
         },
       },
     },

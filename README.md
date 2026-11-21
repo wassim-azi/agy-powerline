@@ -158,31 +158,31 @@ Preview them all in the [theme gallery](https://agy-powerline.com/themes/) or wi
 
 ## Widgets
 
-| Widget                                                           | Shows                                                                                                    |
-| ---------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `model`                                                          | The model in use                                                                                         |
-| `clock`                                                          | The current local time (12/24-hour format set under `clock`)                                             |
-| `fiveHourBar`, `weeklyBar`                                       | 5h / 7d quota left as a meter, with a [pace marker](docs/configuration.md#quota-pace-marker)             |
-| `fiveHourPct`, `weeklyPct`                                       | 5h / 7d quota left as a percentage                                                                       |
-| `fiveHourReset`, `weeklyReset`                                   | Time until the quota resets, or the reset time                                                           |
-| `quota`                                                          | The quota closest to running out, with its reset                                                         |
-| `thirdPartyFiveHour`, `thirdPartyWeekly`                         | Third-party model quotas                                                                                 |
-| `argonWeekly`, `argonReset`                                      | Gemini 4 Argon's own weekly quota (Google AI Pro) and its reset                                          |
-| `context`, `contextPct`, `contextTokens`                         | Context window used: meter, percentage or token counts                                                   |
-| `git`                                                            | Branch, uncommitted changes and ahead/behind                                                             |
-| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree |
-| `project`, `cwd`                                                 | Project folder, current folder                                                                           |
-| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | Active agent, agent state (with confirmation flag), plan, sandbox, artifacts, CLI version                |
-| `tasks`, `queue`                                                 | Running subagents, background tasks, queued user messages                                                |
-| `mode`                                                           | Approval mode (e.g. accept-edits) and Vim mode                                                           |
-| `title`                                                          | The conversation's title                                                                                 |
-| `sessionTime`                                                    | Time since the active conversation started                                                               |
-| `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | Session tokens, estimated cost (USD), and prompt cache usage                                             |
-| `tokensToday`, `tokensWeek`, `tokensMonth`                       | Tokens used today, over the last 7 days, and over the last 30 days, all conversations (Node 22.13+)      |
-| `ram`                                                            | Memory used on your machine                                                                              |
-| `os`                                                             | System agy runs on: Windows, macOS, Linux or WSL                                                         |
-| `host`                                                           | Current user and short hostname from the OS (`alex@devbox`)                                              |
-| `customText`, `exec`                                             | Your own text, or the output of a [shell command](docs/configuration.md#shell-command-widget-exec)       |
+| Widget                                                           | Shows                                                                                                         |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `model`                                                          | The model in use                                                                                              |
+| `clock`                                                          | The current local time (12/24-hour format set under `clock`)                                                  |
+| `fiveHourBar`, `weeklyBar`                                       | 5h / 7d quota left as a meter, with a [pace marker](docs/configuration.md#quota-pace-marker)                  |
+| `fiveHourPct`, `weeklyPct`                                       | 5h / 7d quota left as a percentage                                                                            |
+| `fiveHourReset`, `weeklyReset`                                   | Time until the quota resets, or the reset time                                                                |
+| `quota`                                                          | The quota closest to running out, with its reset                                                              |
+| `thirdPartyFiveHour`, `thirdPartyWeekly`                         | Third-party model quotas                                                                                      |
+| `argonWeekly`, `argonReset`                                      | Gemini 4 Argon's own weekly quota (Google AI Pro) and its reset                                               |
+| `context`, `contextPct`, `contextTokens`                         | Context window used: meter, percentage or token counts                                                        |
+| `git`                                                            | Branch, uncommitted changes and ahead/behind                                                                  |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree      |
+| `project`, `cwd`                                                 | Project folder, current folder                                                                                |
+| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | Active agent, agent state (with confirmation flag), plan, sandbox, artifacts, CLI version                     |
+| `tasks`, `queue`                                                 | Running subagents, background tasks, queued user messages                                                     |
+| `mode`                                                           | Approval mode (e.g. accept-edits) and Vim mode                                                                |
+| `title`                                                          | The conversation's title                                                                                      |
+| `sessionTime`                                                    | Time since the active conversation started                                                                    |
+| `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | Session tokens, estimated cost (USD), and prompt cache usage                                                  |
+| `tokensToday`, `tokensWeek`, `tokensMonth`                       | Tokens used today, over the last 7 days, and over the last 30 days, all conversations (Node 22.13+)           |
+| `ram`                                                            | Memory used on your machine                                                                                   |
+| `os`                                                             | System agy runs on: Windows, macOS, Linux or WSL                                                              |
+| `host`                                                           | Current user and short hostname from the OS (`alex@devbox`)                                                   |
+| `customText`, `env`, `exec`                                      | Your own text, an environment variable, or a [shell command](docs/configuration.md#shell-command-widget-exec) |
 
 A widget with nothing to show hides itself. Widgets can be recolored, renamed, given another icon, made label-free or given their own alert thresholds: see [Configuration](docs/configuration.md).
 

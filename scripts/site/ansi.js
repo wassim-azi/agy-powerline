@@ -99,6 +99,15 @@ function ansiRuns(text) {
 
     for (let i = 0; i < line.length; i++) {
       const ch = line[i];
+      if (ch === "\x1b" && line.startsWith("]8;;", i + 1)) {
+        const bel = line.indexOf("\x07", i);
+        const st = line.indexOf("\x1b\\", i);
+        const end = bel !== -1 && (st === -1 || bel < st) ? bel : st !== -1 ? st + 1 : -1;
+        if (end !== -1) {
+          i = end;
+          continue;
+        }
+      }
       if (ch === "\x1b" && line[i + 1] === "[") {
         const end = line.indexOf("m", i);
         if (end === -1) {

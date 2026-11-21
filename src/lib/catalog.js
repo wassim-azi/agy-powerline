@@ -340,6 +340,13 @@ const WIDGET_CATALOG = [
     summary: "output of a shell command",
   },
   {
+    id: "env",
+    label: "Environment Variable",
+    unique: false,
+    description: "value of an environment variable, hidden when unset",
+    summary: "value of an environment variable",
+  },
+  {
     id: "customText",
     label: "Custom Badge",
     unique: false,

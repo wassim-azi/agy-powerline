@@ -191,6 +191,8 @@ function addWidget(widgets, id, afterIndex = -1) {
   let widget = { id };
   if (id === "customText") {
     widget = { id, text: "Custom" };
+  } else if (id === "env") {
+    widget = { id, var: "NODE_ENV" };
   } else if (id === "exec") {
     widget = { id, cmd: "git stash list | wc -l" };
   }

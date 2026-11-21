@@ -24,6 +24,7 @@ const {
   paceIndex,
   paceGlyph,
   formatPaceDelta,
+  formatQuotaForecast,
   formatGitSync,
   formatGitOperation,
   gitChangeParts,
@@ -35,6 +36,9 @@ const {
   shortenPath,
   fishPath,
   fishBranch,
+  linkPath,
+  linkGitBranch,
+  linkGitSha,
   formatTokens,
   formatContextTokens,
   shortModelName,
@@ -56,6 +60,7 @@ const {
   isRaw,
   isPaced,
   showsPaceDelta,
+  showsForecast,
   METER_STYLES,
   meterStyle,
   resolveContextView,
@@ -66,6 +71,7 @@ const {
   RAM_DANGER,
   TITLE_MAX,
   subagentDetail,
+  readEnvValue,
 } = require("../widget-style");
 const { t } = require("../i18n");
 
@@ -232,6 +238,18 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
     return delta ? ` ${delta}` : "";
   };
 
+  const forecast = (quota) => {
+    const text = showsForecast(widget)
+      ? formatQuotaForecast(quota, {
+          format: widget.forecast,
+          fallback: config.resetFormat || "countdown",
+          clock: config.clock,
+          lang: session.lang,
+        })
+      : "";
+    return text ? `${ascii ? ", " : " · "}${text}` : "";
+  };
+
   function quotaState(quota) {
     const thresh = resolveQuotaThresholds(widget, config);
     const view = resolveQuotaView(quota, config, session.lang);
@@ -262,8 +280,15 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
 
   function quotaPct(quota) {
     const { view, blinkSeq, color } = quotaState(quota);
+    const eta = forecast(quota);
     return (
-      blinkSeq + fg(palette.text) + tag() + fg(color) + `${view.text}${paceDelta(quota)}` + RESET
+      blinkSeq +
+      fg(palette.text) +
+      tag() +
+      fg(color) +
+      `${view.text}${paceDelta(quota)}` +
+      (eta ? fg(palette.text) + eta : "") +
+      RESET
     );
   }
 
@@ -333,6 +358,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         fg(color) +
         `${view.text}${paceDelta(quota)}` +
         fg(palette.text) +
+        forecast(quota) +
         reset +
         RESET
       );
@@ -447,7 +473,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       if (!dirname) {
         return null;
       }
-      return fg(palette.location) + tag() + dirname + RESET;
+      return fg(palette.location) + tag() + linkPath(dirname, session.cwd, widget, ascii) + RESET;
     }
 
     case "project": {
@@ -455,7 +481,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       if (!proj) {
         return null;
       }
-      return fg(palette.location) + tag() + proj + RESET;
+      return fg(palette.location) + tag() + linkPath(proj, session.project, widget, ascii) + RESET;
     }
 
     case "os": {
@@ -481,7 +507,13 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       const syncStr = formatGitSync(session.git.ahead, session.git.behind, ascii);
       const syncPart = syncStr ? ` ${syncStr}` : "";
       const rawBranch = widget?.fish === true ? fishBranch(session.git.branch) : session.git.branch;
-      const branch = limitWidth(rawBranch, widget, ascii);
+      const branch = linkGitBranch(
+        limitWidth(rawBranch, widget, ascii),
+        session.git.branch,
+        session,
+        widget,
+        ascii
+      );
       return (
         fg(palette.git) +
         tag() +
@@ -528,7 +560,9 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       if (!session.gitDetails?.sha) {
         return null;
       }
-      return fg(palette.git) + tag() + session.gitDetails.sha + RESET;
+      return (
+        fg(palette.git) + tag() + linkGitSha(session.gitDetails.sha, session, widget, ascii) + RESET
+      );
 
     case "gitStash":
       if (!(session.gitDetails?.stash > 0)) {
@@ -716,6 +750,22 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         return null;
       }
       return fg(palette.text) + tag() + limitWidth(widget.text, widget, ascii) + RESET;
+    }
+
+    case "env": {
+      const entry = readEnvValue(widget, session, ascii);
+      if (!entry) {
+        return null;
+      }
+      const envWidget = widget?.label === undefined ? { ...widget, label: entry.name } : widget;
+      const envTag = widgetTag("env", {
+        emojis,
+        raw,
+        widget: envWidget,
+        ascii,
+        lang: session.lang,
+      });
+      return fg(palette.text) + envTag + entry.value + RESET;
     }
 
     case "exec": {

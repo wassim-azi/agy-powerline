@@ -110,6 +110,7 @@
 - `tokensWeek` — Tokens used over the last 7 days.
 - `tokensMonth` — Tokens used over the last 30 days.
 - `exec` — Output from a shell command you configure.
+- `env` — Value of an environment variable, hidden when unset.
 - `customText` — Your own text.
 
 ## Config

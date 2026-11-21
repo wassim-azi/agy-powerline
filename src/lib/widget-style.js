@@ -4,7 +4,13 @@
 "use strict";
 
 const { parseColor } = require("./colors");
-const { clipText, formatSubagent, stripControl, visibleWidth } = require("./formatters");
+const {
+  clipText,
+  formatSubagent,
+  limitWidth,
+  stripControl,
+  visibleWidth,
+} = require("./formatters");
 const { DEFAULT_LANGUAGE, t } = require("./i18n");
 
 // Basic names the exec widget's color option always accepted; the Lines
@@ -91,6 +97,13 @@ function showsPaceDelta(widget) {
   return widget?.paceDelta === true && !widget.compact;
 }
 
+const VALID_FORECAST_VALUES = new Set([true, "countdown", "time"]);
+
+// Run-out forecast is opt-in on percentage quota widgets and drops when fitted (compact).
+function showsForecast(widget) {
+  return VALID_FORECAST_VALUES.has(widget?.forecast) && !widget?.compact;
+}
+
 // Each widget's icon and label, shared by both layouts so Pills and Lines
 // read the same. name is the English label (configure shows it), key its
 // message in i18n.js. iconOnly: with emojis on, the icon stands in for the label
@@ -142,8 +155,31 @@ const WIDGET_TAGS = {
   tokensToday: { icon: "📈", name: "Today", key: "tag_today" },
   tokensWeek: { icon: "📊", name: "7d", key: "tag_7d" },
   tokensMonth: { icon: "🗓️", name: "30d", key: "tag_30d" },
+  env: { icon: "🔧", name: "" },
   customText: { icon: "🏷️", name: "" },
 };
+
+const VALID_ENV_NAME = /^[A-Za-z_][A-Za-z0-9_]{0,127}$/;
+// Refuse credential-like variable names so a shared config cannot expose secrets on screen.
+const SENSITIVE_ENV_NAME =
+  /(?:TOKEN|SECRET|KEY|PASS|PWD|CREDENTIAL|AUTH|PRIVATE|COOKIE|BEARER|SESSION)/i;
+
+function readEnvValue(widget, session, ascii = false) {
+  const name = typeof widget?.var === "string" ? widget.var.trim() : "";
+  if (!VALID_ENV_NAME.test(name) || SENSITIVE_ENV_NAME.test(name)) {
+    return null;
+  }
+  const env = session?.env && typeof session.env === "object" ? session.env : process.env;
+  const rawVal = Object.prototype.hasOwnProperty.call(env, name) ? env[name] : undefined;
+  if (typeof rawVal !== "string") {
+    return null;
+  }
+  const cleaned = stripControl(rawVal).replace(/\s+/g, " ").trim();
+  if (!cleaned) {
+    return null;
+  }
+  return { name, value: limitWidth(cleaned, widget, ascii) };
+}
 
 const LABEL_MAX = 20;
 const ICON_MAX = 2;
@@ -370,6 +406,7 @@ module.exports = {
   isRaw,
   isPaced,
   showsPaceDelta,
+  showsForecast,
   METER_STYLES,
   METER_STYLE_IDS,
   isMeterStyle,
@@ -388,4 +425,5 @@ module.exports = {
   RAM_DANGER,
   TITLE_MAX,
   subagentDetail,
+  readEnvValue,
 };

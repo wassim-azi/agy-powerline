@@ -46,6 +46,9 @@ const {
   fishPath,
   fishBranch,
   homePath,
+  linkPath,
+  linkGitBranch,
+  linkGitSha,
   basenameOf,
   label,
   visibleWidth,
@@ -53,6 +56,7 @@ const {
   paceIndex,
   paceGlyph,
   formatPaceDelta,
+  formatQuotaForecast,
 } = require("../formatters");
 const { execWidgetOutput, restoreAfterReset } = require("../exec");
 const {
@@ -63,6 +67,7 @@ const {
   isRaw,
   isPaced,
   showsPaceDelta,
+  showsForecast,
   METER_STYLES,
   meterStyle,
   resolveContextView,
@@ -73,6 +78,7 @@ const {
   RAM_DANGER,
   TITLE_MAX,
   subagentDetail,
+  readEnvValue,
 } = require("../widget-style");
 const { t } = require("../i18n");
 
@@ -204,6 +210,17 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
     const delta = showsPaceDelta(widget) ? formatPaceDelta(quota, ascii) : "";
     return delta ? ` ${delta}` : "";
   };
+  const forecast = (quota) => {
+    const text = showsForecast(widget)
+      ? formatQuotaForecast(quota, {
+          format: widget.forecast,
+          fallback: config.resetFormat || "countdown",
+          clock: config.clock,
+          lang: session.lang,
+        })
+      : "";
+    return text ? `${ascii ? ", " : " · "}${text}` : "";
+  };
   const quotaState = (quota, baseColor) => {
     const thresh = resolveQuotaThresholds(widget, config);
     const view = resolveQuotaView(quota, config, session.lang);
@@ -288,7 +305,11 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       }
       const { view, blink, color } = quotaState(quota, colors.fiveHour);
       const reset = quota.reset ? `${ascii ? ", " : " · "}${quota.reset}` : "";
-      return pill(color, lbl(`${quota.label} ${view.text}${paceDelta(quota)}${reset}`), blink);
+      return pill(
+        color,
+        lbl(`${quota.label} ${view.text}${paceDelta(quota)}${forecast(quota)}${reset}`),
+        blink
+      );
     }
 
     case "fiveHourBar":
@@ -299,7 +320,11 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return null;
       }
       const { view, blink, color } = quotaState(session.fiveHour, colors.fiveHour);
-      return pill(color, lbl(`${view.text}${paceDelta(session.fiveHour)}`), blink);
+      return pill(
+        color,
+        lbl(`${view.text}${paceDelta(session.fiveHour)}${forecast(session.fiveHour)}`),
+        blink
+      );
     }
 
     case "fiveHourReset":
@@ -313,7 +338,11 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return null;
       }
       const { view, blink, color } = quotaState(session.weekly, colors.weekly);
-      return pill(color, lbl(`${view.text}${paceDelta(session.weekly)}`), blink);
+      return pill(
+        color,
+        lbl(`${view.text}${paceDelta(session.weekly)}${forecast(session.weekly)}`),
+        blink
+      );
     }
 
     case "weeklyReset":
@@ -369,7 +398,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       if (!name) {
         return null;
       }
-      return pill(colors.meta, lbl(name));
+      return pill(colors.meta, lbl(linkPath(name, session.cwd, widget, ascii)));
     }
 
     case "project": {
@@ -377,7 +406,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       if (!name) {
         return null;
       }
-      return pill(colors.meta, lbl(name));
+      return pill(colors.meta, lbl(linkPath(name, session.project, widget, ascii)));
     }
 
     case "os": {
@@ -406,7 +435,13 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       const syncStr = formatGitSync(session.git.ahead, session.git.behind, ascii);
       const syncPart = syncStr ? ` ${syncStr}` : "";
       const rawBranch = widget?.fish === true ? fishBranch(session.git.branch) : session.git.branch;
-      const branch = limitWidth(rawBranch, widget, ascii);
+      const branch = linkGitBranch(
+        limitWidth(rawBranch, widget, ascii),
+        session.git.branch,
+        session,
+        widget,
+        ascii
+      );
       return pill(
         session.git.dirty ? colors.gitDirty : colors.git,
         lbl(`${mark}${branch}${opPart}${syncPart}`)
@@ -435,7 +470,7 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       if (!session.gitDetails?.sha) {
         return null;
       }
-      return pill(colors.git, lbl(session.gitDetails.sha));
+      return pill(colors.git, lbl(linkGitSha(session.gitDetails.sha, session, widget, ascii)));
 
     case "gitStash":
       if (!(session.gitDetails?.stash > 0)) {
@@ -632,6 +667,22 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return null;
       }
       return pill(colors.meta, lbl(limitWidth(widget.text, widget, ascii)));
+    }
+
+    case "env": {
+      const entry = readEnvValue(widget, session, ascii);
+      if (!entry) {
+        return null;
+      }
+      const envWidget = widget?.label === undefined ? { ...widget, label: entry.name } : widget;
+      const envTag = widgetTag("env", {
+        emojis,
+        raw,
+        widget: envWidget,
+        ascii,
+        lang: session.lang,
+      });
+      return pill(colors.meta, ` ${envTag}${entry.value} `);
     }
 
     case "exec": {

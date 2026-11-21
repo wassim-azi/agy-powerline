@@ -41,6 +41,7 @@ const MAX_WIDTH_WIDGETS = new Set([
   "agent",
   "customText",
   "exec",
+  "env",
   "gitWorktree",
 ]);
 const COLOR_SLOTS = ["model", "context", "git", "weekly", "thirdParty", "fiveHour", "meta"];
@@ -195,6 +196,15 @@ function editFields(widget, config = {}, options = {}) {
       help: "The badge's text. Enter to type, Enter again to keep it, Esc to cancel.",
     });
   }
+  if (widget.id === "env") {
+    fields.push({
+      key: "var",
+      label: "Variable",
+      text: true,
+      show: (value) => value || "(unset: hidden)",
+      help: "Environment variable name (e.g. NODE_ENV, AWS_PROFILE). Enter to type, Enter again to keep it.",
+    });
+  }
   if (widget.id === "exec") {
     const isFixed = !options.editableCmd;
     fields.push({
@@ -244,6 +254,24 @@ function editFields(widget, config = {}, options = {}) {
         widget.id === "cwd"
           ? "Abbreviates parent folders to their first letter (~/D/r/app)."
           : "Abbreviates branch prefixes before / to their first letter (f/a/login).",
+    });
+  }
+  if (widget.id === "cwd" || widget.id === "project") {
+    fields.push({
+      key: "link",
+      label: "Hyperlink",
+      values: [undefined, true, "vscode", "cursor", "zed"],
+      show: (value) => (value === true || value === "file" ? "file" : value || "off"),
+      help: "Makes the path a clickable OSC 8 terminal link (file manager or editor). Ignored in ASCII or NO_COLOR mode.",
+    });
+  }
+  if (widget.id === "git" || widget.id === "gitSha") {
+    fields.push({
+      key: "link",
+      label: "Hyperlink",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help: "Links to the branch or commit on origin (read from .git/config with zero spawns).",
     });
   }
   if (MAX_WIDTH_WIDGETS.has(widget.id)) {
@@ -338,13 +366,22 @@ function editFields(widget, config = {}, options = {}) {
     });
   }
   if (PACE_DELTA_WIDGETS.has(widget.id)) {
-    fields.push({
-      key: "paceDelta",
-      label: "Pace delta",
-      values: [undefined, true],
-      show: (value) => onOff(value),
-      help: "Adds how far usage is ahead of (⇡) or behind (⇣) an even pace over the window, in points.",
-    });
+    fields.push(
+      {
+        key: "paceDelta",
+        label: "Pace delta",
+        values: [undefined, true],
+        show: (value) => onOff(value),
+        help: "Adds how far usage is ahead of (⇡) or behind (⇣) an even pace over the window, in points.",
+      },
+      {
+        key: "forecast",
+        label: "Run-out forecast",
+        values: [undefined, "countdown", "time"],
+        show: (value) => (value === true ? "on (follows reset format)" : value || "off"),
+        help: "Estimates when quota runs out at current pace; hides when it lasts until reset.",
+      }
+    );
   }
   return fields;
 }
