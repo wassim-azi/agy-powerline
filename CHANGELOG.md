@@ -34,6 +34,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- **Deprecate `npx agy-powerline configure` in favor of bare `npx agy-powerline`**: updated CLI messages (`init`, `default`, `configure`), READMEs, guides, skills, and website copy to point users to `npx agy-powerline`; invoking `npx agy-powerline configure` (or `config`) now prints a deprecation warning and waits 5 seconds before opening the TUI prior to removal in future releases
 - **One-step `npx agy-powerline` onboarding**: running bare `npx agy-powerline` in an interactive terminal now installs or refreshes outdated scripts (keeping existing config and render flags) and launches the live-preview `configure` TUI directly, printing a post-exit summary with a reminder to restart `agy` (`--help` shows usage, piped stdin still renders, and `init --yes` remains unchanged for scripted installs) (#202)
 - **Dedicated `Settings` tab (`i`) in `configure`**: moved global bar toggles (`Bar language`, `Emojis`, `Minimalist mode`, `Quota pace marker`, `Alert blink`, `Space between rows`, `ASCII mode`) out of the live preview's bottom chip strip into `Settings`, keeping `Live preview` focused on the rendered bar (#216)
 - **Clean `configure` lifecycle**: `configure` now restores terminal state, detaches event listeners, and resolves cleanly instead of calling `process.exit(0)` mid-caller (#202)

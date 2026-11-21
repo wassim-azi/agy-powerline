@@ -33,7 +33,7 @@ Consulta de un vistazo tu modelo, las cuotas de Gemini (5h/7d), Claude/GPT y Arg
 | Ritmo de cuotas              | Los marcadores de ritmo en los medidores muestran si tu cuota de 5h o 7d durará hasta su reinicio        | [Guía de cuotas](docs/guides/antigravity-quota.md) · [Calculadora](https://agy-powerline.com/quota-calculator/) |
 | Cuotas de varios proveedores | Sigue lado a lado las cuotas de Gemini 5h/7d, de terceros (Claude/GPT) y de Gemini 4 Argon               | [Referencia del payload](docs/payload.md#quota-buckets)                                                         |
 | Temas y diseños              | 22 temas con contraste WCAG AA (oscuros, claros y aptos para daltonismo) en `pills`, `lines` y `classic` | [Galería de temas](https://agy-powerline.com/themes/)                                                           |
-| Configuradores interactivos  | Editor con vista previa en vivo en la terminal (`npx agy-powerline configure`) o en el navegador         | [Configurador web](https://agy-powerline.com/configure/)                                                        |
+| Configuradores interactivos  | Editor con vista previa en vivo en la terminal (`npx agy-powerline`) o en el navegador                   | [Configurador web](https://agy-powerline.com/configure/)                                                        |
 | Seguridad y privacidad       | Cero dependencias en tiempo de ejecución, sin red ni telemetría, copias de seguridad de `settings.json`  | [Seguridad](SECURITY.md)                                                                                        |
 | Multiplataforma              | Funciona en Windows, macOS, Linux y WSL con diagnósticos integrados (`doctor`)                           | [Instalación](docs/install.md) · [Solución de problemas](docs/troubleshooting.md)                               |
 
@@ -76,11 +76,11 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 `--yes` omite las preguntas interactivas, que agy no puede responder, y reemplaza cualquier `statusLine` existente tras respaldar `settings.json`.
 
-Para una terminal sin fuentes Nerd Font, activa el modo ASCII (`Settings` con `i` en `configure`).
+Para una terminal sin fuentes Nerd Font, activa el modo ASCII (`Settings` con `i` en `npx agy-powerline`).
 
 ## Personalización
 
-`npx agy-powerline configure` abre un editor con una vista previa en tiempo real de tu barra. Usa `←` `→` para alternar entre Widgets, Presets, Themes, Layout, Powerline y Settings, `↑` `↓` para desplazarte, Enter para seleccionar y `q` para guardar y salir. Las teclas de cada pantalla se muestran en la parte inferior; la lista completa se encuentra en [Configuración](docs/configuration.md#configurator-keys).
+`npx agy-powerline` abre un editor con una vista previa en tiempo real de tu barra. Usa `←` `→` para alternar entre Widgets, Presets, Themes, Layout, Powerline y Settings, `↑` `↓` para desplazarte, Enter para seleccionar y `q` para guardar y salir. Las teclas de cada pantalla se muestran en la parte inferior; la lista completa se encuentra en [Configuración](docs/configuration.md#configurator-keys).
 
 ¿Prefieres el navegador? [Construye tu barra en el navegador](https://agy-powerline.com/configure/) con vistas previas en tiempo real, y luego descárgala o impórtala.
 

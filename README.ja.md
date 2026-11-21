@@ -33,7 +33,7 @@
 | クォータのペース表示         | クォータメーターのペースマーカーで、5h または 7d のクォータがリセットまでもつかがひと目でわかる                     | [クォータガイド](docs/guides/antigravity-quota.md) · [計算機](https://agy-powerline.com/quota-calculator/) |
 | マルチプロバイダーのクォータ | Gemini 5h/7d、サードパーティ（Claude/GPT）、Gemini 4 Argon のクォータを横並びで追跡                                 | [ペイロードリファレンス](docs/payload.md#quota-buckets)                                                    |
 | テーマ & レイアウト          | `pills`、`lines`、`classic` の各レイアウトで使える WCAG AA 準拠の 22 テーマ（ダーク、ライト、色覚多様性対応を含む） | [テーマギャラリー](https://agy-powerline.com/themes/)                                                      |
-| 対話式のコンフィギュレーター | ターミナル（`npx agy-powerline configure`）またはブラウザーのライブプレビュー付きエディターで設定                   | [Web コンフィギュレーター](https://agy-powerline.com/configure/)                                           |
+| 対話式のコンフィギュレーター | ターミナル（`npx agy-powerline`）またはブラウザーのライブプレビュー付きエディターで設定                             | [Web コンフィギュレーター](https://agy-powerline.com/configure/)                                           |
 | セキュリティ & プライバシー  | ランタイム依存パッケージ 0、ネットワーク通信なし、テレメトリなし、`settings.json` の自動バックアップ                | [セキュリティ](SECURITY.md)                                                                                |
 | クロスプラットフォーム       | 組み込みの診断機能（`doctor`）付きで Windows、macOS、Linux、WSL で動作                                              | [インストール](docs/install.md) · [トラブルシューティング](docs/troubleshooting.md)                        |
 
@@ -76,11 +76,11 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 `--yes` は agy が答えられない確認をスキップし、`settings.json` をバックアップしたうえで既存の `statusLine` を置き換えます。
 
-Nerd Font のないターミナルでは、ASCII モードをオンにしてください（`configure` で `i` から `Settings` を開く）。
+Nerd Font のないターミナルでは、ASCII モードをオンにしてください（`npx agy-powerline` で `i` から `Settings` を開く）。
 
 ## カスタマイズ
 
-`npx agy-powerline configure` を実行すると、バーのライブプレビュー付きのエディターが開きます。`←` `→` で Widgets、Presets、Themes、Layout、Powerline、Settings を切り替え、`↑` `↓` で移動、Enter で選択、`q` で保存して終了します。各画面のキーは画面下部に表示されます。キーの一覧は [Configuration](docs/configuration.md#configurator-keys) にあります。
+`npx agy-powerline` を実行すると、バーのライブプレビュー付きのエディターが開きます。`←` `→` で Widgets、Presets、Themes、Layout、Powerline、Settings を切り替え、`↑` `↓` で移動、Enter で選択、`q` で保存して終了します。各画面のキーは画面下部に表示されます。キーの一覧は [Configuration](docs/configuration.md#configurator-keys) にあります。
 
 ブラウザーの方がよければ、[ブラウザーでバーを作成](https://agy-powerline.com/configure/)してライブプレビューで確認し、ダウンロードまたはインポートできます。
 

@@ -23,7 +23,7 @@
 사용 중인 모델, Gemini 5시간/7일 할당량, Claude/GPT 및 Argon 할당량, 컨텍스트 창, git 브랜치 등을 한눈에 확인하세요. 인터랙티브 에디터에서 위젯, 테마, 레이아웃을 선택하세요. 명령 한 번으로 설치되며, 의존성은 없습니다.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline configure: argon을 입력해 Argon의 주간 할당량을 추가한 뒤, 프리셋·테마·레이아웃을 살펴보며 바의 실시간 미리보기를 확인하고, Powerline 탭을 여는 모습" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline 인터랙티브 에디터: argon을 입력해 Argon의 주간 할당량을 추가한 뒤, 프리셋·테마·레이아웃을 살펴보며 바의 실시간 미리보기를 확인하고, Powerline 탭을 여는 모습" width="850">
 </p>
 
 ## 왜 agy-powerline인가요?
@@ -33,7 +33,7 @@
 | 할당량 속도 표시 | 할당량 미터의 페이스 마커로 5시간 또는 7일 할당량이 리셋 전까지 유지되는지 확인                    | [할당량 가이드](docs/guides/antigravity-quota.md) · [계산기](https://agy-powerline.com/quota-calculator/) |
 | 다중 모델 할당량 | Gemini 5시간/7일, 서드파티(Claude/GPT), Gemini 4 Argon 할당량을 나란히 추적                        | [페이로드 레퍼런스](docs/payload.md#quota-buckets)                                                        |
 | 테마 & 레이아웃  | `pills`, `lines`, `classic` 전반에서 WCAG AA 대비를 통과한 22개 테마(다크, 라이트, 색약 친화 포함) | [테마 갤러리](https://agy-powerline.com/themes/)                                                          |
-| 인터랙티브 설정  | 터미널(`npx agy-powerline configure`) 또는 브라우저에서 실시간 미리보기 에디터로 설정              | [웹 설정기](https://agy-powerline.com/configure/)                                                         |
+| 인터랙티브 설정  | 터미널(`npx agy-powerline`) 또는 브라우저에서 실시간 미리보기 에디터로 설정                        | [웹 설정기](https://agy-powerline.com/configure/)                                                         |
 | 보안 & 개인정보  | 런타임 의존성 0, 네트워크 호출 없음, 텔레메트리 없음, `settings.json` 자동 백업                    | [보안](SECURITY.md)                                                                                       |
 | 크로스 플랫폼    | 내장 진단 도구(`doctor`)와 함께 Windows, macOS, Linux, WSL 지원                                    | [설치](docs/install.md) · [문제 해결](docs/troubleshooting.md)                                            |
 
@@ -76,11 +76,11 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 `--yes`는 agy가 답할 수 없는 프롬프트를 건너뛰고, `settings.json`을 백업한 뒤 기존 `statusLine`을 교체합니다.
 
-Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`configure`에서 `i`로 `Settings` 열기).
+Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`npx agy-powerline`에서 `i`로 `Settings` 열기).
 
 ## 커스터마이즈
 
-`npx agy-powerline configure`를 실행하면 바의 실시간 미리보기가 있는 에디터가 열립니다. `←` `→`로 Widgets, Presets, Themes, Layout, Powerline, Settings 탭을 전환하고, `↑` `↓`로 이동, Enter로 선택, `q`로 저장하고 종료합니다. 각 화면의 키는 하단에 표시되며, 전체 목록은 [Configuration](docs/configuration.md#configurator-keys)에 있습니다.
+`npx agy-powerline`을 실행하면 바의 실시간 미리보기가 있는 에디터가 열립니다. `←` `→`로 Widgets, Presets, Themes, Layout, Powerline, Settings 탭을 전환하고, `↑` `↓`로 이동, Enter로 선택, `q`로 저장하고 종료합니다. 각 화면의 키는 하단에 표시되며, 전체 목록은 [Configuration](docs/configuration.md#configurator-keys)에 있습니다.
 
 브라우저를 선호하나요? [브라우저에서 바 만들기](https://agy-powerline.com/configure/)에서 실시간 미리보기로 구성한 뒤 다운로드하거나 가져올 수 있습니다.
 

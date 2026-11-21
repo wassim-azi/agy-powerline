@@ -179,7 +179,7 @@ async function defaultInteractiveCommand(options = {}) {
           rl: needsConfirm ? getRl() : null,
         });
         if (!statusLine) {
-          console.log(` Run ${CYAN}npx agy-powerline configure${RESET} anytime to customize.`);
+          console.log(` Run ${CYAN}npx agy-powerline${RESET} anytime to customize.`);
           return false;
         }
         updatedSettings = true;

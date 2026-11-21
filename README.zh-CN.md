@@ -33,7 +33,7 @@
 | 配额节奏标记 | 配额进度条上的节奏标记让你一眼看出 5h 或 7d 配额能否撑到重置                                   | [配额指南](docs/guides/antigravity-quota.md) · [计算器](https://agy-powerline.com/quota-calculator/) |
 | 多模型方配额 | 并排追踪 Gemini 5h/7d、第三方（Claude/GPT）以及 Gemini 4 Argon 配额                            | [Payload 参考](docs/payload.md#quota-buckets)                                                        |
 | 主题与布局   | 涵盖 `pills`、`lines` 和 `classic` 三种布局的 22 款 WCAG AA 主题（含深色、浅色及色盲友好配色） | [主题画廊](https://agy-powerline.com/themes/)                                                        |
-| 交互式配置器 | 在终端（`npx agy-powerline configure`）或浏览器中使用带实时预览的编辑器定制                    | [网页配置器](https://agy-powerline.com/configure/)                                                   |
+| 交互式配置器 | 在终端（`npx agy-powerline`）或浏览器中使用带实时预览的编辑器定制                              | [网页配置器](https://agy-powerline.com/configure/)                                                   |
 | 安全与隐私   | 零运行时依赖、无网络请求、无遥测，自动备份 `settings.json`                                     | [安全说明](SECURITY.md)                                                                              |
 | 跨平台支持   | 支持 Windows、macOS、Linux 和 WSL，内置诊断工具（`doctor`）                                    | [安装说明](docs/install.md) · [故障排查](docs/troubleshooting.md)                                    |
 
@@ -76,11 +76,11 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 
 `--yes` 会跳过 agy 无法回答的确认提示，并在备份 `settings.json` 后替换已有的 `statusLine`。
 
-如果终端没有 Nerd Font，可以开启 ASCII 模式（在 `configure` 中按 `i` 打开 `Settings`）。
+如果终端没有 Nerd Font，可以开启 ASCII 模式（在 `npx agy-powerline` 中按 `i` 打开 `Settings`）。
 
 ## 自定义
 
-`npx agy-powerline configure` 会打开一个带有状态栏实时预览的编辑器。用 `←` `→` 在 Widgets、Presets、Themes、Layout、Powerline 和 Settings 之间切换，`↑` `↓` 移动，Enter 选择，`q` 保存并退出。每个界面的按键都显示在底部；完整列表见 [Configuration](docs/configuration.md#configurator-keys)。
+`npx agy-powerline` 会打开一个带有状态栏实时预览的编辑器。用 `←` `→` 在 Widgets、Presets、Themes、Layout、Powerline 和 Settings 之间切换，`↑` `↓` 移动，Enter 选择，`q` 保存并退出。每个界面的按键都显示在底部；完整列表见 [Configuration](docs/configuration.md#configurator-keys)。
 
 更喜欢浏览器？可以[在浏览器中定制状态栏](https://agy-powerline.com/configure/)并实时预览，然后下载或导入配置。
 

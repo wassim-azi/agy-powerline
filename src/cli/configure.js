@@ -2824,7 +2824,7 @@ function start(options = {}) {
 
   if (!stdin.isTTY || !stdout.isTTY) {
     console.error("Run this in an interactive terminal:");
-    console.error("  npx agy-powerline configure");
+    console.error("  npx agy-powerline");
     process.exitCode = 1;
     return Promise.resolve(false);
   }
@@ -2871,12 +2871,38 @@ function start(options = {}) {
   });
 }
 
+const DEPRECATED_CONFIGURE_DELAY_MS = 5000;
+
+async function deprecatedConfigureCommand(options = {}) {
+  const stdin = options.stdin || process.stdin;
+  const stdout = options.stdout || process.stdout;
+  const stderr = options.stderr || process.stderr;
+  const delayMs = options.delayMs ?? DEPRECATED_CONFIGURE_DELAY_MS;
+  const label = stderr.isTTY ? "\x1b[33mWarning:\x1b[0m" : "Warning:";
+
+  stderr.write(
+    `${label} The 'configure' parameter (and 'config') is obsolete and will be removed in the next releases. Run 'npx agy-powerline' instead.\n`
+  );
+
+  if (!stdin.isTTY || !stdout.isTTY) {
+    return configureCommand(options);
+  }
+
+  if (delayMs > 0) {
+    stderr.write(`Opening editor in ${Math.ceil(delayMs / 1000)}s...\n`);
+    await new Promise((resolve) => setTimeout(resolve, delayMs));
+  }
+  return configureCommand(options);
+}
+
 function runTui(options = {}) {
   return start(options);
 }
 
 module.exports = {
   configureCommand,
+  deprecatedConfigureCommand,
+  DEPRECATED_CONFIGURE_DELAY_MS,
   runTui,
   renderFrame,
   tabAfter,

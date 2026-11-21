@@ -62,7 +62,7 @@ const HOME_TEXT = {
       [
         "Pick a look",
         "Browse presets, layouts, themes and widgets with a live preview during setup, or reopen the editor any time.",
-        "npx agy-powerline configure",
+        "npx agy-powerline",
       ],
       [
         "Restart agy once",
@@ -246,7 +246,7 @@ const HOME_TEXT = {
       [
         "Choisir un style",
         "Parcourez préréglages, dispositions, thèmes et widgets avec un aperçu en direct lors de l'installation, ou rouvrez l'éditeur à tout moment.",
-        "npx agy-powerline configure",
+        "npx agy-powerline",
       ],
       [
         "Redémarrer agy une fois",
@@ -430,7 +430,7 @@ const HOME_TEXT = {
       [
         "Elegir un estilo",
         "Explora preajustes, diseños, temas y widgets con vista previa en vivo al instalar, o vuelve a abrir el editor cuando quieras.",
-        "npx agy-powerline configure",
+        "npx agy-powerline",
       ],
       [
         "Reiniciar agy una vez",
@@ -606,7 +606,7 @@ const HOME_TEXT = {
       [
         "見た目を選ぶ",
         "セットアップ中にプリセット、レイアウト、テーマ、ウィジェットをプレビューしながら選べます。あとからいつでも開き直せます。",
-        "npx agy-powerline configure",
+        "npx agy-powerline",
       ],
       [
         "agy を一度再起動",
@@ -771,7 +771,7 @@ const HOME_TEXT = {
       [
         "挑选外观",
         "安装过程中可带实时预览浏览预设、布局、主题与组件，也可随时重新打开编辑器调整。",
-        "npx agy-powerline configure",
+        "npx agy-powerline",
       ],
       [
         "重启一次 agy",
@@ -936,7 +936,7 @@ const HOME_TEXT = {
       [
         "스타일 고르기",
         "설치 과정이나 언제든 다시 열어 실시간 미리보기를 보며 프리셋, 레이아웃, 테마, 위젯을 선택할 수 있습니다.",
-        "npx agy-powerline configure",
+        "npx agy-powerline",
       ],
       [
         "agy 한 번 재시작",
@@ -1117,7 +1117,7 @@ const HOME_TEXT = {
       [
         "Stil auswählen",
         "Durchsuche Vorlagen, Layouts, Themes und Widgets mit Live-Vorschau bei der Einrichtung oder öffne den Editor jederzeit erneut.",
-        "npx agy-powerline configure",
+        "npx agy-powerline",
       ],
       [
         "agy einmal neu starten",

@@ -30,7 +30,7 @@ agy plugin install https://github.com/wassim-azi/agy-powerline
 
 ## Make it yours
 
-- `npx agy-powerline configure` opens an editor with a live preview: add, remove and reorder widgets, and pick presets, themes, layouts and powerline shapes.
+- `npx agy-powerline` opens an editor with a live preview: add, remove and reorder widgets, and pick presets, themes, layouts and powerline shapes.
 - [Build your bar in the browser](https://agy-powerline.com/configure/), then import it with `npx agy-powerline import statusline.config.json`.
 - Single changes from the command line: `npx agy-powerline theme light-paper`, `npx agy-powerline layout lines`, `npx agy-powerline preset compact`.
 
