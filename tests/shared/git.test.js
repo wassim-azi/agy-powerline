@@ -358,6 +358,18 @@ function testGitDetails(root, git) {
     "Windows planted Git executable detection covers CreateProcess extensions",
     hasPlantedGitBinary(plantedDir)
   );
+
+  if (process.platform === "win32") {
+    write(
+      path.join(syncGitDir, "config"),
+      '[branch "main"]\n\tremote = origin\n\tmerge = refs/heads/main\n'
+    );
+    write(path.join(syncRepo, "git.exe"), "");
+    record(
+      "getGitSync and getGitDetails skip a workspace-planted Git executable",
+      countGitCalls(() => render(syncRepo, ["gitFiles"])) === 0
+    );
+  }
 }
 
 // A rebase, merge, cherry-pick, revert or bisect in progress, on real repos.

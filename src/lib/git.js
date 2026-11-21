@@ -409,9 +409,17 @@ function getGitSync(gitDir, branch, cwd = path.dirname(gitDir)) {
     const out = execFileSync(
       "git",
       // The branch's own upstream: during a rebase HEAD is detached and has none.
-      ["-c", "protocol.allow=never", "rev-list", "--left-right", "--count", `${branch}...${branch}@{upstream}`, "--"],
+      [
+        "-c",
+        "protocol.allow=never",
+        "rev-list",
+        "--left-right",
+        "--count",
+        `${branch}...${branch}@{upstream}`,
+        "--",
+      ],
       {
-        cwd: path.dirname(gitDir),
+        cwd,
         timeout: timeouts.sync,
         stdio: ["ignore", "pipe", "ignore"],
         encoding: "utf8",
