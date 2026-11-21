@@ -209,6 +209,19 @@ function percent(value) {
   return Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0;
 }
 
+// Missing payload values must not become zero through JavaScript coercion.
+function finiteNumber(value) {
+  if (
+    value === null ||
+    value === undefined ||
+    typeof value === "boolean" ||
+    (typeof value === "string" && !value.trim())
+  ) {
+    return NaN;
+  }
+  return Number(value);
+}
+
 function readQuota(data, key, windowSeconds, lang) {
   const quota = data?.quota?.[key];
 
@@ -217,7 +230,7 @@ function readQuota(data, key, windowSeconds, lang) {
   }
 
   // Without a usable fraction there is nothing to show, not "0% left".
-  const fraction = quota.remaining_fraction == null ? NaN : Number(quota.remaining_fraction);
+  const fraction = finiteNumber(quota.remaining_fraction);
 
   if (!Number.isFinite(fraction)) {
     return null;
@@ -297,13 +310,13 @@ function tightestQuota(data, lang) {
 }
 
 function contextUsedPercent(data) {
-  const used = Number(data.context_window?.used_percentage);
+  const used = finiteNumber(data.context_window?.used_percentage);
 
   if (Number.isFinite(used)) {
     return used;
   }
 
-  const remaining = Number(data.context_window?.remaining_percentage);
+  const remaining = finiteNumber(data.context_window?.remaining_percentage);
 
   if (Number.isFinite(remaining)) {
     return 100 - remaining;
