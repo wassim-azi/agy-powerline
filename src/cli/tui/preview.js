@@ -4,16 +4,17 @@
 "use strict";
 
 const {
-  THEME_ORDER,
   LAYOUTS,
   LAYOUT_ORDER,
-  PRESET_ORDER,
   applyPreset,
   renderStatusline,
+  themeColors,
 } = require("../../lib/shared");
+const { terminalBackground } = require("../../lib/themes");
 const { getActiveDepth } = require("../../lib/colors");
+const { visibleWidth } = require("../../lib/formatters");
 const { detectStyle } = require("../../lib/powerline");
-const { currentPreset } = require("./state");
+const { currentPreset, filteredThemes, filteredPresets } = require("./state");
 
 const PREVIEW_WIDTH_STEPS = [60, 80, 100, 120, null];
 
@@ -111,7 +112,8 @@ function stepPreviewWidth(state, dir) {
 
 function previewConfig(state) {
   if (state.screen === "themes") {
-    const hovered = THEME_ORDER[state.cursor];
+    const themes = filteredThemes(state);
+    const hovered = themes[state.cursor];
     return hovered ? { ...state.config, theme: hovered } : state.config;
   }
 
@@ -120,7 +122,8 @@ function previewConfig(state) {
   }
 
   if (state.screen === "presets") {
-    const hovered = PRESET_ORDER[state.cursor];
+    const presets = filteredPresets(state);
+    const hovered = presets[state.cursor];
     return hovered ? applyPreset(state.config, hovered) : state.config;
   }
 
@@ -136,11 +139,11 @@ function previewConfig(state) {
 // or layout. Empty when the preview is the saved setup.
 function previewPending(state) {
   if (state.screen === "themes") {
-    const hovered = THEME_ORDER[state.cursor];
+    const hovered = filteredThemes(state)[state.cursor];
     return hovered && hovered !== state.config.theme ? "theme" : "";
   }
   if (state.screen === "presets") {
-    const hovered = PRESET_ORDER[state.cursor];
+    const hovered = filteredPresets(state)[state.cursor];
     return hovered && hovered !== currentPreset(state.config) ? "preset" : "";
   }
   if (state.screen === "layout") {
@@ -150,7 +153,8 @@ function previewPending(state) {
   return "";
 }
 
-// The bar's rendered rows for the live preview panel.
+// The bar's rendered rows for the live preview panel, plus right-edge stage
+// status pills and an optional truecolor background matching dark/light themes.
 function previewParts(state, width) {
   const preview = previewConfig(state);
   const { dot } = state.ui.glyph;
@@ -170,35 +174,118 @@ function previewParts(state, width) {
   const style =
     preview.layout === "pills" ? ` ${dot} ${detectStyle(preview.powerline) ?? "custom"}` : "";
   const scenario = previewScenarioEntry(state);
-  const scenarioTag = scenario.id !== "default" ? ` ${dot} ${scenario.label}` : "";
-  const widthTag = state.previewWidthOverride ? ` ${dot} ${targetWidth} cols` : "";
+  const widthLabel = state.previewWidthOverride ? `${targetWidth} cols` : "full";
   const pending = previewPending(state);
   const note = pending
     ? ` ${state.ui.accentText(`${dot} ${pending} preview, enter to apply`)}`
     : "";
-  const title = `Live preview ${state.ui.muted(`${dot} ${layout} ${dot} ${preview.theme}${style}${scenarioTag}${widthTag}`)}${note}`;
+  const baseTitle = `Live preview ${state.ui.muted(`${dot} ${layout} ${dot} ${preview.theme}${style}`)}${note}`;
 
-  return { title, bar: String(rendered).split("\n") };
+  const stageFull = `Scenario ${dot} ${scenario.label} (, / .)  Width ${dot} ${widthLabel} (- / +)`;
+  const stageCompact = `${dot} ${scenario.label} (, / .)  ${dot} ${widthLabel} (- / +)`;
+  const room = width - 9 - visibleWidth(baseTitle);
+  let controls;
+  let extraTitle = "";
+  if (room >= visibleWidth(stageFull)) {
+    controls = stageFull;
+  } else if (room >= visibleWidth(stageCompact)) {
+    controls = stageCompact;
+  } else {
+    const scenarioTag = scenario.id !== "default" ? ` ${dot} ${scenario.label}` : "";
+    const widthTag = state.previewWidthOverride ? ` ${dot} ${widthLabel}` : "";
+    extraTitle = scenarioTag || widthTag ? state.ui.muted(`${scenarioTag}${widthTag}`) : "";
+    controls = room >= 14 ? `,/. ${dot} -/+` : "";
+  }
+
+  const shownColors = themeColors(preview.theme, preview.customTheme);
+  const canvasBg =
+    getActiveDepth() === "truecolor" && !state.config.ascii
+      ? shownColors.terminal || terminalBackground(shownColors)
+      : null;
+
+  return {
+    title: `${baseTitle}${extraTitle}`,
+    controls,
+    canvasBg,
+    bar: String(rendered).split("\n"),
+  };
+}
+
+const stripAnsi = (text) => String(text).replace(/\x1b\[[0-9;]*m/g, "");
+
+function renderSingleWidgetLines(data, config, widget) {
+  try {
+    const out = renderStatusline(
+      data,
+      { ...config, widgets: [widget] },
+      { color: getActiveDepth() }
+    );
+    const lines = String(out).split("\n");
+    if (lines.every((line) => !stripAnsi(line).trim())) {
+      return null;
+    }
+    return lines;
+  } catch {
+    return null;
+  }
 }
 
 // One widget drawn on its own with the previewed theme and layout, for the
 // details panel; a widget with nothing to show in the sample data says so.
 function widgetPreview(state, widget, width) {
-  let rendered = "";
-  try {
-    rendered = renderStatusline(
-      { ...activePreviewData(state), terminal_width: width },
-      { ...previewConfig(state), widgets: [widget] },
-      { color: getActiveDepth() }
-    );
-  } catch {
-    // The full preview below reports render errors.
-  }
-  const lines = String(rendered).split("\n");
-  if (lines.every((line) => !line.replace(/\x1b\[[0-9;]*m/g, "").trim())) {
+  const lines = renderSingleWidgetLines(
+    { ...activePreviewData(state), terminal_width: width },
+    previewConfig(state),
+    widget
+  );
+  if (!lines) {
     return [{ dim: "Hidden in this preview: the sample data has nothing for it." }];
   }
   return lines.map((line) => ({ raw: line }));
+}
+
+// Multi-state (Normal vs Near limits) and multi-layout (Pills vs Lines) mini-
+// previews for the lower Widget Details pane, omitting duplicate outputs.
+function widgetComparisonPreviews(state, widget, width) {
+  const baseConfig = previewConfig(state);
+  const baseData = { ...activePreviewData(state), terminal_width: width };
+  const primary = renderSingleWidgetLines(baseData, baseConfig, widget);
+  if (!primary) {
+    return [];
+  }
+  const extra = [];
+
+  if (state.previewScenario === "default") {
+    const alertsScenario = PREVIEW_SCENARIOS.find((entry) => entry.id === "alerts");
+    const alertsLines = renderSingleWidgetLines(
+      { ...alertsScenario.build(state.previewData), terminal_width: width },
+      baseConfig,
+      widget
+    );
+    if (alertsLines && alertsLines.join("\n") !== primary.join("\n")) {
+      extra.push({ dim: "Near limits" }, ...alertsLines.map((line) => ({ raw: line })));
+    }
+  }
+
+  const altLayout = baseConfig.layout === "pills" ? "lines" : "pills";
+  const altLines = renderSingleWidgetLines(baseData, { ...baseConfig, layout: altLayout }, widget);
+  if (altLines && stripAnsi(altLines.join("\n")) !== stripAnsi(primary.join("\n"))) {
+    extra.push(
+      { dim: `${LAYOUTS[altLayout].name} layout` },
+      ...altLines.map((line) => ({ raw: line }))
+    );
+  }
+
+  // If neither alert state nor alternate layout text changed (e.g. static Model
+  // badge), still show how it sits in the other layout when height allows cleanly.
+  if (!extra.length && altLines) {
+    extra.push(
+      { dim: `${LAYOUTS[altLayout].name} layout` },
+      ...altLines.map((line) => ({ raw: line }))
+    );
+  }
+
+  return extra;
 }
 
 module.exports = {
@@ -212,4 +299,5 @@ module.exports = {
   previewPending,
   previewParts,
   widgetPreview,
+  widgetComparisonPreviews,
 };

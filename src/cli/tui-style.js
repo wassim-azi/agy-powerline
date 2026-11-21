@@ -85,14 +85,18 @@ function makeUi(colors, { ascii = false, width = 100 } = {}) {
 
   // Text on a filled, round-ended pill; ASCII mode keeps the fill and drops
   // the round ends (spaces instead), and no-color mode uses reverse video.
-  function pill(text, fill = accent, ink = colors.text) {
+  // An optional quiet suffix (e.g. a tab hotkey letter) stays inside the pill
+  // without bold weight so active and inactive tabs share the same hint style.
+  function pill(text, fill = accent, ink = colors.text, suffix = "") {
     if (plain) {
-      return `${REVERSE}${BOLD} ${text} ${RESET}`;
+      return `${REVERSE}${BOLD} ${text}${suffix ? ` ${suffix}` : ""} ${RESET}`;
     }
     if (ascii) {
-      return `${bg(fill)}${fg(ink)}${BOLD} ${text} ${RESET}`;
+      const tail = suffix ? `${RESET}${bg(fill)}${fg(ink)} ${suffix}` : "";
+      return `${bg(fill)}${fg(ink)}${BOLD} ${text}${tail} ${RESET}`;
     }
-    return `${fg(fill)}${CAP_LEFT}${bg(fill)}${fg(ink)}${BOLD}${text}${RESET}${fg(fill)}${CAP_RIGHT}${RESET}`;
+    const tail = suffix ? `${bg(fill)}${fg(ink)} ${suffix}${RESET}` : "";
+    return `${fg(fill)}${CAP_LEFT}${bg(fill)}${fg(ink)}${BOLD}${text}${RESET}${tail}${fg(fill)}${CAP_RIGHT}${RESET}`;
   }
 
   // A quiet label, like a keycap: preset names, the version.
@@ -160,32 +164,51 @@ function makeUi(colors, { ascii = false, width = 100 } = {}) {
     return ` ${plain ? line : fg(borderColor) + line + RESET}`;
   }
 
+  let lastTabBounds = [];
+
   // Tabs for the main screens; the current one is a filled pill, and the
   // navigation keys sit at the right end. On a narrow terminal the navigation
   // keys go first, then the tabs' key letters, then extra padding between tabs.
   function tabs(items, current) {
-    const draw = (withKeys, tight = false) =>
-      " " +
-      items
-        .map(({ id, label, key }) => {
-          if (id === current) {
-            return pill(label);
-          }
+    const draw = (withKeys, tight = false) => {
+      let col = 1;
+      const bounds = [];
+      const chunks = [];
+      for (let i = 0; i < items.length; i++) {
+        const { id, label, key } = items[i];
+        let part;
+        if (id === current) {
+          part = withKeys && key ? pill(label, accent, colors.text, key) : pill(label);
+        } else {
           const pad = tight ? "" : " ";
-          return `${pad}${label}${withKeys && key ? ` ${muted(key)}` : ""}${pad}`;
-        })
-        .join(" ");
+          part = `${pad}${label}${withKeys && key ? ` ${muted(key)}` : ""}${pad}`;
+        }
+        const partWidth = visibleWidth(part);
+        bounds.push({ id, colStart: col + 1, colEnd: col + partWidth });
+        chunks.push(part);
+        col += partWidth + (i < items.length - 1 ? 1 : 0);
+      }
+      return { text: ` ${chunks.join(" ")}`, bounds };
+    };
     const nav = muted(`${glyph.leftRight} navigate   q quit`);
     const full = draw(true);
     const plainTabs = draw(false);
-    return (
-      spread(full, nav) ??
-      (visibleWidth(full) <= width - 1
-        ? full
-        : visibleWidth(plainTabs) <= width - 1
-          ? plainTabs
-          : truncateLines(draw(false, true), width - 1, ascii))
-    );
+    const spreadFull = spread(full.text, nav);
+    if (spreadFull) {
+      lastTabBounds = full.bounds;
+      return spreadFull;
+    }
+    if (visibleWidth(full.text) <= width - 1) {
+      lastTabBounds = full.bounds;
+      return full.text;
+    }
+    if (visibleWidth(plainTabs.text) <= width - 1) {
+      lastTabBounds = plainTabs.bounds;
+      return plainTabs.text;
+    }
+    const tight = draw(false, true);
+    lastTabBounds = tight.bounds;
+    return truncateLines(tight.text, width - 1, ascii);
   }
 
   // An on/off toggle; key, when given, follows the label like a tab's letter.
@@ -195,14 +218,27 @@ function makeUi(colors, { ascii = false, width = 100 } = {}) {
     return (on ? `${fg(accent2)}${mark}${RESET} ${label}` : muted(`${mark} ${label}`)) + hint;
   }
 
+  function tintAnsiBg(text, rowBg) {
+    return String(text)
+      .replace(/\x1b\[0m/g, `\x1b[0m${rowBg}`)
+      .replace(/\x1b\[49m/g, rowBg);
+  }
+
   // A rounded panel with its title in the top border. Content wider than the
   // panel is cut with an ellipsis instead of wrapping. above and below sit at
-  // the right end of the top and bottom borders (a scrolled list's counts),
-  // so they cost no rows.
-  function panel(title, body, panelWidth = width, { above = "", below = "" } = {}) {
+  // the right end of the top and bottom borders (a scrolled list's counts or
+  // right-aligned stage status), so they cost no rows.
+  function panel(
+    title,
+    body,
+    panelWidth = width,
+    { above = "", below = "", focused = false, fillBg = null } = {}
+  ) {
     const space = Math.max(10, panelWidth - 4);
-    const border = (text) => (plain ? text : fg(borderColor) + text + RESET);
-    const edge = (text) => (text ? ` ${muted(text)} ${border(box.h)}` : "");
+    const frameColor = focused ? accent : borderColor;
+    const border = (text) => (plain ? text : fg(frameColor) + text + RESET);
+    const edgeText = (text) => (/\x1b\[/.test(text) ? text : muted(text));
+    const edge = (text) => (text ? ` ${edgeText(text)} ${border(box.h)}` : "");
     // A title too long for the border is cut, like the rows.
     const room = Math.max(1, panelWidth - 5 - visibleWidth(edge(above)));
     const label = title ? ` ${truncateLines(title, room, ascii)} ` : "";
@@ -218,10 +254,14 @@ function makeUi(colors, { ascii = false, width = 100 } = {}) {
       ) +
       edge(above) +
       border(box.tr);
+    const rowBg = fillBg && !plain ? bg(fillBg) : "";
     const rows = body.map((line) => {
       const clipped = truncateLines(line, space, ascii);
       const pad = " ".repeat(Math.max(0, space - visibleWidth(clipped)));
-      return border(box.v) + " " + clipped + RESET + pad + " " + border(box.v);
+      const inner = rowBg ? tintAnsiBg(clipped, rowBg) : clipped;
+      return (
+        border(box.v) + rowBg + " " + inner + RESET + rowBg + pad + " " + RESET + border(box.v)
+      );
     });
     const bottom =
       border(box.bl + box.h.repeat(Math.max(0, panelWidth - 2 - visibleWidth(edge(below))))) +
@@ -277,6 +317,9 @@ function makeUi(colors, { ascii = false, width = 100 } = {}) {
 
   return {
     glyph,
+    box,
+    plain,
+    borderColor,
     muted,
     wordmark,
     pill,
@@ -288,12 +331,14 @@ function makeUi(colors, { ascii = false, width = 100 } = {}) {
     keycap,
     hints,
     tabs,
+    tabBounds: () => lastTabBounds,
     chip,
     panel,
     row,
     beside,
     toast,
     accent,
+    accent2,
   };
 }
 

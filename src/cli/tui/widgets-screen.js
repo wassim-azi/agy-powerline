@@ -26,15 +26,15 @@ const {
   widgetIcon,
   widgetCount,
 } = require("./state");
-const { widgetPreview } = require("./preview");
+const { widgetPreview, widgetComparisonPreviews } = require("./preview");
 const {
-  MEDIUM,
   WIDE,
   frameWidth,
   splitWidths,
   dim,
   heading,
   capitalize,
+  tabKeys,
   screenFrame,
 } = require("./frame");
 
@@ -145,6 +145,7 @@ function widgetDetails(state, widget) {
 
   const meta = WIDGET_CATALOG.find((item) => item.id === widget.id);
   const options = widgetOptions(state, widget);
+  const detailWidth = splitWidths(frameWidth(state)).details - 4;
   return {
     title: [widgetIcon(state.config, widget.id), widgetLabel(widget.id)].filter(Boolean).join(" "),
     lines: [
@@ -152,11 +153,12 @@ function widgetDetails(state, widget) {
       "",
       heading(state, "Preview"),
       ...previewOneWidget(state, widget),
+      ...widgetComparisonPreviews(state, widget, detailWidth),
       "",
       heading(state, "Options"),
       ...(options.length
         ? options
-        : [{ dim: "Defaults. Colors, labels and thresholds per widget: docs/configuration.md" }]),
+        : [{ dim: "Defaults. Press Enter to customize colors, labels, meters, or thresholds." }]),
       "",
       ...presetsUsing(state, widget.id),
       ...(widget.id === "exec" ? ["", EXEC_NOTE] : []),
@@ -164,67 +166,87 @@ function widgetDetails(state, widget) {
   };
 }
 
+function rowDivider(state, rowNum) {
+  const text = state.config.ascii ? `-- Row ${rowNum} --` : `── Row ${rowNum} ──`;
+  return { divider: dim(state, text) };
+}
+
 function drawMain(state) {
-  const { upDown, shift } = state.ui.glyph;
+  const { upDown, shift, dot } = state.ui.glyph;
   // Flex spaces and new rows are layout, not widgets: they get no number, so
-  // the numbers match the widget count in the title.
+  // the numbers match the widget count in the title. Row headers sit above each
+  // lineBreak group without changing widget indices.
   let number = 0;
-  const items = state.config.widgets.length
-    ? state.config.widgets.map((widget) => {
-        const meta = WIDGET_CATALOG.find((item) => item.id === widget.id);
-        let extra = meta?.summary ?? "";
-        if (widget.id === "exec" && widget.cmd) {
-          extra = `cmd: ${widget.cmd}`;
-        } else if (widget.text) {
-          extra = `text: ${widget.text}`;
-        } else if (widget.warn != null || widget.crit != null) {
-          const parts = [];
-          if (widget.warn != null) parts.push(`warn ${widget.warn}%`);
-          if (widget.crit != null) parts.push(`crit ${widget.crit}%`);
-          if (widget.blink) parts.push("blink");
-          extra = parts.join(", ");
+  let rowNum = 1;
+  const items = [];
+  const itemMap = [];
+
+  if (state.config.widgets.length) {
+    items.push(rowDivider(state, rowNum));
+    itemMap.push(null);
+    for (let i = 0; i < state.config.widgets.length; i++) {
+      const widget = state.config.widgets[i];
+      const meta = WIDGET_CATALOG.find((item) => item.id === widget.id);
+      let extra = meta?.summary ?? "";
+      if (widget.id === "exec" && widget.cmd) {
+        extra = `cmd: ${widget.cmd}`;
+      } else if (widget.text) {
+        extra = `text: ${widget.text}`;
+      } else if (widget.warn != null || widget.crit != null) {
+        const parts = [];
+        if (widget.warn != null) parts.push(`warn ${widget.warn}%`);
+        if (widget.crit != null) parts.push(`crit ${widget.crit}%`);
+        if (widget.blink) parts.push("blink");
+        extra = parts.join(", ");
+      }
+      // Layout items read as quiet dividers, not as widgets.
+      if (widget.id === "separator" || widget.id === "lineBreak") {
+        const divider =
+          widget.id === "separator"
+            ? `${state.config.ascii ? "..." : "╌╌"} flex space`
+            : `${state.config.ascii ? "--" : "↵"} new row`;
+        items.push({ text: dim(state, divider), number: "" });
+        itemMap.push(i);
+        if (widget.id === "lineBreak" && i < state.config.widgets.length - 1) {
+          rowNum += 1;
+          items.push(rowDivider(state, rowNum));
+          itemMap.push(null);
         }
-        // Layout items read as quiet dividers, not as widgets.
-        if (widget.id === "separator" || widget.id === "lineBreak") {
-          const divider =
-            widget.id === "separator"
-              ? `${state.config.ascii ? "..." : "╌╌"} flex space`
-              : `${state.config.ascii ? "--" : "↵"} new row`;
-          return { text: dim(state, divider), number: "" };
-        }
-        number += 1;
-        return {
-          lead: widgetIcon(state.config, widget.id),
-          text: widgetLabel(widget.id),
-          extra: stripControl(extra),
-          number,
-        };
-      })
-    : [dim(state, `${state.ui.glyph.sparkle} nothing here yet. Press a to add your first widget.`)];
+        continue;
+      }
+      number += 1;
+      items.push({
+        lead: widgetIcon(state.config, widget.id),
+        text: widgetLabel(widget.id),
+        extra: stripControl(extra),
+        number,
+      });
+      itemMap.push(i);
+    }
+  } else {
+    items.push(
+      dim(state, `${state.ui.glyph.sparkle} nothing here yet. Press a to add your first widget.`)
+    );
+    itemMap.push(null);
+  }
 
   return screenFrame(state, {
-    title: `Your widgets ${dim(state, `${state.ui.glyph.dot} ${widgetCount(state.config)}`)}`,
+    title: `Your widgets ${dim(state, `${dot} ${widgetCount(state.config)}`)}`,
     items,
     selected: state.config.widgets.length ? state.cursor : -1,
+    itemMap,
+    notes: state.config.widgets.length
+      ? [
+          `enter Edit ${dot} ${shift}${upDown} Reorder ${dot} s Flex space ${dot} n New row ${dot} x Remove`,
+        ]
+      : [],
     details: widgetDetails(state, state.config.widgets[state.cursor]),
-    keys: [
+    keys: tabKeys(state, [
       [upDown, "move"],
-      [`${shift}${upDown}`, "reorder"],
       ["enter", "edit"],
       ["a", "add"],
-      ["s", "flex space"],
-      ["n", "new row"],
       ["x", "remove"],
-      ["d", "reset"],
-      ...(frameWidth(state) >= MEDIUM
-        ? [
-            [",/.", "scenario"],
-            ["-/+", "preview width"],
-          ]
-        : []),
-      ["g", "star"],
-      ["q", "save & quit"],
-    ],
+    ]),
   });
 }
 
@@ -388,7 +410,7 @@ function onEdit(state, key) {
     stepOption(state, field, key.name === "left" ? -1 : 1);
     return;
   }
-  if (key.name === "return" && field.values) {
+  if ((key.name === "return" || key.name === "space") && field.values) {
     stepOption(state, field, 1);
   }
 }

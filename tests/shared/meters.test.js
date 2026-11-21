@@ -181,7 +181,7 @@ async function run() {
     setActiveDepth(previousDepth);
   }
 
-  // Classic: 25 blocks, ░ for the rest, a thin pace line, | between widgets.
+  // Classic: 25 blocks, ░ for the rest, a pace line, | between widgets.
   const classic = stripAnsi(
     render(
       { id: "fiveHourBar" },
@@ -189,10 +189,10 @@ async function run() {
     )
   );
   record(
-    "Classic draws ██░│░ block meters, without brackets, and | dividers",
-    / █*░*│░* \d+\.\d% rem \| /.test(classic) &&
+    "Classic draws ██░┃░ block meters, without brackets, and | dividers",
+    / █*░*┃░* \d+\.\d% rem \| /.test(classic) &&
       !/[[\]]/.test(classic) &&
-      visibleWidth(classic.match(/[█░│]+/)[0]) === 25,
+      visibleWidth(classic.match(/[█░┃]+/)[0]) === 25,
     classic
   );
 
@@ -229,21 +229,21 @@ async function run() {
   }
 
   const blocks = stripAnsi(render({ id: "fiveHourBar", meter: "blocks" }));
-  const geometric = stripAnsi(
-    render({ id: "fiveHourBar" }, { layout: "lines", meterStyle: "geometric" })
+  const squares = stripAnsi(
+    render({ id: "fiveHourBar" }, { layout: "lines", meterStyle: "squares" })
   );
   record(
     "a style draws its own glyphs, from the widget or the global meterStyle",
     blocks.includes("█████") &&
       blocks.includes("░░░░") &&
-      geometric.includes("▰▰▰▰") &&
-      geometric.includes("▱▱▱▱"),
-    `${blocks} / ${geometric}`
+      squares.includes("■■■■■") &&
+      squares.includes("□□□□"),
+    `${blocks} / ${squares}`
   );
   record(
     "the widget's meter wins over the global meterStyle",
-    stripAnsi(render({ id: "fiveHourBar", meter: "line" }, { meterStyle: "blocks" })).includes(
-      "━━━"
+    stripAnsi(render({ id: "fiveHourBar", meter: "braille" }, { meterStyle: "blocks" })).includes(
+      "⣿⣿⣿⣿"
     )
   );
   record(

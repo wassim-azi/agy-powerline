@@ -67,6 +67,7 @@ function deriveLinesPalette(colors) {
     gitDirty: colors.gitDirty || LINES.red,
     agent: colors.model || LINES.magenta,
     text: colors.meta || LINES.white,
+    context: colors.context || LINES.blue,
     quotaLow: colors.fiveHour || LINES.green,
     // Quota/context states: ok -> caution -> danger. The medium band stays
     // "ok" so each state has one unmistakable color (also for color-blind users).
@@ -172,7 +173,7 @@ function renderDotMeter(
   }
 
   // The marker replaces the dot where the quota window currently is.
-  const markGlyph = ascii ? paceGlyph(true) : classic ? "│" : pace || paceGlyph(false);
+  const markGlyph = ascii ? paceGlyph(true) : pace || paceGlyph(false);
   // ASCII empties are dim; NORMAL ends that without dropping a blink.
   const undim = ascii ? NORMAL : "";
   let out = "";
@@ -292,9 +293,12 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
     const isWarn = pct >= thresh.warn;
     const level = isCrit ? "crit" : isWarn ? "warn" : "normal";
     const blinkSeq = !ascii && shouldBlink(level, thresh.blink) ? BLINK : "";
+    const contextPalette = palette.context
+      ? { ...palette, quotaLow: palette.context, quotaMed: palette.context }
+      : palette;
     const color = exceeds200k
       ? palette.quotaCrit || palette.red || LINES.red
-      : colorForUsedPct(Math.round(pct), palette, thresh);
+      : colorForUsedPct(Math.round(pct), contextPalette, thresh);
     const over200k = exceeds200k ? ` ${t("over_200k", session.lang)}` : "";
     return { thresh, size, pct, over200k, blinkSeq, color };
   }

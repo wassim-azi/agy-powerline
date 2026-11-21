@@ -3,10 +3,18 @@
 
 "use strict";
 
-const { THEMES, THEME_ORDER } = require("../../lib/shared");
+const { THEMES } = require("../../lib/shared");
 const { parseColor, fg } = require("../../lib/colors");
-const { RESET, moveCursor, backToMain, persist } = require("./state");
-const { dim, heading, screenFrame } = require("./frame");
+const {
+  BOLD,
+  RESET,
+  clampCursor,
+  moveCursor,
+  backToMain,
+  persist,
+  filteredThemes,
+} = require("./state");
+const { dim, heading, tabKeys, screenFrame } = require("./frame");
 
 const CUSTOM_COLOR_SLOTS = [
   { key: "model", label: "Model" },
@@ -131,27 +139,46 @@ function themeDetails(state, id) {
 }
 
 function drawThemes(state) {
-  const items = THEME_ORDER.map((id) => {
-    const theme =
-      THEMES[id] || (id === "custom" ? { name: "Custom", description: "Your own colors" } : null);
-    if (!theme) {
-      return "";
-    }
-    const swatch = themeSwatch(state.config, id === "custom" ? null : theme.colors);
-    const badge = id === state.config.theme ? state.ui.chip("current", true) : "";
-    const extra = id === "custom" ? `${theme.description}, Enter to edit` : theme.description;
-    return { lead: swatch, text: theme.name, badge, extra };
-  });
+  const themes = filteredThemes(state);
+  const caret = state.config.ascii ? "_" : "▏";
+  const showFilter = state.filterActive || Boolean(state.searchQuery);
+  const queryText = state.searchQuery
+    ? `${BOLD}${state.searchQuery}${RESET}${state.filterActive ? caret : ""}`
+    : `${caret}${dim(state, "type to filter")}`;
+  const head = showFilter ? [`${state.config.ascii ? "filter:" : "🔎"} ${queryText}`, ""] : [];
+  const items = themes.length
+    ? themes.map((id) => {
+        const theme =
+          THEMES[id] ||
+          (id === "custom" ? { name: "Custom", description: "Your own colors" } : null);
+        if (!theme) {
+          return "";
+        }
+        const swatch = themeSwatch(state.config, id === "custom" ? null : theme.colors);
+        const badge = id === state.config.theme ? state.ui.chip("current", true) : "";
+        const extra = id === "custom" ? `${theme.description}, Enter to edit` : theme.description;
+        return { lead: swatch, text: theme.name, badge, extra };
+      })
+    : [dim(state, `No theme matches "${state.searchQuery}". Esc to clear filter.`)];
 
   return screenFrame(state, {
     title: "Themes",
+    head,
     items,
-    details: themeDetails(state, THEME_ORDER[state.cursor]),
-    keys: [
-      [state.ui.glyph.upDown, "preview"],
-      ["enter", "apply"],
-      ["esc", "back"],
-    ],
+    selected: themes.length ? state.cursor : -1,
+    details: themes.length ? themeDetails(state, themes[state.cursor]) : null,
+    keys: state.filterActive
+      ? [
+          ["type", "filter"],
+          [state.ui.glyph.upDown, "preview"],
+          ["enter", "apply"],
+          ["esc", "clear"],
+        ]
+      : tabKeys(state, [
+          [state.ui.glyph.upDown, "preview"],
+          ["/", "filter"],
+          ["enter", "apply"],
+        ]),
   });
 }
 
@@ -164,13 +191,19 @@ function hexSwatch(config, hex) {
   }
 }
 
-// The curated colors in a row, the slot's current one in brackets.
-function curatedPalette(config, current) {
-  const block = config.ascii ? "#" : "■";
-  return CURATED_HEX_PALETTE.map((hex) => {
+// The curated colors in a row with an active pointer row underneath so the
+// selected swatch stands out cleanly across both dark and light terminals.
+function curatedPaletteLines(state, current) {
+  const block = state.config.ascii ? "#" : "■";
+  const strip = CURATED_HEX_PALETTE.map((hex) => {
     const swatch = `${fg(parseColor(hex))}${block}${RESET}`;
     return hex === current ? `[${swatch}]` : ` ${swatch} `;
   }).join("");
+  const activeIdx = CURATED_HEX_PALETTE.indexOf(current);
+  const pointerChar = state.config.ascii ? "^" : "▲";
+  const pointerLine =
+    activeIdx >= 0 ? " ".repeat(activeIdx * 3 + 1) + state.ui.accentText(pointerChar) : "";
+  return pointerLine ? [strip, { raw: pointerLine }] : [strip];
 }
 
 function drawCustomTheme(state) {
@@ -185,21 +218,21 @@ function drawCustomTheme(state) {
   return screenFrame(state, {
     title: "Custom theme",
     items,
-    notes: ["Cycle a slot through curated colors; the preview updates as you go."],
+    notes: ["Cycle a slot through curated colors; x resets a slot to the base theme."],
     details: slot && {
       title: slot.label,
       lines: [
         current ? `Now ${current}.` : "Now the base theme's color.",
         "",
-        curatedPalette(state.config, current),
+        ...curatedPaletteLines(state, current),
         "",
-        { dim: "← → and Enter step through these colors." },
+        { dim: "← →, Space and Enter step through these colors; x resets to base." },
       ],
     },
     keys: [
       [state.ui.glyph.upDown, "slot"],
       [state.ui.glyph.leftRight, "cycle color"],
-      ["enter", "next color"],
+      ["x", "base"],
       ["esc", "back"],
     ],
   });
@@ -212,7 +245,10 @@ function openCustomTheme(state) {
 
 function openThemes(state) {
   state.screen = "themes";
-  state.cursor = Math.max(0, THEME_ORDER.indexOf(state.config.theme));
+  state.filterActive = false;
+  state.searchQuery = "";
+  const themes = filteredThemes(state);
+  state.cursor = Math.max(0, themes.indexOf(state.config.theme));
 }
 
 function cycleCustomColor(state, slotKey, dir = 1) {
@@ -235,6 +271,13 @@ function cycleCustomColor(state, slotKey, dir = 1) {
   persist(state);
 }
 
+function resetCustomColor(state, slotKey) {
+  if (state.config.customTheme?.colors && slotKey in state.config.customTheme.colors) {
+    delete state.config.customTheme.colors[slotKey];
+    persist(state);
+  }
+}
+
 function onCustomTheme(state, key) {
   if (key.name === "escape") {
     backToMain(state);
@@ -251,35 +294,95 @@ function onCustomTheme(state, key) {
     return;
   }
 
+  const slot = CUSTOM_COLOR_SLOTS[state.cursor];
+  if (!slot) {
+    return;
+  }
+
+  if (key.name === "x" || key.name === "delete" || key.name === "backspace") {
+    resetCustomColor(state, slot.key);
+    return;
+  }
+
   if (key.name === "left") {
-    const slot = CUSTOM_COLOR_SLOTS[state.cursor];
-    if (slot) {
-      cycleCustomColor(state, slot.key, -1);
-    }
+    cycleCustomColor(state, slot.key, -1);
     return;
   }
 
   if (key.name === "right" || key.name === "return" || key.name === "space") {
-    const slot = CUSTOM_COLOR_SLOTS[state.cursor];
-    if (slot) {
-      cycleCustomColor(state, slot.key, 1);
-    }
+    cycleCustomColor(state, slot.key, 1);
   }
 }
 
 function onThemes(state, key) {
+  const themes = filteredThemes(state);
+
+  if (state.filterActive) {
+    if (key.name === "escape") {
+      state.filterActive = false;
+      state.searchQuery = "";
+      state.cursor = Math.max(0, filteredThemes(state).indexOf(state.config.theme));
+      return;
+    }
+    if (key.name === "up") {
+      moveCursor(state, -1, themes.length);
+      return;
+    }
+    if (key.name === "down") {
+      moveCursor(state, 1, themes.length);
+      return;
+    }
+    if (key.name === "return" && themes[state.cursor]) {
+      const selected = themes[state.cursor];
+      state.filterActive = false;
+      state.searchQuery = "";
+      if (selected === "custom") {
+        openCustomTheme(state);
+        return;
+      }
+      state.config.theme = selected;
+      persist(state);
+      backToMain(state);
+      return;
+    }
+    if (key.name === "backspace" || key.name === "delete") {
+      if (state.searchQuery.length > 0) {
+        state.searchQuery = state.searchQuery.slice(0, -1);
+        state.cursor = 0;
+        clampCursor(state, filteredThemes(state).length);
+      }
+      return;
+    }
+    if (key.sequence && key.sequence.length === 1 && !key.ctrl && !key.meta) {
+      const char = key.sequence;
+      if (char >= " " && char <= "~") {
+        state.searchQuery += char;
+        state.cursor = 0;
+        clampCursor(state, filteredThemes(state).length);
+      }
+    }
+    return;
+  }
+
+  if (key.sequence === "/") {
+    state.filterActive = true;
+    state.searchQuery = "";
+    state.cursor = 0;
+    return;
+  }
+
   if (key.name === "escape") {
     backToMain(state);
     return;
   }
 
   if (key.name === "up") {
-    moveCursor(state, -1, THEME_ORDER.length);
+    moveCursor(state, -1, themes.length);
     return;
   }
 
   if (key.name === "down") {
-    moveCursor(state, 1, THEME_ORDER.length);
+    moveCursor(state, 1, themes.length);
     return;
   }
 
@@ -289,7 +392,10 @@ function onThemes(state, key) {
   }
 
   if (key.name === "return") {
-    const selected = THEME_ORDER[state.cursor];
+    const selected = themes[state.cursor];
+    if (!selected) {
+      return;
+    }
     if (selected === "custom") {
       openCustomTheme(state);
       return;

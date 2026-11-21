@@ -116,9 +116,25 @@ function handleKey(state, key, { draw, quit }) {
     return;
   }
 
-  const typing = state.screen === "add" || state.hexInput !== null || state.textInput !== null;
+  const typing =
+    state.screen === "add" ||
+    state.hexInput !== null ||
+    state.textInput !== null ||
+    state.filterActive;
   if (isQuitKey(key, typing)) {
     quit();
+    return;
+  }
+
+  if (state.showHelp) {
+    state.showHelp = false;
+    draw();
+    return;
+  }
+
+  if (!typing && key.sequence === "?") {
+    state.showHelp = true;
+    draw();
     return;
   }
 
@@ -159,7 +175,7 @@ function handleKey(state, key, { draw, quit }) {
     }
   }
 
-  if (switchTab(state, key)) {
+  if (!state.filterActive && switchTab(state, key)) {
     draw();
     return;
   }
@@ -169,10 +185,70 @@ function handleKey(state, key, { draw, quit }) {
   draw();
 }
 
+function handleMouse(state, event, { draw }) {
+  if (!event || state.exiting) {
+    return;
+  }
+  const typing = state.hexInput !== null || state.textInput !== null;
+
+  if (event.button === 64 || event.button === 65) {
+    if (state.showHelp || typing) {
+      return;
+    }
+    const handleScreen = SCREEN_HANDLERS[state.screen] || onMain;
+    handleScreen(state, { name: event.button === 64 ? "up" : "down" });
+    draw();
+    return;
+  }
+
+  if (event.release || (event.button & 67) !== 0) {
+    return;
+  }
+
+  if (state.showHelp) {
+    state.showHelp = false;
+    draw();
+    return;
+  }
+
+  const hit = state.hitMap;
+  if (!hit) {
+    return;
+  }
+
+  if (event.row === hit.tabRow && !typing && !state.filterActive) {
+    const tab = hit.tabs?.find((item) => event.col >= item.colStart && event.col <= item.colEnd);
+    if (tab && tab.id !== state.screen) {
+      TAB_OPENERS[tab.id](state);
+      draw();
+      return;
+    }
+  }
+
+  if (event.col <= hit.listWidth) {
+    const offset = event.row - hit.listRowStart;
+    if (offset >= 0 && offset < hit.visibleItems.length) {
+      const target = hit.visibleItems[offset];
+      if (target === null || target === undefined) {
+        return;
+      }
+      if (state.cursor !== target) {
+        state.cursor = target;
+        draw();
+      } else if (!typing) {
+        const handleScreen = SCREEN_HANDLERS[state.screen] || onMain;
+        handleScreen(state, { name: "return" });
+        draw();
+      }
+    }
+  }
+}
+
 module.exports = {
   tabAfter,
   switchTab,
   isQuitKey,
   drawFrameLines,
   handleKey,
+  handleMouse,
 };

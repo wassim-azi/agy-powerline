@@ -7,6 +7,7 @@ const { wrapText } = require("../tui-style");
 const { visibleWidth } = require("../../lib/formatters");
 const { TABS, TAB_OF_SCREEN, REPO_URL } = require("./state");
 const { previewParts } = require("./preview");
+const { overlayHelpModal } = require("./help-screen");
 const { version: VERSION } = require("../../../package.json");
 
 // Window sizes where the editor changes shape: from MEDIUM columns the
@@ -75,12 +76,12 @@ function windowRows(state, count, selected, space) {
   return { start: state.scrollTop, end: state.scrollTop + space };
 }
 
-// List items are { text, extra, value, number } or a plain line: extra is a
-// description, value a setting's current value. From MEDIUM columns they
-// line up in one column.
+// List items are { text, extra, value, number }, { divider: text }, or a plain
+// line: extra is a description, value a setting's current value. From MEDIUM
+// columns they line up in one column.
 function listRows(state, items, selected, rowWidth) {
   const shown = (item) => item.value ?? item.extra ?? "";
-  const entries = items.filter((item) => typeof item !== "string");
+  const entries = items.filter((item) => typeof item !== "string" && !item.divider);
   const labels = entries.filter((item) => shown(item));
   // A badge follows its label, so it counts toward the label's width.
   const labelWidth = (item) =>
@@ -90,15 +91,26 @@ function listRows(state, items, selected, rowWidth) {
   const leadWidth = Math.max(0, ...entries.map((item) => visibleWidth(item.lead ?? "")));
   const lead = (item) =>
     leadWidth ? (item.lead ?? "") + " ".repeat(leadWidth - visibleWidth(item.lead ?? "")) : "";
-  return items.map((item, index) =>
-    typeof item === "string"
-      ? item
-      : state.ui.row(index === selected, item.text, shown(item), item.number ?? null, {
-          pad,
-          lead: lead(item),
-          badge: item.badge,
-        })
-  );
+  return items.map((item, index) => {
+    if (typeof item === "string") {
+      return item;
+    }
+    if (item.divider) {
+      return `  ${item.divider}`;
+    }
+    return state.ui.row(index === selected, item.text, shown(item), item.number ?? null, {
+      pad,
+      lead: lead(item),
+      badge: item.badge,
+    });
+  });
+}
+
+// Appends consistent global hints (? all keys, q save & quit) to every tab's
+// bottom bar while keeping narrow terminals concise on one row.
+function tabKeys(state, primaryKeys) {
+  const concise = frameWidth(state) < MEDIUM ? primaryKeys.slice(0, 3) : primaryKeys;
+  return [...concise, ["?", "all keys"], ["q", "save & quit"]];
 }
 
 // Details entries are plain strings (wrapped to the panel), { dim: text }
@@ -135,7 +147,7 @@ function anchor(top, bottom, tall) {
 // starts to scroll.
 function screenFrame(
   state,
-  { title, head = [], items, selected = state.cursor, notes = [], keys, details }
+  { title, head = [], items, selected = state.cursor, itemMap = null, notes = [], keys, details }
 ) {
   const width = frameWidth(state);
   const height = frameHeight(state);
@@ -177,17 +189,26 @@ function screenFrame(
     COMPACT_STEPS.find((s) => listSpace(s) >= MIN_LIST_ROWS) ||
     COMPACT_STEPS[COMPACT_STEPS.length - 1];
 
+  const selectedDisplay = itemMap && selected >= 0 ? itemMap.indexOf(selected) : selected;
   const content = Math.max(
     head.length + items.length + (wide ? 0 : noteLines(step).length),
     wide ? detailLines.length + noteLines(step).length : 0
   );
   const tall = Math.max(1, Math.min(content, bodySpace(step)));
-  const { start, end } = windowRows(state, items.length, selected, Math.max(1, listSpace(step)));
-  const rows = listRows(state, items, selected, widths.list - 4).slice(start, end);
+  const { start } = windowRows(state, items.length, selectedDisplay, Math.max(1, listSpace(step)));
+  // Keep a leading group divider visible when scrolled back to the first item.
+  const effectiveStart =
+    start === 1 && items[0]?.divider && selectedDisplay === 1 && listSpace(step) >= 2 ? 0 : start;
+  const effectiveEnd = Math.min(items.length, effectiveStart + Math.max(1, listSpace(step)));
+  const rows = listRows(state, items, selectedDisplay, widths.list - 4).slice(
+    effectiveStart,
+    effectiveEnd
+  );
   const { up, down } = state.ui.glyph;
   const counts = {
-    above: start > 0 ? `${up} ${start} more` : "",
-    below: end < items.length ? `${down} ${items.length - end} more` : "",
+    above: effectiveStart > 0 ? `${up} ${effectiveStart} more` : "",
+    below: effectiveEnd < items.length ? `${down} ${items.length - effectiveEnd} more` : "",
+    focused: true,
   };
 
   const body = wide
@@ -205,20 +226,42 @@ function screenFrame(
   const toast = state.flashMessage ? `   ${state.ui.toast(state.flashMessage)}` : "";
   const brand = ` ${state.ui.wordmark("agy-powerline")} ${state.ui.tag(`v${VERSION}`)}${toast}`;
   const gap = step.gaps ? [""] : [];
+  const tabsLine = state.ui.tabs(TABS, TAB_OF_SCREEN[state.screen]);
 
-  return [
+  const tabRow = gap.length + 1 + (step.tagline ? 1 : 0) + (step.gaps ? 1 : 0) + 1;
+  const listRowStart = tabRow + gap.length + 1 + head.length + 1;
+  state.hitMap = {
+    tabRow,
+    tabs: state.ui.tabBounds(),
+    listWidth: widths.list,
+    listRowStart,
+    visibleItems: Array.from({ length: rows.length }, (_, offset) => {
+      const idx = effectiveStart + offset;
+      if (itemMap) {
+        return itemMap[idx] ?? null;
+      }
+      return items[idx]?.divider ? null : idx;
+    }),
+  };
+
+  const frameLines = [
     ...gap,
     state.ui.spread(brand, star) ?? state.ui.spread(brand, starShort) ?? `${brand}  ${starShort}`,
     ...(step.tagline
       ? [` ${dim(state, `${state.ui.glyph.sparkle} Make agy feel like yours`)}`]
       : []),
     ...(step.gaps ? [state.ui.rule()] : []),
-    state.ui.tabs(TABS, TAB_OF_SCREEN[state.screen]),
+    tabsLine,
     ...gap,
     ...body,
-    ...state.ui.panel(preview.title, preview.bar, width),
+    ...state.ui.panel(preview.title, preview.bar, width, {
+      above: preview.controls,
+      fillBg: preview.canvasBg,
+    }),
     ...hints,
   ];
+
+  return state.showHelp ? overlayHelpModal(state, frameLines, width, height) : frameLines;
 }
 
 module.exports = {
@@ -234,6 +277,7 @@ module.exports = {
   splitWidths,
   windowRows,
   listRows,
+  tabKeys,
   detailsBody,
   anchor,
   screenFrame,

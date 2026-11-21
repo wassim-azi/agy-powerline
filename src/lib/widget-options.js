@@ -12,6 +12,8 @@ const {
 } = require("./formatters");
 const {
   METER_STYLE_IDS,
+  isMeterStyle,
+  meterStyle,
   QUOTA_WIDGETS,
   PACE_DELTA_WIDGETS,
   CONTEXT_WIDGETS,
@@ -351,7 +353,8 @@ function editFields(widget, config = {}, options = {}) {
       key: "meter",
       label: "Meter",
       values: [undefined, ...METER_STYLE_IDS],
-      show: (value) => value ?? "theme default",
+      show: (value) =>
+        isMeterStyle(value) ? value : `default (${meterStyle(widget, config, config.layout)})`,
       help: "Meter style; ASCII mode always uses # and -",
     });
   }
@@ -362,7 +365,7 @@ function editFields(widget, config = {}, options = {}) {
       values: [undefined, false, true],
       show: (value) =>
         value === undefined ? `default (${onOff(config.pacing !== false)})` : onOff(value),
-      help: "Marks where usage would be if it were spread evenly over the window. Default follows r.",
+      help: "Marks where usage would be if it were spread evenly over the window. Default follows Quota pace marker in Settings.",
     });
   }
   if (PACE_DELTA_WIDGETS.has(widget.id)) {

@@ -18,7 +18,7 @@ const {
   glyphName,
 } = require("../../lib/powerline");
 const { RESET, BOLD, clampCursor, moveCursor, backToMain, persist } = require("./state");
-const { dim, screenFrame } = require("./frame");
+const { dim, tabKeys, screenFrame } = require("./frame");
 const { openThemes } = require("./themes-screen");
 
 // Rows of the Powerline screen; rows with a slot open the glyph editor.
@@ -115,11 +115,10 @@ function drawPowerline(state) {
     items,
     notes,
     details: powerlineDetails(state, POWERLINE_ROWS[state.cursor]),
-    keys: [
+    keys: tabKeys(state, [
       [state.ui.glyph.upDown, "move"],
       ["enter", "toggle / cycle / edit"],
-      ["esc", "back"],
-    ],
+    ]),
   });
 }
 
@@ -223,11 +222,14 @@ function onPowerline(state, key) {
     return;
   }
 
-  if (key.name !== "return") {
+  if (key.name !== "return" && key.name !== "space") {
     return;
   }
 
   const row = POWERLINE_ROWS[state.cursor];
+  if (key.name === "space" && row.id !== "enabled" && row.id !== "style") {
+    return;
+  }
 
   if (row.id === "enabled") {
     setPowerline(state, { enabled: !state.config.powerline.enabled });

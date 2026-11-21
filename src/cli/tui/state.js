@@ -8,10 +8,14 @@ const {
   InvalidConfigError,
   saveConfig,
   WIDGET_CATALOG,
+  PRESETS,
   PRESET_ORDER,
+  THEMES,
+  THEME_ORDER,
   applyPreset,
 } = require("../../lib/shared");
-const { WIDGET_TAGS } = require("../../lib/widget-style");
+const { OS_ICONS, WIDGET_TAGS } = require("../../lib/widget-style");
+const { currentOsName } = require("../../lib/session");
 const { REPO_URL } = require("../repo-url");
 
 const CSI = "\x1b[";
@@ -21,6 +25,13 @@ const HIDE = `${CSI}?25l`;
 const SHOW = `${CSI}?25h`;
 const ALT_ON = `${CSI}?1049h`;
 const ALT_OFF = `${CSI}?1049l`;
+const SYNC_ON = `${CSI}?2026h`;
+const SYNC_OFF = `${CSI}?2026l`;
+const MOUSE_ON = `${CSI}?1000;1006h`;
+const MOUSE_OFF = `${CSI}?1000;1006l`;
+const CURSOR_HOME = `${CSI}H`;
+const ERASE_LINE = `${CSI}K`;
+const CLEAR_BELOW = `${CSI}J`;
 const HOME_CLEAR = `${CSI}H${CSI}J`;
 
 const TABS = [
@@ -54,6 +65,8 @@ function createState(overrides = {}) {
     exiting: false,
     flashMessage: "",
     searchQuery: "",
+    filterActive: false,
+    showHelp: false,
     glyphSlot: "separator",
     // null while browsing the glyph list; a string while typing a code point.
     hexInput: null,
@@ -187,9 +200,49 @@ function currentPreset(config) {
   return PRESET_ORDER.find((id) => JSON.stringify(applyPreset(config, id).widgets) === mine);
 }
 
-// A widget's icon from the bar, when the bar shows icons.
+// A widget's icon from the bar, when the bar shows icons. For OS, resolve the
+// host platform icon so Operating System and RAM Usage stay distinct in lists.
 function widgetIcon(config, id) {
-  return config.emojis !== false && !config.ascii ? (WIDGET_TAGS[id]?.icon ?? "") : "";
+  if (config.emojis === false || config.ascii) {
+    return "";
+  }
+  if (id === "os") {
+    return OS_ICONS[currentOsName()] || WIDGET_TAGS.os?.icon || "";
+  }
+  return WIDGET_TAGS[id]?.icon ?? "";
+}
+
+function filteredThemes(state) {
+  const q =
+    state.filterActive || state.screen === "themes" ? state.searchQuery.toLowerCase().trim() : "";
+  if (!q) {
+    return THEME_ORDER;
+  }
+  return THEME_ORDER.filter((id) => {
+    const theme =
+      THEMES[id] || (id === "custom" ? { name: "Custom", description: "Your own colors" } : null);
+    return (
+      id.toLowerCase().includes(q) ||
+      (theme?.name && theme.name.toLowerCase().includes(q)) ||
+      (theme?.description && theme.description.toLowerCase().includes(q))
+    );
+  });
+}
+
+function filteredPresets(state) {
+  const q =
+    state.filterActive || state.screen === "presets" ? state.searchQuery.toLowerCase().trim() : "";
+  if (!q) {
+    return PRESET_ORDER;
+  }
+  return PRESET_ORDER.filter((id) => {
+    const preset = PRESETS[id];
+    return (
+      id.toLowerCase().includes(q) ||
+      (preset?.name && preset.name.toLowerCase().includes(q)) ||
+      (preset?.description && preset.description.toLowerCase().includes(q))
+    );
+  });
 }
 
 function widgetCount(config) {
@@ -205,6 +258,13 @@ module.exports = {
   SHOW,
   ALT_ON,
   ALT_OFF,
+  SYNC_ON,
+  SYNC_OFF,
+  MOUSE_ON,
+  MOUSE_OFF,
+  CURSOR_HOME,
+  ERASE_LINE,
+  CLEAR_BELOW,
   HOME_CLEAR,
   TABS,
   TAB_OF_SCREEN,
@@ -215,6 +275,8 @@ module.exports = {
   usedIds,
   addableWidgets,
   filteredAddableWidgets,
+  filteredThemes,
+  filteredPresets,
   clampCursor,
   wrapCursor,
   moveCursor,

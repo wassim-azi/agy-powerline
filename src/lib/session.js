@@ -477,6 +477,7 @@ function terminalWidth(value, maxWidth) {
 }
 
 module.exports = {
+  currentOsName,
   readQuota,
   tightestQuota,
   contextUsedPercent,

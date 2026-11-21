@@ -4,6 +4,7 @@
 "use strict";
 
 const readline = require("readline");
+const { PassThrough } = require("stream");
 const { setConfigDir, sampleData, mergeConfig } = require("../lib/shared");
 const { resolveInstallDir } = require("../lib/paths");
 const { GRADIENTS } = require("../lib/themes");
@@ -14,14 +15,20 @@ const {
   SHOW,
   ALT_ON,
   ALT_OFF,
-  HOME_CLEAR,
+  SYNC_ON,
+  SYNC_OFF,
+  MOUSE_ON,
+  MOUSE_OFF,
+  CURSOR_HOME,
+  ERASE_LINE,
+  CLEAR_BELOW,
   REPO_URL,
   createState,
   persist,
   wrapCursor,
   openUrl,
 } = require("./tui/state");
-const { tabAfter, isQuitKey, drawFrameLines, handleKey } = require("./tui/keys");
+const { tabAfter, isQuitKey, drawFrameLines, handleKey, handleMouse } = require("./tui/keys");
 
 const DEPRECATED_CONFIGURE_DELAY_MS = 5000;
 
@@ -47,6 +54,8 @@ function renderFrame(options = {}) {
     screen,
     cursor: options.cursor || 0,
     searchQuery: options.search || "",
+    filterActive: options.filter === true,
+    showHelp: options.showHelp === true,
     flashMessage: options.flash || "",
     glyphSlot: options.glyphSlot || "separator",
     hexInput: options.hexInput ?? null,
@@ -68,6 +77,34 @@ function renderFrame(options = {}) {
   } finally {
     setActiveDepth(previousDepth);
   }
+}
+
+const SGR_MOUSE_RE = /\x1b\[<(\d+);(\d+);(\d+)([mM])/g;
+
+function consumeMouseInput(raw, pending, onMouse) {
+  const combined = pending + raw;
+  let nextPending = "";
+  const incomplete = combined.match(/\x1b\[<[0-9;]*$/);
+  let scan = combined;
+  if (incomplete && incomplete[0].length <= 24) {
+    nextPending = incomplete[0];
+    scan = combined.slice(0, incomplete.index);
+  }
+  let clean = "";
+  let last = 0;
+  SGR_MOUSE_RE.lastIndex = 0;
+  for (const match of scan.matchAll(SGR_MOUSE_RE)) {
+    clean += scan.slice(last, match.index);
+    last = match.index + match[0].length;
+    onMouse({
+      button: Number(match[1]),
+      col: Number(match[2]),
+      row: Number(match[3]),
+      release: match[4] === "m",
+    });
+  }
+  clean += scan.slice(last);
+  return { clean, pending: nextPending };
 }
 
 function start(options = {}) {
@@ -98,22 +135,27 @@ function start(options = {}) {
     stdout,
   });
 
+  const keyStream = new PassThrough();
+  let mousePending = "";
   const onExit = options.onExit || null;
   let resolvePromise = null;
   let rejectPromise = null;
 
   function draw() {
-    stdout.write(HOME_CLEAR + HIDE + drawFrameLines(state).join("\n") + "\n");
+    const lines = drawFrameLines(state).map((line) => line + ERASE_LINE);
+    stdout.write(SYNC_ON + CURSOR_HOME + HIDE + lines.join("\n") + CLEAR_BELOW + SYNC_OFF);
   }
 
   function cleanupTui() {
-    stdin.off("keypress", onKey);
+    stdin.off("data", onData);
+    keyStream.off("keypress", onKey);
+    keyStream.destroy();
     process.off("SIGINT", quit);
     process.off("SIGTERM", quit);
     stdout.off("resize", draw);
     stdin.setRawMode?.(false);
     stdin.pause?.();
-    stdout.write(SHOW + ALT_OFF);
+    stdout.write(MOUSE_OFF + SYNC_OFF + SHOW + ALT_OFF);
   }
 
   function quit() {
@@ -147,6 +189,19 @@ function start(options = {}) {
     }
   }
 
+  function onMouse(event) {
+    handleMouse(state, event, { draw });
+  }
+
+  function onData(chunk) {
+    const text = Buffer.isBuffer(chunk) ? chunk.toString("utf8") : String(chunk);
+    const result = consumeMouseInput(text, mousePending, onMouse);
+    mousePending = result.pending;
+    if (result.clean) {
+      keyStream.write(result.clean);
+    }
+  }
+
   function onKey(_str, key) {
     handleKey(state, key, { draw, quit });
   }
@@ -155,16 +210,22 @@ function start(options = {}) {
     resolvePromise = resolve;
     rejectPromise = reject;
 
-    readline.emitKeypressEvents(stdin);
-    stdin.setRawMode?.(true);
-    stdin.resume();
-    stdin.on("keypress", onKey);
-    process.on("SIGINT", quit);
-    process.on("SIGTERM", quit);
-    // The frame follows the window width, so redraw before a resize wraps it.
-    stdout.on("resize", draw);
-    stdout.write(ALT_ON + HIDE);
-    draw();
+    try {
+      readline.emitKeypressEvents(keyStream);
+      stdin.setRawMode?.(true);
+      stdin.resume();
+      stdin.on("data", onData);
+      keyStream.on("keypress", onKey);
+      process.on("SIGINT", quit);
+      process.on("SIGTERM", quit);
+      // The frame follows the window width, so redraw before a resize wraps it.
+      stdout.on("resize", draw);
+      stdout.write(ALT_ON + HIDE + MOUSE_ON);
+      draw();
+    } catch (err) {
+      cleanupTui();
+      reject(err);
+    }
   });
 }
 
