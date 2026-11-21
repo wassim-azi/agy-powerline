@@ -65,7 +65,7 @@ export AGY_POWERLINE_DEBUG=1
 
 The next time Antigravity refreshes the bar, the payload is saved to `~/.agy-powerline/last-payload.json`, replacing the previous one on every refresh (unset the variable when you're done). `render --dump-payload <file>` or `AGY_POWERLINE_DUMP_PAYLOAD=<file>` save it elsewhere; a relative `AGY_POWERLINE_DUMP_PAYLOAD` file goes in the install folder, never in your project.
 
-The file is safe to attach to an issue: it keeps only the fields the bar uses (model, quotas, tokens, context, agent state, counters, versions). Your email and session and conversation IDs are never written, paths become placeholders like `/home/user/project`, the branch name becomes a placeholder of the same length, and anything Antigravity adds in the future is left out until agy-powerline uses it. Replay it locally with:
+The file is safe to attach to an issue: it keeps only the fields the bar uses (model, quotas, tokens, context, agent state, counters, versions). Your email and session and conversation IDs are never written, paths become placeholders like `/home/user/project`, the branch name and conversation title become width-preserving placeholders, and anything Antigravity adds in the future is left out until agy-powerline uses it. Replay it locally with:
 
 ```bash
 cat ~/.agy-powerline/last-payload.json | npx agy-powerline render

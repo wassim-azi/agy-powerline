@@ -11,7 +11,13 @@
 // out until it is listed here.
 
 const path = require("path");
-const { stripControl } = require("./formatters");
+const {
+  stripControl,
+  splitGraphemes,
+  graphemeWidth,
+  visibleWidth,
+  cutToWidth,
+} = require("./formatters");
 const { writeFileAtomic, PRIVATE_FILE_MODE } = require("./paths");
 
 const NUMBER = "number";
@@ -89,11 +95,52 @@ function pathPlaceholder(value, seen) {
   return seen.get(key);
 }
 
+const EMOJI_START = /^\p{Emoji}/u;
+const KEEP_STRUCTURAL = /^[ /\\:\-_.]$/;
+
+// Replaces free-form text with neutral placeholders of the exact same terminal
+// column width so layout/wrapping bugs still reproduce without leaking text.
+function maskPreservingWidth(text) {
+  const clean = stripControl(String(text ?? ""));
+  let out = "";
+  for (const cluster of splitGraphemes(clean)) {
+    const width = graphemeWidth(cluster);
+    if (width <= 0) {
+      continue;
+    }
+    if (width === 1) {
+      out += KEEP_STRUCTURAL.test(cluster) ? cluster : "x";
+      continue;
+    }
+    if (width === 2 && EMOJI_START.test(cluster)) {
+      out += "🌿";
+      continue;
+    }
+    let remaining = width;
+    while (remaining >= 2) {
+      out += "全";
+      remaining -= 2;
+    }
+    if (remaining === 1) {
+      out += "x";
+    }
+  }
+  return out;
+}
+
 // Branch names can hold ticket numbers or client names; the placeholder keeps
-// the length, which matters for width bugs.
+// the exact display width and separator structure without leaking private text.
 function branchPlaceholder(value) {
-  const length = Math.min(100, Math.max(6, String(value).length));
-  return "branch" + "x".repeat(length - 6);
+  const masked = maskPreservingWidth(value);
+  return visibleWidth(masked) > 100 ? cutToWidth(masked, 100).out : masked;
+}
+
+// Conversation titles describe the user's work; preserve display width so
+// narrow-terminal fitting reproduces without exposing words or prompt text.
+function titlePlaceholder(value) {
+  const masked = maskPreservingWidth(value);
+  const capped = visibleWidth(masked) > 200 ? cutToWidth(masked, 200).out : masked;
+  return /^x{5}/.test(capped) ? `title${capped.slice(5)}` : capped;
 }
 
 function pick(value, rule, seen) {
@@ -118,13 +165,17 @@ function pick(value, rule, seen) {
     return typeof value === "string" && value ? pathPlaceholder(value, seen) : undefined;
   }
   if (rule === BRANCH) {
-    return typeof value === "string" && value ? branchPlaceholder(value) : undefined;
+    if (typeof value !== "string" || !value) {
+      return undefined;
+    }
+    return branchPlaceholder(value) || undefined;
   }
   if (rule === TITLE) {
-    // A title can name the user's work; the placeholder keeps its length.
-    return typeof value === "string" && value
-      ? "title" + "x".repeat(Math.max(0, Math.min(200, value.length) - 5))
-      : undefined;
+    // A title can name the user's work; the placeholder keeps its display width.
+    if (typeof value !== "string" || !value) {
+      return undefined;
+    }
+    return titlePlaceholder(value) || undefined;
   }
   if (rule === "subagents") {
     // Only the status: a subagent's name and role describe the user's work.
@@ -200,6 +251,7 @@ function writePayloadDump(target, rawInput) {
 
 module.exports = {
   dumpTarget,
+  maskPreservingWidth,
   safePayload,
   writePayloadDump,
 };
