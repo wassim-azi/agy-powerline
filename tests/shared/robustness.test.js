@@ -680,7 +680,15 @@ function runWithOpenStdin(statuslinePath, input) {
       child.stdin.destroy();
       resolve({ code, stdout, ms: Date.now() - started });
     });
-    if (input) {
+    if (Array.isArray(input)) {
+      input.forEach((chunk, index) => {
+        setTimeout(() => {
+          if (!child.stdin.destroyed) {
+            child.stdin.write(chunk);
+          }
+        }, index * 10);
+      });
+    } else if (input) {
       child.stdin.write(input);
     }
   });
@@ -694,11 +702,31 @@ async function testOpenStdin(statuslinePath) {
     `code ${silent.code}, ${silent.ms} ms, stdout ${JSON.stringify(silent.stdout)}`
   );
 
-  const full = await runWithOpenStdin(statuslinePath, PAYLOAD);
+  const full = await runWithOpenStdin(statuslinePath, `\uFEFF${PAYLOAD}\n`);
   record(
-    "runtime renders a complete payload even when stdin stays open",
-    full.code === 0 && /Gemini/.test(full.stdout) && full.ms < 5000,
+    "runtime renders a complete payload immediately even when stdin stays open",
+    full.code === 0 && /Gemini/.test(full.stdout) && full.ms < 800,
     `code ${full.code}, ${full.ms} ms`
+  );
+
+  // Split right after an inner "}" and mid-way through a 4-byte UTF-8 sequence
+  // so readStdin waits for the root object to close without corrupting UTF-8.
+  const multiBytePayload = JSON.stringify({
+    ...JSON.parse(PAYLOAD),
+    conversation_title: "Launch 🚀 check",
+  });
+  const innerClose = multiBytePayload.indexOf("}") + 1;
+  const buf = Buffer.from(multiBytePayload, "utf8");
+  const rocketIndex = buf.indexOf(Buffer.from("🚀", "utf8"));
+  const chunked = await runWithOpenStdin(statuslinePath, [
+    buf.subarray(0, innerClose),
+    buf.subarray(innerClose, rocketIndex + 2),
+    buf.subarray(rocketIndex + 2),
+  ]);
+  record(
+    "runtime waits across partial chunks and split UTF-8 bytes on open stdin then resolves immediately",
+    chunked.code === 0 && /Gemini/.test(chunked.stdout) && chunked.ms < 800,
+    `code ${chunked.code}, ${chunked.ms} ms`
   );
 
   const partial = await runWithOpenStdin(statuslinePath, PAYLOAD.slice(0, 40));

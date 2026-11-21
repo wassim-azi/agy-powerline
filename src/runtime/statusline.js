@@ -88,7 +88,21 @@ function readStdin(timeoutMs) {
       resolve({ text: Buffer.concat(chunks).toString("utf8"), complete });
     };
     const timer = setTimeout(() => finish(false), timeoutMs);
-    process.stdin.on("data", (chunk) => chunks.push(chunk));
+    process.stdin.on("data", (chunk) => {
+      chunks.push(chunk);
+      const trimmed = Buffer.concat(chunks)
+        .toString("utf8")
+        .replace(/^\uFEFF/, "")
+        .trim();
+      if (trimmed.startsWith("{") && trimmed.endsWith("}")) {
+        try {
+          JSON.parse(trimmed);
+          finish(true);
+        } catch {
+          // Wait for remaining chunks or the deadline.
+        }
+      }
+    });
     process.stdin.on("end", () => finish(true));
     process.stdin.on("error", () => finish(true));
   });
