@@ -453,59 +453,31 @@ async function run() {
     )
   );
 
-  const percentageFallbackCases = [
-    {
-      name: "null used percentage falls back to remaining percentage",
-      context_window: { used_percentage: null, remaining_percentage: 55 },
-      expected: 45,
-    },
-    {
-      name: "null percentages fall back to current usage",
-      context_window: {
+  const contextPercent = (context_window) =>
+    contextUsedPercent({ context_window });
+  record(
+    "context percentages ignore null, boolean, and blank values before falling back",
+    contextPercent({ used_percentage: null, remaining_percentage: 55 }) === 45 &&
+      contextPercent({
         used_percentage: null,
         remaining_percentage: null,
         context_window_size: 200000,
         current_usage: { input_tokens: 90000 },
-      },
-      expected: 45,
-    },
-    {
-      name: "null remaining percentage does not become 100% used",
-      context_window: {
+      }) === 45 &&
+      contextPercent({
         used_percentage: undefined,
         remaining_percentage: null,
         context_window_size: 200000,
         current_usage: { input_tokens: 1000 },
-      },
-      expected: 0.5,
-    },
-    {
-      name: "false used percentage falls back to remaining percentage",
-      context_window: { used_percentage: false, remaining_percentage: 55 },
-      expected: 45,
-    },
-    {
-      name: "empty used percentage falls back to remaining percentage",
-      context_window: { used_percentage: "", remaining_percentage: 55 },
-      expected: 45,
-    },
-    {
-      name: "whitespace remaining percentage falls back to current usage",
-      context_window: {
+      }) === 0.5 &&
+      contextPercent({ used_percentage: false, remaining_percentage: 55 }) === 45 &&
+      contextPercent({ used_percentage: "", remaining_percentage: 55 }) === 45 &&
+      contextPercent({
         used_percentage: undefined,
         remaining_percentage: "  ",
         context_window_size: 200000,
         current_usage: { input_tokens: 1000 },
-      },
-      expected: 0.5,
-    },
-  ];
-  record(
-    "context percentages ignore null, boolean, and blank values before falling back",
-    percentageFallbackCases.every(
-      ({ context_window, expected }) =>
-        contextUsedPercent({ context_window }) === expected
-    )
+      }) === 0.5
   );
 
   const noSize = {
