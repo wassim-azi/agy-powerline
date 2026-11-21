@@ -15,6 +15,7 @@ const {
   clearExecCache,
 } = require("../../src/lib/shared");
 const { isTrustedInstallDir, GLOBAL_DIR } = require("../../src/lib/paths");
+const { stripControl } = require("../../src/lib/formatters");
 
 // An exec widget whose command drops a marker file, so each test can tell
 // whether the command actually ran.
@@ -160,6 +161,33 @@ async function run() {
       sanitizeExecOutput("x\x1b]52;c;ZXZpbA==\x07y") === "xy" &&
       sanitizeExecOutput("p\x1b]8;;http://e\x1b\\q\x1b]8;;\x1b\\r") === "pqr" &&
       sanitizeExecOutput("bell\x07\r\x9bz") === "bellz"
+  );
+
+  record(
+    "stripControl removes escapes with intermediate bytes (tput sgr0, DEC)",
+    stripControl("a\x1b(Bb") === "ab" &&
+      stripControl("\x1b(B\x1b[mplain") === "plain" &&
+      stripControl("a\x1b)0b\x1b#8c") === "abc" &&
+      stripControl("a\x1b7b\x1b8c\x1bcd") === "abcd"
+  );
+
+  record(
+    "stripControl removes DCS, SOS, PM and APC control strings with their body",
+    stripControl("a\x1bP0;1|x\x1b\\b") === "ab" &&
+      stripControl("a\x1b_Gi=1\x1b\\b") === "ab" &&
+      stripControl("a\x1bXsos\x1b\\b") === "ab" &&
+      stripControl("a\x1b^pm\x07b") === "ab" &&
+      stripControl("a\x90dcs\x9cb") === "ab" &&
+      stripControl("a\x9d52;c;SECRET\x07b") === "ab" &&
+      stripControl("a\x9fapc\x1b\\b") === "ab"
+  );
+
+  record(
+    "stripControl removes 8-bit CSI with parameters, a bare 0x9B only itself",
+    stripControl("\x9b31mred") === "red" &&
+      stripControl("a\x9b2Jb") === "ab" &&
+      stripControl("a\x9b?25lb") === "ab" &&
+      stripControl("bell\x07\r\x9bz") === "bellz"
   );
 
   record(

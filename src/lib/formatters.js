@@ -513,7 +513,18 @@ function charWidth(code) {
     (code >= 0x1ab0 && code <= 0x1aff) ||
     (code >= 0x1dc0 && code <= 0x1dff) ||
     (code >= 0x20d0 && code <= 0x20ff) ||
-    (code >= 0xfe20 && code <= 0xfe2f)
+    (code >= 0xfe20 && code <= 0xfe2f) ||
+    // Invisible format characters stripControl keeps (ZWSP, ZWNJ, bidi marks,
+    // word joiner, BOM, Mongolian variation selectors, tags, ideographic
+    // variation selectors). U+00AD and U+202F stay 1: terminals draw them,
+    // and Intl puts U+202F in times ("6:33 PM").
+    code === 0x061c ||
+    (code >= 0x180b && code <= 0x180f) ||
+    (code >= 0x200b && code <= 0x200f) ||
+    (code >= 0x2028 && code <= 0x202e) ||
+    (code >= 0x2060 && code <= 0x206f) ||
+    code === 0xfeff ||
+    (code >= 0xe0000 && code <= 0xe01ef)
   ) {
     return 0;
   }
@@ -757,9 +768,15 @@ function limitWidth(value, widget, ascii = false, fallback) {
 function stripControl(text) {
   return (
     String(text ?? "")
-      .replace(/\x1b\][^\x07\x1b]*(?:\x07|\x1b\\)?/g, "")
-      .replace(/\x1b\[[0-?]*[ -/]*[@-~]/g, "")
-      .replace(/\x1b[@-_]?/g, "")
+      // Control strings, body included: OSC, DCS, SOS, PM and APC, as 7-bit
+      // (ESC ] P X ^ _) or 8-bit C1 (0x9D 0x90 0x98 0x9E 0x9F) introducers.
+      .replace(/(?:\x1b[\]PX^_]|[\x90\x98\x9d-\x9f])[^\x07\x1b\x9c]*(?:\x07|\x1b\\|\x9c)?/g, "")
+      // CSI. The 8-bit form needs a parameter byte, so a stray 0x9B before
+      // plain text ("\x9bz") loses only itself, not the letter after it.
+      .replace(/\x1b\[[0-?]*[ -/]*[@-~]|\x9b[0-?]+[ -/]*[@-~]/g, "")
+      // Other escapes, with intermediate bytes too: ESC ( B from `tput sgr0`,
+      // ESC # 8, ESC 7, ESC c...
+      .replace(/\x1b(?:[ -/]+[0-~]|[0-~])?/g, "")
       .replace(/[\x00-\x1f\x7f-\x9f]/g, "")
       // Line/paragraph separators split the bar into extra rows in some
       // terminals, and bidi overrides can make a branch name read as another.
