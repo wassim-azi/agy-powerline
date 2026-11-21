@@ -16,6 +16,7 @@ const {
   mergeConfig,
 } = require("../../src/lib/shared");
 const { VALID_WIDGET_IDS } = require("../../src/lib/config");
+const { contextUsedPercent } = require("../../src/lib/session");
 
 // Runs fn with the OS reporting the given share of memory in use.
 function withMemory(usedShare, fn) {
@@ -450,6 +451,48 @@ async function run() {
         /123\.1K\/1\.0M \(11\.7%\)/.test(contextOnly(layout)) &&
         /123\.1K\/1\.0M/.test(contextOnly(layout, "contextTokens"))
     )
+  );
+
+  const contextPercent = (context_window) =>
+    contextUsedPercent({ context_window });
+  record(
+    "null used percentage falls back to remaining percentage",
+    contextPercent({ used_percentage: null, remaining_percentage: 55 }) === 45
+  );
+  record(
+    "null percentages fall back to current token usage",
+    contextPercent({
+      used_percentage: null,
+      remaining_percentage: null,
+      context_window_size: 200000,
+      current_usage: { input_tokens: 90000 },
+    }) === 45
+  );
+  record(
+    "undefined used percentage falls back to current token usage",
+    contextPercent({
+      used_percentage: undefined,
+      remaining_percentage: null,
+      context_window_size: 200000,
+      current_usage: { input_tokens: 1000 },
+    }) === 0.5
+  );
+  record(
+    "boolean used percentage falls back to remaining percentage",
+    contextPercent({ used_percentage: false, remaining_percentage: 55 }) === 45
+  );
+  record(
+    "empty used percentage falls back to remaining percentage",
+    contextPercent({ used_percentage: "", remaining_percentage: 55 }) === 45
+  );
+  record(
+    "whitespace remaining percentage falls back to current token usage",
+    contextPercent({
+      used_percentage: undefined,
+      remaining_percentage: "  ",
+      context_window_size: 200000,
+      current_usage: { input_tokens: 1000 },
+    }) === 0.5
   );
 
   const noSize = {
