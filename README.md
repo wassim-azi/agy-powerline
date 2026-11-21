@@ -178,7 +178,7 @@ Preview them all in the [theme gallery](https://agy-powerline.com/themes/) or wi
 | `title`                                                          | The conversation's title                                                                                 |
 | `sessionTime`                                                    | Time since the active conversation started                                                               |
 | `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | Session tokens, estimated cost (USD), and prompt cache usage                                             |
-| `tokensToday`, `tokensWeek`                                      | Tokens used today and over the last 7 days, all conversations (Node 22.13+)                              |
+| `tokensToday`, `tokensWeek`, `tokensMonth`                       | Tokens used today, over the last 7 days, and over the last 30 days, all conversations (Node 22.13+)      |
 | `ram`                                                            | Memory used on your machine                                                                              |
 | `os`                                                             | System agy runs on: Windows, macOS, Linux or WSL                                                         |
 | `host`                                                           | Current user and short hostname from the OS (`alex@devbox`)                                              |

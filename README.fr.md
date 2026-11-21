@@ -170,31 +170,31 @@ ou `"language": "fr"` dans `statusline.config.json` (`Settings` via `i` dans `co
 
 ## Widgets
 
-| Widget                                                           | Informations affichées                                                                                                |
-| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `model`                                                          | Modèle utilisé                                                                                                        |
-| `clock`                                                          | Heure locale (format 12h ou 24h réglé sous `clock`)                                                                   |
-| `fiveHourBar`, `weeklyBar`                                       | Quota restant sur 5h/7j sous forme de jauge, avec un [repère de rythme](docs/configuration.md#quota-pace-marker)      |
-| `fiveHourPct`, `weeklyPct`                                       | Pourcentage de quota restant sur 5h/7j                                                                                |
-| `fiveHourReset`, `weeklyReset`                                   | Temps restant avant la réinitialisation du quota, ou heure de réinitialisation                                        |
-| `quota`                                                          | Quota le plus proche de sa limite, avec son heure de réinitialisation                                                 |
-| `thirdPartyFiveHour`, `thirdPartyWeekly`                         | Quotas des modèles tiers                                                                                              |
-| `argonWeekly`, `argonReset`                                      | Quota hebdomadaire propre à Gemini 4 Argon (Google AI Pro) et sa réinitialisation                                     |
-| `context`, `contextPct`, `contextTokens`                         | Fenêtre de contexte utilisée : jauge, pourcentage ou nombre de tokens                                                 |
-| `git`                                                            | Branche, modifications non validées et commits en avance ou en retard                                                 |
-| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Lignes ajoutées et supprimées, fichiers indexés/modifiés/non suivis/en conflit, ID du commit, stashes, worktree lié   |
-| `project`, `cwd`                                                 | Dossier du projet et dossier courant                                                                                  |
-| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | Agent actif, état de l’agent (avec indicateur de confirmation), offre Antigravity, sandbox, artefacts, version de CLI |
-| `tasks`, `queue`                                                 | Sous-agents actifs, tâches en arrière-plan et messages en file d’attente                                              |
-| `mode`                                                           | Mode d’approbation (par exemple `accept-edits`) et mode Vim                                                           |
-| `title`                                                          | Titre de la conversation                                                                                              |
-| `sessionTime`                                                    | Temps écoulé depuis le début de la conversation active                                                                |
-| `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | Tokens de la session, coût estimé (USD) et utilisation du cache des prompts                                           |
-| `tokensToday`, `tokensWeek`                                      | Tokens utilisés aujourd’hui et sur les 7 derniers jours, toutes conversations confondues (Node 22.13+)                |
-| `ram`                                                            | Mémoire utilisée sur votre machine                                                                                    |
-| `os`                                                             | Système sur lequel agy tourne : Windows, macOS, Linux ou WSL                                                          |
-| `host`                                                           | Utilisateur courant et nom d’hôte court du système (`alex@devbox`)                                                    |
-| `customText`, `exec`                                             | Texte personnalisé ou résultat d’une [commande shell](docs/configuration.md#shell-command-widget-exec)                |
+| Widget                                                           | Informations affichées                                                                                                            |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `model`                                                          | Modèle utilisé                                                                                                                    |
+| `clock`                                                          | Heure locale (format 12h ou 24h réglé sous `clock`)                                                                               |
+| `fiveHourBar`, `weeklyBar`                                       | Quota restant sur 5h/7j sous forme de jauge, avec un [repère de rythme](docs/configuration.md#quota-pace-marker)                  |
+| `fiveHourPct`, `weeklyPct`                                       | Pourcentage de quota restant sur 5h/7j                                                                                            |
+| `fiveHourReset`, `weeklyReset`                                   | Temps restant avant la réinitialisation du quota, ou heure de réinitialisation                                                    |
+| `quota`                                                          | Quota le plus proche de sa limite, avec son heure de réinitialisation                                                             |
+| `thirdPartyFiveHour`, `thirdPartyWeekly`                         | Quotas des modèles tiers                                                                                                          |
+| `argonWeekly`, `argonReset`                                      | Quota hebdomadaire propre à Gemini 4 Argon (Google AI Pro) et sa réinitialisation                                                 |
+| `context`, `contextPct`, `contextTokens`                         | Fenêtre de contexte utilisée : jauge, pourcentage ou nombre de tokens                                                             |
+| `git`                                                            | Branche, modifications non validées et commits en avance ou en retard                                                             |
+| `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Lignes ajoutées et supprimées, fichiers indexés/modifiés/non suivis/en conflit, ID du commit, stashes, worktree lié               |
+| `project`, `cwd`                                                 | Dossier du projet et dossier courant                                                                                              |
+| `agent`, `agentState`, `plan`, `sandbox`, `artifacts`, `version` | Agent actif, état de l’agent (avec indicateur de confirmation), offre Antigravity, sandbox, artefacts, version de CLI             |
+| `tasks`, `queue`                                                 | Sous-agents actifs, tâches en arrière-plan et messages en file d’attente                                                          |
+| `mode`                                                           | Mode d’approbation (par exemple `accept-edits`) et mode Vim                                                                       |
+| `title`                                                          | Titre de la conversation                                                                                                          |
+| `sessionTime`                                                    | Temps écoulé depuis le début de la conversation active                                                                            |
+| `totalTokens`, `cost`, `cacheHit`, `cacheRead`, `cacheCreate`    | Tokens de la session, coût estimé (USD) et utilisation du cache des prompts                                                       |
+| `tokensToday`, `tokensWeek`, `tokensMonth`                       | Tokens utilisés aujourd’hui, sur les 7 derniers jours et sur les 30 derniers jours, toutes conversations confondues (Node 22.13+) |
+| `ram`                                                            | Mémoire utilisée sur votre machine                                                                                                |
+| `os`                                                             | Système sur lequel agy tourne : Windows, macOS, Linux ou WSL                                                                      |
+| `host`                                                           | Utilisateur courant et nom d’hôte court du système (`alex@devbox`)                                                                |
+| `customText`, `exec`                                             | Texte personnalisé ou résultat d’une [commande shell](docs/configuration.md#shell-command-widget-exec)                            |
 
 Un widget qui n’a rien à afficher se masque automatiquement. Vous pouvez personnaliser sa couleur, le renommer, changer son icône, masquer son libellé ou définir ses propres seuils d’alerte : consultez la [documentation de configuration](docs/configuration.md).
 

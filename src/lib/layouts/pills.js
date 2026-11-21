@@ -604,13 +604,10 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
     }
 
     case "tokensToday":
-    case "tokensWeek": {
-      const usage = formatUsage(
-        session.usage?.[id === "tokensToday" ? "today" : "week"],
-        widget,
-        ascii,
-        session.lang
-      );
+    case "tokensWeek":
+    case "tokensMonth": {
+      const period = { tokensToday: "today", tokensWeek: "week", tokensMonth: "month" }[id];
+      const usage = formatUsage(session.usage?.[period], widget, ascii, session.lang);
       if (!usage) {
         return null;
       }

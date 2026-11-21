@@ -211,7 +211,7 @@ function buildConfigSchema() {
           budget: {
             type: "number",
             minimum: 0.01,
-            description: "tokensToday, tokensWeek, or cost.",
+            description: "tokensToday, tokensWeek, tokensMonth, or cost.",
           },
           text: { type: "string", description: "customText: the text to show." },
         },

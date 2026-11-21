@@ -3,10 +3,10 @@
 
 "use strict";
 
-// Tokens used today and over the last 7 days, for the tokensToday and
-// tokensWeek widgets. agy keeps each conversation in a SQLite database of its
-// own; only the usage numbers, response IDs (to drop duplicates) and
-// timestamps are read from it, never a message, a model prompt or a name.
+// Tokens used today, over the last 7 days, and over the last 30 days, for the
+// tokensToday, tokensWeek, and tokensMonth widgets. agy keeps each conversation
+// in a SQLite database of its own; only the usage numbers, response IDs (to drop
+// duplicates) and timestamps are read from it, never a message, a model prompt or a name.
 // The field numbers and the way duplicates are dropped follow ccusage's
 // Antigravity adapter (MIT, rust/adapters/antigravity/src/parser.rs).
 
@@ -23,7 +23,7 @@ const USAGE_CACHE_NAME = ".usage-cache.json";
 const READ_BUDGET_MS = 100;
 const DAY_MS = 86400000;
 // How many days back each widget looks, today included.
-const USAGE_PERIODS = { tokensToday: 1, tokensWeek: 7 };
+const USAGE_PERIODS = { tokensToday: 1, tokensWeek: 7, tokensMonth: 30 };
 // Usage metadata is a few hundred bytes; anything this big isn't.
 const MAX_BLOB_BYTES = 4 * 1024 * 1024;
 const MAX_DEPTH = 8;
@@ -502,6 +502,7 @@ function resolveUsage(config, { read = false } = {}) {
     return {
       today: sum(cache, recentDays(now, 1, timeZone)),
       week: sum(cache, recentDays(now, 7, timeZone)),
+      month: sum(cache, recentDays(now, 30, timeZone)),
     };
   } catch {
     return null;

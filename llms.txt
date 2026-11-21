@@ -108,6 +108,7 @@
 - `clock` — Current local time.
 - `tokensToday` — Tokens used today across conversations.
 - `tokensWeek` — Tokens used over the last 7 days.
+- `tokensMonth` — Tokens used over the last 30 days.
 - `exec` — Output from a shell command you configure.
 - `customText` — Your own text.
 

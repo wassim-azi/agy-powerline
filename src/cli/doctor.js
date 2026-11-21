@@ -194,7 +194,7 @@ async function doctorCommand(options = {}) {
     console.log(
       `${YELLOW} usage widgets need Node 22.13 or newer${RESET} (this is ${process.version}).`
     );
-    console.log("  tokensToday and tokensWeek stay hidden until Node is updated.");
+    console.log("  tokensToday, tokensWeek and tokensMonth stay hidden until Node is updated.");
   }
 
   // Not a failure either: the bar shows English.

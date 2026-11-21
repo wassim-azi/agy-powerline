@@ -37,6 +37,7 @@ const MESSAGES = {
     tag_tokens: "Tokens",
     tag_clock: "Clock",
     tag_today: "Today",
+    tag_30d: "30d",
     tag_cost: "Cost",
     tag_queue: "Queue",
 
@@ -90,6 +91,7 @@ const MESSAGES = {
     tag_tokens: "Tokens",
     tag_clock: "Heure",
     tag_today: "Aujourd'hui",
+    tag_30d: "30j",
     tag_cost: "Coût",
     tag_queue: "File",
 
@@ -143,6 +145,7 @@ const MESSAGES = {
     tag_tokens: "Tokens",
     tag_clock: "Hora",
     tag_today: "Hoy",
+    tag_30d: "30d",
     tag_cost: "Coste",
     tag_queue: "Cola",
 
@@ -196,6 +199,7 @@ const MESSAGES = {
     tag_tokens: "トークン",
     tag_clock: "時刻",
     tag_today: "今日",
+    tag_30d: "30日",
     tag_cost: "コスト",
     tag_queue: "キュー",
 
@@ -250,6 +254,7 @@ const MESSAGES = {
     tag_tokens: "Token",
     tag_clock: "时间",
     tag_today: "今日",
+    tag_30d: "30天",
     tag_cost: "费用",
     tag_queue: "队列",
 
@@ -303,6 +308,7 @@ const MESSAGES = {
     tag_tokens: "토큰",
     tag_clock: "시각",
     tag_today: "오늘",
+    tag_30d: "30일",
     tag_cost: "비용",
     tag_queue: "대기",
 
@@ -356,6 +362,7 @@ const MESSAGES = {
     tag_tokens: "Tokens",
     tag_clock: "Uhrzeit",
     tag_today: "Heute",
+    tag_30d: "30T",
     tag_cost: "Kosten",
     tag_queue: "Warteschlange",
 

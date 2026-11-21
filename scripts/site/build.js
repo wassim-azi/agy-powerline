@@ -658,7 +658,15 @@ function guidesIndexPage() {
 
 // Widgets that read the machine the site is built on (or its agy data) get no
 // preview: it would show the build machine, not an example.
-const NO_PREVIEW = new Set(["os", "host", "ram", "clock", "tokensToday", "tokensWeek"]);
+const NO_PREVIEW = new Set([
+  "os",
+  "host",
+  "ram",
+  "clock",
+  "tokensToday",
+  "tokensWeek",
+  "tokensMonth",
+]);
 const PREVIEW_OPTIONS = { customText: { text: "Production" }, exec: { cmd: "echo deploy" } };
 
 function widgetPreview(id, styles) {

@@ -325,6 +325,14 @@ const WIDGET_CATALOG = [
     summary: "tokens used over 7 days",
   },
   {
+    id: "tokensMonth",
+    label: "Tokens 30 Days",
+    unique: true,
+    description:
+      "tokens used in the last 30 days in all agy conversations, from agy's local data (Node 22.13+)",
+    summary: "tokens used over 30 days",
+  },
+  {
     id: "exec",
     label: "Shell Command",
     unique: false,

@@ -71,6 +71,7 @@ const VALID_WIDGET_IDS = new Set([
   "clock",
   "tokensToday",
   "tokensWeek",
+  "tokensMonth",
   "exec",
   "customText",
   "separator",
