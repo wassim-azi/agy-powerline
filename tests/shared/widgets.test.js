@@ -23,8 +23,10 @@ const {
   charWidth,
   splitGraphemes,
   clipText,
+  pathLinkUrl,
   formatTokens,
 } = require("../../src/lib/formatters");
+const { ansiToHtml } = require("../../scripts/site/ansi");
 const { buildCustomTheme, THEMES } = require("../../src/lib/themes");
 const { buildSegment } = require("../../src/lib/layouts/pills");
 const { buildLinesSegment, deriveLinesPalette } = require("../../src/lib/layouts/lines");
@@ -104,6 +106,7 @@ async function run() {
   testCustomLabelAndIcon();
   testAntigravityLatestPayloadFields();
   testEnvWidget();
+  testOsc8Links();
 }
 
 function testCustomLabelAndIcon() {
@@ -1681,6 +1684,118 @@ function testEnvWidget() {
       varProp.type === "string"
     )
   );
+}
+
+function testOsc8Links() {
+  const real = fixture("antigravity-1.3.0.json");
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), "agy-osc8-"));
+
+  try {
+    const repoDir = path.join(root, "café project");
+    const subDir = path.join(repoDir, "nested", "deep folder");
+    fs.mkdirSync(path.join(repoDir, ".git", "refs", "heads", "feature"), { recursive: true });
+    fs.mkdirSync(subDir, { recursive: true });
+    const sha = "a1b2c3d4e5f60718293a4b5c6d7e8f9012345678";
+    fs.writeFileSync(path.join(repoDir, ".git", "HEAD"), "ref: refs/heads/feature/auth-v2\n");
+    fs.writeFileSync(path.join(repoDir, ".git", "refs", "heads", "feature", "auth-v2"), `${sha}\n`);
+    fs.writeFileSync(
+      path.join(repoDir, ".git", "config"),
+      '[remote "origin"]\n\turl = git@github.com:wassim-azi/agy-powerline.git\n'
+    );
+
+    const payload = {
+      ...real,
+      cwd: subDir,
+      workspace: { current_dir: subDir, project_dir: repoDir },
+      vcs: { type: "git", branch: "feature/auth-v2", dirty: true },
+    };
+    const expectedCwdUrl = pathLinkUrl(subDir, "file");
+    const expectedVscodeUrl = pathLinkUrl(repoDir, "vscode");
+
+    for (const layout of LAYOUT_ORDER) {
+      const linked = render(
+        payload,
+        [
+          { id: "cwd", link: true, fish: true, maxWidth: 16 },
+          { id: "project", link: "vscode" },
+          { id: "git", link: true, fish: true, maxWidth: 12 },
+          { id: "gitSha", link: true },
+        ],
+        { layout, color: "truecolor" }
+      );
+      const suppressedAscii = render(
+        payload,
+        [
+          { id: "cwd", link: true },
+          { id: "git", link: true },
+          { id: "gitSha", link: true },
+        ],
+        { layout, ascii: true, color: "truecolor" }
+      );
+      const suppressedNoColor = render(
+        payload,
+        [
+          { id: "cwd", link: true },
+          { id: "project", link: "cursor" },
+          { id: "git", link: true },
+          { id: "gitSha", link: true },
+        ],
+        { layout, color: "none" }
+      );
+
+      record(
+        `${layout} OSC 8 link wraps cwd, project, git branch, and gitSha cleanly`,
+        linked.includes(`\x1b]8;;${expectedCwdUrl}\x07`) &&
+          linked.includes(`\x1b]8;;${expectedVscodeUrl}\x07`) &&
+          linked.includes(
+            "\x1b]8;;https://github.com/wassim-azi/agy-powerline/tree/feature/auth-v2\x07f/auth-v2\x1b]8;;\x07"
+          ) &&
+          linked.includes(
+            `\x1b]8;;https://github.com/wassim-azi/agy-powerline/commit/${sha.slice(0, 7)}\x07${sha.slice(0, 7)}\x1b]8;;\x07`
+          ) &&
+          !suppressedAscii.includes("\x1b]8;;") &&
+          !suppressedNoColor.includes("\x1b]8;;"),
+        linked
+      );
+    }
+
+    const winFile = pathLinkUrl("C:\\Users\\François\\café #1", true);
+    const winCursor = pathLinkUrl("C:\\Users\\alex\\app", "cursor");
+    const relIgnored = pathLinkUrl("relative/path", true);
+    const previewHtml = ansiToHtml(
+      render(
+        payload,
+        [
+          { id: "cwd", link: true },
+          { id: "git", link: true },
+        ],
+        {
+          layout: "pills",
+          color: "truecolor",
+        }
+      )
+    );
+
+    const cwdLinkField = widgetEditFields({ id: "cwd" }).find((f) => f.key === "link");
+    const gitLinkField = widgetEditFields({ id: "git" }).find((f) => f.key === "link");
+    const shaLinkField = widgetEditFields({ id: "gitSha" }).find((f) => f.key === "link");
+    const linkSchema = buildConfigSchema().definitions.widget.properties.link;
+
+    record(
+      "pathLinkUrl preserves non-ASCII UTF-8, ansiToHtml strips OSC 8, and link is configurable",
+      winFile === "file:///C:/Users/François/café%20%231" &&
+        winCursor === "cursor://file/C:/Users/alex/app" &&
+        relIgnored === "" &&
+        !previewHtml.includes("]8;;") &&
+        previewHtml.includes("f") &&
+        Boolean(cwdLinkField && gitLinkField && shaLinkField) &&
+        Array.isArray(linkSchema?.enum) &&
+        linkSchema.enum.includes("vscode"),
+      JSON.stringify({ winFile, winCursor, relIgnored, previewHtml })
+    );
+  } finally {
+    fs.rmSync(root, { recursive: true, force: true });
+  }
 }
 
 module.exports = { run };

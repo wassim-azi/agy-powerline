@@ -184,6 +184,11 @@ function buildConfigSchema() {
             description:
               "cwd and git: abbreviate parent folders or branch prefixes to their first letter.",
           },
+          link: {
+            enum: [true, false, "file", "vscode", "cursor", "zed"],
+            description:
+              "cwd, project (file/vscode/cursor/zed/true) and git, gitSha (true/false): opt-in OSC 8 clickable hyperlink.",
+          },
           warn: percent("Caution level for this widget."),
           crit: percent("Danger level for this widget."),
           blink: { enum: [true, false, "warn"] },

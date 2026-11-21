@@ -5,7 +5,7 @@
 
 const os = require("os");
 const path = require("path");
-const { rgb } = require("./colors");
+const { rgb, getActiveDepth } = require("./colors");
 const { t } = require("./i18n");
 
 function formatReset(seconds, lang) {
@@ -879,6 +879,101 @@ function closeLink(terminator) {
   return terminator ? `\x1b]8;;${terminator}` : "";
 }
 
+const SAFE_OSC8_URL = /^(?:https?|file|vscode|cursor|zed):\/\//i;
+const PATH_LINK_SCHEMES = new Set([true, "file", "vscode", "cursor", "zed"]);
+
+function encodeUriPath(segments) {
+  return segments
+    .map((seg) =>
+      String(seg).replace(
+        /[\s%#?"<>`{}|^\\]/g,
+        (ch) => `%${ch.charCodeAt(0).toString(16).toUpperCase().padStart(2, "0")}`
+      )
+    )
+    .join("/");
+}
+
+// Converts an absolute filesystem path into a file:// or editor URI while
+// leaving non-ASCII UTF-8 characters unescaped for Windows Explorer / ShellExecute.
+function pathLinkUrl(targetPath, option) {
+  if (!PATH_LINK_SCHEMES.has(option) || typeof targetPath !== "string") {
+    return "";
+  }
+  const raw = targetPath.trim();
+  if (!raw || /[\x00-\x1f\x7f]/.test(raw)) {
+    return "";
+  }
+
+  let normalized;
+  if (/^[A-Za-z]:[\\/]/.test(raw)) {
+    normalized = `/${raw[0].toUpperCase()}:${encodeUriPath(raw.slice(2).split(/[\\/]+/))}`;
+  } else if (/^\\\\[^\\]+[\\/][^\\]+/.test(raw)) {
+    const rest = encodeUriPath(
+      raw
+        .slice(2)
+        .split(/[\\/]+/)
+        .filter(Boolean)
+    );
+    normalized = rest ? `//${rest}` : "";
+  } else if (raw.startsWith("/")) {
+    normalized = `/${encodeUriPath(raw.slice(1).split(/\/+/))}`;
+  } else {
+    return "";
+  }
+
+  if (!normalized) {
+    return "";
+  }
+  const scheme = option === true || option === "file" ? "file" : option;
+  if (scheme === "file") {
+    return normalized.startsWith("//") ? `file:${normalized}` : `file://${normalized}`;
+  }
+  return `${scheme}://file${normalized}`;
+}
+
+function isSafeOsc8Url(url) {
+  return (
+    typeof url === "string" &&
+    url.length > 0 &&
+    !/[\x00-\x1f\x7f\\]/.test(url) &&
+    SAFE_OSC8_URL.test(url)
+  );
+}
+
+// Wraps visible text in an OSC 8 terminal hyperlink when safe and enabled.
+// Suppressed in ASCII mode and no-color mode (NO_COLOR / --color none).
+function osc8Link(text, url, { ascii = false } = {}) {
+  if (!text || ascii || getActiveDepth() === "none" || !isSafeOsc8Url(url)) {
+    return text;
+  }
+  return `\x1b]8;;${url}\x07${text}\x1b]8;;\x07`;
+}
+
+function linkPath(text, fullPath, widget, ascii = false) {
+  const url = widget?.link ? pathLinkUrl(fullPath, widget.link) : "";
+  return osc8Link(text, url, { ascii });
+}
+
+function linkGitBranch(text, fullBranch, session, widget, ascii = false) {
+  if (
+    widget?.link !== true ||
+    !fullBranch ||
+    !session?.gitDetails?.remoteUrl ||
+    (session.gitDetails.detached && session.gitDetails.branch === fullBranch)
+  ) {
+    return text;
+  }
+  const encodedBranch = encodeURIComponent(fullBranch).replace(/%2F/g, "/");
+  return osc8Link(text, `${session.gitDetails.remoteUrl}/tree/${encodedBranch}`, { ascii });
+}
+
+function linkGitSha(sha, session, widget, ascii = false) {
+  if (widget?.link !== true || !sha || !session?.gitDetails?.remoteUrl) {
+    return sha;
+  }
+  return osc8Link(sha, `${session.gitDetails.remoteUrl}/commit/${sha}`, { ascii });
+}
+
 // "+128 −34" as parts, so Lines can color each; zero counts are left out.
 function gitChangeParts(changes, ascii = false) {
   const parts = [];
@@ -1138,4 +1233,9 @@ module.exports = {
   graphemeWidth,
   cutToWidth,
   closeLink,
+  pathLinkUrl,
+  osc8Link,
+  linkPath,
+  linkGitBranch,
+  linkGitSha,
 };
