@@ -73,6 +73,7 @@ const {
   RAM_DANGER,
   TITLE_MAX,
   subagentDetail,
+  readEnvValue,
 } = require("../widget-style");
 const { t } = require("../i18n");
 
@@ -632,6 +633,22 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return null;
       }
       return pill(colors.meta, lbl(limitWidth(widget.text, widget, ascii)));
+    }
+
+    case "env": {
+      const entry = readEnvValue(widget, session, ascii);
+      if (!entry) {
+        return null;
+      }
+      const envWidget = widget?.label === undefined ? { ...widget, label: entry.name } : widget;
+      const envTag = widgetTag("env", {
+        emojis,
+        raw,
+        widget: envWidget,
+        ascii,
+        lang: session.lang,
+      });
+      return pill(colors.meta, ` ${envTag}${entry.value} `);
     }
 
     case "exec": {

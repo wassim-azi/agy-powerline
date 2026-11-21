@@ -73,6 +73,7 @@ const VALID_WIDGET_IDS = new Set([
   "tokensWeek",
   "tokensMonth",
   "exec",
+  "env",
   "customText",
   "separator",
   "lineBreak",

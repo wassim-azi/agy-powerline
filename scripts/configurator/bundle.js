@@ -59,7 +59,7 @@ function browserPlatform() {
 }
 
 const process = {
-  env: {},
+  env: { NODE_ENV: "development", AWS_PROFILE: "dev" },
   platform: browserPlatform(),
   execPath: "/usr/bin/node",
   version: "v22.0.0",

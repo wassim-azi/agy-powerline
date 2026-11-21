@@ -194,7 +194,7 @@ npx agy-powerline init --language ja
 | `ram`                                                            | マシンのメモリ使用量                                                                                                                 |
 | `os`                                                             | agy が動作しているシステム：Windows、macOS、Linux、または WSL                                                                        |
 | `host`                                                           | OS の現在のユーザーと短いホスト名（`alex@devbox`）                                                                                   |
-| `customText`、`exec`                                             | 任意のテキスト、または [シェルコマンド](docs/configuration.md#shell-command-widget-exec)の出力                                       |
+| `customText`、`env`、`exec`                                      | 任意のテキスト、環境変数、または [シェルコマンド](docs/configuration.md#shell-command-widget-exec)の出力                             |
 
 表示する内容のないウィジェットは自動的に隠れます。ウィジェットごとに色や名前・アイコンを変えたり、ラベルを外したり、独自の警告しきい値を設定したりできます。詳しくは [Configuration](docs/configuration.md) を参照してください。
 

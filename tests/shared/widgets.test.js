@@ -51,7 +51,7 @@ function render(data, widgets, options = {}) {
         widgets,
         ...(options.clock ? { clock: options.clock } : {}),
       },
-      { color: options.color || "none" }
+      { color: options.color || "none", ...(options.env ? { env: options.env } : {}) }
     )
   );
 }
@@ -103,6 +103,7 @@ async function run() {
   testHost();
   testCustomLabelAndIcon();
   testAntigravityLatestPayloadFields();
+  testEnvWidget();
 }
 
 function testCustomLabelAndIcon() {
@@ -709,6 +710,7 @@ function testWidgetWidthAndDepth() {
     "agent",
     "customText",
     "exec",
+    "env",
     "gitWorktree",
   ];
   const depthField = widgetEditFields({ id: "cwd" }).find(({ key }) => key === "depth");
@@ -1620,6 +1622,65 @@ function testAntigravityLatestPayloadFields() {
       initialOut
     );
   }
+}
+
+function testEnvWidget() {
+  const real = fixture("antigravity-1.3.0.json");
+  const env = { AWS_PROFILE: "prod-admin", NODE_ENV: "production" };
+
+  for (const layout of LAYOUT_ORDER) {
+    const basic = render(real, [{ id: "env", var: "AWS_PROFILE" }], { layout, env });
+    const custom = render(
+      real,
+      [{ id: "env", var: "AWS_PROFILE", label: "AWS", icon: "🌿", maxWidth: 6 }],
+      { layout, env }
+    );
+    const noLabel = render(real, [{ id: "env", var: "AWS_PROFILE", label: "" }], { layout, env });
+    const raw = render(real, [{ id: "env", var: "NODE_ENV", raw: true }], { layout, env });
+    const multi = render(
+      real,
+      [
+        { id: "env", var: "AWS_PROFILE", label: "AWS" },
+        { id: "env", var: "NODE_ENV", label: "ENV" },
+      ],
+      { layout, env }
+    );
+    const unset = render(real, [{ id: "env", var: "DOES_NOT_EXIST" }], { layout, env });
+    const empty = render(real, [{ id: "env", var: "EMPTY_VAR" }], {
+      layout,
+      env: { ...env, EMPTY_VAR: "   " },
+    });
+
+    record(
+      `${layout} env renders var, label, icon, maxWidth, raw, multiple widgets, and hides when unset`,
+      basic.includes("AWS_PROFILE: prod-admin") &&
+        custom.includes("🌿 AWS: prod-…") &&
+        noLabel.includes("🔧 prod-admin") &&
+        !noLabel.includes("AWS_PROFILE") &&
+        raw.trim() === "production" &&
+        multi.includes("AWS: prod-admin") &&
+        multi.includes("ENV: production") &&
+        unset.trim() === "" &&
+        empty.trim() === "",
+      JSON.stringify({ basic, custom, noLabel, raw, multi, unset, empty })
+    );
+  }
+
+  const fields = widgetEditFields({ id: "env", var: "NODE_ENV" });
+  const schema = buildConfigSchema();
+  const varProp = schema.definitions.widget.properties.var;
+  record(
+    "env exposes var, label, icon, and maxWidth in configure and var in config schema",
+    Boolean(
+      fields.some((f) => f.key === "var" && f.text === true) &&
+      fields.some((f) => f.key === "label") &&
+      fields.some((f) => f.key === "icon") &&
+      fields.some((f) => f.key === "maxWidth") &&
+      MAX_WIDTH_WIDGETS.has("env") &&
+      varProp &&
+      varProp.type === "string"
+    )
+  );
 }
 
 module.exports = { run };

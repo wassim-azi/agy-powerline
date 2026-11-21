@@ -100,6 +100,8 @@ function renderBar(data, config, overrides) {
   const session = sanitizeDeep(
     extractSession(payload, resolved, { readUsage: overrides.usage === "read" })
   );
+  // Keep overrides.env isolated per render without walking the whole host environment.
+  session.env = env;
   // Exec widgets only run when the caller opts in ("run"); CLI previews keep
   // the default placeholder so rendering a config never executes it.
   session.execMode =

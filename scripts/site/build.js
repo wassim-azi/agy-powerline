@@ -667,7 +667,11 @@ const NO_PREVIEW = new Set([
   "tokensWeek",
   "tokensMonth",
 ]);
-const PREVIEW_OPTIONS = { customText: { text: "Production" }, exec: { cmd: "echo deploy" } };
+const PREVIEW_OPTIONS = {
+  customText: { text: "Production" },
+  exec: { cmd: "echo deploy" },
+  env: { var: "NODE_ENV" },
+};
 
 function widgetPreview(id, styles) {
   if (NO_PREVIEW.has(id) || id === "separator" || id === "lineBreak") return "";
@@ -680,7 +684,11 @@ function widgetPreview(id, styles) {
     rowGap: true,
     widgets: [{ id, ...(PREVIEW_OPTIONS[id] || {}) }],
   };
-  const out = renderStatusline(data, config, { color: "truecolor", flexGaps: true });
+  const out = renderStatusline(data, config, {
+    color: "truecolor",
+    flexGaps: true,
+    env: id === "env" ? { NODE_ENV: "production" } : {},
+  });
   if (!out.replace(/\x1b\[[0-9;]*m/g, "").trim()) return "";
   return `<div class="screen-wrap"><div class="term-frame" data-bg="dark"><div class="term" data-bg="dark"><div class="screen">${ansiToHtml(out, { styles })}</div></div></div></div>`;
 }

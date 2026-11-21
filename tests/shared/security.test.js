@@ -221,6 +221,61 @@ async function run() {
     hostile.includes("clean") && !hostile.includes("]52;")
   );
   clearExecCache();
+
+  const sensitiveVars = [
+    "GITHUB_TOKEN",
+    "AWS_SECRET_ACCESS_KEY",
+    "OPENAI_API_KEY",
+    "DB_PASSWORD",
+    "MYSQL_PWD",
+    "GCP_CREDENTIAL",
+    "AUTH_HEADER",
+    "PRIVATE_KEY",
+    "SESSION_COOKIE",
+    "BEARER_VALUE",
+    "SESSION_ID",
+  ];
+  const fakeEnv = {
+    ...Object.fromEntries(sensitiveVars.map((name) => [name, "should-not-leak"])),
+    SAFE_ENV: "ok\x1b]52;c;ZXZpbA==\x07\nclean",
+    "1INVALID": "bad",
+  };
+  const secretLeak = stripControl(
+    renderStatusline(
+      JSON.parse(PAYLOAD),
+      {
+        ...defaultConfig(),
+        widgets: [
+          ...sensitiveVars.map((name) => ({ id: "env", var: name })),
+          { id: "env", var: "1INVALID" },
+          { id: "env", var: "toString" },
+        ],
+      },
+      { color: "none", env: fakeEnv }
+    )
+  ).trim();
+  const safeClean = stripControl(
+    renderStatusline(
+      JSON.parse(PAYLOAD),
+      { ...defaultConfig(), widgets: [{ id: "env", var: "SAFE_ENV" }] },
+      { color: "none", env: fakeEnv }
+    )
+  );
+  const isolated = stripControl(
+    renderStatusline(
+      JSON.parse(PAYLOAD),
+      { ...defaultConfig(), widgets: [{ id: "env", var: "PATH" }] },
+      { color: "none", env: {} }
+    )
+  ).trim();
+  record(
+    "env widget blocks secret names, strips control sequences, and respects overrides.env",
+    secretLeak === "" &&
+      safeClean.includes("okclean") &&
+      !safeClean.includes("]52;") &&
+      isolated === "",
+    JSON.stringify({ secretLeak, safeClean, isolated })
+  );
 }
 
 module.exports = { run };

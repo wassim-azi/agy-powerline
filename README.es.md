@@ -194,7 +194,7 @@ o `"language": "es"` en `statusline.config.json` (`Settings` con `i` en `configu
 | `ram`                                                            | Memoria utilizada en tu equipo                                                                                                        |
 | `os`                                                             | Sistema en el que se ejecuta agy: Windows, macOS, Linux o WSL                                                                         |
 | `host`                                                           | Usuario actual y nombre de host corto del sistema operativo (`alex@devbox`)                                                           |
-| `customText`, `exec`                                             | Tu propio texto personalizado o la salida de un [comando de shell](docs/configuration.md#shell-command-widget-exec)                   |
+| `customText`, `env`, `exec`                                      | Tu propio texto, una variable de entorno o la salida de un [comando de shell](docs/configuration.md#shell-command-widget-exec)        |
 
 Un widget sin nada que mostrar se oculta automáticamente. Los widgets se pueden recolorear, renombrar, asignar otro icono, dejar sin etiqueta o configurar con sus propios umbrales de alerta: consulta [Configuración](docs/configuration.md).
 

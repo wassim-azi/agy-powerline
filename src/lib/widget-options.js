@@ -41,6 +41,7 @@ const MAX_WIDTH_WIDGETS = new Set([
   "agent",
   "customText",
   "exec",
+  "env",
   "gitWorktree",
 ]);
 const COLOR_SLOTS = ["model", "context", "git", "weekly", "thirdParty", "fiveHour", "meta"];
@@ -193,6 +194,15 @@ function editFields(widget, config = {}, options = {}) {
       text: true,
       show: (value) => value || "(empty: hidden)",
       help: "The badge's text. Enter to type, Enter again to keep it, Esc to cancel.",
+    });
+  }
+  if (widget.id === "env") {
+    fields.push({
+      key: "var",
+      label: "Variable",
+      text: true,
+      show: (value) => value || "(unset: hidden)",
+      help: "Environment variable name (e.g. NODE_ENV, AWS_PROFILE). Enter to type, Enter again to keep it.",
     });
   }
   if (widget.id === "exec") {

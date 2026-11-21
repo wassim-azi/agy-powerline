@@ -214,6 +214,11 @@ function buildConfigSchema() {
             description: "tokensToday, tokensWeek, tokensMonth, or cost.",
           },
           text: { type: "string", description: "customText: the text to show." },
+          var: {
+            type: "string",
+            pattern: "^[A-Za-z_][A-Za-z0-9_]{0,127}$",
+            description: "env: environment variable name to display (hidden when unset).",
+          },
         },
       },
     },
