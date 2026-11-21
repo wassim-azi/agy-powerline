@@ -369,12 +369,13 @@ function saveSync(file, key, sync) {
   }
 }
 
-function getGitSync(gitDir, branch, cwd = path.dirname(gitDir)) {
+function getGitSync(gitDir, branch, cwd) {
   if (!gitDir || !isSafeBranchName(branch)) {
     return { ahead: 0, behind: 0 };
   }
 
   try {
+    cwd = cwd || path.dirname(gitDir);
     const commonDir = commonGitDir(gitDir);
     if (hasRiskyRepoConfig(gitDir, commonDir)) {
       logWarning("GIT_CONFIG_SKIPPED");

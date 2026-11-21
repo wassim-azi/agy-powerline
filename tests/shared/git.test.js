@@ -333,6 +333,8 @@ function testGitDetails(root, git) {
     record(`risky config detects ${label}`, hasRiskyRepoConfig(dir, dir));
   }
 
+  record("getGitSync handles a missing Git directory", getGitSync(null, "main").ahead === 0);
+
   const syncRepo = path.join(root, "promisor-sync");
   const syncGitDir = path.join(syncRepo, ".git");
   fs.mkdirSync(path.join(syncGitDir, "refs", "heads"), { recursive: true });
