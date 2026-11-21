@@ -444,14 +444,7 @@ function isValidDepth(value) {
   return Number.isInteger(value) && value >= 1 && value <= 10;
 }
 
-// Keep the path's root and final `depth` folders, replacing any middle
-// folders with one ellipsis. Accept either OS's path separators on every OS.
-function shortenPath(value, depth, ascii = false) {
-  const text = String(value ?? "");
-  if (!text || !isValidDepth(depth)) {
-    return text;
-  }
-
+function parsePathParts(text) {
   let root = "";
   let rest = text;
   let separator = text.match(/[\\/]/)?.[0] || "/";
@@ -481,17 +474,83 @@ function shortenPath(value, depth, ascii = false) {
     rest = text.slice(1);
   }
 
-  const folders = rest.split(/[\\/]+/).filter(Boolean);
+  return {
+    root,
+    separator,
+    folders: rest.split(/[\\/]+/).filter(Boolean),
+  };
+}
+
+function joinPathParts(root, separator, folders) {
+  const joined = folders.join(separator);
+  if (!root) {
+    return joined;
+  }
+  if (root === "/" || root === "\\") {
+    return `${root}${joined}`;
+  }
+  return joined ? `${root}${separator}${joined}` : root;
+}
+
+// Keep the path's root and final `depth` folders, replacing any middle
+// folders with one ellipsis. Accept either OS's path separators on every OS.
+function shortenPath(value, depth, ascii = false) {
+  const text = String(value ?? "");
+  if (!text || !isValidDepth(depth)) {
+    return text;
+  }
+
+  const { root, separator, folders } = parsePathParts(text);
   if (folders.length <= depth) {
     return text;
   }
 
-  const suffix = folders.slice(-depth).join(separator);
   const ellipsis = ascii ? "..." : "…";
-  if (root === "/" || root === "\\") {
-    return `${root}${ellipsis}${separator}${suffix}`;
+  return joinPathParts(root, separator, [ellipsis, ...folders.slice(-depth)]);
+}
+
+// Abbreviate a single path or branch segment to its first grapheme cluster (or
+// dot + first grapheme for hidden names such as ".gemini").
+function abbreviateSegment(segment) {
+  const clusters = splitGraphemes(segment);
+  if (clusters.length <= 1) {
+    return segment;
   }
-  return `${root ? `${root}${separator}` : ""}${ellipsis}${separator}${suffix}`;
+  return segment.startsWith(".") ? clusters.slice(0, 2).join("") : clusters[0];
+}
+
+// Fish-style path shortening: abbreviate parent folders while keeping the last
+// folder (or `depth` folders when set) in full.
+function fishPath(value, depth) {
+  const text = String(value ?? "");
+  if (!text) {
+    return text;
+  }
+
+  const keep = isValidDepth(depth) ? depth : 1;
+  const { root, separator, folders } = parsePathParts(text);
+  if (folders.length <= keep) {
+    return text;
+  }
+
+  const cutoff = folders.length - keep;
+  const shortened = folders.map((folder, index) =>
+    index < cutoff ? abbreviateSegment(folder) : folder
+  );
+  return joinPathParts(root, separator, shortened);
+}
+
+// Fish-style branch shortening: abbreviate slash-separated prefixes before the
+// final segment (`feature/auth/oauth-login` -> `f/a/oauth-login`).
+function fishBranch(value) {
+  const text = String(value ?? "");
+  if (!text.includes("/")) {
+    return text;
+  }
+
+  const parts = text.split("/");
+  const last = parts.pop();
+  return `${parts.map((part) => (part ? abbreviateSegment(part) : "")).join("/")}/${last}`;
 }
 
 function label(emojis, emoji, named, value) {
@@ -999,6 +1058,8 @@ module.exports = {
   limitWidth,
   isValidMaxWidth,
   shortenPath,
+  fishPath,
+  fishBranch,
   isValidDepth,
   quotaColor,
   contextColor,

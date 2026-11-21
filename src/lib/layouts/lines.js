@@ -33,6 +33,8 @@ const {
   formatCost,
   limitWidth,
   shortenPath,
+  fishPath,
+  fishBranch,
   formatTokens,
   formatContextTokens,
   shortModelName,
@@ -436,12 +438,12 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
     }
 
     case "cwd": {
-      const dirname = limitWidth(
-        shortenPath(homePath(session.cwd), widget?.depth, ascii),
-        widget,
-        ascii,
-        session.lang
-      );
+      const home = homePath(session.cwd);
+      const pathText =
+        widget?.fish === true
+          ? fishPath(home, widget?.depth)
+          : shortenPath(home, widget?.depth, ascii);
+      const dirname = limitWidth(pathText, widget, ascii, session.lang);
       if (!dirname) {
         return null;
       }
@@ -478,7 +480,8 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
       const opStr = widget.operation === false ? "" : formatGitOperation(session.git.operation);
       const syncStr = formatGitSync(session.git.ahead, session.git.behind, ascii);
       const syncPart = syncStr ? ` ${syncStr}` : "";
-      const branch = limitWidth(session.git.branch, widget, ascii);
+      const rawBranch = widget?.fish === true ? fishBranch(session.git.branch) : session.git.branch;
+      const branch = limitWidth(rawBranch, widget, ascii);
       return (
         fg(palette.git) +
         tag() +

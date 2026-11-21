@@ -43,6 +43,8 @@ const {
   formatCost,
   limitWidth,
   shortenPath,
+  fishPath,
+  fishBranch,
   homePath,
   basenameOf,
   label,
@@ -358,12 +360,12 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
     }
 
     case "cwd": {
-      const name = limitWidth(
-        shortenPath(homePath(session.cwd), widget?.depth, ascii),
-        widget,
-        ascii,
-        session.lang
-      );
+      const home = homePath(session.cwd);
+      const pathText =
+        widget?.fish === true
+          ? fishPath(home, widget?.depth)
+          : shortenPath(home, widget?.depth, ascii);
+      const name = limitWidth(pathText, widget, ascii, session.lang);
       if (!name) {
         return null;
       }
@@ -403,7 +405,8 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       const opPart = opStr ? `|${opStr}` : "";
       const syncStr = formatGitSync(session.git.ahead, session.git.behind, ascii);
       const syncPart = syncStr ? ` ${syncStr}` : "";
-      const branch = limitWidth(session.git.branch, widget, ascii);
+      const rawBranch = widget?.fish === true ? fishBranch(session.git.branch) : session.git.branch;
+      const branch = limitWidth(rawBranch, widget, ascii);
       return pill(
         session.git.dirty ? colors.gitDirty : colors.git,
         lbl(`${mark}${branch}${opPart}${syncPart}`)

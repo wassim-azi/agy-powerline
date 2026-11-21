@@ -179,6 +179,11 @@ function buildConfigSchema() {
           },
           maxWidth: { type: "integer", minimum: 4, maximum: 200 },
           depth: { type: "integer", minimum: 1, maximum: 10, description: "cwd only." },
+          fish: {
+            type: "boolean",
+            description:
+              "cwd and git: abbreviate parent folders or branch prefixes to their first letter.",
+          },
           warn: percent("Caution level for this widget."),
           crit: percent("Danger level for this widget."),
           blink: { enum: [true, false, "warn"] },
