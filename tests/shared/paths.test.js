@@ -14,6 +14,20 @@ const {
   writeWindowsLauncher,
   readSettingsForUpdate,
 } = require("../../src/lib/paths");
+const { homePath } = require("../../src/lib/formatters");
+
+function withHome(platform, homedir, run) {
+  const platformDescriptor = Object.getOwnPropertyDescriptor(process, "platform");
+  const prevHomedir = os.homedir;
+  Object.defineProperty(process, "platform", { ...platformDescriptor, value: platform });
+  os.homedir = () => homedir;
+  try {
+    return run();
+  } finally {
+    Object.defineProperty(process, "platform", platformDescriptor);
+    os.homedir = prevHomedir;
+  }
+}
 
 function withTempDir(name, run) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), `agy-paths-${name}-`));
@@ -161,6 +175,31 @@ async function run() {
         JSON.stringify(result)
       );
     }
+  });
+
+  withHome("linux", "/home/al", () => {
+    record(
+      "homePath shortens POSIX home and subpaths without matching sibling home prefixes",
+      homePath("/home/al") === "~" &&
+        homePath("/home/al/repo") === "~/repo" &&
+        homePath("/home/alex/repo") === "/home/alex/repo"
+    );
+  });
+
+  withHome("win32", "C:\\Users\\al", () => {
+    record(
+      "homePath shortens Windows home and subpaths without matching sibling home prefixes",
+      homePath("C:\\Users\\al") === "~" &&
+        homePath("c:\\users\\al\\repo") === "~\\repo" &&
+        homePath("C:\\Users\\alex\\repo") === "C:\\Users\\alex\\repo"
+    );
+  });
+
+  withHome("linux", "/", () => {
+    record(
+      "homePath handles root HOME=/ without turning /app into ~app",
+      homePath("/") === "~" && homePath("/app") === "/app"
+    );
   });
 }
 

@@ -278,7 +278,7 @@ function formatTokens(n) {
     n = 0;
   }
 
-  if (n >= 1_000_000) {
+  if (n >= 999_950) {
     return `${(n / 1_000_000).toFixed(1)}M`;
   }
 
@@ -423,14 +423,17 @@ function homePath(value) {
     return input;
   }
 
-  const resolved = path.resolve(input);
-  const home = path.resolve(os.homedir());
-  const prefix =
-    process.platform === "win32"
-      ? resolved.toLowerCase().startsWith(home.toLowerCase())
-      : resolved.startsWith(home);
+  const resolvePath =
+    (process.platform === "win32" ? path.win32?.resolve : path.posix?.resolve) || path.resolve;
+  const resolved = resolvePath(input);
+  const home = resolvePath(os.homedir());
+  const normResolved = process.platform === "win32" ? resolved.toLowerCase() : resolved;
+  const normHome = process.platform === "win32" ? home.toLowerCase() : home;
+  const nextChar = resolved[home.length];
+  const hasBoundary =
+    normResolved.length === normHome.length || nextChar === "/" || nextChar === "\\";
 
-  if (prefix) {
+  if (normResolved.startsWith(normHome) && hasBoundary) {
     return "~" + resolved.slice(home.length);
   }
 
