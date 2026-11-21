@@ -24,6 +24,7 @@ const {
   paceIndex,
   paceGlyph,
   formatPaceDelta,
+  formatQuotaForecast,
   formatGitSync,
   formatGitOperation,
   gitChangeParts,
@@ -56,6 +57,7 @@ const {
   isRaw,
   isPaced,
   showsPaceDelta,
+  showsForecast,
   METER_STYLES,
   meterStyle,
   resolveContextView,
@@ -233,6 +235,18 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
     return delta ? ` ${delta}` : "";
   };
 
+  const forecast = (quota) => {
+    const text = showsForecast(widget)
+      ? formatQuotaForecast(quota, {
+          format: widget.forecast,
+          fallback: config.resetFormat || "countdown",
+          clock: config.clock,
+          lang: session.lang,
+        })
+      : "";
+    return text ? `${ascii ? ", " : " · "}${text}` : "";
+  };
+
   function quotaState(quota) {
     const thresh = resolveQuotaThresholds(widget, config);
     const view = resolveQuotaView(quota, config, session.lang);
@@ -263,8 +277,15 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
 
   function quotaPct(quota) {
     const { view, blinkSeq, color } = quotaState(quota);
+    const eta = forecast(quota);
     return (
-      blinkSeq + fg(palette.text) + tag() + fg(color) + `${view.text}${paceDelta(quota)}` + RESET
+      blinkSeq +
+      fg(palette.text) +
+      tag() +
+      fg(color) +
+      `${view.text}${paceDelta(quota)}` +
+      (eta ? fg(palette.text) + eta : "") +
+      RESET
     );
   }
 
@@ -334,6 +355,7 @@ function buildLinesSegment(id, session, palette, emojis, ascii = false, widget =
         fg(color) +
         `${view.text}${paceDelta(quota)}` +
         fg(palette.text) +
+        forecast(quota) +
         reset +
         RESET
       );

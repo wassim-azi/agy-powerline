@@ -161,6 +161,21 @@ It's off by default. Turn it on per widget with `"paceDelta": true`, or with **P
 - It's independent of `"pacing"` and `"pace"`, which only set the meters' marker.
 - On a terminal too narrow for the row, the delta goes before any widget is dropped.
 
+### Run-out forecast (`forecast`)
+
+The same percentage widgets (`fiveHourPct`, `weeklyPct`, and `quota`) can also estimate when quota runs out at your current burn rate across the current window:
+
+```
+⏳ 5h: 21.0% rem · ~1hr 12m     countdown until exhaustion
+⏳ 5h: 21.0% rem · ~15:40       exact run-out time ("forecast": "time")
+```
+
+Set `"forecast": "countdown"`, `"forecast": "time"`, or `"forecast": true` (follows `resetFormat`), or cycle **Run-out forecast** in `configure`:
+
+- Computed statelessly from elapsed window time and quota remaining (zero disk writes).
+- Automatically hides when the quota will last until the reset, during the first 10 minutes of a fresh window, or when the window length is unknown.
+- Drops before any widget when fitting a row to a narrow terminal (`compact`).
+
 ### Quota perspective (`quotaMode`)
 
 By default (`"quotaMode": "remaining"`), quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) show the percentage remaining (`72.0% rem`). Set `"quotaMode": "used"` — or cycle **Quota display** in the Settings tab (`i`) in `configure` — to display quota consumed instead (`28.0% used`), localized in every supported bar language. Meters continue filling left-to-right by usage consumed alongside the pace marker, and warning/danger thresholds continue triggering at the same usage levels.

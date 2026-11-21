@@ -201,6 +201,11 @@ function buildConfigSchema() {
             description:
               "quota, fiveHourPct, weeklyPct: show how far usage is ahead of or behind an even pace.",
           },
+          forecast: {
+            enum: [true, false, "countdown", "time"],
+            description:
+              "quota, fiveHourPct, weeklyPct: estimate when quota runs out at your current pace (true follows resetFormat).",
+          },
           meterStyle: { enum: [...METER_STYLE_IDS] },
           format: { enum: ["countdown", "time", "both"], description: "Reset widgets." },
           short: { type: "boolean", description: "model: the short model name." },

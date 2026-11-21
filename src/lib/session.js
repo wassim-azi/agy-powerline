@@ -256,6 +256,7 @@ function readQuota(data, key, windowSeconds, lang) {
     remaining,
     reset: hasReset ? formatReset(resetSeconds, lang) : "",
     resetSeconds,
+    windowSeconds: elapsedPct !== null ? windowSeconds : 0,
     elapsedPct,
     resetTime: resetValid && quota.reset_time ? String(quota.reset_time) : "",
     disabled: quota.disabled === true,

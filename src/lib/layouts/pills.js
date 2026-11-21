@@ -53,6 +53,7 @@ const {
   paceIndex,
   paceGlyph,
   formatPaceDelta,
+  formatQuotaForecast,
 } = require("../formatters");
 const { execWidgetOutput, restoreAfterReset } = require("../exec");
 const {
@@ -63,6 +64,7 @@ const {
   isRaw,
   isPaced,
   showsPaceDelta,
+  showsForecast,
   METER_STYLES,
   meterStyle,
   resolveContextView,
@@ -205,6 +207,17 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
     const delta = showsPaceDelta(widget) ? formatPaceDelta(quota, ascii) : "";
     return delta ? ` ${delta}` : "";
   };
+  const forecast = (quota) => {
+    const text = showsForecast(widget)
+      ? formatQuotaForecast(quota, {
+          format: widget.forecast,
+          fallback: config.resetFormat || "countdown",
+          clock: config.clock,
+          lang: session.lang,
+        })
+      : "";
+    return text ? `${ascii ? ", " : " · "}${text}` : "";
+  };
   const quotaState = (quota, baseColor) => {
     const thresh = resolveQuotaThresholds(widget, config);
     const view = resolveQuotaView(quota, config, session.lang);
@@ -289,7 +302,11 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
       }
       const { view, blink, color } = quotaState(quota, colors.fiveHour);
       const reset = quota.reset ? `${ascii ? ", " : " · "}${quota.reset}` : "";
-      return pill(color, lbl(`${quota.label} ${view.text}${paceDelta(quota)}${reset}`), blink);
+      return pill(
+        color,
+        lbl(`${quota.label} ${view.text}${paceDelta(quota)}${forecast(quota)}${reset}`),
+        blink
+      );
     }
 
     case "fiveHourBar":
@@ -300,7 +317,11 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return null;
       }
       const { view, blink, color } = quotaState(session.fiveHour, colors.fiveHour);
-      return pill(color, lbl(`${view.text}${paceDelta(session.fiveHour)}`), blink);
+      return pill(
+        color,
+        lbl(`${view.text}${paceDelta(session.fiveHour)}${forecast(session.fiveHour)}`),
+        blink
+      );
     }
 
     case "fiveHourReset":
@@ -314,7 +335,11 @@ function buildSegment(id, session, colors, emojis, ascii = false, widget = {}, c
         return null;
       }
       const { view, blink, color } = quotaState(session.weekly, colors.weekly);
-      return pill(color, lbl(`${view.text}${paceDelta(session.weekly)}`), blink);
+      return pill(
+        color,
+        lbl(`${view.text}${paceDelta(session.weekly)}${forecast(session.weekly)}`),
+        blink
+      );
     }
 
     case "weeklyReset":

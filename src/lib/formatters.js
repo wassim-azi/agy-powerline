@@ -253,6 +253,68 @@ function formatPaceDelta(quota, ascii = false) {
 
   return `${delta > 0 ? (ascii ? "^" : "⇡") : ascii ? "v" : "⇣"}${Math.abs(delta)}%`;
 }
+
+const MIN_FORECAST_ELAPSED_SEC = 600;
+
+// Estimates when the quota empties at the current window burn rate, or "" when
+// the quota will last until the reset, is too early in the window, or has no known window.
+function formatQuotaForecast(quota, { format, fallback = "countdown", clock = {}, lang } = {}) {
+  const remaining = Number(quota?.remaining);
+  const resetSeconds = Number(quota?.resetSeconds);
+  const elapsedPct = quota?.elapsedPct == null ? NaN : Number(quota.elapsedPct);
+
+  if (
+    quota?.elapsedPct == null ||
+    !Number.isFinite(elapsedPct) ||
+    elapsedPct <= 0 ||
+    elapsedPct >= 100 ||
+    !Number.isFinite(remaining) ||
+    remaining <= 0 ||
+    remaining >= 100 ||
+    !Number.isFinite(resetSeconds) ||
+    resetSeconds <= 0
+  ) {
+    return "";
+  }
+
+  const winSeconds = Number(quota?.windowSeconds);
+  const elapsedSeconds =
+    Number.isFinite(winSeconds) && winSeconds > resetSeconds
+      ? winSeconds - resetSeconds
+      : (resetSeconds * elapsedPct) / (100 - elapsedPct);
+
+  if (!Number.isFinite(elapsedSeconds) || elapsedSeconds < MIN_FORECAST_ELAPSED_SEC) {
+    return "";
+  }
+
+  const usedPct = 100 - remaining;
+  if (usedPct <= elapsedPct) {
+    return "";
+  }
+
+  const runsOutInSeconds = Math.max(1, Math.floor((remaining * elapsedSeconds) / usedPct));
+  if (!Number.isFinite(runsOutInSeconds) || runsOutInSeconds >= resetSeconds) {
+    return "";
+  }
+
+  const chosen =
+    format === "countdown" || format === "time"
+      ? format
+      : fallback === "time"
+        ? "time"
+        : "countdown";
+
+  if (chosen === "time") {
+    const target = new Date(Date.now() + runsOutInSeconds * 1000);
+    const exact =
+      runsOutInSeconds >= 86400
+        ? `${formatClockDate(target, clock)}, ${formatClockTime(target, clock)}`
+        : formatClockTime(target, clock);
+    return `~${exact}`;
+  }
+
+  return `~${formatReset(runsOutInSeconds, lang)}`;
+}
 function resetInSeconds(quota) {
   const seconds = Number(quota?.reset_in_seconds);
 
@@ -1040,6 +1102,7 @@ module.exports = {
   paceIndex,
   paceGlyph,
   formatPaceDelta,
+  formatQuotaForecast,
   resetInSeconds,
   formatTokens,
   formatContextTokens,
