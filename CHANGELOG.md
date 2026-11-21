@@ -34,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Aligned onboarding docs & visuals**: updated the demo GIF, OG share cards, and guides for the unified `npx agy-powerline` workflow (#205)
 - **Updated sample model to Gemini 4 Hydrogen**: replaced `Gemini 3.8 Flash (High)` (`3.8 Flash·High`) with `Gemini 4 Hydrogen (High)` (`4 Hydrogen·High`) across demo data, live previews, docs, OG share cards, and the demo GIF (#220)
 
+### Security
+
+- **Git subprocess hardening**: detect same-line risky config sections and partial-clone settings, skip unsafe repositories before both ahead/behind and working-tree Git calls, disable Git network protocols and lazy fetching, and prevent Windows from resolving a planted Git executable from the workspace (#249)
+
 ### Fixed
 
 - **Gemini & Argon model pool matching in `quota`**: inspect both `model.display_name` and `model.id` and recognize unprefixed Gemini codenames (`argon`, `hydrogen`, `neon`, `carbon`) in `tightestQuota()` so non-prefixed display names do not fall back to the `3p-*` quota pool (#242)
