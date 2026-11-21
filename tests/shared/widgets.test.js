@@ -18,6 +18,7 @@ const {
   shortenPath,
   isValidDepth,
   visibleWidth,
+  charWidth,
   formatTokens,
 } = require("../../src/lib/formatters");
 const { buildCustomTheme, THEMES } = require("../../src/lib/themes");
@@ -505,6 +506,21 @@ function testWidgetWidthAndDepth() {
       visibleWidth(emoji) === 5 &&
       colored === "\x1b[31mabcdefg…\x1b[0m" &&
       visibleWidth(colored) === 8
+  );
+
+  const zeroWidth = [
+    0x061c, 0x180b, 0x180e, 0x180f, 0x200b, 0x200c, 0x200e, 0x200f, 0x2060, 0x2064, 0x206f, 0xfeff,
+    0xe0001, 0xe0067, 0xe007f, 0xe0100, 0xe01ef,
+  ];
+  record(
+    "charWidth counts invisible format characters as zero columns",
+    zeroWidth.every((code) => charWidth(code) === 0) &&
+      visibleWidth("a\u200bb\u200ec\u200fd\u061ce\ufefff\u2060g") === 7 &&
+      visibleWidth("葛\u{e0100}") === 2 &&
+      // Drawn by terminals: soft hyphen, narrow no-break space (Intl times).
+      charWidth(0x00ad) === 1 &&
+      charWidth(0x202f) === 1 &&
+      limitWidth("ab\u200bcdef", { maxWidth: 5 }) === "ab\u200bcd…"
   );
 
   const gitSession = {

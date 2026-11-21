@@ -40,6 +40,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **Escape stripping and zero-width characters**: `stripControl()` now removes escapes with intermediate bytes (`ESC ( B` from `tput sgr0`, `ESC # 8`), DCS / SOS / PM / APC control strings with their body, and 8-bit C1 control strings and CSI, so `exec` output and payload text no longer leave `(B` or `0;1|x` in the bar; invisible format characters (zero-width space, bidi marks, word joiner, BOM, tag and ideographic variation selectors) now count as zero columns when fitting the bar (#248)
 - **Home path boundary and token rollover rounding**: require a path-separator boundary in `homePath()` so sibling directories like `/home/alex` do not match `/home/al`, and roll `formatTokens()` over to `"1.0M"` at `999,950` instead of formatting `999,950..999,999` as `"1000.0K"` (#246)
 - **Session-scoped `exec` payload cache keys**: include the sanitized session payload in `widgetCacheKey()` when `"payload": true` so concurrent sessions or model switches in the same working directory do not serve stale cached output (#250)
 - **Context percentage fallback**: ignore null, boolean, and empty or whitespace-only percentage values so valid remaining percentages or current token usage are used instead (#245)
