@@ -106,6 +106,11 @@ function buildConfigSchema() {
           'Show quota bars and percentages as remaining capacity ("remaining", default) or consumed usage ("used").',
         enum: [...QUOTA_MODE_ORDER],
       },
+      zeroFiveHourWhenWeeklyEmpty: {
+        type: "boolean",
+        description:
+          "Show 0% remaining (100% used) on 5-hour quota widgets whenever the matching 7-day quota is 0% (even if 3p-5h is marked disabled).",
+      },
       meterStyle: { description: "Meter style for every meter.", enum: [...METER_STYLE_IDS] },
       gradient: {
         type: "string",

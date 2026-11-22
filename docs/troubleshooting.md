@@ -25,6 +25,7 @@ It then reports: Windows Node on WSL, stale installed scripts (fix: `npx agy-pow
 - **Windows: the bar doesn't start:** the install folder path may contain `&`, `(`, `^`, `,`, `;` or `=`. See [What `init` does](install.md#what-init-does).
 - **`⚠ Statusline disabled after 30 consecutive failures.` inside `agy`:** Antigravity throttles status line refreshes to at most once every 300 ms, stops any run that takes longer than 5 seconds, and disables the custom bar for the rest of the session after 30 failed runs in a row. Run `npx agy-powerline doctor` to inspect the failure (and fix any broken Node path or slow `exec` command), then run `/statusline enable` inside `agy`.
 - **The demo shows widgets your live bar doesn't:** `render --demo` uses sample data. Widgets like `sandbox`, `artifacts` and `tasks` stay hidden in a real session until there is a sandbox, an artifact or something running in the background.
+- **`3P 5h` (`thirdPartyFiveHour`) shows in previews/demo but not in `agy`:** Antigravity sends `quota["3p-5h"].disabled: true` when that bucket isn't active (commonly when `3p-weekly` is at `0%`), which you can confirm with `AGY_POWERLINE_DEBUG=1`. Turn on **Show disabled** (`"showDisabled": true`) on `thirdPartyFiveHour` to show the raw payload value, or turn on **Zero 5h when 7d is 0%** (`"zeroFiveHourWhenWeeklyEmpty": true`) in Settings (`i`) to show `0.0% rem` whenever the matching 7-day quota is at `0%`.
 
 ## Reporting a bug
 

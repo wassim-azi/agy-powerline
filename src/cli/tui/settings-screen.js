@@ -160,6 +160,11 @@ const SETTINGS_ROWS = [
     help: "Show quota bars and percentages as remaining capacity (72.0% rem) or quota consumed (28.0% used). Caution and danger colors trigger at the same usage levels in both modes.",
   },
   {
+    id: "zeroFiveHourWhenWeeklyEmpty",
+    label: "Zero 5h when 7d is 0%",
+    help: "Show 0% remaining (100% used) on all 5-hour quota widgets whenever the matching 7-day quota is at 0%, even if Antigravity marks 3p-5h disabled.",
+  },
+  {
     id: "overflow",
     label: "Row overflow",
     help: "What happens when a row is wider than the terminal: fit (default, shrink labels and drop low-priority widgets) or wrap (keep every widget and break onto continuation rows).",
@@ -311,6 +316,10 @@ function settingValue(config, row) {
 
   if (row.id === "quotaMode") {
     return resolveQuotaMode(config.quotaMode);
+  }
+
+  if (row.id === "zeroFiveHourWhenWeeklyEmpty") {
+    return config.zeroFiveHourWhenWeeklyEmpty ? "on" : "off";
   }
 
   if (row.id === "overflow") {
@@ -668,6 +677,14 @@ function toggleOrCycleSetting(state, row) {
     config.quotaMode = next;
     if (persist(state)) {
       state.flashMessage = `Quota display: ${next}`;
+    }
+    return;
+  }
+
+  if (row.id === "zeroFiveHourWhenWeeklyEmpty") {
+    config.zeroFiveHourWhenWeeklyEmpty = !config.zeroFiveHourWhenWeeklyEmpty;
+    if (persist(state)) {
+      state.flashMessage = `Zero 5h when 7d is 0%: ${config.zeroFiveHourWhenWeeklyEmpty ? "on" : "off"}`;
     }
     return;
   }

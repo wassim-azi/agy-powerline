@@ -43,6 +43,7 @@ const SETTINGS = [
   "maxWidth",
   "resetFormat",
   "quotaMode",
+  "zeroFiveHourWhenWeeklyEmpty",
   "log",
 ];
 

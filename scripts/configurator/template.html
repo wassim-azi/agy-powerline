@@ -851,6 +851,9 @@
                 <label class="toggle-item"
                   ><input type="checkbox" id="toggleRowGap" /> Row gap</label
                 >
+                <label class="toggle-item"
+                  ><input type="checkbox" id="toggleZero5hOnWeekly" /> Zero 5h when 7d is 0%</label
+                >
               </div>
             </div>
           </section>
@@ -1018,6 +1021,7 @@
         const toggleMinimalist = document.getElementById("toggleMinimalist");
         const togglePacing = document.getElementById("togglePacing");
         const toggleRowGap = document.getElementById("toggleRowGap");
+        const toggleZero5hOnWeekly = document.getElementById("toggleZero5hOnWeekly");
         const configJson = document.getElementById("configJson");
         const shareUrlInput = document.getElementById("shareUrlInput");
         const shareUrlRow = document.getElementById("shareUrlRow");
@@ -1148,6 +1152,7 @@
           toggleMinimalist.checked = Boolean(state.config.minimalist);
           togglePacing.checked = state.config.pacing !== false;
           toggleRowGap.checked = Boolean(state.config.rowGap);
+          toggleZero5hOnWeekly.checked = Boolean(state.config.zeroFiveHourWhenWeeklyEmpty);
 
           // Exec warning
           execWarning.style.display = Page.hasExecWidgets(state.config.widgets) ? "block" : "none";
@@ -1593,6 +1598,10 @@
           });
           toggleRowGap.addEventListener("change", (e) => {
             state.config.rowGap = e.target.checked;
+            syncControls();
+          });
+          toggleZero5hOnWeekly.addEventListener("change", (e) => {
+            state.config.zeroFiveHourWhenWeeklyEmpty = e.target.checked;
             syncControls();
           });
 

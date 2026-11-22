@@ -559,6 +559,107 @@ function testQuotaMode() {
         JSON.stringify(["remaining", "used"])
   );
 
+  // Global zeroFiveHourWhenWeeklyEmpty: 0% remaining on 5h widgets when 7d is 0% (even if disabled).
+  const weeklyEmptyPayload = {
+    quota: {
+      "gemini-5h": {
+        remaining_fraction: 0.72,
+        reset_time: RESET_AT,
+        reset_in_seconds: 7200,
+      },
+      "gemini-weekly": {
+        remaining_fraction: 0,
+        reset_time: RESET_AT,
+        reset_in_seconds: 86400,
+      },
+      "3p-5h": {
+        remaining_fraction: 1,
+        reset_time: "1970-01-01T00:00:00.000Z",
+        reset_in_seconds: 0,
+        disabled: true,
+      },
+      "3p-weekly": {
+        remaining_fraction: 0,
+        reset_time: RESET_AT,
+        reset_in_seconds: 86400,
+      },
+    },
+  };
+  const zeroOff = plain(
+    {
+      emojis: false,
+      ascii: true,
+      widgets: [{ id: "fiveHourPct" }, { id: "thirdPartyFiveHour" }],
+    },
+    weeklyEmptyPayload
+  );
+  const zeroOn = plain(
+    {
+      emojis: false,
+      ascii: true,
+      zeroFiveHourWhenWeeklyEmpty: true,
+      widgets: [{ id: "fiveHourBar" }, { id: "fiveHourPct" }, { id: "thirdPartyFiveHour" }],
+    },
+    weeklyEmptyPayload
+  );
+  const zeroOnUsed = plain(
+    {
+      emojis: false,
+      ascii: true,
+      quotaMode: "used",
+      zeroFiveHourWhenWeeklyEmpty: true,
+      widgets: [{ id: "fiveHourPct" }, { id: "thirdPartyFiveHour" }],
+    },
+    weeklyEmptyPayload
+  );
+  const zeroOnNonEmpty = plain(
+    {
+      emojis: false,
+      ascii: true,
+      zeroFiveHourWhenWeeklyEmpty: true,
+      widgets: [{ id: "fiveHourPct" }, { id: "thirdPartyFiveHour" }],
+    },
+    {
+      quota: {
+        ...weeklyEmptyPayload.quota,
+        "gemini-weekly": { remaining_fraction: 0.1, reset_time: RESET_AT, reset_in_seconds: 86400 },
+        "3p-weekly": { remaining_fraction: 0.2, reset_time: RESET_AT, reset_in_seconds: 86400 },
+      },
+    }
+  );
+  const zeroOnMissing5h = plain(
+    {
+      emojis: false,
+      ascii: true,
+      zeroFiveHourWhenWeeklyEmpty: true,
+      widgets: [{ id: "thirdPartyFiveHour" }],
+    },
+    {
+      quota: {
+        "3p-5h": { disabled: true },
+        "3p-weekly": { remaining_fraction: 0, reset_time: RESET_AT, reset_in_seconds: 86400 },
+      },
+    }
+  );
+  record(
+    "zeroFiveHourWhenWeeklyEmpty shows 0% rem (100% used) on all 5h widgets when 7d is 0%, including disabled 3p-5h",
+    /5h: 72\.0% rem/.test(zeroOff) &&
+      !/3P 5h/.test(zeroOff) &&
+      /5h: \[[^\]]+\] 0\.0% rem/.test(zeroOn) &&
+      /5h: 0\.0% rem/.test(zeroOn) &&
+      /3P 5h: \[[^\]]+\] 0\.0% rem/.test(zeroOn) &&
+      /5h: 100\.0% used/.test(zeroOnUsed) &&
+      /3P 5h: \[[^\]]+\] 100\.0% used/.test(zeroOnUsed) &&
+      /5h: 72\.0% rem/.test(zeroOnNonEmpty) &&
+      !/3P 5h/.test(zeroOnNonEmpty) &&
+      /3P 5h: \[[^\]]+\] 0\.0% rem/.test(zeroOnMissing5h) &&
+      mergeConfig({}).zeroFiveHourWhenWeeklyEmpty === false &&
+      mergeConfig({ zeroFiveHourWhenWeeklyEmpty: true }).zeroFiveHourWhenWeeklyEmpty === true &&
+      droppedSettings({ zeroFiveHourWhenWeeklyEmpty: true }).length === 0 &&
+      buildConfigSchema().properties.zeroFiveHourWhenWeeklyEmpty?.type === "boolean",
+    `${zeroOff} / ${zeroOn} / ${zeroOnUsed}`
+  );
+
   // Quota run-out forecast (#251): countdown & exact time, auto-hide guards, compact drop, and configure options.
   const ahead5h = payload();
   // 5h window = 18000s. reset_in_seconds = 10800s -> 7200s elapsed (40%).

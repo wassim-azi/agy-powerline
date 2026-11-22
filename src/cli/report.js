@@ -190,6 +190,7 @@ function configRows(installDir, env) {
       `minimalist ${config.minimalist ? "on" : "off"}`,
       `row gaps ${config.rowGap ? "on" : "off"}`,
       `pacing ${config.pacing ? "on" : "off"}`,
+      `zero 5h on 7d empty ${config.zeroFiveHourWhenWeeklyEmpty ? "on" : "off"}`,
       `color ${config.color}`,
       `clock ${config.clock.timeZone || config.clock.locale ? "custom" : "default"}`,
     ].join(", "),
