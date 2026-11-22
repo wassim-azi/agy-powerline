@@ -52,6 +52,10 @@ function makeGit(env) {
         "commit.gpgsign=false",
         "-c",
         "init.defaultBranch=main",
+        "-c",
+        "gc.auto=0",
+        "-c",
+        "maintenance.auto=false",
         ...args,
       ],
       { cwd, env, stdio: ["ignore", "pipe", "pipe"], encoding: "utf8" }
@@ -418,6 +422,7 @@ function testGitOperations(root, git) {
   const copyDir = (src, dst) => {
     fs.mkdirSync(dst, { recursive: true });
     for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+      if (entry.name === "maintenance.lock") continue;
       const from = path.join(src, entry.name);
       const to = path.join(dst, entry.name);
       if (entry.isDirectory()) {
