@@ -116,7 +116,7 @@ Sieh dir alle Themes in der [Theme-Galerie](https://agy-powerline.com/themes/) o
 **Pills** (Standard): Kapseln im Powerline-Stil. Wähle zwischen abgerundeten, eckigen, abgeschrägten oder flachen Formen sowie optional einer Leerzeile zwischen den Zeilen.
 
 <p align="center">
-  <img src="assets/screenshots/pills-dark.png" alt="agy-powerline Pills-Layout mit dem Theme dark-aurora: Modell, Kontext, Projekt und Git; Gemini-5h- und -7T-Kontingente mit Tempomarkierungen und Resets; wöchentliche Anthropic- (Claude/Sonnet) und Argon-Kontingente" width="850">
+  <img src="assets/screenshots/pills-dark.png" alt="agy-powerline Pills-Layout mit dem Theme dark-aurora: Modell, Kontext, Cache-Trefferquote, Tokens der letzten 30 Tage, Uhrzeit, RAM und Betriebssystem; Gemini-5h-Kontingent mit Tempomarkierung und Reset, Anthropic-5h-Kontingent (Claude/Sonnet), Projekt und Git; Gemini-7T-Kontingent mit Reset, wöchentliche Anthropic- und Argon-Kontingente" width="850">
 </p>
 
 <details>

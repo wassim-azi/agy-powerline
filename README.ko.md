@@ -116,7 +116,7 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`npx agy-powerl
 **Pills** (기본값): 파워라인 스타일 캡슐. 둥근(round), 각진(angled), 기울어진(slanted), 평평한(flat) 모양을 고를 수 있고, 행 사이에 빈 줄을 넣을 수도 있습니다.
 
 <p align="center">
-  <img src="assets/screenshots/pills-dark.png" alt="dark-aurora 테마의 agy-powerline Pills 레이아웃: 모델, 컨텍스트, 프로젝트, git; 페이스 마커와 리셋 시간이 있는 Gemini 5시간/7일 할당량; Anthropic(Claude/Sonnet)과 Argon 주간 할당량" width="850">
+  <img src="assets/screenshots/pills-dark.png" alt="dark-aurora 테마의 agy-powerline Pills 레이아웃: 모델, 컨텍스트, 캐시 적중률, 30일 토큰, 시계, RAM, OS; 페이스 마커와 리셋 시간이 있는 Gemini 5시간 할당량, Anthropic(Claude/Sonnet) 5시간 할당량, 프로젝트, git; Gemini 7일 할당량과 리셋 시간, Anthropic 및 Argon 주간 할당량" width="850">
 </p>
 
 <details>

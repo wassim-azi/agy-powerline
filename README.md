@@ -114,7 +114,7 @@ Preview them all in the [theme gallery](https://agy-powerline.com/themes/) or wi
 **Pills** (default): powerline-style capsules. Choose round, angled, slanted or flat shapes, and optionally a blank line between rows.
 
 <p align="center">
-  <img src="assets/screenshots/pills-dark.png" alt="agy-powerline Pills layout with the dark-aurora theme: model, context, project and git; Gemini 5h and 7d quotas with pace markers and resets; Anthropic (Claude/Sonnet) and Argon weekly quotas" width="850">
+  <img src="assets/screenshots/pills-dark.png" alt="agy-powerline Pills layout with the dark-aurora theme: model, context, cache hit, 30-day tokens, clock, RAM and OS; Gemini 5h quota with pace marker and reset, Anthropic (Claude/Sonnet) 5h quota, project and git; Gemini 7d quota and reset, Anthropic and Argon weekly quotas" width="850">
 </p>
 
 <details>

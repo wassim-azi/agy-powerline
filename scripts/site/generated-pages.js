@@ -618,8 +618,7 @@ function settingsPage() {
         <p class="lede">Every bar-wide option in <code>statusline.config.json</code> and the CLI <code>Settings</code> tab. Every bar below is rendered by the real statusline code from sample data. Try them interactively in the <a href="/configure/">browser configurator</a>.</p>
         <nav aria-label="Settings"><p>${entries.map((s) => `<a href="#${esc(s.id)}"><code>${esc(s.key)}</code></a>`).join(" ")}</p></nav>
         ${sections}`;
-  const description =
-    "Every global option in agy-powerline for Antigravity CLI: alignment, overflow, quotaMode, resetFormat, meterStyle, maxWidth and thresholds with live previews.";
+  const description = `All ${entries.length} bar-wide agy-powerline settings, with live previews: quotas as left or used, reset format, meter style, alignment, overflow and width.`;
   return {
     path: "settings/",
     sources: [

@@ -529,10 +529,10 @@ npx agy-powerline import my-bar.json
 
 **Wide terminals**: set `"maxWidth"` to a positive integer (e.g. `120`) — or cycle **Max bar width** (`full`, `100`, `120`, `140`, `160`) in the Settings tab (`i`) in the editor — to cap the bar's effective width at `Math.min(terminal_width, maxWidth)` instead of stretching flex spaces across an ultrawide window. `"full"` or `null` (default) leaves the bar uncapped.
 
-The README's three-row Pills bar in a 74-column window: values only, the short model name, and the project hidden:
+A three-row Pills bar in a 74-column window, with the default `fit`: values only, and the project hidden to make room:
 
 <p align="center">
-  <img src="../assets/screenshots/narrow.png" alt="agy-powerline's three-row Pills bar in a 74-column window, values only: short model name, context and git branch; Gemini 5h and 7d quotas; Anthropic (Claude/Sonnet) and Argon weekly quotas" width="640" height="161">
+  <img src="../assets/screenshots/narrow.png" alt="agy-powerline's three-row Pills bar in a 74-column window, values only: model and context; Gemini 5h quota and reset, Anthropic (Claude/Sonnet) 5h quota and git branch; Gemini 7d quota and reset, Anthropic and Argon weekly quotas" width="640" height="135">
 </p>
 
 **Limited color support?** Color depth resolves per refresh, strongest hint first: `render --color <truecolor|256|none>`, then `NO_COLOR` (disables color), then `AGY_POWERLINE_COLOR`, then `"color"` in the config (`"auto"` default), then terminal heuristics (`COLORTERM=truecolor`/`24bit` → truecolor, `*256color*` `TERM` → 256-color `38;5`/`48;5` codes, `dumb` → no color). Bold/dim are kept; only fg/bg color is dropped in `none` mode, and Pills meters draw their fill with `█`/`░` (`#`/`-` in ASCII mode) instead of color.

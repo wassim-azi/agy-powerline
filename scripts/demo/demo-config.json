@@ -14,7 +14,7 @@
   "log": true,
   "resetFormat": "countdown",
   "quotaMode": "remaining",
-  "zeroFiveHourWhenWeeklyEmpty": false,
+  "zeroFiveHourWhenWeeklyEmpty": true,
   "clock": {
     "hour12": false,
     "timeZone": "",

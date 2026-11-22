@@ -116,7 +116,7 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 **Pills**（デフォルト）：powerline 風のカプセル。形は丸型、山型、斜め、フラットから選べ、行の間に空行を入れることもできます。
 
 <p align="center">
-  <img src="assets/screenshots/pills-dark.png" alt="dark-aurora テーマの agy-powerline Pills レイアウト：モデル、コンテキスト、プロジェクト、git；ペースマーカーとリセットまでの時間付きの Gemini 5h と 7d のクォータ；Anthropic（Claude/Sonnet）と Argon の週間クォータ" width="850">
+  <img src="assets/screenshots/pills-dark.png" alt="dark-aurora テーマの agy-powerline Pills レイアウト：モデル、コンテキスト、キャッシュヒット率、30 日間のトークン、時刻、RAM、OS；ペースマーカーとリセットまでの時間付きの Gemini 5h クォータ、Anthropic（Claude/Sonnet）の 5h クォータ、プロジェクト、git；Gemini 7d クォータとリセット、Anthropic と Argon の週間クォータ" width="850">
 </p>
 
 <details>

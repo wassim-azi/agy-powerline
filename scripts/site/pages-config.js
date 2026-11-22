@@ -89,7 +89,9 @@ const MARKDOWN_PAGES = [
     schema: "ProfilePage",
     name: "About",
     edit: false,
-    title: "About agy-powerline",
+    // The share card keeps the short name; the tab and search title say what it is.
+    card: { title: "About agy-powerline", label: "About" },
+    title: "About agy-powerline - the open-source agy statusline",
     description:
       "Who builds agy-powerline, the open-source agy statusline for Google Antigravity CLI, its principles (no dependencies, no telemetry) and its contributors.",
   },

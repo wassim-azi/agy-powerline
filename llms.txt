@@ -141,7 +141,7 @@ Default: `~/.agy-powerline/statusline.config.json`; with `AGY_POWERLINE_HOME`, u
 - [Install](https://agy-powerline.com/install/)
 - [Configuration](https://agy-powerline.com/docs/configuration/)
 - [Widgets, with previews](https://agy-powerline.com/widgets/)
-- [Settings, with previews](https://agy-powerline.com/settings/): `language`, `clock.hour12`, `resetFormat`, `gradient`, `meterStyle`, `thresholds`, `alignment`, `overflow`, `maxWidth`, `quotaMode`
+- [Settings, with previews](https://agy-powerline.com/settings/): `language`, `clock.hour12`, `resetFormat`, `gradient`, `meterStyle`, `emojis`, `minimalist`, `pacing`, `thresholds`, `rowGap`, `maxWidth`, `alignment`, `quotaMode`, `zeroFiveHourWhenWeeklyEmpty`, `overflow`, `ascii`
 - [Payload reference](https://agy-powerline.com/docs/payload/): what agy sends to the status line
 - [Troubleshooting](https://agy-powerline.com/troubleshooting/)
 - [FAQ](https://agy-powerline.com/faq/)

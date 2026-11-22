@@ -115,15 +115,19 @@ const HOME_TEXT = {
     ],
     shotsEyebrow: "Real screenshots",
     shotsTitle: "In a real terminal",
-    shotsLead: "Taken in agy sessions, not mock-ups.",
+    shotsLead: "Taken in agy sessions and in the editor, not mock-ups.",
     shots: {
+      editor: [
+        "Editor",
+        "The agy-powerline editor in a terminal: adding Argon's reset timer, previewing presets, filtering themes, switching between Classic, Pills and Lines, and the Settings tab",
+      ],
       windows: [
         "agy session",
         "agy-powerline under agy's input box in Windows Terminal: a short conversation above, the three-row Pills bar below",
       ],
       "pills-dark": [
         "Pills",
-        "agy-powerline Pills layout with the dark-aurora theme: model, context, project and git; Gemini 5h and 7d quotas with pace markers and resets; Anthropic (Claude/Sonnet) and Argon weekly quotas",
+        "agy-powerline Pills layout with the dark-aurora theme: model, context, cache hit, 30-day tokens, clock, RAM and OS; Gemini 5h quota with pace marker and reset, Anthropic (Claude/Sonnet) 5h quota, project and git; Gemini 7d quota and reset, Anthropic and Argon weekly quotas",
       ],
       "lines-light": [
         "Lines",
@@ -299,15 +303,19 @@ const HOME_TEXT = {
     ],
     shotsEyebrow: "Vraies captures",
     shotsTitle: "Dans un vrai terminal",
-    shotsLead: "Prises dans de vraies sessions agy, pas des maquettes.",
+    shotsLead: "Prises dans de vraies sessions agy et dans l'éditeur, pas des maquettes.",
     shots: {
+      editor: [
+        "Éditeur",
+        "L'éditeur d'agy-powerline dans un terminal : ajout du compte à rebours d'Argon, aperçu des préréglages, filtre des thèmes, passage de Classic à Pills et Lines, et l'onglet Settings",
+      ],
       windows: [
         "Session agy",
         "agy-powerline sous la zone de saisie d'agy dans Windows Terminal : une courte conversation au-dessus, la barre Pills sur trois lignes en dessous",
       ],
       "pills-dark": [
         "Pills",
-        "Disposition Pills d'agy-powerline avec le thème dark-aurora : modèle, contexte, projet et git ; quotas Gemini 5 h et 7 j avec repères de rythme et remises à zéro ; quotas hebdomadaires Anthropic (Claude/Sonnet) et Argon",
+        "Disposition Pills d'agy-powerline avec le thème dark-aurora : modèle, contexte, cache, jetons sur 30 jours, heure, RAM et OS ; quota Gemini sur 5h avec repère de rythme et réinitialisation, quota Anthropic (Claude/Sonnet) sur 5h, projet et Git ; quota Gemini sur 7j et réinitialisation, quotas hebdomadaires Anthropic et Argon",
       ],
       "lines-light": [
         "Lines",
@@ -483,15 +491,19 @@ const HOME_TEXT = {
     ],
     shotsEyebrow: "Capturas reales",
     shotsTitle: "En un terminal real",
-    shotsLead: "Tomadas en sesiones de agy, no son maquetas.",
+    shotsLead: "Tomadas en sesiones de agy y en el editor, no son maquetas.",
     shots: {
+      editor: [
+        "Editor",
+        "El editor de agy-powerline en una terminal: añade el reinicio de Argon, previsualiza ajustes predefinidos, filtra temas, cambia entre Classic, Pills y Lines, y muestra la pestaña Settings",
+      ],
       windows: [
         "Sesión de agy",
         "agy-powerline bajo el cuadro de texto de agy en Windows Terminal: una conversación corta arriba, la barra Pills de tres filas abajo",
       ],
       "pills-dark": [
         "Pills",
-        "Diseño Pills de agy-powerline con el tema dark-aurora: modelo, contexto, proyecto y git; cuotas de Gemini de 5 h y 7 d con marcadores de ritmo y reinicios; cuotas semanales de Anthropic (Claude/Sonnet) y Argon",
+        "Diseño Pills de agy-powerline con el tema dark-aurora: modelo, contexto, caché, tokens de 30 días, hora, RAM y SO; cuota de Gemini de 5h con marcador de ritmo y reinicio, cuota de Anthropic (Claude/Sonnet) de 5h, proyecto y git; cuota de Gemini de 7d y reinicio, cuotas semanales de Anthropic y Argon",
       ],
       "lines-light": [
         "Lines",
@@ -659,15 +671,19 @@ const HOME_TEXT = {
     ],
     shotsEyebrow: "実際のスクリーンショット",
     shotsTitle: "実際のターミナルで",
-    shotsLead: "agy のセッションで撮影したもので、モックアップではありません。",
+    shotsLead: "agy のセッションとエディターで撮影したもので、モックアップではありません。",
     shots: {
+      editor: [
+        "エディター",
+        "ターミナルで動く agy-powerline のエディター：Argon のリセットタイマーを追加し、プリセットをプレビューし、テーマを絞り込み、Classic・Pills・Lines を切り替え、Settings タブを表示",
+      ],
       windows: [
         "agy のセッション",
         "Windows Terminal で agy の入力欄の下に表示された agy-powerline：上に短い会話、下に 3 行の Pills バー",
       ],
       "pills-dark": [
         "Pills",
-        "dark-aurora テーマの agy-powerline Pills レイアウト：モデル、コンテキスト、プロジェクト、git；ペースマーカーとリセットまでの時間付きの Gemini 5h と 7d のクォータ；Anthropic（Claude/Sonnet）と Argon の週間クォータ",
+        "dark-aurora テーマの agy-powerline Pills レイアウト：モデル、コンテキスト、キャッシュヒット率、30 日間のトークン、時刻、RAM、OS；ペースマーカーとリセットまでの時間付きの Gemini 5h クォータ、Anthropic（Claude/Sonnet）の 5h クォータ、プロジェクト、git；Gemini 7d クォータとリセット、Anthropic と Argon の週間クォータ",
       ],
       "lines-light": [
         "Lines",
@@ -823,15 +839,19 @@ const HOME_TEXT = {
     ],
     shotsEyebrow: "真实截图",
     shotsTitle: "运行在真实终端中",
-    shotsLead: "均截自真实 agy 会话，而非设计效果图。",
+    shotsLead: "均截自真实 agy 会话和编辑器，而非设计效果图。",
     shots: {
+      editor: [
+        "编辑器",
+        "终端中的 agy-powerline 编辑器：添加 Argon 重置计时器、预览预设、筛选主题、在 Classic、Pills 和 Lines 之间切换，以及 Settings 选项卡",
+      ],
       windows: [
         "agy 会话",
         "Windows Terminal 中位于 agy 输入框下方的 agy-powerline：上方是一段简短对话，下方是三行 Pills 状态栏",
       ],
       "pills-dark": [
         "Pills",
-        "搭配 dark-aurora 主题的 agy-powerline Pills 布局：模型、上下文、项目与 Git；带节奏标记与重置倒计时的 Gemini 5h 和 7d 配额；Anthropic（Claude/Sonnet）与 Argon 每周配额",
+        "agy-powerline 的 Pills 布局，dark-aurora 主题：模型、上下文、缓存命中率、30 天 token、时钟、内存和操作系统；Gemini 5h 配额（带节奏标记和重置时间）、Anthropic（Claude/Sonnet）5h 配额、项目和 git；Gemini 7d 配额和重置时间、Anthropic 和 Argon 每周配额",
       ],
       "lines-light": ["Lines", "浅色终端上搭配 light-paper 主题的 agy-powerline Lines 布局"],
       "classic-dark": [
@@ -989,15 +1009,19 @@ const HOME_TEXT = {
     ],
     shotsEyebrow: "실제 화면",
     shotsTitle: "실제 터미널에서 동작하는 모습",
-    shotsLead: "디자인 시안이 아닌 실제 agy 세션에서 촬영한 화면입니다.",
+    shotsLead: "디자인 시안이 아닌 실제 agy 세션과 에디터에서 촬영한 화면입니다.",
     shots: {
+      editor: [
+        "에디터",
+        "터미널에서 실행되는 agy-powerline 에디터: Argon 리셋 타이머 추가, 프리셋 미리보기, 테마 필터, Classic·Pills·Lines 전환, Settings 탭",
+      ],
       windows: [
         "agy 세션",
         "Windows Terminal의 agy 입력창 아래 agy-powerline: 위에는 짧은 대화, 아래에는 3줄 Pills 상태바",
       ],
       "pills-dark": [
         "Pills",
-        "dark-aurora 테마의 agy-powerline Pills 레이아웃: 모델, 컨텍스트, 프로젝트, Git; 속도 마커와 리셋 카운트다운이 있는 Gemini 5시간 및 7일 할당량; Anthropic(Claude/Sonnet) 및 Argon 주간 할당량",
+        "dark-aurora 테마의 agy-powerline Pills 레이아웃: 모델, 컨텍스트, 캐시 적중률, 30일 토큰, 시계, RAM, OS; 페이스 마커와 리셋 시간이 있는 Gemini 5시간 할당량, Anthropic(Claude/Sonnet) 5시간 할당량, 프로젝트, git; Gemini 7일 할당량과 리셋 시간, Anthropic 및 Argon 주간 할당량",
       ],
       "lines-light": ["Lines", "밝은 터미널 위의 light-paper 테마 agy-powerline Lines 레이아웃"],
       "classic-dark": [
@@ -1170,15 +1194,19 @@ const HOME_TEXT = {
     ],
     shotsEyebrow: "Echte Screenshots",
     shotsTitle: "In einem echten Terminal",
-    shotsLead: "In echten agy-Sitzungen aufgenommen, keine Mock-ups.",
+    shotsLead: "In echten agy-Sitzungen und im Editor aufgenommen, keine Mock-ups.",
     shots: {
+      editor: [
+        "Editor",
+        "Der agy-powerline-Editor im Terminal: Argons Reset-Timer hinzufügen, Presets ansehen, Themes filtern, zwischen Classic, Pills und Lines wechseln und der Settings-Tab",
+      ],
       windows: [
         "agy-Sitzung",
         "agy-powerline unter dem Eingabefeld von agy in Windows Terminal: oben ein kurzes Gespräch, darunter die dreizeilige Pills-Leiste",
       ],
       "pills-dark": [
         "Pills",
-        "agy-powerline Pills-Layout mit dem Theme dark-aurora: Modell, Kontext, Projekt und Git; Gemini-5h- und -7T-Kontingente mit Tempomarkierungen und Resets; wöchentliche Anthropic- (Claude/Sonnet) und Argon-Kontingente",
+        "agy-powerline Pills-Layout mit dem Theme dark-aurora: Modell, Kontext, Cache-Trefferquote, Tokens der letzten 30 Tage, Uhrzeit, RAM und Betriebssystem; Gemini-5h-Kontingent mit Tempomarkierung und Reset, Anthropic-5h-Kontingent (Claude/Sonnet), Projekt und Git; Gemini-7T-Kontingent mit Reset, wöchentliche Anthropic- und Argon-Kontingente",
       ],
       "lines-light": [
         "Lines",

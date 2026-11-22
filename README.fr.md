@@ -116,7 +116,7 @@ Prévisualisez tous les thèmes dans la [galerie de thèmes](https://agy-powerli
 **Pills** (par défaut) : capsules de style powerline. Choisissez des formes arrondies, anguleuses, inclinées ou plates, et ajoutez éventuellement une ligne vide entre les lignes de la barre.
 
 <p align="center">
-  <img src="assets/screenshots/pills-dark.png" alt="Disposition Pills d’agy-powerline avec le thème dark-aurora : modèle, contexte, projet et Git ; quotas Gemini sur 5h et 7j avec repères de rythme et réinitialisations ; quotas hebdomadaires Anthropic (Claude/Sonnet) et Argon" width="850">
+  <img src="assets/screenshots/pills-dark.png" alt="Disposition Pills d’agy-powerline avec le thème dark-aurora : modèle, contexte, cache, jetons sur 30 jours, heure, RAM et OS ; quota Gemini sur 5h avec repère de rythme et réinitialisation, quota Anthropic (Claude/Sonnet) sur 5h, projet et Git ; quota Gemini sur 7j et réinitialisation, quotas hebdomadaires Anthropic et Argon" width="850">
 </p>
 
 <details>

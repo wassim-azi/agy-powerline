@@ -49,7 +49,8 @@ agy-powerline 2.0 makes the bar yours in one command. `npx agy-powerline` instal
 - `compactionLimit` on context widgets: measure context against the size where it gets compacted, such as 256K (#219)
 - `showDisabled` on `thirdPartyFiveHour`: keep the 3P 5h quota visible when Antigravity marks it disabled (#282)
 - The bar in German, Korean and Simplified Chinese (`de`, `ko`, `zh-CN`), each with a home page on agy-powerline.com, and the README in German (#122, #150, #231)
-- agy-powerline.com/settings/ previews all 15 bar-wide settings, and /configure/ has Widgets, Appearance and Settings tabs (#277)
+- agy-powerline.com/settings/ previews all 16 bar-wide settings, and /configure/ has Widgets, Appearance and Settings tabs (#277)
+- The home page of agy-powerline.com plays a recording of the editor, in an Editor tab beside the terminal screenshots
 - Debug dumps (`AGY_POWERLINE_DEBUG=1`) include the agent, cost, effort, queue, approval and quota amounts (#202), and each subagent's model (Antigravity CLI 1.5.3 and later)
 
 ### Changed

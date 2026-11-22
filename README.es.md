@@ -116,7 +116,7 @@ Previsualízalos todos en la [galería de temas](https://agy-powerline.com/theme
 **Pills** (predeterminado): cápsulas de estilo powerline. Elige formas redondeadas, anguladas, inclinadas o planas, y opcionalmente una línea en blanco entre filas.
 
 <p align="center">
-  <img src="assets/screenshots/pills-dark.png" alt="Diseño Pills de agy-powerline con el tema dark-aurora: modelo, contexto, proyecto y git; cuotas de Gemini de 5h y 7d con marcadores de ritmo y reinicios; cuotas semanales de Anthropic (Claude/Sonnet) y Argon" width="850">
+  <img src="assets/screenshots/pills-dark.png" alt="Diseño Pills de agy-powerline con el tema dark-aurora: modelo, contexto, caché, tokens de 30 días, hora, RAM y SO; cuota de Gemini de 5h con marcador de ritmo y reinicio, cuota de Anthropic (Claude/Sonnet) de 5h, proyecto y git; cuota de Gemini de 7d y reinicio, cuotas semanales de Anthropic y Argon" width="850">
 </p>
 
 <details>

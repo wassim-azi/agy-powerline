@@ -116,7 +116,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 **Pills**（默认）：powerline 风格的胶囊。可选圆角、尖角、斜角或平直形状，也可以在行与行之间留一个空行。
 
 <p align="center">
-  <img src="assets/screenshots/pills-dark.png" alt="agy-powerline 的 Pills 布局，dark-aurora 主题：模型、上下文、项目和 git；Gemini 5h 和 7d 配额，带节奏标记和重置时间；Anthropic（Claude/Sonnet）和 Argon 每周配额" width="850">
+  <img src="assets/screenshots/pills-dark.png" alt="agy-powerline 的 Pills 布局，dark-aurora 主题：模型、上下文、缓存命中率、30 天 token、时钟、内存和操作系统；Gemini 5h 配额（带节奏标记和重置时间）、Anthropic（Claude/Sonnet）5h 配额、项目和 git；Gemini 7d 配额和重置时间、Anthropic 和 Argon 每周配额" width="850">
 </p>
 
 <details>

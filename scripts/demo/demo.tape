@@ -4,7 +4,12 @@
 # agy-powerline demo, recorded with VHS (https://github.com/charmbracelet/vhs)
 # Run from the repo root, in a normal (non-Administrator) terminal:
 #   vhs scripts/demo/demo.tape
-# It writes assets/demo.gif.
+# It writes assets/demo.gif for the READMEs, and the same take as video
+# (assets/site/demo/editor.mp4 and .webm, with its last frame as
+# editor-poster.png) for the home page of agy-powerline.com. The poster loads
+# with the page, so give it a 256-color palette afterwards (530 KB down to 200 KB):
+#   ffmpeg -i assets/site/demo/editor-poster.png -vf "split[a][b];[a]palettegen=max_colors=256:stats_mode=full[p];[b][p]paletteuse=dither=none" -pred mixed -compression_level 9 poster.png
+# then move poster.png over editor-poster.png.
 #
 # One quick take of configure, the editor with its live preview, tab by
 # tab: add Gemini 4 Argon's reset timer from the Add list by typing
@@ -18,6 +23,8 @@
 # way, so the Layout tab couldn't show each layout's own look.
 
 Output assets/demo.gif
+Output assets/site/demo/editor.mp4
+Output assets/site/demo/editor.webm
 
 # About 178 columns by 42 rows, the size of a maximized terminal: wide
 # enough (140 or more) for configure's details panel beside each list.
@@ -104,3 +111,4 @@ Type "i"
 Sleep 800ms
 Down@400ms 4
 Sleep 2.5s
+Screenshot assets/site/demo/editor-poster.png
