@@ -36,15 +36,3 @@ updates:
     groups:
       actions:
         patterns: ["*"]
-
-  # The Codespaces / Dev Container image (.devcontainer/devcontainer.json).
-  - package-ecosystem: "devcontainers"
-    directory: "/"
-    schedule:
-      interval: "monthly"
-    open-pull-requests-limit: 5
-    cooldown:
-      default-days: 7
-    commit-message:
-      prefix: "build"
-      include: "scope"

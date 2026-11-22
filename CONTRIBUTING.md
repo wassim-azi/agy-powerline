@@ -10,10 +10,6 @@ Using an AI coding agent (Antigravity CLI, Claude Code, Codex, Cursor, Copilot, 
 
 ## 🛠️ Quickstart & Development Setup
 
-[![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/wassim-azi/agy-powerline?quickstart=1)
-
-Prefer not to install Node locally? Use the badge above, or clone the repository in VS Code and choose **Dev Containers: Reopen in Container**. The container installs dependencies when it is created; run the checks below once it is ready. `agy` itself isn't installed in the container: check the bar with `node src/index.js render --demo` or a payload from `tests/fixtures/` (`node src/index.js render < tests/fixtures/antigravity-1.3.0.json`).
-
 1. **Clone the repository:**
 
    ```bash
