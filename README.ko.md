@@ -20,7 +20,7 @@
 
 **Google Antigravity CLI를 위한 빠르고 자유롭게 설정 가능한 agy 스테이터스라인.**
 
-사용 중인 모델, Google Gemini(Hydrogen, Neon, Argon, Carbon, Flash) 및 Anthropic(Claude, Sonnet) 할당량, 컨텍스트 창, git 브랜치 등을 한눈에 확인하세요. 인터랙티브 에디터에서 위젯, 테마, 레이아웃을 선택하세요. 명령 한 번으로 설치되며, 의존성은 없습니다.
+사용 중인 모델, 페이스 마커와 소진 예측이 있는 Google Gemini(Hydrogen, Neon, Argon, Carbon, Flash) 및 Anthropic(Claude, Sonnet) 할당량, 컨텍스트 창, 토큰과 비용, 에이전트 상태, git 브랜치 등을 한눈에 확인하세요. 인터랙티브 에디터에서 위젯, 테마, 레이아웃과 바 전체 설정을 선택하세요. 명령 한 번으로 설치되며, 의존성은 없습니다.
 
 </div>
 
@@ -30,14 +30,17 @@
 
 ## 왜 agy-powerline인가요?
 
-| 기능             | 제공 내용                                                                                             | 자세히 보기                                                                                               |
-| ---------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| 할당량 속도 표시 | 할당량 미터의 페이스 마커로 5시간 또는 7일 할당량이 리셋 전까지 유지되는지 확인                       | [할당량 가이드](docs/guides/antigravity-quota.md) · [계산기](https://agy-powerline.com/quota-calculator/) |
-| 다중 모델 할당량 | Google Gemini(Hydrogen, Neon, Argon, Carbon, Flash) 및 Anthropic(Claude, Sonnet) 할당량을 나란히 추적 | [페이로드 레퍼런스](docs/payload.md#quota-buckets)                                                        |
-| 테마 & 레이아웃  | `pills`, `lines`, `classic` 전반에서 WCAG AA 대비를 통과한 22개 테마(다크, 라이트, 색약 친화 포함)    | [테마 갤러리](https://agy-powerline.com/themes/)                                                          |
-| 인터랙티브 설정  | 터미널(`npx agy-powerline`) 또는 브라우저에서 실시간 미리보기 에디터로 설정                           | [웹 설정기](https://agy-powerline.com/configure/)                                                         |
-| 보안 & 개인정보  | 런타임 의존성 0, 네트워크 호출 없음, 텔레메트리 없음, `settings.json` 자동 백업                       | [보안](SECURITY.md)                                                                                       |
-| 크로스 플랫폼    | 내장 진단 도구(`doctor`)와 함께 Windows, macOS, Linux, WSL 지원                                       | [설치](docs/install.md) · [문제 해결](docs/troubleshooting.md)                                            |
+| 기능                 | 제공 내용                                                                                                                                                                                                                                               | 자세히 보기                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| 속도 표시와 예측     | 페이스 마커로 5시간 또는 7일 할당량이 리셋 전까지 유지되는지 확인하고, `forecast`로 현재 속도라면 언제 소진되는지도 표시                                                                                                                                | [할당량 가이드](docs/guides/antigravity-quota.md) · [계산기](https://agy-powerline.com/quota-calculator/) |
+| 다중 모델 할당량     | Google Gemini(Hydrogen, Neon, Argon, Carbon, Flash), Anthropic(Claude, Sonnet), Argon 전용 주간 할당량을 남은 양 또는 사용량으로 나란히 표시                                                                                                            | [페이로드 레퍼런스](docs/payload.md#quota-buckets)                                                        |
+| 컨텍스트, 토큰, 비용 | 컨텍스트 창 사용량(압축 한도 기준도 가능), 세션 토큰과 캐시 적중률, 오늘·7일·30일 토큰 사용량, 예상 비용을 예산 알림과 함께 표시                                                                                                                        | [위젯](docs/configuration.md#widgets)                                                                     |
+| 에이전트 상태        | 에이전트가 하는 일(승인을 기다리는 도구 포함), 서브에이전트와 백그라운드 작업, 대기 중인 메시지, 승인 모드, 샌드박스                                                                                                                                    | [페이로드 레퍼런스](docs/payload.md)                                                                      |
+| 링크가 있는 git      | 브랜치, 변경 사항, ahead/behind, worktree, stash를 폴더·브랜치·커밋 페이지로 가는 클릭 가능한 링크, fish 스타일로 줄인 경로와 함께 표시                                                                                                                 | [위젯 옵션](docs/configuration.md#widget-options)                                                         |
+| 테마 & 레이아웃      | `pills`, `lines`, `classic` 전반에서 WCAG AA 대비를 통과한 22개 테마(다크, 라이트, 색약 친화 포함), 그라데이션과 9가지 미터 스타일                                                                                                                      | [테마 갤러리](https://agy-powerline.com/themes/)                                                          |
+| 에디터 & 설정        | `npx agy-powerline`은 샘플 시나리오와 터미널 너비로 시험해 볼 수 있는 실시간 미리보기 에디터를 열고, 바 전체에 적용되는 16가지 설정(할당량 남은 양/사용량, 리셋 형식, 정렬, 넘침 처리, 최대 너비 등)을 제공합니다. 브라우저에서도 똑같이 쓸 수 있습니다 | [설정](https://agy-powerline.com/settings/) · [웹 설정기](https://agy-powerline.com/configure/)           |
+| 보안 & 개인정보      | 런타임 의존성 0, 네트워크 호출 없음, 텔레메트리 없음, `settings.json` 자동 백업                                                                                                                                                                         | [보안](SECURITY.md)                                                                                       |
+| 크로스 플랫폼        | 내장 진단 도구(`doctor`)와 함께 Windows, macOS, Linux, WSL 지원                                                                                                                                                                                         | [설치](docs/install.md) · [문제 해결](docs/troubleshooting.md)                                            |
 
 ## 설치
 

@@ -20,7 +20,7 @@
 
 **为 Google Antigravity CLI（`agy`）打造的快速、可配置的状态栏。**
 
-一眼看到当前模型、Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）和 Anthropic（Claude、Sonnet）配额、上下文窗口、git 分支等信息。在交互式编辑器中挑选组件、主题和布局。一条命令即可安装，零依赖。
+一眼看到当前模型、带节奏标记和耗尽预测的 Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）和 Anthropic（Claude、Sonnet）配额、上下文窗口、token 与花费、智能体状态、git 分支等信息。在交互式编辑器中挑选组件、主题、布局和整条状态栏的设置。一条命令即可安装，零依赖。
 
 </div>
 
@@ -30,14 +30,17 @@
 
 ## 为什么选择 agy-powerline？
 
-| 特性         | 你能获得什么                                                                                       | 了解更多                                                                                             |
-| ------------ | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| 配额节奏标记 | 配额进度条上的节奏标记让你一眼看出 5h 或 7d 配额能否撑到重置                                       | [配额指南](docs/guides/antigravity-quota.md) · [计算器](https://agy-powerline.com/quota-calculator/) |
-| 多模型方配额 | 并排追踪 Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）以及 Anthropic（Claude、Sonnet）配额 | [Payload 参考](docs/payload.md#quota-buckets)                                                        |
-| 主题与布局   | 涵盖 `pills`、`lines` 和 `classic` 三种布局的 22 款 WCAG AA 主题（含深色、浅色及色盲友好配色）     | [主题画廊](https://agy-powerline.com/themes/)                                                        |
-| 交互式配置器 | 在终端（`npx agy-powerline`）或浏览器中使用带实时预览的编辑器定制                                  | [网页配置器](https://agy-powerline.com/configure/)                                                   |
-| 安全与隐私   | 零运行时依赖、无网络请求、无遥测，自动备份 `settings.json`                                         | [安全说明](SECURITY.md)                                                                              |
-| 跨平台支持   | 支持 Windows、macOS、Linux 和 WSL，内置诊断工具（`doctor`）                                        | [安装说明](docs/install.md) · [故障排查](docs/troubleshooting.md)                                    |
+| 特性                 | 你能获得什么                                                                                                                                                                     | 了解更多                                                                                             |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 配额节奏与预测       | 节奏标记让你一眼看出 5h 或 7d 配额能否撑到重置，`forecast` 还会显示按当前速度何时耗尽                                                                                            | [配额指南](docs/guides/antigravity-quota.md) · [计算器](https://agy-powerline.com/quota-calculator/) |
+| 多模型方配额         | 并排显示 Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）、Anthropic（Claude、Sonnet）以及 Argon 专属的每周配额，可显示剩余量或已用量                                       | [Payload 参考](docs/payload.md#quota-buckets)                                                        |
+| 上下文、token 与花费 | 上下文窗口用量（也可对照压缩上限）、会话 token 与缓存命中率、今天及 7 天或 30 天内的 token 用量，以及预估花费，并支持预算提醒                                                    | [组件](docs/configuration.md#widgets)                                                                |
+| 智能体状态           | 智能体正在做什么（包括等待你批准的工具）、子智能体与后台任务、排队中的消息、审批模式和沙盒                                                                                       | [Payload 参考](docs/payload.md)                                                                      |
+| 带链接的 git         | 分支、改动、领先/落后、worktree 与 stash，可点击链接直达文件夹、分支和提交页面，并支持 fish 风格缩短长路径                                                                       | [组件选项](docs/configuration.md#widget-options)                                                     |
+| 主题与布局           | 涵盖 `pills`、`lines` 和 `classic` 三种布局的 22 款 WCAG AA 主题（含深色、浅色及色盲友好配色），另有渐变和 9 种进度条样式                                                        | [主题画廊](https://agy-powerline.com/themes/)                                                        |
+| 编辑器与设置         | `npx agy-powerline` 打开带实时预览的编辑器，可切换示例场景和终端宽度进行测试，并提供 16 项整条状态栏设置：配额显示剩余或已用、重置格式、对齐、溢出、最大宽度等。浏览器中同样可用 | [设置](https://agy-powerline.com/settings/) · [网页配置器](https://agy-powerline.com/configure/)     |
+| 安全与隐私           | 零运行时依赖、无网络请求、无遥测，自动备份 `settings.json`                                                                                                                       | [安全说明](SECURITY.md)                                                                              |
+| 跨平台支持           | 支持 Windows、macOS、Linux 和 WSL，内置诊断工具（`doctor`）                                                                                                                      | [安装说明](docs/install.md) · [故障排查](docs/troubleshooting.md)                                    |
 
 ## 安装
 
