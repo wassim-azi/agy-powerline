@@ -7,14 +7,15 @@
 # It writes assets/demo.gif.
 #
 # One quick take of configure, the editor with its live preview, tab by
-# tab: add Gemini 4 Argon's weekly quota from the Add list by typing
+# tab: add Gemini 4 Argon's reset timer from the Add list by typing
 # "argon", preview presets, browse and filter themes with "/", step through
-# Pills, Lines, and Classic layouts, inspect Meter style in Settings, and
-# finish on the "?" shortcuts overlay.
+# Classic, Pills, and Lines layouts, and finish on Meter style in Settings.
 #
 # It starts from demo-config.json in a fresh temporary AGY_POWERLINE_HOME, so
 # it never touches your real ~/.agy-powerline or agy settings. That config
-# has 17 widgets and space between rows.
+# has 16 widgets on 3 rows, in the Classic layout and the dark-mono theme,
+# and no bar-wide meterStyle: one would draw every layout's meters the same
+# way, so the Layout tab couldn't show each layout's own look.
 
 Output assets/demo.gif
 
@@ -58,9 +59,13 @@ Sleep 1.5s
 # Each tab opens straight from the one before by its letter; leaving a tab
 # that way applies nothing, so the widgets and theme stay.
 
-# Widgets: the details panel follows the cursor over the first 5 widgets.
-# Add (a), filtered by typing, puts Argon right after the selected one.
-Down@600ms 4
+# Widgets: the details panel follows the cursor over the first 3 rows, then
+# Up wraps around to Argon 7d, the last widget. Add (a), filtered by typing,
+# offers only Argon's reset timer (Argon 7d is one per bar and already in)
+# and puts it right after the selected widget.
+Down@600ms 2
+Sleep 600ms
+Up@500ms 3
 Sleep 600ms
 Type "a"
 Sleep 600ms
@@ -87,19 +92,15 @@ Sleep 900ms
 Escape
 Sleep 500ms
 
-# Layout (l): Pills, then Lines with dot meters and Classic with | dividers
-# and █░┃ block meters.
+# Layout (l): opens on Classic, this config's layout, with | dividers and
+# block meters, then Pills and Lines.
 Type "l"
 Sleep 900ms
 Down@1s 2
 Sleep 1s
 
-# Settings (i): step to Meter style to preview the 9 meter styles.
+# Settings (i): end on Meter style, previewing the 9 meter styles.
 Type "i"
 Sleep 800ms
 Down@400ms 4
-Sleep 1.2s
-
-# Help overlay (?): show keyboard shortcuts cleanly.
-Type "?"
-Sleep 1.5s
+Sleep 2.5s

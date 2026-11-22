@@ -196,7 +196,8 @@ function truncateLine(line, width, ascii = false) {
     return line;
   }
 
-  const ellipsis = ascii ? ELLIPSIS.ascii : ELLIPSIS.unicode;
+  // The ASCII "..." is 3 columns: shorten it so a 1- or 2-column terminal isn't overrun.
+  const ellipsis = (ascii ? ELLIPSIS.ascii : ELLIPSIS.unicode).slice(0, Math.max(0, width));
   const { out, link } = cutToWidth(line, width - ellipsis.length);
   return out + closeLink(link) + RESET + ellipsis;
 }

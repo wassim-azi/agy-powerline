@@ -307,7 +307,14 @@ function personalPayload() {
       current_dir: "/home/someone/projects/client-acme/src",
       project_dir: "/home/someone/projects/client-acme",
     },
-    subagents: [{ name: "research", role: "summarize client-acme contract", status: "running" }],
+    subagents: [
+      {
+        name: "research",
+        role: "summarize client-acme contract",
+        model: "Gemini 4 Hydrogen (High)",
+        status: "running",
+      },
+    ],
     conversation_title: "client-acme contract review",
     mcp_servers: ["corp-internal.host"],
     quota: {
@@ -343,8 +350,9 @@ function testPayloadDump() {
       safe.conversation_title.startsWith("title")
   );
   record(
-    "the dump keeps only each subagent's status",
-    JSON.stringify(safe.subagents) === JSON.stringify([{ status: "running" }])
+    "the dump keeps only each subagent's status and model",
+    JSON.stringify(safe.subagents) ===
+      JSON.stringify([{ status: "running", model: "Gemini 4 Hydrogen (High)" }])
   );
   record(
     "paths keep their relationship and the branch keeps its length",

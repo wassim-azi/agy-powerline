@@ -1,27 +1,114 @@
 {
+  "$schema": "https://agy-powerline.com/schema/v1.json",
+  "theme": "dark-mono",
+  "emojis": true,
+  "ascii": false,
+  "color": "auto",
+  "layout": "classic",
+  "language": "en",
+  "pacing": true,
+  "minimalist": false,
   "rowGap": true,
+  "alignment": "spread",
+  "overflow": "wrap",
+  "log": true,
+  "resetFormat": "countdown",
+  "quotaMode": "remaining",
+  "zeroFiveHourWhenWeeklyEmpty": false,
+  "clock": {
+    "hour12": false,
+    "timeZone": "",
+    "locale": ""
+  },
+  "thresholds": {
+    "quotaWarn": 30,
+    "quotaCrit": 10,
+    "contextWarn": 70,
+    "contextCrit": 90,
+    "blink": false
+  },
+  "powerline": {
+    "enabled": true,
+    "separators": ["E0B4"],
+    "separatorInvert": [false],
+    "startCaps": ["E0B6"],
+    "endCaps": ["E0B4"]
+  },
   "widgets": [
-    { "id": "agentState" },
-    { "id": "tasks" },
-    { "id": "model" },
-    { "id": "plan" },
-    { "id": "sandbox" },
-    { "id": "separator" },
-    { "id": "project" },
-    { "id": "git" },
-    { "id": "lineBreak" },
-    { "id": "context" },
-    { "id": "totalTokens", "split": true },
-    { "id": "cacheHit" },
-    { "id": "separator" },
-    { "id": "artifacts" },
-    { "id": "ram" },
-    { "id": "version" },
-    { "id": "lineBreak" },
-    { "id": "fiveHourBar" },
-    { "id": "fiveHourReset" },
-    { "id": "separator" },
-    { "id": "weeklyBar" },
-    { "id": "weeklyReset" }
-  ]
+    {
+      "id": "model"
+    },
+    {
+      "id": "separator"
+    },
+    {
+      "id": "context",
+      "compactionLimit": 512000
+    },
+    {
+      "id": "cacheHit"
+    },
+    {
+      "id": "separator"
+    },
+    {
+      "id": "tokensMonth"
+    },
+    {
+      "id": "clock"
+    },
+    {
+      "id": "ram"
+    },
+    {
+      "id": "os"
+    },
+    {
+      "id": "lineBreak"
+    },
+    {
+      "id": "fiveHourBar"
+    },
+    {
+      "id": "fiveHourReset"
+    },
+    {
+      "id": "separator"
+    },
+    {
+      "id": "thirdPartyFiveHour",
+      "showDisabled": true
+    },
+    {
+      "id": "separator"
+    },
+    {
+      "id": "project"
+    },
+    {
+      "id": "git"
+    },
+    {
+      "id": "lineBreak"
+    },
+    {
+      "id": "weeklyBar"
+    },
+    {
+      "id": "weeklyReset"
+    },
+    {
+      "id": "separator"
+    },
+    {
+      "id": "thirdPartyWeekly"
+    },
+    {
+      "id": "separator"
+    },
+    {
+      "id": "argonWeekly"
+    }
+  ],
+  "gradient": "mono"
 }

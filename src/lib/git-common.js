@@ -54,6 +54,16 @@ function parseRemoteWebUrl(rawUrl) {
     return "";
   }
 
+  // Azure DevOps SSH remotes (v3/org/project/repo) live on a different host
+  // and path than the repository's web page.
+  const azureSsh = /^(ssh\.dev\.azure\.com|vs-ssh\.visualstudio\.com)$/i.test(host);
+  if (azureSsh && parts.length === 4 && parts[0].toLowerCase() === "v3") {
+    const [, org, project, repo] = parts;
+    return /^ssh\.dev\.azure\.com$/i.test(host)
+      ? `https://dev.azure.com/${org}/${project}/_git/${repo}`
+      : `https://${org}.visualstudio.com/${project}/_git/${repo}`;
+  }
+
   return `${proto}//${host}/${parts.join("/")}`;
 }
 

@@ -23,7 +23,7 @@
 Consulta de un vistazo tu modelo, las cuotas de Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) y Anthropic (Claude, Sonnet), la ventana de contexto, la rama de Git y mucho más. Elige widgets, temas y diseño desde un editor interactivo. Un solo comando para instalar, sin dependencias.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="editor interactivo de agy-powerline: añade la cuota semanal de Argon escribiendo argon, explora preajustes y filtra temas con /, compara los diseños Pills, Lines y Classic con vista previa en vivo, revisa los estilos de medidor en Settings y abre el resumen de atajos" width="850">
+  <img src="assets/demo.gif" alt="editor interactivo de agy-powerline: añade el reinicio de la cuota semanal de Argon escribiendo argon, explora preajustes y filtra temas con /, compara los diseños Pills, Lines y Classic con vista previa en vivo y revisa los estilos de medidor en Settings" width="850">
 </p>
 
 ## ¿Por qué agy-powerline?

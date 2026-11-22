@@ -20,7 +20,7 @@ const {
 } = require("../../src/lib/shared");
 const { droppedSettings } = require("../../src/lib/config-check");
 const { buildConfigSchema } = require("../../scripts/site/config-schema");
-const { visibleWidth } = require("../../src/lib/formatters");
+const { visibleWidth, clipText } = require("../../src/lib/formatters");
 const { DROP_ORDER, fitWidgets, truncateLines } = require("../../src/lib/fit");
 const { WIDGET_CATALOG } = require("../../src/lib/catalog");
 
@@ -204,6 +204,15 @@ function testTruncation() {
         `\x1b]8;;${url}\x1b\\abc\x1b]8;;\x1b\\\x1b[0m…` &&
       truncateLines(`\x1b]8;;${url}\x07ab\x1b]8;;\x07cdef`, 4) ===
         `\x1b]8;;${url}\x07ab\x1b]8;;\x07c\x1b[0m…`
+  );
+
+  const plain = (text) => text.replace(/\x1b\[[0-9;]*m/g, "");
+  record(
+    "ASCII cuts never outgrow a 1- or 2-column terminal or a 1- or 2-column clip",
+    [1, 2, 3].every((w) => visibleWidth(plain(truncateLines("abcdef", w, true))) <= w) &&
+      [1, 2, 3].every((w) => visibleWidth(plain(clipText("abcdef", w, true))) <= w) &&
+      plain(truncateLines("abcdef", 1, true)) === "." &&
+      plain(clipText("abcdef", 2, true)) === ".."
   );
 }
 

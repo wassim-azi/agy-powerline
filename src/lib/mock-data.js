@@ -18,7 +18,7 @@ function sampleData() {
       current_dir: process.cwd(),
       project_dir: process.cwd(),
     },
-    version: "1.2.17",
+    version: "1.5.14",
     context_window: {
       total_input_tokens: 88244,
       total_output_tokens: 61074,

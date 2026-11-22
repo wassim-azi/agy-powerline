@@ -65,6 +65,7 @@ function createState(overrides = {}) {
     exiting: false,
     flashMessage: "",
     searchQuery: "",
+    addAfter: 0,
     filterActive: false,
     showHelp: false,
     glyphSlot: "separator",

@@ -178,9 +178,9 @@ function pick(value, rule, seen) {
     return titlePlaceholder(value) || undefined;
   }
   if (rule === "subagents") {
-    // Only the status: a subagent's name and role describe the user's work.
+    // Status and model only: a subagent's name and role describe the user's work.
     return Array.isArray(value)
-      ? value.slice(0, 50).map((agent) => pick(agent, { status: TEXT }, seen) || {})
+      ? value.slice(0, 50).map((agent) => pick(agent, { status: TEXT, model: TEXT }, seen) || {})
       : undefined;
   }
   if (rule === "quota") {

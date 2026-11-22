@@ -23,7 +23,7 @@
 Behalte Modell, Google-Gemini- (Hydrogen, Neon, Argon, Carbon, Flash) und Anthropic-Kontingente (Claude, Sonnet), Kontextfenster, Git-Branch und vieles mehr auf einen Blick im Auge. Wähle Widgets, Themes und Layout in einem interaktiven Editor. Ein Befehl zur Installation, keine Abhängigkeiten.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="Interaktiver Editor von agy-powerline: Argon-Wochenkontingent per Eingabe von argon hinzufügen, Vorlagen und Themes per / filtern, Pills, Lines und Classic in der Live-Vorschau vergleichen, Meter-Stile unter Settings prüfen und die ?-Tastaturkürzel öffnen" width="850">
+  <img src="assets/demo.gif" alt="Interaktiver Editor von agy-powerline: Reset des Argon-Wochenkontingents per Eingabe von argon hinzufügen, Vorlagen und Themes per / filtern, Pills, Lines und Classic in der Live-Vorschau vergleichen und Meter-Stile unter Settings prüfen" width="850">
 </p>
 
 ## Warum agy-powerline?

@@ -302,8 +302,10 @@ function bucketGroup(key) {
 // The bucket closest to running out for the model in use: the Argon bucket
 // for Argon models, the other gemini-* buckets for Gemini models, 3p-*
 // (third-party) buckets for the others. Argon falls back to the Gemini
-// buckets, where its usage counts when there is no Argon bucket. Without a
-// matching bucket every bucket counts. Disabled buckets never do.
+// buckets, where its usage counts when there is no Argon bucket. Orchestrator
+// executes on Gemini 4 Hydrogen whatever its planner, so it draws on the Gemini
+// buckets, plus the Argon bucket when Argon plans. Without a matching bucket
+// every bucket counts. Disabled buckets never do.
 function tightestQuota(data, lang) {
   const buckets = data?.quota && typeof data.quota === "object" ? data.quota : {};
   const usable = [];
@@ -322,7 +324,9 @@ function tightestQuota(data, lang) {
     .toLowerCase();
   const inGroup = (group) => usable.filter((quota) => bucketGroup(quota.key) === group);
   let pool;
-  if (model.includes("argon")) {
+  if (model.includes("orchestrator")) {
+    pool = [...inGroup("gemini"), ...(model.includes("argon") ? inGroup("argon") : [])];
+  } else if (model.includes("argon")) {
     pool = inGroup("argon");
     pool = pool.length ? pool : inGroup("gemini");
   } else if (/gemini|hydrogen|neon|carbon|flash/.test(model)) {

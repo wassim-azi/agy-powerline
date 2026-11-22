@@ -1,0 +1,66 @@
+{
+  "model": {
+    "id": "Gemini 4 Hydrogen (High)",
+    "display_name": "Gemini 4 Hydrogen (High)",
+    "effort": "high"
+  },
+  "version": "1.5.14",
+  "product": "antigravity",
+  "agent_state": "idle",
+  "plan_tier": "Google AI Pro",
+  "cwd": "/home/user/project",
+  "workspace": {
+    "current_dir": "/home/user/project",
+    "project_dir": "/home/user/project"
+  },
+  "context_window": {
+    "total_input_tokens": 17625,
+    "total_output_tokens": 126,
+    "context_window_size": 1048576,
+    "used_percentage": 1.6808509826660156,
+    "remaining_percentage": 98.31914901733398,
+    "current_usage": {
+      "input_tokens": 12603,
+      "output_tokens": 126,
+      "cache_creation_input_tokens": 0,
+      "cache_read_input_tokens": 0
+    }
+  },
+  "exceeds_200k_tokens": false,
+  "quota": {
+    "3p-5h": {
+      "remaining_fraction": 1,
+      "reset_time": "1970-01-01T00:00:00.000Z",
+      "reset_in_seconds": 0,
+      "disabled": true
+    },
+    "3p-weekly": {
+      "remaining_fraction": 0,
+      "reset_time": "2026-11-28T12:30:20.000Z",
+      "reset_in_seconds": 508371
+    },
+    "gemini-5h": {
+      "remaining_fraction": 0.7504738,
+      "reset_time": "2026-11-22T16:27:31.000Z",
+      "reset_in_seconds": 4202
+    },
+    "gemini-argon-wtu-weekly": {
+      "remaining_fraction": 0.0018366667,
+      "reset_time": "2026-11-28T12:30:27.000Z",
+      "reset_in_seconds": 508378
+    },
+    "gemini-weekly": {
+      "remaining_fraction": 0.5164398,
+      "reset_time": "2026-11-28T12:30:11.000Z",
+      "reset_in_seconds": 508362
+    }
+  },
+  "vcs": {
+    "type": "git"
+  },
+  "sandbox": {
+    "enabled": false
+  },
+  "cycle_mode": "auto",
+  "terminal_width": 129
+}

@@ -23,7 +23,7 @@
 一眼看到当前模型、Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）和 Anthropic（Claude、Sonnet）配额、上下文窗口、git 分支等信息。在交互式编辑器中挑选组件、主题和布局。一条命令即可安装，零依赖。
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline 交互式编辑器：输入 argon 添加 Argon 每周配额，预览预设并用 / 筛选主题，实时对比 Pills、Lines 与 Classic 布局，在 Settings 中查看进度条样式，并打开 ? 快捷键面板" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline 交互式编辑器：输入 argon 添加 Argon 每周配额的重置时间，预览预设并用 / 筛选主题，实时对比 Pills、Lines 与 Classic 布局，并在 Settings 中查看进度条样式" width="850">
 </p>
 
 ## 为什么选择 agy-powerline？

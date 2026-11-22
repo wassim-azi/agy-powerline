@@ -573,8 +573,12 @@ const WIDGET_DEFINITIONS = [
       if (!text) {
         return null;
       }
-      // An approval mode like accept-edits changes what the agent may do alone.
-      const approval = ctx.session.approvalMode && ctx.session.approvalMode !== "default";
+      // A mode other than agy's default (Auto since agy 1.5.7) changes what the
+      // agent may do alone, so it stands out; Auto itself is the usual state.
+      const approval =
+        ctx.session.approvalMode &&
+        ctx.session.approvalMode !== "default" &&
+        ctx.session.approvalMode !== "auto";
       return ctx.text(text, {
         pillColor: approval ? "caution" : "meta",
         linesColor: approval ? "caution" : "text",

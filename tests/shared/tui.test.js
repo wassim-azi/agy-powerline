@@ -17,6 +17,8 @@ const {
 } = require("../../src/lib/shared");
 const { GRADIENT_ORDER } = require("../../src/lib/themes");
 const { SETTINGS_ROWS } = require("../../src/cli/tui/settings-screen");
+const { createState } = require("../../src/cli/tui/state");
+const { openAdd, onAdd } = require("../../src/cli/tui/widgets-screen");
 const { visibleWidth } = require("../../src/lib/formatters");
 const { WIDGET_CATALOG } = require("../../src/lib/catalog");
 
@@ -50,6 +52,7 @@ async function run() {
   testDepthIsRestored();
   testTabKeys();
   await testSettingsInteractions();
+  await testAddPosition();
   await testPreviewControls();
   await testModernUiPolish();
 }
@@ -723,6 +726,41 @@ async function runConfigureKeys(initialConfig, keys) {
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
   }
+}
+
+// Add (a) puts the new widget after the selected one, wherever the Add list's
+// own cursor was, and Esc leaves the selection where it was.
+async function testAddPosition() {
+  const DOWN = "\x1b[B";
+  const widgets = [{ id: "model" }, { id: "plan" }, { id: "sandbox" }, { id: "project" }];
+  const ids = (config) => config.widgets.map((w) => w.id).join(",");
+
+  const added = await runConfigureKeys({ widgets }, [DOWN, DOWN, "a", ..."argon", "\r"]);
+  record(
+    "Add inserts the picked widget after the selected one, not after the Add list's row",
+    ids(added.saved).startsWith("model,plan,sandbox,argonWeekly,project")
+  );
+
+  const listMoved = await runConfigureKeys({ widgets }, [DOWN, "a", DOWN, DOWN, DOWN, "\r"]);
+  const listIds = ids(listMoved.saved).split(",");
+  record(
+    "moving down the Add list doesn't change where the widget goes",
+    listIds.length === 5 &&
+      listIds.slice(0, 2).join(",") === "model,plan" &&
+      listIds[3] === "sandbox"
+  );
+
+  // A lone ESC through stdin waits on readline's escape timeout, so drive the
+  // screen directly.
+  const state = createState({ config: { widgets }, cursor: 3 });
+  openAdd(state);
+  onAdd(state, { name: "down" });
+  onAdd(state, { name: "down" });
+  onAdd(state, { name: "escape" });
+  record(
+    "Esc from Add puts the cursor back on the selected widget",
+    state.screen === "main" && state.cursor === 3
+  );
 }
 
 async function testSettingsInteractions() {

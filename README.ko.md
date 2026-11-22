@@ -23,7 +23,7 @@
 사용 중인 모델, Google Gemini(Hydrogen, Neon, Argon, Carbon, Flash) 및 Anthropic(Claude, Sonnet) 할당량, 컨텍스트 창, git 브랜치 등을 한눈에 확인하세요. 인터랙티브 에디터에서 위젯, 테마, 레이아웃을 선택하세요. 명령 한 번으로 설치되며, 의존성은 없습니다.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline 인터랙티브 에디터: argon을 입력해 Argon의 주간 할당량을 추가하고, 프리셋과 / 테마 필터링, Pills·Lines·Classic 레이아웃 실시간 미리보기, Settings의 미터 스타일, ? 단축키 오버레이를 확인하는 모습" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline 인터랙티브 에디터: argon을 입력해 Argon 주간 할당량의 리셋을 추가하고, 프리셋과 / 테마 필터링, Pills·Lines·Classic 레이아웃 실시간 미리보기, Settings의 미터 스타일을 확인하는 모습" width="850">
 </p>
 
 ## 왜 agy-powerline인가요?

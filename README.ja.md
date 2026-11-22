@@ -23,7 +23,7 @@
 使用中のモデル、Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）および Anthropic（Claude、Sonnet）のクォータ、コンテキストウィンドウ、git ブランチなどがひと目でわかります。ウィジェット、テーマ、レイアウトは対話式のエディターで選べます。インストールはコマンドひとつ、依存パッケージはありません。
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline の対話式エディター：argon と入力して Argon の週間クォータを追加し、プリセットや / でのテーマ検索、Pills・Lines・Classic レイアウトのライブプレビュー、Settings のメータースタイル、? のショートカット一覧を表示" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline の対話式エディター：argon と入力して Argon の週間クォータのリセットを追加し、プリセットや / でのテーマ検索、Pills・Lines・Classic レイアウトのライブプレビュー、Settings のメータースタイルを表示" width="850">
 </p>
 
 ## なぜ agy-powerline？

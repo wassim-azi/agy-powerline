@@ -730,6 +730,17 @@ function testRemoteUrlAndDetached(root) {
       parseRemoteWebUrl("ext::sh -c evil") === "" &&
       parseRemoteWebUrl("https://evil.com/a/b\x07c") === ""
   );
+  record(
+    "parseRemoteWebUrl turns Azure DevOps SSH remotes into the repository's web address",
+    parseRemoteWebUrl("git@ssh.dev.azure.com:v3/org/proj/repo") ===
+      "https://dev.azure.com/org/proj/_git/repo" &&
+      parseRemoteWebUrl("ssh://git@ssh.dev.azure.com/v3/org/proj/repo") ===
+        "https://dev.azure.com/org/proj/_git/repo" &&
+      parseRemoteWebUrl("org@vs-ssh.visualstudio.com:v3/org/proj/repo") ===
+        "https://org.visualstudio.com/proj/_git/repo" &&
+      parseRemoteWebUrl("https://org@dev.azure.com/org/proj/_git/repo") ===
+        "https://dev.azure.com/org/proj/_git/repo"
+  );
 
   const repo = path.join(root, "detached-remote");
   const commit = "0123456789abcdef0123456789abcdef01234567";
