@@ -8,8 +8,9 @@
 #
 # One quick take of configure, the editor with its live preview, tab by
 # tab: add Gemini 4 Argon's weekly quota from the Add list by typing
-# "argon", then preview a few presets, a few themes, the Lines and Classic
-# layouts, and end on the Powerline tab.
+# "argon", preview presets, browse and filter themes with "/", step through
+# Pills, Lines, and Classic layouts, inspect Meter style in Settings, and
+# finish on the "?" shortcuts overlay.
 #
 # It starts from demo-config.json in a fresh temporary AGY_POWERLINE_HOME, so
 # it never touches your real ~/.agy-powerline or agy settings. That config
@@ -68,25 +69,37 @@ Sleep 1s
 Enter
 Sleep 1.5s
 
-# Presets (o): the preview and the details panel follow the first 4.
+# Presets (o): the preview and the details panel follow the first 3.
 Type "o"
-Sleep 1s
-Down@900ms 3
-Sleep 1s
+Sleep 900ms
+Down@800ms 2
+Sleep 900ms
 
-# Themes (t): the preview recolors over the first 5.
+# Themes (t): browse themes, then filter with "/".
 Type "t"
-Sleep 1s
-Down@700ms 4
-Sleep 1s
+Sleep 900ms
+Down@600ms 2
+Sleep 500ms
+Type "/"
+Sleep 300ms
+Type@100ms "tokyo"
+Sleep 900ms
+Escape
+Sleep 500ms
 
 # Layout (l): Pills, then Lines with dot meters and Classic with | dividers
-# and █░│ block meters.
+# and █░┃ block meters.
 Type "l"
+Sleep 900ms
+Down@1s 2
 Sleep 1s
-Down@1.2s 2
+
+# Settings (i): step to Meter style to preview the 9 meter styles.
+Type "i"
+Sleep 800ms
+Down@400ms 4
 Sleep 1.2s
 
-# Powerline (p): shown for a moment.
-Type "p"
+# Help overlay (?): show keyboard shortcuts cleanly.
+Type "?"
 Sleep 1.5s

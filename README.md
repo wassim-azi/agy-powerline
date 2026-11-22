@@ -21,7 +21,7 @@
 See your model, Gemini 5h/7d, Claude/GPT and Argon quotas, context window, git branch and more at a glance. Pick widgets, themes and layout from an interactive editor. One command to install, no dependencies.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline interactive editor: add Argon's weekly quota by typing argon, then browse the presets, themes and layouts with a live preview of the bar, and open the Powerline tab" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline interactive editor: add Argon's weekly quota by typing argon, preview presets, browse and filter themes with /, compare Pills, Lines and Classic layouts with a live preview of the bar, inspect meter styles in Settings, and view the keyboard shortcuts overlay" width="850">
 </p>
 
 ## Why agy-powerline?
