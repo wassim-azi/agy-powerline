@@ -193,6 +193,11 @@ function buildConfigSchema() {
           crit: percent("Danger level for this widget."),
           blink: { enum: [true, false, "warn"] },
           showBelow: percent("Quota widgets: hide while more than this % is left."),
+          showDisabled: {
+            type: "boolean",
+            description:
+              "thirdPartyFiveHour: keep showing the 3P 5h bar when Antigravity marks quota.3p-5h disabled.",
+          },
           showAbove: percent("Context widgets: hide while less than this % is used."),
           compactionLimit: {
             type: "number",

@@ -39,7 +39,7 @@ const { t } = require("./i18n");
 function renderQuotaMeter(sessionKey, colorSlot, { hideWhenDisabled = false } = {}) {
   return (ctx) => {
     const quota = ctx.session[sessionKey];
-    if (!quota || (hideWhenDisabled && quota.disabled)) {
+    if (!quota || (hideWhenDisabled && quota.disabled && ctx.widget?.showDisabled !== true)) {
       return null;
     }
     return ctx.quotaMeter(quota, colorSlot);
@@ -195,6 +195,7 @@ const WIDGET_DEFINITIONS = [
     quotaKey: "thirdPartyFiveHour",
     meter: true,
     paced: true,
+    options: ["showDisabled"],
     render: renderQuotaMeter("thirdPartyFiveHour", "thirdParty", { hideWhenDisabled: true }),
   },
   {

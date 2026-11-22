@@ -1047,10 +1047,15 @@ function testTightestQuota() {
   for (const layout of LAYOUT_ORDER) {
     const sample3p5h = render(sampleData(), [{ id: "thirdPartyFiveHour" }], { layout });
     const disabled3p5h = render(real, [{ id: "thirdPartyFiveHour" }], { layout });
+    const forced3p5h = render(real, [{ id: "thirdPartyFiveHour", showDisabled: true }], {
+      layout,
+    });
     record(
-      `${layout} thirdPartyFiveHour renders with sampleData() and hides when disabled`,
-      /3P 5h: .*100\.0% rem/.test(sample3p5h) && disabled3p5h.trim() === "",
-      `${sample3p5h} / ${disabled3p5h}`
+      `${layout} thirdPartyFiveHour renders with sampleData(), hides when disabled, and renders with showDisabled: true`,
+      /3P 5h: .*100\.0% rem/.test(sample3p5h) &&
+        disabled3p5h.trim() === "" &&
+        /3P 5h: .*100\.0% rem/.test(forced3p5h),
+      `${sample3p5h} / ${disabled3p5h} / ${forced3p5h}`
     );
   }
 
