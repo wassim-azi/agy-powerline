@@ -70,7 +70,7 @@ function removeItem(state) {
   persist(state);
 }
 
-function addItem(state, id) {
+function addItem(state, id, after = state.cursor) {
   let widget = { id };
   if (id === "customText") {
     widget = { id, text: "Custom" };
@@ -85,8 +85,8 @@ function addItem(state, id) {
     state.config.widgets.push(widget);
     state.cursor = 0;
   } else {
-    state.config.widgets.splice(state.cursor + 1, 0, widget);
-    state.cursor += 1;
+    state.config.widgets.splice(after + 1, 0, widget);
+    state.cursor = after + 1;
   }
 
   persist(state);
@@ -416,6 +416,9 @@ function onEdit(state, key) {
 }
 
 function openAdd(state) {
+  // The Add list reuses state.cursor; remember the selected widget so the new
+  // one goes in after it and Esc puts the cursor back where it was.
+  state.addAfter = state.cursor;
   state.screen = "add";
   state.searchQuery = "";
   state.cursor = 0;
@@ -543,6 +546,7 @@ function onAdd(state, key) {
       clampCursor(state, filteredAddableWidgets(state).length);
       return;
     }
+    state.cursor = state.addAfter;
     backToMain(state);
     return;
   }
@@ -558,7 +562,7 @@ function onAdd(state, key) {
   }
 
   if (key.name === "return" && items[state.cursor]) {
-    addItem(state, items[state.cursor].id);
+    addItem(state, items[state.cursor].id, state.addAfter);
     backToMain(state);
     return;
   }

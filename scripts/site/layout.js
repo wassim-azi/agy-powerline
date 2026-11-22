@@ -38,11 +38,11 @@ const GA_CONNECT_SRC =
   "https://*.google-analytics.com https://*.analytics.google.com https://*.googletagmanager.com";
 const GA_IMG_SRC = "https://*.google-analytics.com https://*.googletagmanager.com";
 // Everything else loads from the site only. 'self' lets the stylesheet, the
-// font, the icons, the manifest and tools that read robots.txt or llms.txt from
+// font, the icons, the editor recording, the manifest and tools that read robots.txt or llms.txt from
 // inside the page reach this site. finishPage() swaps 'unsafe-inline' in
 // script-src for the hashes of the page's own scripts. Styles stay inline-able:
 // the configurator draws its preview with style attributes in the browser.
-const SITE_CSP = `default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'unsafe-inline' ${GA_SCRIPT_SRC}; img-src 'self' data: ${GA_IMG_SRC}; font-src 'self'; connect-src 'self' ${GA_CONNECT_SRC}; manifest-src 'self'; base-uri 'none'; form-action 'none'`;
+const SITE_CSP = `default-src 'none'; style-src 'self' 'unsafe-inline'; script-src 'unsafe-inline' ${GA_SCRIPT_SRC}; img-src 'self' data: ${GA_IMG_SRC}; font-src 'self'; media-src 'self'; connect-src 'self' ${GA_CONNECT_SRC}; manifest-src 'self'; base-uri 'none'; form-action 'none'`;
 // The styles every page shares (SHARED_CSS), in one file the browser keeps
 // between pages.
 const STYLESHEET_URL = "/site.css";

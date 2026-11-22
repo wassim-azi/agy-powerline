@@ -575,6 +575,10 @@ function buildSite(outDir) {
       copy(path.join("assets", "site", "art", file), path.join("img", file));
     }
   }
+  // The editor recording on the home page, written by scripts/demo/demo.tape.
+  for (const file of fs.readdirSync(path.join(repo, "assets", "site", "demo"))) {
+    copy(path.join("assets", "site", "demo", file), path.join("img", `agy-powerline-${file}`));
+  }
   for (const file of fs.readdirSync(path.join(repo, "assets", "site", "og"))) {
     if (file.endsWith(".jpg")) copy(path.join("assets", "site", "og", file), path.join("og", file));
   }

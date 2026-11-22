@@ -5,71 +5,87 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [2.0.0] - 2026-11-22
+
+agy-powerline 2.0 makes the bar yours in one command. `npx agy-powerline` installs it and opens a redesigned editor, a new Settings tab holds every option that applies to the whole bar, the bar now speaks German, Korean and Simplified Chinese, and new widgets track your monthly tokens, your spend and your environment. Configs from 1.x keep working.
+
+### Highlights
+
+- **One command.** `npx agy-powerline` installs or updates the bar and opens the editor; when you quit, it reminds you to restart agy.
+- **A redesigned editor.** Rows grouped in your widget list, each widget previewed in several states, `?` for every shortcut, `/` to filter themes and presets, mouse support, and a live preview you can switch between scenarios and widths.
+- **Settings for the whole bar.** Quotas as left or used, reset times, max width, row alignment, row overflow, meter style, gradient, warning sensitivity, clock and language: in the editor (`i`), at agy-powerline.com/settings/ and in the browser configurator.
+- **New widgets.** `tokensMonth`, `env`, `cost`, `agent` and `queue`, plus quota forecasts, clickable links and fish-style paths.
+- **Three new languages.** The bar in German, Korean and Simplified Chinese, each with its own home page.
+- **Safer by default.** Git calls refuse risky repositories, timed-out `exec` commands take their child processes with them, and debug dumps mask branch names and titles.
+
+### Upgrading from 1.x
+
+- Run `npx agy-powerline` once to update the installed bar, then restart agy. Your `statusline.config.json` stays as it is.
+- `npx agy-powerline configure` (and `config`) still opens the editor, after a 5-second deprecation notice. Use `npx agy-powerline`; the alias goes away in a future release.
+- The `line`, `geometric` and `bars` meter styles are removed. A config that names one gets its layout's default meter.
+- Scripts are unaffected: `init --yes` installs without questions, piped stdin still renders, and `--help` prints usage.
 
 ### Added
 
-- **Global `zeroFiveHourWhenWeeklyEmpty` setting**: show `0.0% rem` (`100.0% used`) on all 5-hour quota widgets (`fiveHourBar`, `fiveHourPct`, `thirdPartyFiveHour`) whenever the paired 7-day quota reaches `0%`, even when Antigravity marks `quota["3p-5h"].disabled: true` (`false` by default, exposed as **Zero 5h when 7d is 0%** in the TUI Settings tab (`i`), browser configurator, `/settings/`, and JSON schema) (#283)
-- **`showDisabled` option on `thirdPartyFiveHour`**: keep displaying the `3P 5h` quota bar when Antigravity marks `quota["3p-5h"].disabled: true` (`false` / unset by default, exposed as **Show disabled** in widget options and JSON schema)
-- **Website `/settings/` reference & `/configure/` Settings parity**: added a dedicated `/settings/` showcase page with live previews for all 15 global bar-wide options (`language`, `clock.hour12`, `resetFormat`, `gradient`, `meterStyle`, `emojis`, `minimalist`, `pacing`, `thresholds`, `rowGap`, `maxWidth`, `alignment`, `quotaMode`, `overflow`, `ascii`), reorganized the `/configure/` browser configurator into **Widgets** / **Appearance** / **Settings** tabs with full Settings parity and reset support, emitted `index.html.md` alternates across hub/tool pages, updated home/gallery copy, and replaced the hardcoded theme count in `THEMES_PAGE.title` (#277)
-- **Studio canvas & quick interactions in the interactive editor**: active-pane focus borders, `Live preview` right-border scenario/width status (`Scenario · ... (, / .)` & `Width · ... (- / +)`), truecolor dark/light terminal canvas tinting on `Live preview`, row group dividers (`── Row 1 ──`) in `Your widgets`, multi-state/multi-layout mini-previews + quick-actions strip in Widget Details, a global `Meter style` setting in `Settings` (`i`), a `?` shortcut overlay, `/` type-to-filter in `Themes` and `Presets`, `Space` cycling in `Edit`, DEC synchronized redraws, and SGR mouse click/wheel support (#275)
-- **Live preview controls in the interactive editor**: cycle preview scenarios (`,`, `.` between `Normal`, `Near limits`, and `Agent & modes`) and simulated bar widths (`-`, `+`/`=` through `60`, `80`, `100`, `120` columns, and full panel width) without modifying saved config (#256)
-- **Opt-in OSC 8 clickable hyperlinks (`"link"`)**: wrap `cwd` and `project` in `file://`, `vscode://file/`, `cursor://file/`, or `zed://file/` links and `git` / `gitSha` in normalized `https://` branch/commit links read directly from `.git/config` (zero spawns, credentials stripped), automatically suppressed in ASCII and no-color modes and stripped in web previews (#255)
-- **Opt-in quota run-out forecast (`"forecast"`)**: added `"forecast"` (`true`, `"countdown"`, or `"time"`) on `quota`, `fiveHourPct`, and `weeklyPct` to estimate when quota will run out at the current window burn rate, auto-hiding when pace lasts until reset, during the first 10 minutes, or on narrow terminals, with interactive editor and schema support (#251)
-- **Zero-spawn `env` widget**: display environment variables (`{ "id": "env", "var": "AWS_PROFILE" }`) in-process without spawning a shell, auto-hiding when unset or matching credential patterns (`TOKEN`, `SECRET`, `KEY`, `PASS`, `PWD`, `AUTH`, etc.), supporting `label`, `icon`, `maxWidth`, `raw`, and interactive editor support (#254)
-- **New `tokensMonth` (30-day token usage) widget**: tracks total tokens used over the last 30 days across all Antigravity conversations using existing `.usage-cache.json` daily buckets, supporting `split: true`, `budget` alerts, all 7 bar languages, and `split`/`budget`/`warn`/`crit`/`blink` options in the interactive editor (#252)
-- **Opt-in fish-style path and branch shortening (`"fish": true`)**: abbreviate parent folders on `cwd` (composing with `depth` and keeping dot-directories like `.gemini` → `.g` and multi-codepoint emoji clusters intact) and slash-separated prefixes on `git` (`feature/auth/oauth-login` → `f/a/oauth-login`), exposed as **Fish style** in the interactive editor (#253)
-- **New Antigravity CLI 1.4.5 widgets**: added opt-in `cost` (`cost.total_usd`, `cost.estimated`), `agent` (`agent.name`), and `queue` (`pending_input_count`) widgets (#202)
-- **Approval & Mercurial status**: surfaced `tool_confirmation_pending` directly on `agentState` and read Mercurial branch names from `.hg/branch` when `vcs.type` is `"hg"` (#202)
-- **Expanded debug dumps**: included `agent`, `cost`, `model.effort`, `pending_input_count`, `tool_confirmation_pending`, and `quota.*.remaining_amount` in `AGY_POWERLINE_DEBUG=1` payload dumps (#202)
-- **Clock format in Settings**: cycle **Clock format** (`auto (locale)`, `24h`, `12h`) and reset with `x` in the `Settings` tab (`i`) of the interactive editor (#208)
-- **Global `resetFormat` default**: added `"resetFormat"` (`"countdown"` default, `"time"`, or `"both"`) as the default format inherited by reset timer widgets (`fiveHourReset`, `weeklyReset`, `argonReset`) while preserving per-widget `"format"` overrides, exposed as **Reset format** in the `Settings` tab (`i`) of the interactive editor (#212)
-- **Quota perspective (`quotaMode`)**: added `"quotaMode"` (`"remaining"` default for `72.0% rem`, or `"used"` for `28.0% used`, localized across all bar languages) across all quota widgets while keeping meter fill, pace marker, and warning thresholds aligned, exposed as **Quota display** in the `Settings` tab (`i`) of the interactive editor (#211)
-- **Bar gradient in Settings**: cycle **Bar gradient** (`off` and built-in presets with live preview, keeping custom hex gradients in the cycle until reset) in the `Settings` tab (`i`) of the interactive editor (#209)
-- **Warning sensitivity in Settings**: cycle **Warning sensitivity** presets (`default`, `early`, `relaxed`) backed by `thresholds`, preserving `custom` hand-edited thresholds and `blink`, in the `Settings` tab (`i`) of the interactive editor (#213)
-- **Global `maxWidth` cap**: added an optional `"maxWidth"` setting (`"full"` / `null` default, or a positive integer) to clamp bar width on ultrawide terminals (`Math.min(terminal_width, maxWidth)`), exposed as presets (`full`, `100`, `120`, `140`, `160`) in **Max bar width** in the `Settings` tab (`i`) of the interactive editor (#210)
-- **Subagent spend, sub-0.01¢ precision, and budget alerts on `cost`**: format spend below `$0.0001` as `<$0.0001` and avoid `$0.0100` rounding between `$0.00995` and `$0.01`, support `"split": true` on `cost` to show `cost.subagent_usd` (`$0.42 · subagents $0.13`), and support `"budget"` (in USD) with `warn` / `crit` / `blink` threshold alerts and interactive editor options (#241)
-- **Row overflow (`overflow`)**: added `"overflow"` (`"fit"` default to shrink labels and drop low-priority widgets, or `"wrap"` to keep every widget and break overflowing ones onto continuation rows), exposed as **Row overflow** in the `Settings` tab (`i`) of the interactive editor (#215)
-- **Row alignment (`alignment`)**: added `"alignment"` (`"left"` default, `"center"` for a compact centered bar, `"spread"` for evenly distributed gaps without manual `separator` items), exposed as **Row alignment** in the `Settings` tab (`i`) of the interactive editor (#214)
-- **Context compaction ceiling (`compactionLimit`)**: added an opt-in per-widget `"compactionLimit"` option on `context`, `contextPct`, and `contextTokens` to scale context percentage, meter, token denominator, `warn`/`crit`/`blink`, and `showAbove` against a smaller soft ceiling (such as `256000` or `512000`) while superseding the fixed `exceeds_200k_tokens` danger override, with presets (`off`, `200.0K`, `256.0K`, `512.0K`) in the interactive editor (#219)
-- **Simplified Chinese (`zh-CN`)**: added bar labels, captions, and units for `"language": "zh-CN"`, plus the localized home page at `agy-powerline.com/zh-cn/` (#122)
-- **Korean (`ko`)**: added bar labels, captions, and units for `"language": "ko"`, plus the localized home page at `agy-powerline.com/ko/` (#150)
-- **German (`de`)**: added `README.de.md`, bar labels, captions, and units for `"language": "de"`, plus the localized home page at `agy-powerline.com/de/` (#231)
+- `npx agy-powerline` installs or refreshes the bar, keeping your config, and opens the editor in one step (#202)
+- The editor's live preview switches scenarios (`,` `.`: Normal, Near limits, Agent & modes) and widths (`-` `+`: 60 to 120 columns or full width) without touching your config (#256)
+- A redesigned editor: the focused pane is outlined, your widgets are grouped by row, each widget's details preview it in several states and layouts, `?` lists every shortcut, `/` filters themes and presets, `Space` cycles values in Edit, and the mouse clicks and scrolls (#275)
+- A Settings tab (`i`) in the editor for every option that applies to the whole bar (#216)
+- `quotaMode`: quotas as what's left (`72.0% rem`) or what's used (`28.0% used`), in every bar language (#211)
+- `resetFormat`: reset timers as a countdown, a time or both; a widget's own `format` still wins (#212)
+- `maxWidth`: a cap on the bar's width for wide terminals (#210)
+- `alignment`: rows aligned left, centered, or spread evenly (#214)
+- `overflow`: `fit` shortens labels and drops the least important widgets; `wrap` keeps every widget and continues on the next line (#215)
+- `meterStyle` for the whole bar, with 9 meter styles to pick from in Settings (#275)
+- Clock format, bar gradient and warning sensitivity (`default`, `early`, `relaxed`) in Settings (#208, #209, #213)
+- `zeroFiveHourWhenWeeklyEmpty`: 5-hour quotas show 0% once their 7-day quota is empty (#283)
+- `tokensMonth` widget: tokens used across all your conversations in the last 30 days, with an optional input/output split and budget alerts (#252)
+- `env` widget: shows an environment variable such as `AWS_PROFILE` without starting a shell, and hides it when unset or when its name looks like a secret (#254)
+- `cost`, `agent` and `queue` widgets for the fields Antigravity CLI 1.4.5 sends (#202); `cost` can show subagent spend and alert on a budget (#241)
+- `agentState` shows when a tool is waiting for your approval, and the `git` widget reads Mercurial branches (#202)
+- `forecast` on quota widgets: when the quota runs out at your current rate, hidden when it lasts until the reset (#251)
+- `link`: clickable `cwd`, `project`, `git` and `gitSha`, opening the folder (file, VS Code, Cursor or Zed) or the branch and commit pages on GitHub, GitLab, Bitbucket, Azure DevOps and similar hosts, in terminals that support links (#255)
+- `fish`: fish-style shortening of `cwd` and `git` (`feature/auth/oauth-login` → `f/a/oauth-login`) (#253)
+- `compactionLimit` on context widgets: measure context against the size where it gets compacted, such as 256K (#219)
+- `showDisabled` on `thirdPartyFiveHour`: keep the 3P 5h quota visible when Antigravity marks it disabled (#282)
+- The bar in German, Korean and Simplified Chinese (`de`, `ko`, `zh-CN`), each with a home page on agy-powerline.com, and the README in German (#122, #150, #231)
+- agy-powerline.com/settings/ previews all 16 bar-wide settings, and /configure/ has Widgets, Appearance and Settings tabs (#277)
+- The home page of agy-powerline.com plays a recording of the editor, in an Editor tab beside the terminal screenshots
+- Debug dumps (`AGY_POWERLINE_DEBUG=1`) include the agent, cost, effort, queue, approval and quota amounts (#202), and each subagent's model (Antigravity CLI 1.5.3 and later)
 
 ### Changed
 
-- **Deprecate `npx agy-powerline configure` in favor of bare `npx agy-powerline`**: updated CLI messages (`init`, `default`, `caps`, `configure`), CHANGELOG, READMEs, docs, guides, skills, and website copy to point users to `npx agy-powerline`; invoking `npx agy-powerline configure` (or `config`) now prints a deprecation warning and waits 5 seconds before opening the TUI prior to removal in future releases
-- **One-step `npx agy-powerline` onboarding**: running bare `npx agy-powerline` in an interactive terminal now installs or refreshes outdated scripts (keeping existing config and render flags) and launches the live-preview interactive editor directly, printing a post-exit summary with a reminder to restart `agy` (`--help` shows usage, piped stdin still renders, and `init --yes` remains unchanged for scripted installs) (#202)
-- **Dedicated `Settings` tab (`i`) in the interactive editor**: moved global bar toggles (`Bar language`, `Emojis`, `Minimalist mode`, `Quota pace marker`, `Alert blink`, `Space between rows`, `ASCII mode`) out of the live preview's bottom chip strip into `Settings`, keeping `Live preview` focused on the rendered bar (#216)
-- **Clean interactive editor lifecycle**: the interactive editor now restores terminal state, detaches event listeners, and resolves cleanly instead of calling `process.exit(0)` mid-caller (#202)
-- **Aligned onboarding docs & visuals**: updated the demo GIF, OG share cards, and guides for the unified `npx agy-powerline` workflow (#205)
-- **Updated sample model to Gemini 4 Hydrogen**: replaced `Gemini 3.8 Flash (High)` (`3.8 Flash·High`) with `Gemini 4 Hydrogen (High)` (`4 Hydrogen·High`) across demo data, live previews, docs, OG share cards, and the demo GIF (#220)
-
-### Security
-
-- **Width-preserving scrubbing in debug payload dumps**: scrub `vcs.branch` and `conversation_title` with `maskPreservingWidth()` in `AGY_POWERLINE_DEBUG=1` and `--dump-payload` captures so branch and title placeholders preserve exact terminal column widths (including multi-width CJK and emoji clusters) and separator structure without leaking private text (#258)
-- **Git subprocess hardening**: detect same-line risky config sections and partial-clone settings, skip unsafe repositories before both ahead/behind and working-tree Git calls, disable Git network protocols and lazy fetching, and prevent Windows from resolving a planted Git executable from the workspace (#249)
-
-### Fixed
-
-- **Unprefixed Flash model pool matching in `quota`**: recognize `flash` alongside `argon`, `hydrogen`, `neon`, and `carbon` in `tightestQuota()` so unprefixed Flash models route to the `gemini-*` quota pool instead of `3p-*`
-- **TUI & meter polish**: resolved distinct host OS icons (`os` vs `ram`) in the widget list, unified tab keycap hints across active/inactive tabs, aligned footer hints across `Settings` and sub-tabs, grouped `Settings` panel notes, replaced the stale `docs/configuration.md` option note and `r` pace-marker wording in `Edit`, unified `Classic` meters on `┃` instead of `│` dividers, and fixed `dark-mono` healthy `context` widgets using gray (`colors.context`) in `Lines` / `Classic` (#275)
-- **Grapheme-safe width, truncation, Backspace, and OSC 8 cleanup**: measure and truncate ZWJ emoji (`👩‍💻`), flags (`🇫🇷`), skin-tone modifiers (`👍🏽`), VS16 emoji (`❤️`), keycaps (`1️⃣`), Hangul jamo, and combining marks as whole grapheme clusters across `visibleWidth()`, `clipText()`, `truncateLines()`, `sanitizeExecOutput()`, and interactive editor text editing (Backspace and `maxLength`), and close open OSC 8 hyperlinks before appending the ellipsis on truncation (#247)
-- **Escape stripping and zero-width characters**: `stripControl()` now removes escapes with intermediate bytes (`ESC ( B` from `tput sgr0`, `ESC # 8`), DCS / SOS / PM / APC control strings with their body, and 8-bit C1 control strings and CSI, so `exec` output and payload text no longer leave `(B` or `0;1|x` in the bar; invisible format characters (zero-width space, bidi marks, word joiner, BOM, tag and ideographic variation selectors) now count as zero columns when fitting the bar (#248)
-- **Home path boundary and token rollover rounding**: require a path-separator boundary in `homePath()` so sibling directories like `/home/alex` do not match `/home/al`, and roll `formatTokens()` over to `"1.0M"` at `999,950` instead of formatting `999,950..999,999` as `"1000.0K"` (#246)
-- **Session-scoped `exec` payload cache keys**: include the sanitized session payload in `widgetCacheKey()` when `"payload": true` so concurrent sessions or model switches in the same working directory do not serve stale cached output (#250)
-- **Context percentage fallback**: ignore null, boolean, and empty or whitespace-only percentage values so valid remaining percentages or current token usage are used instead (#245)
-- **Gemini & Argon model pool matching in `quota`**: inspect both `model.display_name` and `model.id` and recognize unprefixed Gemini codenames (`argon`, `hydrogen`, `neon`, `carbon`) in `tightestQuota()` so non-prefixed display names do not fall back to the `3p-*` quota pool (#242)
-- **Fast open-stdin payload completion**: resolve `readStdin()` in `statusline.js` as soon as a complete JSON object arrives instead of waiting out the 1000 ms open-stdin timeout (#218)
-- **3P 5h quota in live preview and demo data**: removed `disabled: true` from `quota["3p-5h"]` in `sampleData()` so `thirdPartyFiveHour` (`🧪 3P 5h`) renders in the interactive editor, `render --demo`, `/widgets/`, and the browser configurator, and split the third-party and Argon rows in the `quotas` preset so all 10 widgets fit within 80 columns (#234)
-- **Clean `exec` timeout cleanup**: kill the full process tree (`taskkill /T /F` on Windows, process group `SIGKILL` on macOS/Linux) when an `exec` command times out so child and grandchild processes don't outlive the refresh (#177)
-- **French (`fr`) and Spanish (`es`) translations**: fixed the nested blockquote, untranslated `Mise à jour` comments, outdated security statement, and `5h/7j` / `repère de rythme` consistency in `README.fr.md`, added the missing overview and plugin sections across `README.fr.md` and `README.es.md`, and refined the live-preview editor phrasing on `/fr/` and `/es/` (#229)
-- **Japanese (`ja`) translation**: changed `now` (`今すぐ` -> `今`) and documented the 80-column width constraint on `subagent`/`subagents` in `src/lib/i18n.js`, completed the untranslated widget and command rows and missing sections in `README.ja.md`, and localized the header `Docs` nav label on `/ja/` (#227)
-- **Simplified Chinese (`zh-CN`) and Korean (`ko`) translations**: fixed preset, context-window, and language-setting descriptions in `README.ko.md` and `/ko/`, completed untranslated widget and command rows in `README.zh-CN.md`, and localized the header `Docs` nav label (#225)
+- `npx agy-powerline configure` and `config` are deprecated: they wait 5 seconds after a notice, then open the editor (#273)
+- Classic meters use `┃` dividers (#275)
+- `mode` shows `auto`, Antigravity CLI's default mode since 1.5.7, in the neutral color; `accept-edits` and `plan` keep the caution color
+- Previews and docs show Gemini 4 Hydrogen as the sample model (#220) and Antigravity CLI 1.5.14 as the sample version
 
 ### Removed
 
-- **`line`, `geometric`, and `bars` meter styles**: streamlined `METER_STYLES` to 9 distinct styles (`pips`, `cells`, `dots`, `blocks`, `shade`, `squares`, `braille`, `rings`, `ramp`); legacy configs with removed IDs safely fall back to layout defaults (#275)
+- The `line`, `geometric` and `bars` meter styles; configs that name them get the layout's default meter (#275)
+
+### Fixed
+
+- Models named without a `gemini` prefix (Argon, Hydrogen, Neon, Carbon, Flash) count against the Gemini quota, not the third-party one (#242, #285)
+- `quota` follows Orchestrator to the Gemini quota its executor uses, plus Argon's own quota when Argon plans, instead of the third-party quota or Argon's alone
+- The 3P 5h quota shows in the editor's preview, `render --demo` and the site's previews (#234)
+- Emoji with joiners, flags, skin tones, keycaps, Hangul and combining marks count as one character when the bar measures and shortens text, and Backspace in the editor deletes them whole (#247)
+- Escape sequences in `exec` output and payload text no longer leave stray characters such as `(B` in the bar, and invisible characters take no space (#248)
+- Token counts roll over to `1.0M` instead of showing `1000.0K`, and a folder next to your home folder whose name starts the same is no longer shortened to `~` (#246)
+- Context widgets fall back to token usage when the percentage is missing or invalid (#245)
+- `exec` widgets with `"payload": true` cache their output per session (#250)
+- The bar renders as soon as agy's payload arrives instead of waiting out a 1-second timeout when stdin stays open (#218)
+- A timed-out `exec` command takes its child processes with it (#177)
+- The editor restores the terminal when you quit (#202)
+- Adding a widget in the editor (`a`) puts it after the selected widget instead of second in the list, and leaving the Add list with Esc keeps your selection
+- In ASCII mode, a bar cut to fit a 1- or 2-column terminal ends with `.` or `..` instead of overflowing it with `...`
+- `dark-mono`'s healthy context widgets use the theme's context color in Lines and Classic (#275)
+- Completed and refined the French, Spanish, Japanese, Korean and Simplified Chinese READMEs and home pages (#225, #227, #229)
+
+### Security
+
+- Git calls skip repositories with risky config, never touch the network, and on Windows never run a `git` placed in the workspace (#249)
+- Debug dumps mask branch names and conversation titles, keeping their width (#258)
 
 ## [1.11.4] - 2026-11-13
 

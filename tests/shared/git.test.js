@@ -415,9 +415,22 @@ function testGitOperations(root, git) {
   write(path.join(baseOpRepo, "x.txt"), "main\n");
   git(baseOpRepo, "commit", "-q", "-am", "main");
 
+  const copyDir = (src, dst) => {
+    fs.mkdirSync(dst, { recursive: true });
+    for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+      const from = path.join(src, entry.name);
+      const to = path.join(dst, entry.name);
+      if (entry.isDirectory()) {
+        copyDir(from, to);
+      } else {
+        fs.copyFileSync(from, to);
+      }
+    }
+  };
+
   const repo = (name) => {
     const dir = path.join(root, name);
-    fs.cpSync(baseOpRepo, dir, { recursive: true });
+    copyDir(baseOpRepo, dir);
     return dir;
   };
 
@@ -729,6 +742,17 @@ function testRemoteUrlAndDetached(root) {
         "http://gitea.local:3000/team/app" &&
       parseRemoteWebUrl("ext::sh -c evil") === "" &&
       parseRemoteWebUrl("https://evil.com/a/b\x07c") === ""
+  );
+  record(
+    "parseRemoteWebUrl turns Azure DevOps SSH remotes into the repository's web address",
+    parseRemoteWebUrl("git@ssh.dev.azure.com:v3/org/proj/repo") ===
+      "https://dev.azure.com/org/proj/_git/repo" &&
+      parseRemoteWebUrl("ssh://git@ssh.dev.azure.com/v3/org/proj/repo") ===
+        "https://dev.azure.com/org/proj/_git/repo" &&
+      parseRemoteWebUrl("org@vs-ssh.visualstudio.com:v3/org/proj/repo") ===
+        "https://org.visualstudio.com/proj/_git/repo" &&
+      parseRemoteWebUrl("https://org@dev.azure.com/org/proj/_git/repo") ===
+        "https://dev.azure.com/org/proj/_git/repo"
   );
 
   const repo = path.join(root, "detached-remote");

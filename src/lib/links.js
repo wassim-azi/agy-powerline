@@ -242,6 +242,29 @@ function linkPath(text, fullPath, widget, ascii = false) {
   return osc8Link(text, url, { ascii });
 }
 
+// Branch and commit pages differ by host: Bitbucket Cloud uses /src and
+// /commits, Azure DevOps a version query; GitHub, GitLab, Gitea and most
+// others answer /tree and /commit.
+function remotePageUrl(remoteUrl, kind, value) {
+  let host;
+  try {
+    host = new URL(remoteUrl).hostname.toLowerCase();
+  } catch {
+    return "";
+  }
+  const azure =
+    (host === "dev.azure.com" || host.endsWith(".visualstudio.com")) &&
+    remoteUrl.includes("/_git/");
+  if (kind === "branch") {
+    if (azure) {
+      return `${remoteUrl}?version=GB${encodeURIComponent(value)}`;
+    }
+    const branch = encodeURIComponent(value).replace(/%2F/g, "/");
+    return `${remoteUrl}/${host === "bitbucket.org" ? "src" : "tree"}/${branch}`;
+  }
+  return `${remoteUrl}/${host === "bitbucket.org" ? "commits" : "commit"}/${value}`;
+}
+
 function linkGitBranch(text, fullBranch, session, widget, ascii = false) {
   if (
     widget?.link !== true ||
@@ -251,15 +274,16 @@ function linkGitBranch(text, fullBranch, session, widget, ascii = false) {
   ) {
     return text;
   }
-  const encodedBranch = encodeURIComponent(fullBranch).replace(/%2F/g, "/");
-  return osc8Link(text, `${session.gitDetails.remoteUrl}/tree/${encodedBranch}`, { ascii });
+  return osc8Link(text, remotePageUrl(session.gitDetails.remoteUrl, "branch", fullBranch), {
+    ascii,
+  });
 }
 
 function linkGitSha(sha, session, widget, ascii = false) {
   if (widget?.link !== true || !sha || !session?.gitDetails?.remoteUrl) {
     return sha;
   }
-  return osc8Link(sha, `${session.gitDetails.remoteUrl}/commit/${sha}`, { ascii });
+  return osc8Link(sha, remotePageUrl(session.gitDetails.remoteUrl, "commit", sha), { ascii });
 }
 
 module.exports = {
@@ -270,6 +294,7 @@ module.exports = {
   fishPath,
   fishBranch,
   pathLinkUrl,
+  remotePageUrl,
   osc8Link,
   linkPath,
   linkGitBranch,

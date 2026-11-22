@@ -1,3 +1,5 @@
+<div align="center">
+
 # agy-powerline
 
 [English](README.md) | [简体中文](README.zh-CN.md) | **日本語** | [Français](README.fr.md) | [Español](README.es.md) | [한국어](README.ko.md) | [Deutsch](README.de.md)
@@ -8,11 +10,9 @@
 [![CI](https://github.com/wassim-azi/agy-powerline/actions/workflows/ci.yml/badge.svg)](https://github.com/wassim-azi/agy-powerline/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/wassim-azi/agy-powerline/actions/workflows/codeql.yml/badge.svg)](https://github.com/wassim-azi/agy-powerline/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/wassim-azi/agy-powerline/badge)](https://scorecard.dev/viewer/?uri=github.com/wassim-azi/agy-powerline)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15655/badge)](https://www.bestpractices.dev/projects/15655)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](#プライバシーとセキュリティ)
 [![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-0078D6.svg)](docs/install.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Open in GitHub Codespaces](https://img.shields.io/badge/open%20in-Codespaces-24292f.svg?logo=github&logoColor=white)](https://codespaces.new/wassim-azi/agy-powerline?quickstart=1)
 [![Web Configurator](https://img.shields.io/badge/web%20configurator-live-00dc82.svg)](https://agy-powerline.com/configure/)
 [![Mentioned in Awesome Gemini CLI](https://img.shields.io/badge/mentioned%20in-awesome-fc60a8.svg?logo=awesomelists&logoColor=white)](https://github.com/Piebald-AI/awesome-gemini-cli)
 
@@ -20,22 +20,27 @@
 
 **Google Antigravity の CLI（`agy`）向けの、高速でカスタマイズ可能なステータスライン。**
 
-使用中のモデル、Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）および Anthropic（Claude、Sonnet）のクォータ、コンテキストウィンドウ、git ブランチなどがひと目でわかります。ウィジェット、テーマ、レイアウトは対話式のエディターで選べます。インストールはコマンドひとつ、依存パッケージはありません。
+使用中のモデル、ペースマーカーと枯渇予測付きの Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）および Anthropic（Claude、Sonnet）のクォータ、コンテキストウィンドウ、トークンとコスト、エージェントの状態、git ブランチなどがひと目でわかります。ウィジェット、テーマ、レイアウト、バー全体の設定は対話式のエディターで選べます。インストールはコマンドひとつ、依存パッケージはありません。
+
+</div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline の対話式エディター：argon と入力して Argon の週間クォータを追加し、プリセットや / でのテーマ検索、Pills・Lines・Classic レイアウトのライブプレビュー、Settings のメータースタイル、? のショートカット一覧を表示" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline の対話式エディター：argon と入力して Argon の週間クォータのリセットを追加し、プリセットや / でのテーマ検索、Pills・Lines・Classic レイアウトのライブプレビュー、Settings のメータースタイルを表示" width="850">
 </p>
 
 ## なぜ agy-powerline？
 
-| 機能                         | できること                                                                                                          | 詳しく見る                                                                                                 |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| クォータのペース表示         | クォータメーターのペースマーカーで、5h または 7d のクォータがリセットまでもつかがひと目でわかる                     | [クォータガイド](docs/guides/antigravity-quota.md) · [計算機](https://agy-powerline.com/quota-calculator/) |
-| マルチプロバイダーのクォータ | Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）と Anthropic（Claude、Sonnet）のクォータを横並びで追跡         | [ペイロードリファレンス](docs/payload.md#quota-buckets)                                                    |
-| テーマ & レイアウト          | `pills`、`lines`、`classic` の各レイアウトで使える WCAG AA 準拠の 22 テーマ（ダーク、ライト、色覚多様性対応を含む） | [テーマギャラリー](https://agy-powerline.com/themes/)                                                      |
-| 対話式のコンフィギュレーター | ターミナル（`npx agy-powerline`）またはブラウザーのライブプレビュー付きエディターで設定                             | [Web コンフィギュレーター](https://agy-powerline.com/configure/)                                           |
-| セキュリティ & プライバシー  | ランタイム依存パッケージ 0、ネットワーク通信なし、テレメトリなし、`settings.json` の自動バックアップ                | [セキュリティ](SECURITY.md)                                                                                |
-| クロスプラットフォーム       | 組み込みの診断機能（`doctor`）付きで Windows、macOS、Linux、WSL で動作                                              | [インストール](docs/install.md) · [トラブルシューティング](docs/troubleshooting.md)                        |
+| 機能                           | できること                                                                                                                                                                                                                                                  | 詳しく見る                                                                                                     |
+| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| ペース表示と予測               | ペースマーカーで 5h または 7d のクォータがリセットまでもつかがわかり、`forecast` で今のペースではいつ尽きるかも表示                                                                                                                                         | [クォータガイド](docs/guides/antigravity-quota.md) · [計算機](https://agy-powerline.com/quota-calculator/)     |
+| マルチプロバイダーのクォータ   | Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）、Anthropic（Claude、Sonnet）、Argon 専用の週間クォータを横並びで、残量または使用量として表示                                                                                                          | [ペイロードリファレンス](docs/payload.md#quota-buckets)                                                        |
+| コンテキスト・トークン・コスト | コンテキストウィンドウの使用量（圧縮される上限に対する表示も可）、セッションのトークンとキャッシュヒット、今日・7 日間・30 日間のトークン、推定コストを予算アラート付きで表示                                                                               | [ウィジェット](docs/configuration.md#widgets)                                                                  |
+| エージェントの状況             | エージェントの動作（承認待ちのツールを含む）、サブエージェントとバックグラウンドタスク、キュー内のメッセージ、承認モード、サンドボックス                                                                                                                    | [ペイロードリファレンス](docs/payload.md)                                                                      |
+| リンク付きの git               | ブランチ、変更、ahead/behind、worktree、stash を、フォルダー・ブランチ・コミットのページへのクリックできるリンクと、fish 風に短縮したパスで表示                                                                                                             | [ウィジェットのオプション](docs/configuration.md#widget-options)                                               |
+| テーマ & レイアウト            | `pills`、`lines`、`classic` の各レイアウトで使える WCAG AA 準拠の 22 テーマ（ダーク、ライト、色覚多様性対応を含む）、グラデーション、9 種類のメータースタイル                                                                                               | [テーマギャラリー](https://agy-powerline.com/themes/)                                                          |
+| エディター & 設定              | `npx agy-powerline` でライブプレビュー付きのエディターが開き、サンプルのシナリオや端末幅で試しながら、バー全体の 16 の設定（クォータの残量/使用量、リセットの表示形式、配置、はみ出し時の動作、最大幅など）を変更できます。ブラウザーでも同じことができます | [設定](https://agy-powerline.com/settings/) · [Web コンフィギュレーター](https://agy-powerline.com/configure/) |
+| セキュリティ & プライバシー    | ランタイム依存パッケージ 0、ネットワーク通信なし、テレメトリなし、`settings.json` の自動バックアップ                                                                                                                                                        | [セキュリティ](SECURITY.md)                                                                                    |
+| クロスプラットフォーム         | 組み込みの診断機能（`doctor`）付きで Windows、macOS、Linux、WSL で動作                                                                                                                                                                                      | [インストール](docs/install.md) · [トラブルシューティング](docs/troubleshooting.md)                            |
 
 ## インストール
 
@@ -116,7 +121,7 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 **Pills**（デフォルト）：powerline 風のカプセル。形は丸型、山型、斜め、フラットから選べ、行の間に空行を入れることもできます。
 
 <p align="center">
-  <img src="assets/screenshots/pills-dark.png" alt="dark-aurora テーマの agy-powerline Pills レイアウト：モデル、コンテキスト、プロジェクト、git；ペースマーカーとリセットまでの時間付きの Gemini 5h と 7d のクォータ；Anthropic（Claude/Sonnet）と Argon の週間クォータ" width="850">
+  <img src="assets/screenshots/pills-dark.png" alt="dark-aurora テーマの agy-powerline Pills レイアウト：モデル、コンテキスト、キャッシュヒット率、30 日間のトークン、時刻、RAM、OS；ペースマーカーとリセットまでの時間付きの Gemini 5h クォータ、Anthropic（Claude/Sonnet）の 5h クォータ、プロジェクト、git；Gemini 7d クォータとリセット、Anthropic と Argon の週間クォータ" width="850">
 </p>
 
 <details>

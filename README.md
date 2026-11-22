@@ -1,3 +1,5 @@
+<div align="center">
+
 # agy-powerline
 
 **English** | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [Français](README.fr.md) | [Español](README.es.md) | [한국어](README.ko.md) | [Deutsch](README.de.md)
@@ -8,32 +10,35 @@
 [![CI](https://github.com/wassim-azi/agy-powerline/actions/workflows/ci.yml/badge.svg)](https://github.com/wassim-azi/agy-powerline/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/wassim-azi/agy-powerline/actions/workflows/codeql.yml/badge.svg)](https://github.com/wassim-azi/agy-powerline/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/wassim-azi/agy-powerline/badge)](https://scorecard.dev/viewer/?uri=github.com/wassim-azi/agy-powerline)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15655/badge)](https://www.bestpractices.dev/projects/15655)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](#privacy-and-security)
 [![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-0078D6.svg)](docs/install.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Open in GitHub Codespaces](https://img.shields.io/badge/open%20in-Codespaces-24292f.svg?logo=github&logoColor=white)](https://codespaces.new/wassim-azi/agy-powerline?quickstart=1)
 [![Web Configurator](https://img.shields.io/badge/web%20configurator-live-00dc82.svg)](https://agy-powerline.com/configure/)
 [![Mentioned in Awesome Gemini CLI](https://img.shields.io/badge/mentioned%20in-awesome-fc60a8.svg?logo=awesomelists&logoColor=white)](https://github.com/Piebald-AI/awesome-gemini-cli)
 
 **A fast, configurable agy statusline for Google Antigravity CLI.**
 
-See your model, Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthropic (Claude, Sonnet) 5h/7d quotas, context window, git branch and more at a glance. Pick widgets, themes and layout from an interactive editor. One command to install, no dependencies.
+See your model, Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthropic (Claude, Sonnet) 5h/7d quotas with pace markers and run-out forecasts, context window, tokens and cost, agent state, git branch and more at a glance. Pick widgets, themes, layout and bar-wide settings in an interactive editor. One command to install, no dependencies.
+
+</div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline interactive editor: add Argon's weekly quota by typing argon, preview presets, browse and filter themes with /, compare Pills, Lines and Classic layouts with a live preview of the bar, inspect meter styles in Settings, and view the keyboard shortcuts overlay" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline interactive editor: add the reset of Argon's weekly quota by typing argon, preview presets, browse and filter themes with /, compare Pills, Lines and Classic layouts with a live preview of the bar, and inspect meter styles in Settings" width="850">
 </p>
 
 ## Why agy-powerline?
 
-| Feature                   | What you get                                                                                                  | Learn more                                                                                                  |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Quota pacing              | Pace markers on quota meters show whether your 5h or 7d quota lasts until reset                               | [Quota guide](docs/guides/antigravity-quota.md) · [Calculator](https://agy-powerline.com/quota-calculator/) |
-| Multi-provider quotas     | Track Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthropic (Claude, Sonnet) quotas side by side | [Payload reference](docs/payload.md#quota-buckets)                                                          |
-| Themes & layouts          | 22 WCAG AA themes (including dark, light, and color-blind safe) across `pills`, `lines`, and `classic`        | [Theme gallery](https://agy-powerline.com/themes/)                                                          |
-| Interactive configurators | Live preview editor in your terminal (`npx agy-powerline`) or in your browser                                 | [Web configurator](https://agy-powerline.com/configure/)                                                    |
-| Security & privacy        | Zero runtime dependencies, no network calls, no telemetry, automatic `settings.json` backups                  | [Security](SECURITY.md)                                                                                     |
-| Cross-platform            | Works on Windows, macOS, Linux, and WSL with built-in diagnostics (`doctor`)                                  | [Install](docs/install.md) · [Troubleshooting](docs/troubleshooting.md)                                     |
+| Feature                | What you get                                                                                                                                                                                                                                   | Learn more                                                                                                  |
+| ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| Quota pace & forecasts | Pace markers show whether your 5h or 7d quota lasts until its reset, and `forecast` adds when it runs out at your current rate                                                                                                                 | [Quota guide](docs/guides/antigravity-quota.md) · [Calculator](https://agy-powerline.com/quota-calculator/) |
+| Multi-provider quotas  | Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash), Anthropic (Claude, Sonnet) and Argon's own weekly quota side by side, as what's left or what's used                                                                                      | [Payload reference](docs/payload.md#quota-buckets)                                                          |
+| Context, tokens & cost | Context window used, or measured against its compaction limit, session tokens and cache hits, tokens used today, over 7 or 30 days, and estimated spend, with budget alerts                                                                    | [Widgets](docs/configuration.md#widgets)                                                                    |
+| Agent awareness        | What the agent is doing (including a tool waiting for your approval), subagents and background tasks, queued messages, approval mode and sandbox                                                                                               | [Payload reference](docs/payload.md)                                                                        |
+| Git, with links        | Branch, changes, ahead/behind, worktree and stash, with clickable links to the folder, branch and commit pages, and fish-style shortening of long paths                                                                                        | [Widget options](docs/configuration.md#widget-options)                                                      |
+| Themes & layouts       | 22 WCAG AA themes (dark, light and color-blind safe) across `pills`, `lines` and `classic`, with gradients and 9 meter styles                                                                                                                  | [Theme gallery](https://agy-powerline.com/themes/)                                                          |
+| Editor & Settings      | `npx agy-powerline` opens a live-preview editor that switches between sample scenarios and terminal widths, with 16 bar-wide settings: quotas as left or used, reset format, alignment, overflow, max width and more. The same in your browser | [Settings](https://agy-powerline.com/settings/) · [Web configurator](https://agy-powerline.com/configure/)  |
+| Security & privacy     | Zero runtime dependencies, no network calls, no telemetry, automatic `settings.json` backups                                                                                                                                                   | [Security](SECURITY.md)                                                                                     |
+| Cross-platform         | Works on Windows, macOS, Linux, and WSL with built-in diagnostics (`doctor`)                                                                                                                                                                   | [Install](docs/install.md) · [Troubleshooting](docs/troubleshooting.md)                                     |
 
 ## Install
 
@@ -114,7 +119,7 @@ Preview them all in the [theme gallery](https://agy-powerline.com/themes/) or wi
 **Pills** (default): powerline-style capsules. Choose round, angled, slanted or flat shapes, and optionally a blank line between rows.
 
 <p align="center">
-  <img src="assets/screenshots/pills-dark.png" alt="agy-powerline Pills layout with the dark-aurora theme: model, context, project and git; Gemini 5h and 7d quotas with pace markers and resets; Anthropic (Claude/Sonnet) and Argon weekly quotas" width="850">
+  <img src="assets/screenshots/pills-dark.png" alt="agy-powerline Pills layout with the dark-aurora theme: model, context, cache hit, 30-day tokens, clock, RAM and OS; Gemini 5h quota with pace marker and reset, Anthropic (Claude/Sonnet) 5h quota, project and git; Gemini 7d quota and reset, Anthropic and Argon weekly quotas" width="850">
 </p>
 
 <details>

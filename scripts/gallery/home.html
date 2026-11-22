@@ -328,7 +328,8 @@
       .shot {
         margin: 0;
       }
-      .shot img {
+      .shot img,
+      .shot video {
         display: block;
         width: 100%;
         height: auto;
@@ -645,7 +646,11 @@
             var on = t === tab;
             t.setAttribute("aria-selected", String(on));
             t.tabIndex = on ? 0 : -1;
-            document.getElementById(t.getAttribute("aria-controls")).hidden = !on;
+            var panel = document.getElementById(t.getAttribute("aria-controls"));
+            panel.hidden = !on;
+            // A recording left playing in a hidden tab would keep downloading.
+            var video = panel.querySelector("video");
+            if (video && !on) video.pause();
           });
         }
         tabs.forEach(function (tab, i) {

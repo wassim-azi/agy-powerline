@@ -265,7 +265,8 @@ function clipText(text, max, ascii = false) {
   if (visibleWidth(value) <= max) {
     return value;
   }
-  const ellipsis = ascii ? "..." : "…";
+  // The ASCII "..." is 3 columns: never let it outgrow `max`.
+  const ellipsis = (ascii ? "..." : "…").slice(0, Math.max(0, max));
   const { out, link } = cutToWidth(value, max - ellipsis.length);
   const clipped = out.trimEnd() + closeLink(link) + ellipsis;
   return /\x1b\[[0-?]*[ -/]*m/.test(clipped) ? `${clipped}\x1b[0m` : clipped;

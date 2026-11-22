@@ -8,6 +8,7 @@ const path = require("path");
 const { record, runCli } = require("../helpers");
 const { VALID_WIDGET_IDS, PRESETS, LAYOUT_ORDER } = require("../../src/lib/config");
 const { THEME_ORDER } = require("../../src/lib/themes");
+const { settingsPage } = require("../../scripts/site/generated-pages");
 
 // The README and every README.<lang>.md translation list the same widgets,
 // themes, presets and commands, and link each other from their language
@@ -89,6 +90,17 @@ async function run() {
     "llms.txt lists every command",
     missingCommands.length === 0,
     `missing: ${missingCommands.join(", ")}`
+  );
+
+  // The settings page (agy-powerline.com/settings/) is the list of bar-wide
+  // settings; llms.txt names each one next to its link.
+  const settingKeys = [...settingsPage().markdown.matchAll(/^## (\S+)$/gm)].map((m) => m[1]);
+  const settingsLine = llms.split("\n").find((line) => line.includes("/settings/")) || "";
+  const missingSettings = settingKeys.filter((key) => !settingsLine.includes(`\`${key}\``));
+  record(
+    "llms.txt lists every setting on the settings page",
+    settingKeys.length > 0 && missingSettings.length === 0,
+    `missing: ${missingSettings.join(", ")}`
   );
   record(
     "llms.txt contains no email addresses",

@@ -1,3 +1,5 @@
+<div align="center">
+
 # agy-powerline
 
 [English](README.md) | **简体中文** | [日本語](README.ja.md) | [Français](README.fr.md) | [Español](README.es.md) | [한국어](README.ko.md) | [Deutsch](README.de.md)
@@ -8,11 +10,9 @@
 [![CI](https://github.com/wassim-azi/agy-powerline/actions/workflows/ci.yml/badge.svg)](https://github.com/wassim-azi/agy-powerline/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/wassim-azi/agy-powerline/actions/workflows/codeql.yml/badge.svg)](https://github.com/wassim-azi/agy-powerline/actions/workflows/codeql.yml)
 [![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/wassim-azi/agy-powerline/badge)](https://scorecard.dev/viewer/?uri=github.com/wassim-azi/agy-powerline)
-[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/15655/badge)](https://www.bestpractices.dev/projects/15655)
 [![Dependencies](https://img.shields.io/badge/dependencies-0-brightgreen.svg)](#隐私与安全)
 [![Platforms](https://img.shields.io/badge/platforms-Windows%20%7C%20macOS%20%7C%20Linux-0078D6.svg)](docs/install.md)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Open in GitHub Codespaces](https://img.shields.io/badge/open%20in-Codespaces-24292f.svg?logo=github&logoColor=white)](https://codespaces.new/wassim-azi/agy-powerline?quickstart=1)
 [![Web Configurator](https://img.shields.io/badge/web%20configurator-live-00dc82.svg)](https://agy-powerline.com/configure/)
 [![Mentioned in Awesome Gemini CLI](https://img.shields.io/badge/mentioned%20in-awesome-fc60a8.svg?logo=awesomelists&logoColor=white)](https://github.com/Piebald-AI/awesome-gemini-cli)
 
@@ -20,22 +20,27 @@
 
 **为 Google Antigravity CLI（`agy`）打造的快速、可配置的状态栏。**
 
-一眼看到当前模型、Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）和 Anthropic（Claude、Sonnet）配额、上下文窗口、git 分支等信息。在交互式编辑器中挑选组件、主题和布局。一条命令即可安装，零依赖。
+一眼看到当前模型、带节奏标记和耗尽预测的 Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）和 Anthropic（Claude、Sonnet）配额、上下文窗口、token 与花费、智能体状态、git 分支等信息。在交互式编辑器中挑选组件、主题、布局和整条状态栏的设置。一条命令即可安装，零依赖。
+
+</div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline 交互式编辑器：输入 argon 添加 Argon 每周配额，预览预设并用 / 筛选主题，实时对比 Pills、Lines 与 Classic 布局，在 Settings 中查看进度条样式，并打开 ? 快捷键面板" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline 交互式编辑器：输入 argon 添加 Argon 每周配额的重置时间，预览预设并用 / 筛选主题，实时对比 Pills、Lines 与 Classic 布局，并在 Settings 中查看进度条样式" width="850">
 </p>
 
 ## 为什么选择 agy-powerline？
 
-| 特性         | 你能获得什么                                                                                       | 了解更多                                                                                             |
-| ------------ | -------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| 配额节奏标记 | 配额进度条上的节奏标记让你一眼看出 5h 或 7d 配额能否撑到重置                                       | [配额指南](docs/guides/antigravity-quota.md) · [计算器](https://agy-powerline.com/quota-calculator/) |
-| 多模型方配额 | 并排追踪 Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）以及 Anthropic（Claude、Sonnet）配额 | [Payload 参考](docs/payload.md#quota-buckets)                                                        |
-| 主题与布局   | 涵盖 `pills`、`lines` 和 `classic` 三种布局的 22 款 WCAG AA 主题（含深色、浅色及色盲友好配色）     | [主题画廊](https://agy-powerline.com/themes/)                                                        |
-| 交互式配置器 | 在终端（`npx agy-powerline`）或浏览器中使用带实时预览的编辑器定制                                  | [网页配置器](https://agy-powerline.com/configure/)                                                   |
-| 安全与隐私   | 零运行时依赖、无网络请求、无遥测，自动备份 `settings.json`                                         | [安全说明](SECURITY.md)                                                                              |
-| 跨平台支持   | 支持 Windows、macOS、Linux 和 WSL，内置诊断工具（`doctor`）                                        | [安装说明](docs/install.md) · [故障排查](docs/troubleshooting.md)                                    |
+| 特性                 | 你能获得什么                                                                                                                                                                     | 了解更多                                                                                             |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| 配额节奏与预测       | 节奏标记让你一眼看出 5h 或 7d 配额能否撑到重置，`forecast` 还会显示按当前速度何时耗尽                                                                                            | [配额指南](docs/guides/antigravity-quota.md) · [计算器](https://agy-powerline.com/quota-calculator/) |
+| 多模型方配额         | 并排显示 Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）、Anthropic（Claude、Sonnet）以及 Argon 专属的每周配额，可显示剩余量或已用量                                       | [Payload 参考](docs/payload.md#quota-buckets)                                                        |
+| 上下文、token 与花费 | 上下文窗口用量（也可对照压缩上限）、会话 token 与缓存命中率、今天及 7 天或 30 天内的 token 用量，以及预估花费，并支持预算提醒                                                    | [组件](docs/configuration.md#widgets)                                                                |
+| 智能体状态           | 智能体正在做什么（包括等待你批准的工具）、子智能体与后台任务、排队中的消息、审批模式和沙盒                                                                                       | [Payload 参考](docs/payload.md)                                                                      |
+| 带链接的 git         | 分支、改动、领先/落后、worktree 与 stash，可点击链接直达文件夹、分支和提交页面，并支持 fish 风格缩短长路径                                                                       | [组件选项](docs/configuration.md#widget-options)                                                     |
+| 主题与布局           | 涵盖 `pills`、`lines` 和 `classic` 三种布局的 22 款 WCAG AA 主题（含深色、浅色及色盲友好配色），另有渐变和 9 种进度条样式                                                        | [主题画廊](https://agy-powerline.com/themes/)                                                        |
+| 编辑器与设置         | `npx agy-powerline` 打开带实时预览的编辑器，可切换示例场景和终端宽度进行测试，并提供 16 项整条状态栏设置：配额显示剩余或已用、重置格式、对齐、溢出、最大宽度等。浏览器中同样可用 | [设置](https://agy-powerline.com/settings/) · [网页配置器](https://agy-powerline.com/configure/)     |
+| 安全与隐私           | 零运行时依赖、无网络请求、无遥测，自动备份 `settings.json`                                                                                                                       | [安全说明](SECURITY.md)                                                                              |
+| 跨平台支持           | 支持 Windows、macOS、Linux 和 WSL，内置诊断工具（`doctor`）                                                                                                                      | [安装说明](docs/install.md) · [故障排查](docs/troubleshooting.md)                                    |
 
 ## 安装
 
@@ -116,7 +121,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 **Pills**（默认）：powerline 风格的胶囊。可选圆角、尖角、斜角或平直形状，也可以在行与行之间留一个空行。
 
 <p align="center">
-  <img src="assets/screenshots/pills-dark.png" alt="agy-powerline 的 Pills 布局，dark-aurora 主题：模型、上下文、项目和 git；Gemini 5h 和 7d 配额，带节奏标记和重置时间；Anthropic（Claude/Sonnet）和 Argon 每周配额" width="850">
+  <img src="assets/screenshots/pills-dark.png" alt="agy-powerline 的 Pills 布局，dark-aurora 主题：模型、上下文、缓存命中率、30 天 token、时钟、内存和操作系统；Gemini 5h 配额（带节奏标记和重置时间）、Anthropic（Claude/Sonnet）5h 配额、项目和 git；Gemini 7d 配额和重置时间、Anthropic 和 Argon 每周配额" width="850">
 </p>
 
 <details>

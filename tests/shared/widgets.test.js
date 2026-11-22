@@ -26,6 +26,7 @@ const {
   pathLinkUrl,
   formatTokens,
 } = require("../../src/lib/formatters");
+const { remotePageUrl } = require("../../src/lib/links");
 const { ansiToHtml } = require("../../scripts/site/ansi");
 const { buildCustomTheme, THEMES } = require("../../src/lib/themes");
 const { buildSegment } = require("../../src/lib/layouts/pills");
@@ -803,6 +804,30 @@ function testMode() {
   const neither = { ...vimOnly, cycle_mode: "default" };
   delete neither.vim;
   record("mode hides in the default mode with Vim editing off", !/🧭/.test(render(neither, mode)));
+
+  // Auto is agy's default mode since 1.5.7: it shows in the Vim mode's neutral
+  // color, while accept-edits and plan keep the caution color.
+  const sgr = (payload) =>
+    (
+      renderStatusline(
+        { ...payload, terminal_width: 0 },
+        { ...defaultConfig(), layout: "pills", widgets: mode },
+        { color: "truecolor" }
+      ).match(/\x1b\[[0-9;]*m/g) || []
+    ).join("");
+  const neutral = sgr(vimOnly);
+  const modeOnly = (cycle_mode) => {
+    const payload = { ...real, cycle_mode };
+    delete payload.vim;
+    return payload;
+  };
+  record(
+    "mode shows auto in the neutral color and other approval modes in the caution color",
+    sgr(modeOnly("auto")) === neutral &&
+      sgr(modeOnly("accept-edits")) !== neutral &&
+      sgr(modeOnly("plan")) !== neutral &&
+      /🧭 auto /.test(render(modeOnly("auto"), mode))
+  );
 }
 
 function testClock() {
@@ -1006,6 +1031,28 @@ function testTightestQuota() {
       /7d 28\.6% rem/.test(idOnlyGemini) &&
       !/3P/.test(idOnlyGemini),
     `${unprefixedArgon} | ${unprefixedHydrogen} | ${unprefixedFlash} | ${idOnlyGemini}`
+  );
+
+  // Orchestrator executes on Gemini 4 Hydrogen: the Gemini buckets count,
+  // plus Argon's own bucket when Argon plans; never the 3p buckets.
+  const orchestrator = (id, display_name) =>
+    render({ ...argonPayload, model: { id, display_name } }, quota);
+  const carbonPlanner = orchestrator("gemini-pro-orchestrator", "Orchestrator (Carbon)");
+  const argonPlanner = orchestrator("gemini-pro-orchestrator-argon", "Orchestrator (Argon)");
+  const bareOrchestrator = render({ ...real, model: { display_name: "Orchestrator" } }, quota);
+  record(
+    "quota routes Orchestrator to the Gemini buckets, and to Argon's when Argon plans",
+    /7d 93\.9% rem/.test(carbonPlanner) &&
+      !/Argon/.test(carbonPlanner) &&
+      /Argon 7d 8\.2% rem/.test(argonPlanner) &&
+      /7d 28\.6% rem/.test(bareOrchestrator) &&
+      !/3P/.test(bareOrchestrator),
+    `${carbonPlanner} | ${argonPlanner} | ${bareOrchestrator}`
+  );
+  record(
+    "short model names keep the Orchestrator planner",
+    shortModelName("Orchestrator (Carbon)") === "Orchestrator·Carbon" &&
+      shortModelName("Orchestrator (Argon)", true) === "Orchestrator Argon"
   );
 
   // Ultra: no Argon bucket, Argon counts toward the Gemini buckets.
@@ -1808,6 +1855,24 @@ function testOsc8Links() {
         linked
       );
     }
+
+    const sha7 = sha.slice(0, 7);
+    record(
+      "git links use each host's branch and commit pages (GitHub-style, Bitbucket, Azure DevOps)",
+      remotePageUrl("https://gitlab.com/g/sub/repo", "branch", "feat/x") ===
+        "https://gitlab.com/g/sub/repo/tree/feat/x" &&
+        remotePageUrl("https://gitlab.com/g/sub/repo", "commit", sha7) ===
+          `https://gitlab.com/g/sub/repo/commit/${sha7}` &&
+        remotePageUrl("https://bitbucket.org/team/repo", "branch", "feat/x") ===
+          "https://bitbucket.org/team/repo/src/feat/x" &&
+        remotePageUrl("https://bitbucket.org/team/repo", "commit", sha7) ===
+          `https://bitbucket.org/team/repo/commits/${sha7}` &&
+        remotePageUrl("https://dev.azure.com/org/proj/_git/repo", "branch", "feat/x") ===
+          "https://dev.azure.com/org/proj/_git/repo?version=GBfeat%2Fx" &&
+        remotePageUrl("https://org.visualstudio.com/proj/_git/repo", "commit", sha7) ===
+          `https://org.visualstudio.com/proj/_git/repo/commit/${sha7}` &&
+        remotePageUrl("not a url", "branch", "main") === ""
+    );
 
     const winFile = pathLinkUrl("C:\\Users\\François\\café #1", true);
     const winCursor = pathLinkUrl("C:\\Users\\alex\\app", "cursor");

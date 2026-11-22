@@ -38,6 +38,7 @@ const {
   SITE_LANGUAGES,
 } = require("../site/layout");
 const { breadcrumbData, faqPageData } = require("../site/doc-page");
+const { stripTags } = require("../site/markdown");
 const { HOME_TEXT } = require("../site/home-text");
 const { encodeConfig } = require("../configurator/page");
 
@@ -251,8 +252,20 @@ function card(t, styles) {
 // The site's structured data: the site (for the site name in search
 // results), its author and the app. No rating: Google wants real reviews for
 // software rich results, and invented ones break its rules.
-function homeStructuredData(description, { lang = "en", pagePath = "", faq = [] } = {}) {
+// The date CHANGELOG.md gives this version, or "" before it is released.
+function releaseDate() {
+  const changelog = fs.readFileSync(path.join(repo, "CHANGELOG.md"), "utf8");
+  const heading = changelog.split("\n").find((line) => line.startsWith(`## [${version}] - `));
+  const match = heading && heading.match(/ - (\d{4}-\d{2}-\d{2})$/);
+  return match ? match[1] : "";
+}
+
+function homeStructuredData(
+  description,
+  { lang = "en", pagePath = "", faq = [], features = [] } = {}
+) {
   const pageUrl = absoluteUrl(pagePath);
+  const released = releaseDate();
   const graph = [
     {
       "@type": "WebSite",
@@ -283,6 +296,9 @@ function homeStructuredData(description, { lang = "en", pagePath = "", faq = [] 
       applicationSubCategory: "Terminal statusline",
       operatingSystem: "Windows, macOS, Linux",
       softwareVersion: version,
+      ...(released ? { dateModified: released } : {}),
+      releaseNotes: `${SITE_URL}changelog/`,
+      ...(features.length ? { featureList: features } : {}),
       softwareRequirements: "Node.js 20+, Antigravity CLI (agy)",
       downloadUrl: NPM_URL,
       installUrl: `${SITE_URL}install/`,
@@ -407,9 +423,24 @@ function shotsHtml(text) {
               <img ${screenshotAttrs(name, 1000)} alt="${attr(text.shots[name][1])}" width="${width}" height="${height}" decoding="async" />
             </figure>`;
   }).join("\n            ");
-  return `<div class="tabs shot-tabs" role="tablist" aria-label="${text.shotsTitle}">${tabs}</div>
+  // The editor recording plays only when asked: preload="none" keeps its
+  // 2 MB off the page until then, and the poster is its last frame.
+  const poster = path.join(repo, "assets", "site", "demo", "editor-poster.png");
+  const { width, height } = pngSize(poster);
+  const [editorTab, editorLabel] = text.shots.editor;
+  const editor = {
+    tab: `<button type="button" class="tab" role="tab" id="tab-editor" aria-controls="shot-editor" aria-selected="false" tabindex="-1">${editorTab}</button>`,
+    panel: `<figure class="shot" role="tabpanel" id="shot-editor" aria-labelledby="tab-editor" hidden>
+              <video controls muted loop playsinline preload="none" poster="/img/agy-powerline-editor-poster.png" width="${width}" height="${height}" aria-label="${attr(editorLabel)}">
+                <source src="/img/agy-powerline-editor.webm" type="video/webm" />
+                <source src="/img/agy-powerline-editor.mp4" type="video/mp4" />
+              </video>
+            </figure>`,
+  };
+  return `<div class="tabs shot-tabs" role="tablist" aria-label="${text.shotsTitle}">${tabs}${editor.tab}</div>
           <div class="shot-stage">
             ${panels}
+            ${editor.panel}
           </div>`;
 }
 
@@ -478,7 +509,13 @@ function buildHomeHtml({ lang = "en" } = {}) {
       { hreflang: "x-default", path: "" },
     ],
     imageAlt: text.imageAlt,
-    structuredData: homeStructuredData(text.description, { lang, pagePath, faq: text.faq }),
+    structuredData: homeStructuredData(text.description, {
+      lang,
+      pagePath,
+      faq: text.faq,
+      // The feature tiles' titles, in the page's language.
+      features: text.features(counts()).map(([, title]) => stripTags(title)),
+    }),
     pageCss: styles.css(),
   });
   return finishPage(

@@ -108,7 +108,7 @@ function buildConfiguratorPage() {
 
   const rawTemplate = fs.readFileSync(templatePath, "utf8");
   const description =
-    "agy statusline configurator: pick widgets, a theme and a layout in the browser with a live preview, then download the config or import it with npx.";
+    "agy statusline configurator: edit widgets, themes, layouts and all 16 bar settings with scenario and width previews, then export or import with npx.";
   const template = injectSiteChrome(rawTemplate, {
     title: "agy statusline configurator - build your bar in the browser",
     description,

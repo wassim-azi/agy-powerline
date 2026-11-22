@@ -60,7 +60,17 @@ function runSuiteIsolated(modulePath) {
         );
         return;
       }
-      resolve(Array.isArray(payload?.results) ? payload.results : []);
+      // A suite whose run() never settles lets the event loop drain and the
+      // worker exit 0 without a message; that must fail, not pass with no checks.
+      if (!Array.isArray(payload?.results)) {
+        reject(
+          new Error(
+            `Suite worker exited without reporting results (a check never finished?)${stderr ? `\n${stderr.trim()}` : ""}`
+          )
+        );
+        return;
+      }
+      resolve(payload.results);
     });
   });
 }
