@@ -132,6 +132,7 @@ async function run() {
         html.includes('id="alignmentSelect"') &&
         html.includes('id="quotaModeSelect"') &&
         html.includes('id="overflowSelect"') &&
+        html.includes('id="toggleZero5hOnWeekly"') &&
         html.includes('id="resetConfigBtn"') &&
         missingMeterStyles.length === 0,
       missingMeterStyles.join(", ")
@@ -145,6 +146,7 @@ async function run() {
       maxWidth: 120,
       alignment: "center",
       quotaMode: "used",
+      zeroFiveHourWhenWeeklyEmpty: true,
       overflow: "wrap",
       clock: { hour12: false },
       thresholds: { ...defaultConfig().thresholds, quotaWarn: 40, blink: "warn" },
@@ -158,6 +160,7 @@ async function run() {
         decoded.maxWidth === 120 &&
         decoded.alignment === "center" &&
         decoded.quotaMode === "used" &&
+        decoded.zeroFiveHourWhenWeeklyEmpty === true &&
         decoded.overflow === "wrap" &&
         decoded.resetFormat === "both" &&
         decoded.clock.hour12 === false &&

@@ -263,6 +263,31 @@ function readQuota(data, key, windowSeconds, lang) {
   };
 }
 
+// When a 7d quota is exhausted (0% left), Antigravity can leave its paired 5h
+// bucket at 100% (often marked disabled: true). When opted in, treat that 5h
+// bucket as 0% remaining so the bar doesn't show 100% capacity left.
+function applyWeeklyEmptyZero(fiveHour, weekly, enabled) {
+  if (!enabled || !weekly || weekly.remaining > 0) {
+    return fiveHour;
+  }
+  if (!fiveHour) {
+    return {
+      remaining: 0,
+      reset: "",
+      resetSeconds: 0,
+      windowSeconds: 0,
+      elapsedPct: null,
+      resetTime: "",
+      disabled: false,
+    };
+  }
+  return {
+    ...fiveHour,
+    remaining: 0,
+    disabled: false,
+  };
+}
+
 // Which quota group a bucket belongs to.
 function bucketGroup(key) {
   if (key.startsWith("gemini-argon-")) {
@@ -403,6 +428,12 @@ function extractSession(data, config, options = {}) {
     }
   }
 
+  const zeroWhenWeeklyEmpty = config?.zeroFiveHourWhenWeeklyEmpty === true;
+  const rawFiveHour = readQuota(data, "gemini-5h", FIVE_HOURS, lang);
+  const weekly = readQuota(data, "gemini-weekly", SEVEN_DAYS, lang);
+  const rawThirdPartyFiveHour = readQuota(data, "3p-5h", FIVE_HOURS, lang);
+  const thirdPartyWeekly = readQuota(data, "3p-weekly", SEVEN_DAYS, lang);
+
   return {
     lang,
     os: osName,
@@ -424,10 +455,14 @@ function extractSession(data, config, options = {}) {
     exceeds200k: data.exceeds_200k_tokens === true,
     cacheRead: count(data.context_window?.current_usage?.cache_read_input_tokens),
     cacheCreate: count(data.context_window?.current_usage?.cache_creation_input_tokens),
-    fiveHour: readQuota(data, "gemini-5h", FIVE_HOURS, lang),
-    weekly: readQuota(data, "gemini-weekly", SEVEN_DAYS, lang),
-    thirdPartyFiveHour: readQuota(data, "3p-5h", FIVE_HOURS, lang),
-    thirdPartyWeekly: readQuota(data, "3p-weekly", SEVEN_DAYS, lang),
+    fiveHour: applyWeeklyEmptyZero(rawFiveHour, weekly, zeroWhenWeeklyEmpty),
+    weekly,
+    thirdPartyFiveHour: applyWeeklyEmptyZero(
+      rawThirdPartyFiveHour,
+      thirdPartyWeekly,
+      zeroWhenWeeklyEmpty
+    ),
+    thirdPartyWeekly,
     argonWeekly: readQuota(data, ARGON_BUCKET, SEVEN_DAYS, lang),
     tightestQuota: tightestQuota(data, lang),
     cwd: firstText(data.cwd, data.workspace?.current_dir),

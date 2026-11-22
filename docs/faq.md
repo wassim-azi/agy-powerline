@@ -36,7 +36,7 @@ Your terminal font lacks the powerline glyphs. Install a [Nerd Font](https://www
 
 ## Why does `render --demo` show widgets my live bar doesn't?
 
-The demo uses sample data. Widgets such as `sandbox`, `artifacts` and `tasks` hide in a real session until there is a sandbox, an artifact or something running in the background. A widget with nothing to show is left out, not shown as `0` or `Unknown`.
+The demo uses sample data. Widgets such as `sandbox`, `artifacts` and `tasks` hide in a real session until there is a sandbox, an artifact or something running in the background. A widget with nothing to show is left out, not shown as `0` or `Unknown`. Likewise, `thirdPartyFiveHour` (`3P 5h`) hides in live sessions when Antigravity marks `quota["3p-5h"].disabled: true`; set `"showDisabled": true` on the widget to show the raw payload value, or `"zeroFiveHourWhenWeeklyEmpty": true` globally to show `0.0% rem` whenever the 7-day quota is at `0%`.
 
 ## Can a repository I clone change my bar or run commands?
 

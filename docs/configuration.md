@@ -183,6 +183,10 @@ Set `"forecast": "countdown"`, `"forecast": "time"`, or `"forecast": true` (foll
 
 By default (`"quotaMode": "remaining"`), quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) show the percentage remaining (`72.0% rem`). Set `"quotaMode": "used"` — or cycle **Quota display** in the Settings tab (`i`) in the editor — to display quota consumed instead (`28.0% used`), localized in every supported bar language. Meters continue filling left-to-right by usage consumed alongside the pace marker, and warning/danger thresholds continue triggering at the same usage levels.
 
+### Zero 5h when 7d is 0% (`zeroFiveHourWhenWeeklyEmpty`)
+
+When a 7-day quota reaches `0%` remaining, Antigravity can still report its paired 5-hour bucket at `100%` (for example `3p-5h` with `"disabled": true`). Set `"zeroFiveHourWhenWeeklyEmpty": true` — or toggle **Zero 5h when 7d is 0%** in the Settings tab (`i`) in the editor — to show `0.0% rem` (`100.0% used` when `quotaMode` is `"used"`) on all 5-hour quota widgets (`fiveHourBar`, `fiveHourPct`, `thirdPartyFiveHour`) whenever the matching 7-day quota is at `0%`, even when `3p-5h` is marked `disabled`.
+
 ## Meter styles
 
 Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"meterStyle"` picks another look for every meter, and `"meter"` on a meter widget (`fiveHourBar`, `weeklyBar`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`, `context`) for that one; the widget's value wins. The editor sets the per-widget one (Enter on a meter widget, then **Meter**).

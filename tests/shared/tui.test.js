@@ -865,6 +865,17 @@ async function testSettingsInteractions() {
       qmReset.saved.quotaMode === "remaining"
   );
 
+  const zSteps = ["i", ...Array(settingIdx("zeroFiveHourWhenWeeklyEmpty")).fill(DOWN)];
+  const zOn = await runConfigureKeys({}, [...zSteps, "\r"]);
+  const zOff = await runConfigureKeys({ zeroFiveHourWhenWeeklyEmpty: true }, [...zSteps, "x"]);
+  const zOnScreen = strip(zOn.frames[zOn.frames.length - 1] || "");
+  record(
+    "Settings Zero 5h when 7d is 0% toggles on and x resets to false",
+    zOn.saved.zeroFiveHourWhenWeeklyEmpty === true &&
+      /Zero 5h when 7d is 0%:\s+on/.test(zOnScreen) &&
+      zOff.saved.zeroFiveHourWhenWeeklyEmpty === false
+  );
+
   // #215: Row overflow cycles fit -> wrap -> fit and resets on x.
   const ovSteps = ["i", ...Array(settingIdx("overflow")).fill(DOWN)];
   const ovWrap = await runConfigureKeys({}, [...ovSteps, "\r"]);

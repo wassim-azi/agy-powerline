@@ -547,6 +547,35 @@ function settingsPage() {
       ),
     },
     {
+      id: "zeroFiveHourWhenWeeklyEmpty",
+      key: "zeroFiveHourWhenWeeklyEmpty",
+      title: "Zero 5h when 7d is 0%",
+      defaultVal: "false",
+      options: "false, true",
+      desc: "Shows 0% remaining (100% used) on all 5-hour quota widgets whenever the matching 7-day quota is at 0%, even when Antigravity marks 3p-5h disabled.",
+      snippet: '{\n  "zeroFiveHourWhenWeeklyEmpty": true\n}',
+      demos: [
+        settingDemo(
+          "zeroFiveHourWhenWeeklyEmpty: false (default)",
+          {
+            zeroFiveHourWhenWeeklyEmpty: false,
+            widgets: [{ id: "thirdPartyFiveHour" }, { id: "thirdPartyWeekly" }],
+          },
+          {},
+          styles
+        ),
+        settingDemo(
+          "zeroFiveHourWhenWeeklyEmpty: true",
+          {
+            zeroFiveHourWhenWeeklyEmpty: true,
+            widgets: [{ id: "thirdPartyFiveHour" }, { id: "thirdPartyWeekly" }],
+          },
+          {},
+          styles
+        ),
+      ],
+    },
+    {
       id: "overflow",
       key: "overflow",
       title: "Row overflow",
