@@ -47,6 +47,15 @@ const OPTION_BUILDERS = {
       help: "4 Hydrogen·High instead of Gemini 4 Hydrogen (High).",
     },
   ],
+  showDisabled: () => [
+    {
+      key: "showDisabled",
+      label: "Show disabled",
+      values: [undefined, true],
+      show: (value) => onOff(value),
+      help: "Keep showing the 3P 5h bar when Antigravity marks quota.3p-5h disabled.",
+    },
+  ],
   splitTokens: () => [
     {
       key: "split",
