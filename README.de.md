@@ -23,7 +23,7 @@
 Behalte Modell, Gemini-5h/7T-, Claude/GPT- und Argon-Kontingente, Kontextfenster, Git-Branch und vieles mehr auf einen Blick im Auge. Wähle Widgets, Themes und Layout in einem interaktiven Editor. Ein Befehl zur Installation, keine Abhängigkeiten.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="Interaktiver Editor von agy-powerline: das wöchentliche Argon-Kontingent durch Eingabe von argon hinzufügen, danach Vorlagen, Themes und Layouts mit Live-Vorschau der Leiste durchblättern und den Tab Powerline öffnen" width="850">
+  <img src="assets/demo.gif" alt="Interaktiver Editor von agy-powerline: Argon-Wochenkontingent per Eingabe von argon hinzufügen, Vorlagen und Themes per / filtern, Pills, Lines und Classic in der Live-Vorschau vergleichen, Meter-Stile unter Settings prüfen und die ?-Tastaturkürzel öffnen" width="850">
 </p>
 
 ## Warum agy-powerline?

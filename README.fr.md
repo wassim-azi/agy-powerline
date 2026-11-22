@@ -23,7 +23,7 @@
 Consultez d’un coup d’œil le modèle utilisé, les quotas Gemini sur 5h/7j, ceux de Claude/GPT et d’Argon, la fenêtre de contexte, la branche Git et bien plus encore. Choisissez les widgets, les thèmes et la disposition dans un éditeur interactif. Une seule commande suffit pour l’installation, sans aucune dépendance.
 
 <p align="center">
-  <img src="assets/demo.gif" alt="éditeur interactif d’agy-powerline : ajout du quota hebdomadaire d’Argon en tapant argon, puis parcours des préréglages, des thèmes et des dispositions avec un aperçu en direct de la barre, et ouverture de l’onglet Powerline" width="850">
+  <img src="assets/demo.gif" alt="éditeur interactif d’agy-powerline : ajout du quota hebdomadaire d’Argon en tapant argon, aperçu des préréglages, filtrage des thèmes avec /, comparaison des dispositions Pills, Lines et Classic en direct, styles de jauge dans Settings et vue des raccourcis clavier" width="850">
 </p>
 
 ## Pourquoi agy-powerline ?
