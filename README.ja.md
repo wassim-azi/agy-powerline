@@ -1,3 +1,5 @@
+<div align="center">
+
 # agy-powerline
 
 [English](README.md) | [简体中文](README.zh-CN.md) | **日本語** | [Français](README.fr.md) | [Español](README.es.md) | [한국어](README.ko.md) | [Deutsch](README.de.md)
@@ -21,6 +23,8 @@
 **Google Antigravity の CLI（`agy`）向けの、高速でカスタマイズ可能なステータスライン。**
 
 使用中のモデル、Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）および Anthropic（Claude、Sonnet）のクォータ、コンテキストウィンドウ、git ブランチなどがひと目でわかります。ウィジェット、テーマ、レイアウトは対話式のエディターで選べます。インストールはコマンドひとつ、依存パッケージはありません。
+
+</div>
 
 <p align="center">
   <img src="assets/demo.gif" alt="agy-powerline の対話式エディター：argon と入力して Argon の週間クォータのリセットを追加し、プリセットや / でのテーマ検索、Pills・Lines・Classic レイアウトのライブプレビュー、Settings のメータースタイルを表示" width="850">

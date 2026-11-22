@@ -1,3 +1,5 @@
+<div align="center">
+
 # agy-powerline
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [Français](README.fr.md) | **Español** | [한국어](README.ko.md) | [Deutsch](README.de.md)
@@ -21,6 +23,8 @@
 **Una línea de estado rápida y configurable para la CLI de Google Antigravity (`agy`).**
 
 Consulta de un vistazo tu modelo, las cuotas de Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) y Anthropic (Claude, Sonnet), la ventana de contexto, la rama de Git y mucho más. Elige widgets, temas y diseño desde un editor interactivo. Un solo comando para instalar, sin dependencias.
+
+</div>
 
 <p align="center">
   <img src="assets/demo.gif" alt="editor interactivo de agy-powerline: añade el reinicio de la cuota semanal de Argon escribiendo argon, explora preajustes y filtra temas con /, compara los diseños Pills, Lines y Classic con vista previa en vivo y revisa los estilos de medidor en Settings" width="850">

@@ -1,3 +1,5 @@
+<div align="center">
+
 # agy-powerline
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [Français](README.fr.md) | [Español](README.es.md) | [한국어](README.ko.md) | **Deutsch**
@@ -21,6 +23,8 @@
 **Eine schnelle, konfigurierbare agy-Statuszeile für die Google Antigravity CLI (`agy`).**
 
 Behalte Modell, Google-Gemini- (Hydrogen, Neon, Argon, Carbon, Flash) und Anthropic-Kontingente (Claude, Sonnet), Kontextfenster, Git-Branch und vieles mehr auf einen Blick im Auge. Wähle Widgets, Themes und Layout in einem interaktiven Editor. Ein Befehl zur Installation, keine Abhängigkeiten.
+
+</div>
 
 <p align="center">
   <img src="assets/demo.gif" alt="Interaktiver Editor von agy-powerline: Reset des Argon-Wochenkontingents per Eingabe von argon hinzufügen, Vorlagen und Themes per / filtern, Pills, Lines und Classic in der Live-Vorschau vergleichen und Meter-Stile unter Settings prüfen" width="850">

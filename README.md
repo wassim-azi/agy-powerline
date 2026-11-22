@@ -1,3 +1,5 @@
+<div align="center">
+
 # agy-powerline
 
 **English** | [简体中文](README.zh-CN.md) | [日本語](README.ja.md) | [Français](README.fr.md) | [Español](README.es.md) | [한국어](README.ko.md) | [Deutsch](README.de.md)
@@ -19,6 +21,8 @@
 **A fast, configurable agy statusline for Google Antigravity CLI.**
 
 See your model, Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthropic (Claude, Sonnet) 5h/7d quotas, context window, git branch and more at a glance. Pick widgets, themes and layout from an interactive editor. One command to install, no dependencies.
+
+</div>
 
 <p align="center">
   <img src="assets/demo.gif" alt="agy-powerline interactive editor: add the reset of Argon's weekly quota by typing argon, preview presets, browse and filter themes with /, compare Pills, Lines and Classic layouts with a live preview of the bar, and inspect meter styles in Settings" width="850">
