@@ -14,10 +14,10 @@ agy sends the state of each quota to the status line as a "bucket": the share le
 
 | Bucket                    | Window          | Counts                                             |
 | ------------------------- | --------------- | -------------------------------------------------- |
-| `gemini-5h`               | 5 hours         | Gemini models                                      |
-| `gemini-weekly`           | 7 days          | Gemini models                                      |
+| `gemini-5h`               | 5 hours         | Google Gemini models (Hydrogen, Neon)              |
+| `gemini-weekly`           | 7 days          | Google Gemini models (Hydrogen, Neon)              |
 | `gemini-argon-wtu-weekly` | 7 days          | Gemini 4 Argon on Google AI Pro (no 5-hour window) |
-| `3p-5h`, `3p-weekly`      | 5 hours, 7 days | Third-party models such as Claude and GPT          |
+| `3p-5h`, `3p-weekly`      | 5 hours, 7 days | Anthropic models (Claude and Sonnet)               |
 
 A bucket that doesn't apply right now can arrive marked `disabled`, and the bar hides it by default. When Antigravity marks `3p-5h` `disabled` while `3p-weekly` is at `0%`, you can either keep showing its payload value with `"showDisabled": true` on `thirdPartyFiveHour` or set `"zeroFiveHourWhenWeeklyEmpty": true` globally so all 5-hour quota widgets show `0.0% rem` (`100.0% used`) whenever their matching 7-day quota is at `0%`. The [payload reference](../payload.md#quota-buckets) has the details.
 

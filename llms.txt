@@ -1,6 +1,6 @@
 # agy-powerline
 
-> A fast, configurable agy statusline for Google Antigravity CLI (`agy`). Requires Node.js 20+; has no runtime dependencies or network calls.
+> A fast, configurable agy statusline for Google Antigravity CLI (`agy`) supporting Google Gemini (Hydrogen, Neon, Argon) and Anthropic (Claude, Sonnet) models. Requires Node.js 20+; has no runtime dependencies or network calls.
 
 ## Install
 - `npx agy-powerline` installs (or updates outdated scripts) and opens the interactive TUI configurator in a terminal.
@@ -71,8 +71,8 @@
 - `weeklyBar` — 7-day quota left as a pace-marked meter.
 - `weeklyPct` — 7-day quota left as a percentage.
 - `weeklyReset` — Time until the 7-day quota resets, or its reset time.
-- `thirdPartyFiveHour` — Third-party 5-hour quota left.
-- `thirdPartyWeekly` — Third-party 7-day quota left.
+- `thirdPartyFiveHour` — Anthropic (Claude, Sonnet) 5-hour quota left.
+- `thirdPartyWeekly` — Anthropic (Claude, Sonnet) 7-day quota left.
 - `argonWeekly` — Gemini 4 Argon's weekly quota (Google AI Pro).
 - `argonReset` — Time until Argon's weekly quota resets.
 - `context` — Context window used as a meter.
