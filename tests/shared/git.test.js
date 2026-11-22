@@ -415,9 +415,22 @@ function testGitOperations(root, git) {
   write(path.join(baseOpRepo, "x.txt"), "main\n");
   git(baseOpRepo, "commit", "-q", "-am", "main");
 
+  const copyDir = (src, dst) => {
+    fs.mkdirSync(dst, { recursive: true });
+    for (const entry of fs.readdirSync(src, { withFileTypes: true })) {
+      const from = path.join(src, entry.name);
+      const to = path.join(dst, entry.name);
+      if (entry.isDirectory()) {
+        copyDir(from, to);
+      } else {
+        fs.copyFileSync(from, to);
+      }
+    }
+  };
+
   const repo = (name) => {
     const dir = path.join(root, name);
-    fs.cpSync(baseOpRepo, dir, { recursive: true });
+    copyDir(baseOpRepo, dir);
     return dir;
   };
 

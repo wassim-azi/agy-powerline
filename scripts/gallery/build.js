@@ -38,6 +38,7 @@ const {
   SITE_LANGUAGES,
 } = require("../site/layout");
 const { breadcrumbData, faqPageData } = require("../site/doc-page");
+const { stripTags } = require("../site/markdown");
 const { HOME_TEXT } = require("../site/home-text");
 const { encodeConfig } = require("../configurator/page");
 
@@ -513,7 +514,7 @@ function buildHomeHtml({ lang = "en" } = {}) {
       pagePath,
       faq: text.faq,
       // The feature tiles' titles, in the page's language.
-      features: text.features(counts()).map(([, title]) => title.replace(/<[^>]+>/g, "")),
+      features: text.features(counts()).map(([, title]) => stripTags(title)),
     }),
     pageCss: styles.css(),
   });
