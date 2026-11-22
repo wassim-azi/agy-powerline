@@ -15,7 +15,7 @@ const HOME_TEXT = {
     lang: "en",
     title: "agy statusline for Google Antigravity CLI - agy-powerline",
     description:
-      "agy-powerline is an agy statusline for Google Antigravity CLI: Gemini, Claude/GPT and Argon quotas with pace markers, context and git in agy's status bar.",
+      "agy statusline for Google Antigravity CLI: Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthropic (Claude/Sonnet) quotas, pace markers, git.",
     imageAlt:
       "agy-powerline: the agy statusline that tells you if your quota will last, with the default bar",
     eyebrow: "Statusline for Google Antigravity CLI",
@@ -123,7 +123,7 @@ const HOME_TEXT = {
       ],
       "pills-dark": [
         "Pills",
-        "agy-powerline Pills layout with the dark-aurora theme: model, context, project and git; Gemini 5h and 7d quotas with pace markers and resets; Claude/GPT and Argon weekly quotas",
+        "agy-powerline Pills layout with the dark-aurora theme: model, context, project and git; Gemini 5h and 7d quotas with pace markers and resets; Anthropic (Claude/Sonnet) and Argon weekly quotas",
       ],
       "lines-light": [
         "Lines",
@@ -171,7 +171,7 @@ const HOME_TEXT = {
       ],
       [
         "Which quotas does it show?",
-        'The Gemini 5-hour and 7-day quotas, the third-party (Claude and GPT) 5-hour and 7-day quotas, and Gemini 4 Argon\'s weekly quota on Google AI Pro, each with its reset time. The <a href="/guides/antigravity-quota/">quota guide</a> explains the meters.',
+        'The Google Gemini (Hydrogen, Neon, Carbon, Flash) 5-hour and 7-day quotas, the Anthropic (Claude and Sonnet) 5-hour and 7-day quotas, and Gemini 4 Argon\'s weekly quota on Google AI Pro, each with its reset time. The <a href="/guides/antigravity-quota/">quota guide</a> explains the meters.',
       ],
     ],
     allQuestions: "All questions →",
@@ -183,7 +183,7 @@ const HOME_TEXT = {
     lang: "fr",
     title: "Statusline agy pour Google Antigravity CLI - agy-powerline",
     description:
-      "agy-powerline, la statusline de Google Antigravity CLI (agy) : quotas Gemini, Claude/GPT et Argon avec repère de rythme, contexte et git dans la barre d'agy.",
+      "agy-powerline pour Google Antigravity CLI : quotas Gemini (Hydrogen, Neon, Argon, Carbon, Flash) et Anthropic (Claude/Sonnet), rythme, contexte, git.",
     imageAlt:
       "agy-powerline : la statusline agy qui vous dit si votre quota va tenir, avec la barre par défaut",
     eyebrow: "Statusline pour Google Antigravity CLI",
@@ -307,7 +307,7 @@ const HOME_TEXT = {
       ],
       "pills-dark": [
         "Pills",
-        "Disposition Pills d'agy-powerline avec le thème dark-aurora : modèle, contexte, projet et git ; quotas Gemini 5 h et 7 j avec repères de rythme et remises à zéro ; quotas hebdomadaires Claude/GPT et Argon",
+        "Disposition Pills d'agy-powerline avec le thème dark-aurora : modèle, contexte, projet et git ; quotas Gemini 5 h et 7 j avec repères de rythme et remises à zéro ; quotas hebdomadaires Anthropic (Claude/Sonnet) et Argon",
       ],
       "lines-light": [
         "Lines",
@@ -355,7 +355,7 @@ const HOME_TEXT = {
       ],
       [
         "Quels quotas affiche-t-elle ?",
-        'Les quotas Gemini sur 5 heures et 7 jours, les quotas tiers (Claude et GPT) sur 5 heures et 7 jours, et le quota hebdomadaire de Gemini 4 Argon sur Google AI Pro, chacun avec sa remise à zéro. Le <a href="/guides/antigravity-quota/">guide des quotas</a> (en anglais) explique les jauges.',
+        'Les quotas Google Gemini (Hydrogen, Neon, Carbon, Flash) sur 5 heures et 7 jours, les quotas Anthropic (Claude et Sonnet) sur 5 heures et 7 jours, et le quota hebdomadaire de Gemini 4 Argon sur Google AI Pro, chacun avec sa remise à zéro. Le <a href="/guides/antigravity-quota/">guide des quotas</a> (en anglais) explique les jauges.',
       ],
     ],
     allQuestions: "Toutes les questions (en anglais) →",
@@ -367,7 +367,7 @@ const HOME_TEXT = {
     lang: "es",
     title: "Statusline agy para Google Antigravity CLI - agy-powerline",
     description:
-      "agy-powerline, la statusline de Google Antigravity CLI (agy): cuotas de Gemini, Claude/GPT y Argon con marcador de ritmo, contexto y git en la barra de agy.",
+      "agy-powerline para Google Antigravity CLI: cuotas Gemini (Hydrogen, Neon, Argon, Carbon, Flash) y Anthropic (Claude/Sonnet), ritmo, contexto y git.",
     imageAlt:
       "agy-powerline: la statusline de agy que te dice si tu cuota va a durar, con la barra por defecto",
     eyebrow: "Statusline para Google Antigravity CLI",
@@ -491,7 +491,7 @@ const HOME_TEXT = {
       ],
       "pills-dark": [
         "Pills",
-        "Diseño Pills de agy-powerline con el tema dark-aurora: modelo, contexto, proyecto y git; cuotas de Gemini de 5 h y 7 d con marcadores de ritmo y reinicios; cuotas semanales de Claude/GPT y Argon",
+        "Diseño Pills de agy-powerline con el tema dark-aurora: modelo, contexto, proyecto y git; cuotas de Gemini de 5 h y 7 d con marcadores de ritmo y reinicios; cuotas semanales de Anthropic (Claude/Sonnet) y Argon",
       ],
       "lines-light": [
         "Lines",
@@ -539,7 +539,7 @@ const HOME_TEXT = {
       ],
       [
         "¿Qué cuotas muestra?",
-        'Las cuotas de Gemini de 5 horas y 7 días, las cuotas de terceros (Claude y GPT) de 5 horas y 7 días, y la cuota semanal de Gemini 4 Argon en Google AI Pro, cada una con su hora de reinicio. La <a href="/guides/antigravity-quota/">guía de cuotas</a> (en inglés) explica los medidores.',
+        'Las cuotas de Google Gemini (Hydrogen, Neon, Carbon, Flash) de 5 horas y 7 días, las cuotas de Anthropic (Claude y Sonnet) de 5 horas y 7 días, y la cuota semanal de Gemini 4 Argon en Google AI Pro, cada una con su hora de reinicio. La <a href="/guides/antigravity-quota/">guía de cuotas</a> (en inglés) explica los medidores.',
       ],
     ],
     allQuestions: "Todas las preguntas (en inglés) →",
@@ -551,7 +551,7 @@ const HOME_TEXT = {
     lang: "ja",
     title: "Google Antigravity CLI 向け agy ステータスライン - agy-powerline",
     description:
-      "agy-powerline は Google Antigravity CLI（agy）向けのステータスラインです。Gemini、Claude/GPT、Argon のクォータをペースマーカー付きで、コンテキストや git と一緒に agy のステータスバーに表示します。",
+      "agy-powerline は Google Antigravity CLI 用ステータスライン。Gemini（Hydrogen、Neon、Argon、Carbon、Flash）や Anthropic（Claude/Sonnet）のクォータ、git を表示。",
     imageAlt:
       "agy-powerline：クォータが最後までもつかがわかる agy のステータスラインと、デフォルトのバー",
     eyebrow: "Google Antigravity CLI 向けステータスライン",
@@ -667,7 +667,7 @@ const HOME_TEXT = {
       ],
       "pills-dark": [
         "Pills",
-        "dark-aurora テーマの agy-powerline Pills レイアウト：モデル、コンテキスト、プロジェクト、git；ペースマーカーとリセットまでの時間付きの Gemini 5h と 7d のクォータ；Claude/GPT と Argon の週間クォータ",
+        "dark-aurora テーマの agy-powerline Pills レイアウト：モデル、コンテキスト、プロジェクト、git；ペースマーカーとリセットまでの時間付きの Gemini 5h と 7d のクォータ；Anthropic（Claude/Sonnet）と Argon の週間クォータ",
       ],
       "lines-light": [
         "Lines",
@@ -715,7 +715,7 @@ const HOME_TEXT = {
       ],
       [
         "どのクォータを表示しますか？",
-        'Gemini の 5 時間と 7 日間のクォータ、サードパーティ（Claude と GPT）の 5 時間と 7 日間のクォータ、Google AI Pro での Gemini 4 Argon の週間クォータを、それぞれのリセット時刻とともに表示します。メーターの見方は<a href="/guides/antigravity-quota/">クォータのガイド</a>（英語）で説明しています。',
+        'Google Gemini（Hydrogen、Neon、Carbon、Flash）の 5 時間と 7 日間のクォータ、Anthropic（Claude と Sonnet）の 5 時間と 7 日間のクォータ、Google AI Pro での Gemini 4 Argon の週間クォータを、それぞれのリセット時刻とともに表示します。メーターの見方は<a href="/guides/antigravity-quota/">クォータのガイド</a>（英語）で説明しています。',
       ],
     ],
     allQuestions: "すべての質問（英語）→",
@@ -727,7 +727,7 @@ const HOME_TEXT = {
     lang: "zh-CN",
     title: "Google Antigravity CLI 的 agy 状态栏 - agy-powerline",
     description:
-      "agy-powerline 是专为 Google Antigravity CLI（agy）打造的状态栏工具：在 agy 状态栏中实时展示当前模型、上下文窗口、Git 状态以及带配额节奏标记的 Gemini、Claude/GPT 和 Argon 配额。零依赖，无遥测。",
+      "agy-powerline 是专为 Google Antigravity CLI（agy）打造的状态栏：展示 Gemini（Hydrogen、Neon、Argon、Carbon、Flash）和 Anthropic（Claude/Sonnet）配额、节奏标记与 Git。",
     imageAlt: "agy-powerline：提前预判配额是否够用的 agy 状态栏及默认外观",
     eyebrow: "Google Antigravity CLI 状态栏",
     heroTitle: '提前看出<span class="grad-text">配额是否够用</span>的 agy 状态栏',
@@ -831,7 +831,7 @@ const HOME_TEXT = {
       ],
       "pills-dark": [
         "Pills",
-        "搭配 dark-aurora 主题的 agy-powerline Pills 布局：模型、上下文、项目与 Git；带节奏标记与重置倒计时的 Gemini 5h 和 7d 配额；Claude/GPT 与 Argon 每周配额",
+        "搭配 dark-aurora 主题的 agy-powerline Pills 布局：模型、上下文、项目与 Git；带节奏标记与重置倒计时的 Gemini 5h 和 7d 配额；Anthropic（Claude/Sonnet）与 Argon 每周配额",
       ],
       "lines-light": ["Lines", "浅色终端上搭配 light-paper 主题的 agy-powerline Lines 布局"],
       "classic-dark": [
@@ -875,7 +875,7 @@ const HOME_TEXT = {
       ],
       [
         "会显示哪些配额？",
-        '涵盖 Gemini 的 5 小时与 7 天配额、第三方模型（Claude 与 GPT）的 5 小时与 7 天配额，以及 Google AI Pro 下 Gemini 4 Argon 的每周配额，每一项都带有重置时间。进度条说明见<a href="/guides/antigravity-quota/">配额指南</a>（英文）。',
+        '涵盖 Google Gemini（Hydrogen、Neon、Carbon、Flash）的 5 小时与 7 天配额、Anthropic（Claude 与 Sonnet）的 5 小时与 7 天配额，以及 Google AI Pro 下 Gemini 4 Argon 的每周配额，每一项都带有重置时间。进度条说明见<a href="/guides/antigravity-quota/">配额指南</a>（英文）。',
       ],
     ],
     allQuestions: "查看全部问题（英文）→",
@@ -887,7 +887,7 @@ const HOME_TEXT = {
     lang: "ko",
     title: "Google Antigravity CLI용 agy 상태바 - agy-powerline",
     description:
-      "agy-powerline은 Google Antigravity CLI(agy)용 상태바입니다. 현재 모델, 컨텍스트 창, Git 상태와 소비 속도 마커가 포함된 Gemini, Claude/GPT 및 Argon 할당량을 보여줍니다. 의존성과 텔레메트리가 없습니다.",
+      "agy-powerline은 Google Antigravity CLI용 상태바입니다. Gemini(Hydrogen, Neon, Argon, Carbon, Flash) 및 Anthropic(Claude/Sonnet) 할당량과 속도 마커, Git을 표시합니다.",
     imageAlt: "agy-powerline: 할당량이 리셋 전까지 남을지 미리 알려주는 agy 상태바와 기본 스타일",
     eyebrow: "Google Antigravity CLI 상태바",
     heroTitle: '리셋 전에 <span class="grad-text">할당량이 남는지</span> 미리 보는 agy 상태바',
@@ -997,7 +997,7 @@ const HOME_TEXT = {
       ],
       "pills-dark": [
         "Pills",
-        "dark-aurora 테마의 agy-powerline Pills 레이아웃: 모델, 컨텍스트, 프로젝트, Git; 속도 마커와 리셋 카운트다운이 있는 Gemini 5시간 및 7일 할당량; Claude/GPT 및 Argon 주간 할당량",
+        "dark-aurora 테마의 agy-powerline Pills 레이아웃: 모델, 컨텍스트, 프로젝트, Git; 속도 마커와 리셋 카운트다운이 있는 Gemini 5시간 및 7일 할당량; Anthropic(Claude/Sonnet) 및 Argon 주간 할당량",
       ],
       "lines-light": ["Lines", "밝은 터미널 위의 light-paper 테마 agy-powerline Lines 레이아웃"],
       "classic-dark": [
@@ -1042,7 +1042,7 @@ const HOME_TEXT = {
       ],
       [
         "어떤 할당량이 표시되나요?",
-        'Gemini 5시간 및 7일 할당량, 타사 모델(Claude 및 GPT) 5시간 및 7일 할당량, Google AI Pro의 Gemini 4 Argon 주간 할당량을 각각 리셋 시간과 함께 표시합니다. 막대 읽는 법은 <a href="/guides/antigravity-quota/">할당량 가이드</a> (영어)를 참고하세요.',
+        'Google Gemini(Hydrogen, Neon, Carbon, Flash) 5시간 및 7일 할당량, Anthropic(Claude 및 Sonnet) 5시간 및 7일 할당량, Google AI Pro의 Gemini 4 Argon 주간 할당량을 각각 리셋 시간과 함께 표시합니다. 막대 읽는 법은 <a href="/guides/antigravity-quota/">할당량 가이드</a> (영어)를 참고하세요.',
       ],
     ],
     allQuestions: "모든 질문 보기 (영어) →",
@@ -1054,7 +1054,7 @@ const HOME_TEXT = {
     lang: "de",
     title: "agy-Statuszeile für Google Antigravity CLI - agy-powerline",
     description:
-      "agy-powerline ist die agy-Statuszeile für Google Antigravity CLI: Gemini-, Claude/GPT- und Argon-Kontingente mit Tempomarkierung, Kontext und Git in agy.",
+      "agy-powerline für Google Antigravity CLI: Gemini (Hydrogen, Neon, Argon, Carbon, Flash) und Anthropic (Claude/Sonnet) Kontingente mit Tempomarkierung.",
     imageAlt:
       "agy-powerline: die agy-Statuszeile, die dir zeigt, ob dein Kontingent bis zum Reset reicht, mit der Standardleiste",
     eyebrow: "Statuszeile für Google Antigravity CLI",
@@ -1178,7 +1178,7 @@ const HOME_TEXT = {
       ],
       "pills-dark": [
         "Pills",
-        "agy-powerline Pills-Layout mit dem Theme dark-aurora: Modell, Kontext, Projekt und Git; Gemini-5h- und -7T-Kontingente mit Tempomarkierungen und Resets; wöchentliche Claude/GPT- und Argon-Kontingente",
+        "agy-powerline Pills-Layout mit dem Theme dark-aurora: Modell, Kontext, Projekt und Git; Gemini-5h- und -7T-Kontingente mit Tempomarkierungen und Resets; wöchentliche Anthropic- (Claude/Sonnet) und Argon-Kontingente",
       ],
       "lines-light": [
         "Lines",
@@ -1226,7 +1226,7 @@ const HOME_TEXT = {
       ],
       [
         "Welche Kontingente werden angezeigt?",
-        'Die 5-Stunden- und 7-Tage-Kontingente von Gemini, die 5-Stunden- und 7-Tage-Kontingente für Drittanbieter (Claude und GPT) sowie das Wochenkontingent von Gemini 4 Argon in Google AI Pro, jeweils mit Reset-Zeit. Der <a href="/guides/antigravity-quota/">Kontingent-Guide</a> (auf Englisch) erklärt die Anzeigen.',
+        'Die 5-Stunden- und 7-Tage-Kontingente von Google Gemini (Hydrogen, Neon, Carbon, Flash), die 5-Stunden- und 7-Tage-Kontingente von Anthropic (Claude und Sonnet) sowie das Wochenkontingent von Gemini 4 Argon in Google AI Pro, jeweils mit Reset-Zeit. Der <a href="/guides/antigravity-quota/">Kontingent-Guide</a> (auf Englisch) erklärt die Anzeigen.',
       ],
     ],
     allQuestions: "Alle Fragen (auf Englisch) →",

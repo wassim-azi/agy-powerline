@@ -40,6 +40,6 @@ A running agy picks up these changes on its next refresh, without a restart.
 
 The default bar has two rows: the model, the context window and the git branch, then your 5-hour and 7-day Gemini quotas with their reset times. Each quota meter has a [pace marker](antigravity-quota.md#read-the-quota-meters) that shows whether you're using it faster than time passes.
 
-On Google AI Pro, Gemini 4 Argon has a weekly quota of its own; add the `argonWeekly` widget to see it. If you use Claude or GPT models in agy, `thirdPartyFiveHour` and `thirdPartyWeekly` show their quotas.
+On Google AI Pro, Gemini 4 Argon has a weekly quota of its own alongside Hydrogen, Neon, Carbon, and Flash; add the `argonWeekly` widget to see it. If you use Anthropic models (Claude and Sonnet) in agy, `thirdPartyFiveHour` and `thirdPartyWeekly` show their quotas.
 
 Browse every theme in the [theme gallery](https://agy-powerline.com/themes/), and see the [full widget list](https://agy-powerline.com/widgets/).

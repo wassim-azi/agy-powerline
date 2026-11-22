@@ -1,7 +1,7 @@
 {
   "name": "agy-powerline",
   "version": "1.11.4",
-  "description": "agy statusline for Google Antigravity CLI: live Gemini, Claude/GPT and Argon quota pacing, git, themes and an interactive TUI configurator",
+  "description": "agy statusline for Google Antigravity CLI: live Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthropic (Claude/Sonnet) quota pacing, git, themes and an interactive TUI configurator",
   "bin": {
     "agy-powerline": "src/index.js"
   },
@@ -63,6 +63,8 @@
     "terminal",
     "tui",
     "gemini",
+    "anthropic",
+    "claude",
     "quota",
     "nerd-fonts",
     "windows",

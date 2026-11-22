@@ -4,7 +4,7 @@ Short answers, with links to the details.
 
 ## What is agy-powerline?
 
-A status line for Google Antigravity CLI (`agy`): a small Node.js script that agy runs on every refresh to draw the bar under its input box. It shows the model, your Gemini 5-hour and 7-day quotas with a pace marker, the Claude/GPT and Argon quotas, the context window, git and more, with themes, layouts and an editor. It is free and open source (MIT).
+A status line for Google Antigravity CLI (`agy`): a small Node.js script that agy runs on every refresh to draw the bar under its input box. It shows the model, your Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthropic (Claude, Sonnet) quotas with pace markers, the context window, git and more, with themes, layouts and an editor. It is free and open source (MIT).
 
 ## How do I install it?
 
@@ -28,7 +28,7 @@ A refresh takes about 0.1 s of agy-powerline's own work on a Windows 11 laptop. 
 
 ## Which quotas does it show?
 
-The Gemini 5-hour and 7-day quotas, the third-party (Claude and GPT) 5-hour and 7-day quotas, and Gemini 4 Argon's weekly quota on Google AI Pro, each with its reset time. The [quota guide](guides/antigravity-quota.md) explains the meters and the pace marker.
+The Google Gemini (Hydrogen, Neon, Carbon, Flash) 5-hour and 7-day quotas, the Anthropic (Claude and Sonnet) 5-hour and 7-day quotas, and Gemini 4 Argon's weekly quota on Google AI Pro, each with its reset time. The [quota guide](guides/antigravity-quota.md) explains the meters and the pace marker.
 
 ## The bar shows boxes or question marks. How do I fix it?
 
