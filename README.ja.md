@@ -20,7 +20,7 @@
 
 **Google Antigravity の CLI（`agy`）向けの、高速でカスタマイズ可能なステータスライン。**
 
-使用中のモデル、Google Gemini（Hydrogen、Neon、Argon）および Anthropic（Claude、Sonnet）のクォータ、コンテキストウィンドウ、git ブランチなどがひと目でわかります。ウィジェット、テーマ、レイアウトは対話式のエディターで選べます。インストールはコマンドひとつ、依存パッケージはありません。
+使用中のモデル、Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）および Anthropic（Claude、Sonnet）のクォータ、コンテキストウィンドウ、git ブランチなどがひと目でわかります。ウィジェット、テーマ、レイアウトは対話式のエディターで選べます。インストールはコマンドひとつ、依存パッケージはありません。
 
 <p align="center">
   <img src="assets/demo.gif" alt="agy-powerline の対話式エディター：argon と入力して Argon の週間クォータを追加し、プリセットや / でのテーマ検索、Pills・Lines・Classic レイアウトのライブプレビュー、Settings のメータースタイル、? のショートカット一覧を表示" width="850">
@@ -31,7 +31,7 @@
 | 機能                         | できること                                                                                                          | 詳しく見る                                                                                                 |
 | ---------------------------- | ------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | クォータのペース表示         | クォータメーターのペースマーカーで、5h または 7d のクォータがリセットまでもつかがひと目でわかる                     | [クォータガイド](docs/guides/antigravity-quota.md) · [計算機](https://agy-powerline.com/quota-calculator/) |
-| マルチプロバイダーのクォータ | Google Gemini（Hydrogen、Neon、Argon）と Anthropic（Claude、Sonnet）のクォータを横並びで追跡                        | [ペイロードリファレンス](docs/payload.md#quota-buckets)                                                    |
+| マルチプロバイダーのクォータ | Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）と Anthropic（Claude、Sonnet）のクォータを横並びで追跡         | [ペイロードリファレンス](docs/payload.md#quota-buckets)                                                    |
 | テーマ & レイアウト          | `pills`、`lines`、`classic` の各レイアウトで使える WCAG AA 準拠の 22 テーマ（ダーク、ライト、色覚多様性対応を含む） | [テーマギャラリー](https://agy-powerline.com/themes/)                                                      |
 | 対話式のコンフィギュレーター | ターミナル（`npx agy-powerline`）またはブラウザーのライブプレビュー付きエディターで設定                             | [Web コンフィギュレーター](https://agy-powerline.com/configure/)                                           |
 | セキュリティ & プライバシー  | ランタイム依存パッケージ 0、ネットワーク通信なし、テレメトリなし、`settings.json` の自動バックアップ                | [セキュリティ](SECURITY.md)                                                                                |

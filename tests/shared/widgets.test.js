@@ -988,6 +988,10 @@ function testTightestQuota() {
     { ...real, model: { id: "hydrogen-high", display_name: "Hydrogen (High)" } },
     quota
   );
+  const unprefixedFlash = render(
+    { ...real, model: { id: "flash-high", display_name: "Flash (High)" } },
+    quota
+  );
   const idOnlyGemini = render(
     { ...real, model: { id: "gemini-4-flash", display_name: "Custom Flash" } },
     quota
@@ -997,9 +1001,11 @@ function testTightestQuota() {
     /Argon 7d 8\.2% rem/.test(unprefixedArgon) &&
       /7d 28\.6% rem/.test(unprefixedHydrogen) &&
       !/3P/.test(unprefixedHydrogen) &&
+      /7d 28\.6% rem/.test(unprefixedFlash) &&
+      !/3P/.test(unprefixedFlash) &&
       /7d 28\.6% rem/.test(idOnlyGemini) &&
       !/3P/.test(idOnlyGemini),
-    `${unprefixedArgon} | ${unprefixedHydrogen} | ${idOnlyGemini}`
+    `${unprefixedArgon} | ${unprefixedHydrogen} | ${unprefixedFlash} | ${idOnlyGemini}`
   );
 
   // Ultra: no Argon bucket, Argon counts toward the Gemini buckets.

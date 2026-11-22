@@ -20,7 +20,7 @@
 
 **Google Antigravity CLI를 위한 빠르고 자유롭게 설정 가능한 agy 스테이터스라인.**
 
-사용 중인 모델, Google Gemini(Hydrogen, Neon, Argon) 및 Anthropic(Claude, Sonnet) 할당량, 컨텍스트 창, git 브랜치 등을 한눈에 확인하세요. 인터랙티브 에디터에서 위젯, 테마, 레이아웃을 선택하세요. 명령 한 번으로 설치되며, 의존성은 없습니다.
+사용 중인 모델, Google Gemini(Hydrogen, Neon, Argon, Carbon, Flash) 및 Anthropic(Claude, Sonnet) 할당량, 컨텍스트 창, git 브랜치 등을 한눈에 확인하세요. 인터랙티브 에디터에서 위젯, 테마, 레이아웃을 선택하세요. 명령 한 번으로 설치되며, 의존성은 없습니다.
 
 <p align="center">
   <img src="assets/demo.gif" alt="agy-powerline 인터랙티브 에디터: argon을 입력해 Argon의 주간 할당량을 추가하고, 프리셋과 / 테마 필터링, Pills·Lines·Classic 레이아웃 실시간 미리보기, Settings의 미터 스타일, ? 단축키 오버레이를 확인하는 모습" width="850">
@@ -28,14 +28,14 @@
 
 ## 왜 agy-powerline인가요?
 
-| 기능             | 제공 내용                                                                                          | 자세히 보기                                                                                               |
-| ---------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| 할당량 속도 표시 | 할당량 미터의 페이스 마커로 5시간 또는 7일 할당량이 리셋 전까지 유지되는지 확인                    | [할당량 가이드](docs/guides/antigravity-quota.md) · [계산기](https://agy-powerline.com/quota-calculator/) |
-| 다중 모델 할당량 | Google Gemini(Hydrogen, Neon, Argon) 및 Anthropic(Claude, Sonnet) 할당량을 나란히 추적             | [페이로드 레퍼런스](docs/payload.md#quota-buckets)                                                        |
-| 테마 & 레이아웃  | `pills`, `lines`, `classic` 전반에서 WCAG AA 대비를 통과한 22개 테마(다크, 라이트, 색약 친화 포함) | [테마 갤러리](https://agy-powerline.com/themes/)                                                          |
-| 인터랙티브 설정  | 터미널(`npx agy-powerline`) 또는 브라우저에서 실시간 미리보기 에디터로 설정                        | [웹 설정기](https://agy-powerline.com/configure/)                                                         |
-| 보안 & 개인정보  | 런타임 의존성 0, 네트워크 호출 없음, 텔레메트리 없음, `settings.json` 자동 백업                    | [보안](SECURITY.md)                                                                                       |
-| 크로스 플랫폼    | 내장 진단 도구(`doctor`)와 함께 Windows, macOS, Linux, WSL 지원                                    | [설치](docs/install.md) · [문제 해결](docs/troubleshooting.md)                                            |
+| 기능             | 제공 내용                                                                                             | 자세히 보기                                                                                               |
+| ---------------- | ----------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
+| 할당량 속도 표시 | 할당량 미터의 페이스 마커로 5시간 또는 7일 할당량이 리셋 전까지 유지되는지 확인                       | [할당량 가이드](docs/guides/antigravity-quota.md) · [계산기](https://agy-powerline.com/quota-calculator/) |
+| 다중 모델 할당량 | Google Gemini(Hydrogen, Neon, Argon, Carbon, Flash) 및 Anthropic(Claude, Sonnet) 할당량을 나란히 추적 | [페이로드 레퍼런스](docs/payload.md#quota-buckets)                                                        |
+| 테마 & 레이아웃  | `pills`, `lines`, `classic` 전반에서 WCAG AA 대비를 통과한 22개 테마(다크, 라이트, 색약 친화 포함)    | [테마 갤러리](https://agy-powerline.com/themes/)                                                          |
+| 인터랙티브 설정  | 터미널(`npx agy-powerline`) 또는 브라우저에서 실시간 미리보기 에디터로 설정                           | [웹 설정기](https://agy-powerline.com/configure/)                                                         |
+| 보안 & 개인정보  | 런타임 의존성 0, 네트워크 호출 없음, 텔레메트리 없음, `settings.json` 자동 백업                       | [보안](SECURITY.md)                                                                                       |
+| 크로스 플랫폼    | 내장 진단 도구(`doctor`)와 함께 Windows, macOS, Linux, WSL 지원                                       | [설치](docs/install.md) · [문제 해결](docs/troubleshooting.md)                                            |
 
 ## 설치
 

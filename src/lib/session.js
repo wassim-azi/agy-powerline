@@ -325,7 +325,7 @@ function tightestQuota(data, lang) {
   if (model.includes("argon")) {
     pool = inGroup("argon");
     pool = pool.length ? pool : inGroup("gemini");
-  } else if (/gemini|hydrogen|neon|carbon/.test(model)) {
+  } else if (/gemini|hydrogen|neon|carbon|flash/.test(model)) {
     pool = inGroup("gemini");
   } else {
     pool = inGroup("3p");

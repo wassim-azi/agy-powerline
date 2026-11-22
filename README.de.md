@@ -20,7 +20,7 @@
 
 **Eine schnelle, konfigurierbare agy-Statuszeile für die Google Antigravity CLI (`agy`).**
 
-Behalte Modell, Google-Gemini- (Hydrogen, Neon, Argon) und Anthropic-Kontingente (Claude, Sonnet), Kontextfenster, Git-Branch und vieles mehr auf einen Blick im Auge. Wähle Widgets, Themes und Layout in einem interaktiven Editor. Ein Befehl zur Installation, keine Abhängigkeiten.
+Behalte Modell, Google-Gemini- (Hydrogen, Neon, Argon, Carbon, Flash) und Anthropic-Kontingente (Claude, Sonnet), Kontextfenster, Git-Branch und vieles mehr auf einen Blick im Auge. Wähle Widgets, Themes und Layout in einem interaktiven Editor. Ein Befehl zur Installation, keine Abhängigkeiten.
 
 <p align="center">
   <img src="assets/demo.gif" alt="Interaktiver Editor von agy-powerline: Argon-Wochenkontingent per Eingabe von argon hinzufügen, Vorlagen und Themes per / filtern, Pills, Lines und Classic in der Live-Vorschau vergleichen, Meter-Stile unter Settings prüfen und die ?-Tastaturkürzel öffnen" width="850">
@@ -31,7 +31,7 @@ Behalte Modell, Google-Gemini- (Hydrogen, Neon, Argon) und Anthropic-Kontingente
 | Funktion                   | Was du bekommst                                                                                                | Mehr erfahren                                                                                                 |
 | -------------------------- | -------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | Kontingent-Tempo           | Tempomarkierungen auf den Anzeigen zeigen, ob dein 5h- oder 7T-Kontingent bis zum Reset ausreicht              | [Kontingent-Guide](docs/guides/antigravity-quota.md) · [Rechner](https://agy-powerline.com/quota-calculator/) |
-| Mehrere Anbieter           | Google Gemini (Hydrogen, Neon, Argon) und Anthropic (Claude, Sonnet) nebeneinander verfolgen                   | [Payload-Referenz](docs/payload.md#quota-buckets)                                                             |
+| Mehrere Anbieter           | Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) und Anthropic (Claude, Sonnet) nebeneinander verfolgen    | [Payload-Referenz](docs/payload.md#quota-buckets)                                                             |
 | Themes & Layouts           | 22 WCAG-AA-geprüfte Themes (dunkel, hell und farbenblindfreundlich) für `pills`, `lines` und `classic`         | [Theme-Galerie](https://agy-powerline.com/themes/)                                                            |
 | Interaktive Konfiguratoren | Editor mit Live-Vorschau im Terminal (`npx agy-powerline`) oder im Browser                                     | [Web-Konfigurator](https://agy-powerline.com/configure/)                                                      |
 | Sicherheit & Datenschutz   | Null Laufzeitabhängigkeiten, keine Netzwerkaufrufe, keine Telemetrie, automatische Backups von `settings.json` | [Sicherheit](SECURITY.md)                                                                                     |
