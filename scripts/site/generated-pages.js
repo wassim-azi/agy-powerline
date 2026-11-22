@@ -95,7 +95,7 @@ function docsIndexPage() {
           ["/themes/", "Theme gallery", "Every theme on dark and light terminals."],
         ])}`;
   const description =
-    "Documentation for agy-powerline, the agy statusline for Google Antigravity CLI: install, configuration, widgets, troubleshooting, payload reference and guides.";
+    "agy-powerline documentation for Antigravity CLI: install, configuration, widgets, bar settings, payload reference, troubleshooting, security and guides.";
   return {
     path: "docs/",
     sources: ["scripts/site/build.js", "scripts/site/generated-pages.js"],
@@ -220,8 +220,7 @@ function widgetsPage() {
           <h2 id="layout-helpers">Layout helpers</h2>
           <ul>${layoutHelpers.map((w) => `<li><code>${esc(w.id)}</code>: ${esc(w.description)}</li>`).join("")}</ul>
         </section>`;
-  const description =
-    "Every widget of the agy-powerline statusline for Antigravity CLI, with a live preview: model, quotas with pace markers, context, git, tokens and more.";
+  const description = `All ${widgets.length} agy-powerline widgets with live previews: quotas and forecasts, context, 30-day tokens, cost, agent state, queue, git links, env and commands.`;
   return {
     path: "widgets/",
     sources: ["src/lib/widgets.js", "src/lib/catalog.js", "src/lib/widget-style.js"],

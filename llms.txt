@@ -1,6 +1,14 @@
 # agy-powerline
 
-> A fast, configurable agy statusline for Google Antigravity CLI (`agy`) supporting Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthropic (Claude, Sonnet) models. Requires Node.js 20+; has no runtime dependencies or network calls.
+> A configurable statusline dashboard for Google Antigravity CLI (`agy`) supporting Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthropic (Claude, Sonnet) models. Tracks quotas with pace markers and run-out forecasts, context window with compaction limits, session and 30-day tokens, estimated spend with budget alerts, agent state, subagents and queued messages, git details with clickable terminal links and fish-style shortening, across 22 WCAG AA themes, 3 layouts, 7 bar languages, and 16 bar-wide settings. Requires Node.js 20+ (Node 22.13+ for cross-conversation token totals via `node:sqlite`); has no runtime dependencies, no network calls, and no telemetry.
+
+## Capabilities
+- **Quota pace & forecasts:** Pace markers compare quota consumption against elapsed 5h and 7d window time across Gemini, Anthropic (Claude, Sonnet), and Argon weekly buckets. Optional `paceDelta` shows points ahead (`⇡`) or behind (`⇣`) an even pace, and `forecast` estimates when quota runs out at the current rate. Display quotas as remaining or used (`quotaMode`), optionally zero 5h when 7d is empty (`zeroFiveHourWhenWeeklyEmpty`), and keep disabled 3P 5h visible (`showDisabled`).
+- **Context, tokens & cost:** Track context window usage against the full window or a soft `compactionLimit` (e.g. `256000`). Monitor session tokens (`totalTokens`, with input/output `split`), prompt cache (`cacheRead`, `cacheCreate`, `cacheHit`), cross-conversation totals (`tokensToday`, `tokensWeek`, `tokensMonth`, read read-only from agy's local SQLite databases on Node 22.13+), and estimated USD spend (`cost`, with optional subagent `split`) with `budget` alerts (`warn`/`crit` colors and `blink`).
+- **Git & clickable workspace links:** Show branch, dirty state, ongoing git operations (`REBASE`, `MERGING`, `CHERRY-PICKING`, `REVERTING`, `BISECTING`), ahead/behind counts, line changes (`gitChanges`), file counts (`gitFiles`), commit SHA (`gitSha`), stashes (`gitStash`), and linked worktree (`gitWorktree`). Optional `link` creates clickable OSC 8 hyperlinks to folders (`file`, `vscode`, `cursor`, `zed`) and remote branches/commits; `fish` shortens parent directories (`~/D/r/app`) and branch prefixes (`f/a/oauth-login`).
+- **Agent, tasks & environment:** Show active non-default `agent`, `agentState` (including pending tool confirmation), running `tasks` (subagents and background tasks), `queue` (queued user messages), `mode` (approval and Vim modes), `sandbox`, `artifacts`, `env` variables (zero subprocesses; secret-like names blocked), and `exec` shell commands (global install config only).
+- **Interactive editor & Settings:** `npx agy-powerline` installs or updates the bar and launches a full-screen TUI editor with six tabs — Widgets (`w`), Presets (`o`), Themes (`t`), Layout (`l`), Powerline (`p`), and Settings (`i`) — plus live scenario switching (`,` `.`: Normal, Near limits, Agent & modes), simulated terminal widths (`-` `+`: 60–120 columns or full), `/` search filtering, and mouse support. The [browser configurator](https://agy-powerline.com/configure/) mirrors the editor with full Settings parity and shareable URLs.
+- **Themes, layouts & localization:** 22 WCAG AA themes (dark, light, color-blind safe) plus `custom`, 8 row gradients (`aurora`, `sunset`, `ocean`, `forest`, `neon`, `candy`, `rainbow`, `mono`) or custom hex stops, 9 meter styles (`pips`, `cells`, `dots`, `blocks`, `shade`, `squares`, `braille`, `rings`, `ramp`), 7 bar languages (`en`, `fr`, `es`, `ja`, `zh-CN`, `ko`, `de`), `ascii` mode, `maxWidth`, `alignment`, and `overflow` (`fit` or `wrap`).
 
 ## Install
 - `npx agy-powerline` installs (or updates outdated scripts) and opens the interactive TUI configurator in a terminal.
@@ -112,6 +120,28 @@
 - `exec` — Output from a shell command you configure.
 - `env` — Value of an environment variable, hidden when unset.
 - `customText` — Your own text.
+
+## Widget options
+- `forecast` (`"countdown"`, `"time"`, or `true` to follow `resetFormat`) on `quota`, `fiveHourPct`, `weeklyPct` — Estimates when quota runs out at the current pace; hides when it lasts until reset or during the first 10 minutes of a window.
+- `paceDelta` (`true`) on `quota`, `fiveHourPct`, `weeklyPct` — Adds points ahead of (`⇡`) or behind (`⇣`) an even pace over the window.
+- `pace` (`true` | `false`) on `fiveHourBar`, `weeklyBar`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly` — Toggles the pace marker per meter widget.
+- `meter` (`pips`, `cells`, `dots`, `blocks`, `shade`, `squares`, `braille`, `rings`, `ramp`) on `fiveHourBar`, `weeklyBar`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`, `context` — Overrides `meterStyle` for that widget.
+- `showDisabled` (`true`) on `thirdPartyFiveHour` — Keeps showing the 3P 5h bar when Antigravity marks `quota.3p-5h` disabled.
+- `link` on `cwd`, `project` (`"file"` | `true` | `"vscode"` | `"cursor"` | `"zed"`) and `git`, `gitSha` (`true`) — Clickable OSC 8 terminal links to folders, editors, or remote branch/commit URLs (read from `.git/config` with zero spawns; suppressed in `ascii` or `NO_COLOR` mode).
+- `fish` (`true`) on `cwd`, `git` — Abbreviates parent directories (`~/D/r/app`) and slash-separated branch prefixes (`f/a/oauth-login`).
+- `depth` (`1`–`10`) on `cwd` — Keeps the root and last N folders, collapsing the middle with `…`.
+- `budget` (number) on `cost` (USD) and `tokensToday`, `tokensWeek`, `tokensMonth` (tokens) — Adds `%` of budget used and shifts to caution/danger colors (`warn`/`crit`, `blink`) as usage approaches the budget.
+- `split` (`true`) on `totalTokens`, `tokensToday`, `tokensWeek`, `tokensMonth` (input `↑` / output `↓` apart) and `cost` (includes subagent spend when subagents were used).
+- `compactionLimit` (positive integer tokens, e.g. `256000`) on `context`, `contextPct`, `contextTokens` — Scales context %, meter, denominator, and thresholds to a soft compaction ceiling instead of the full window.
+- `showBelow` (`0`–`100`) on quota and reset widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `fiveHourReset`, `weeklyBar`, `weeklyPct`, `weeklyReset`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`, `argonReset`) — Shows only at or below that remaining percentage.
+- `showAbove` (`0`–`100`) on `context`, `contextPct`, `contextTokens` — Shows only at or above that used percentage (or when `exceeds_200k_tokens` triggers).
+- `format` (`"countdown"` | `"time"` | `"both"`) on `fiveHourReset`, `weeklyReset`, `argonReset` — Overrides `resetFormat`.
+- `short` (`true`) on `model` — Shortens the model name (e.g. `4 Hydrogen·High`).
+- `maxWidth` (`4`–`200`) on `model`, `cwd`, `project`, `git`, `gitWorktree`, `agent`, `title`, `exec`, `env`, `customText` — Clips the displayed value to that column width.
+- `operation` (`false`) on `git` — Hides rebase/merge/cherry-pick/revert/bisect operation labels.
+- `var` on `env` — Environment variable name (hidden when unset or secret-named).
+- `cmd`, `interval`, `timeout`, `payload`, `colors` on `exec`; `text` on `customText`.
+- Universal options on any widget: `color`, `textColor`, `bold`, `raw`, `label`, `icon`, plus `warn`, `crit`, `blink` on quota, context, and cross-conversation token widgets (`tokensToday`, `tokensWeek`, `tokensMonth`).
 
 ## Config
 Default: `~/.agy-powerline/statusline.config.json`; with `AGY_POWERLINE_HOME`, use `$AGY_POWERLINE_HOME/statusline.config.json`. See [Configuration](https://agy-powerline.com/docs/configuration/).

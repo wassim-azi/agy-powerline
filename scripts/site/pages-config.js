@@ -18,7 +18,7 @@ const MARKDOWN_PAGES = [
     name: "Install",
     title: "Install agy-powerline - agy statusline setup",
     description:
-      "Install the agy statusline with npx agy-powerline: what setup changes, the agy plugin route, installing without npm, WSL, upgrading and removing it.",
+      "Install agy-powerline with npx agy-powerline to wire settings.json and open the editor, or install via agy plugin, without npm, on WSL, upgrade or remove it.",
   },
   {
     source: "docs/configuration.md",
@@ -29,7 +29,7 @@ const MARKDOWN_PAGES = [
     name: "Configuration",
     title: "agy-powerline configuration - widgets, themes and options",
     description:
-      "Every setting of the agy-powerline statusline: widget options, the quota pace marker, meter styles, thresholds, shell commands, powerline glyphs and themes.",
+      "Every agy-powerline setting: 16 bar-wide options, quota pace and forecasts, budgets, compaction limits, git links, fish paths, meters, gradients and themes.",
   },
   {
     source: "docs/troubleshooting.md",
@@ -50,7 +50,7 @@ const MARKDOWN_PAGES = [
     name: "Payload reference",
     title: "What Antigravity CLI sends to a status line (payload)",
     description:
-      "Every field of the JSON Antigravity CLI (agy) pipes to a status line command, from real payloads: model, context window, quota buckets, git, sandbox and more.",
+      "Every JSON field Antigravity CLI (agy) pipes to a status line: model, context window, quota buckets, cost, agent state, queue, subagents, git and sandbox.",
   },
   {
     source: "docs/faq.md",
@@ -81,7 +81,7 @@ const MARKDOWN_PAGES = [
     name: "Changelog",
     title: "agy-powerline changelog - release notes",
     description:
-      "Release notes for every version of agy-powerline, the agy statusline for Google Antigravity CLI: new widgets, themes, commands and fixes.",
+      "Release notes for every version of agy-powerline for Google Antigravity CLI: new widgets, bar settings, quota forecasts, themes, languages, commands and fixes.",
   },
   {
     source: "scripts/site/content/about.md",
@@ -115,7 +115,7 @@ const GUIDES = [
     name: "See your Antigravity quota while you work",
     title: "See your Antigravity quota while you work - agy-powerline",
     description:
-      "Read Antigravity CLI's 5-hour and 7-day quotas in agy's status bar, with pace markers that show whether a quota lasts until its reset.",
+      "Read Antigravity CLI's 5h and 7d quotas in agy's status bar as left or used, with pace markers and run-out forecasts showing if a quota lasts.",
   },
   {
     source: "docs/guides/add-statusline-to-antigravity-cli.md",
