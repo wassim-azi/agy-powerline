@@ -63,6 +63,8 @@
     "terminal",
     "tui",
     "gemini",
+    "anthropic",
+    "claude",
     "quota",
     "nerd-fonts",
     "windows",
