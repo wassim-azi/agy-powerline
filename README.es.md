@@ -25,7 +25,7 @@ Consulta de un vistazo tu modelo, las cuotas de Google Gemini (Hydrogen, Neon, A
 </div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="editor interactivo de agy-powerline: añade el reinicio de la cuota semanal de Argon escribiendo argon, explora preajustes y filtra temas con /, compara los diseños Pills, Lines y Classic con vista previa en vivo y revisa los estilos de medidor en Settings" width="850">
+  <img src="assets/demo.gif" alt="editor interactivo de agy-powerline: añade el coste de la sesión escribiendo cost, explora preajustes y filtra temas con /, compara los diseños Pills, Lines y Classic con vista previa en vivo y revisa los estilos de medidor en Settings" width="850">
 </p>
 
 ## ¿Por qué agy-powerline?
@@ -33,7 +33,7 @@ Consulta de un vistazo tu modelo, las cuotas de Google Gemini (Hydrogen, Neon, A
 | Característica               | Qué obtienes                                                                                                                                                                                                                                                                       | Más información                                                                                                 |
 | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | Ritmo y previsiones          | Los marcadores de ritmo muestran si tu cuota de 5h o 7d durará hasta su reinicio, y `forecast` añade cuándo se agotará a tu ritmo actual                                                                                                                                           | [Guía de cuotas](docs/guides/antigravity-quota.md) · [Calculadora](https://agy-powerline.com/quota-calculator/) |
-| Cuotas de varios proveedores | Las cuotas de Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash), Anthropic (Claude, Sonnet) y la cuota semanal propia de Argon lado a lado, como restante o como usado                                                                                                          | [Referencia del payload](docs/payload.md#quota-buckets)                                                         |
+| Cuotas de varios proveedores | Las cuotas de 5h y 7d de Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) y Anthropic (Claude, Sonnet) lado a lado, como restante o como usado                                                                                                                                 | [Referencia del payload](docs/payload.md#quota-buckets)                                                         |
 | Contexto, tokens y coste     | La ventana de contexto usada, o medida frente a su límite de compactación, los tokens y la caché de la sesión, los tokens de hoy, de 7 o de 30 días, y el gasto estimado, con alertas de presupuesto                                                                               | [Widgets](docs/configuration.md#widgets)                                                                        |
 | Estado del agente            | Qué hace el agente (incluida una herramienta que espera tu aprobación), subagentes y tareas en segundo plano, mensajes en cola, modo de aprobación y sandbox                                                                                                                       | [Referencia del payload](docs/payload.md)                                                                       |
 | Git, con enlaces             | Rama, cambios, adelanto/retraso, worktree y stash, con enlaces en los que se puede hacer clic a la carpeta, la rama y el commit, y rutas abreviadas al estilo de fish                                                                                                              | [Opciones de widgets](docs/configuration.md#widget-options)                                                     |
@@ -102,7 +102,7 @@ Comienza desde un preajuste y luego ajústalo:
 | `agent`   | Estado del agente, subagentes, título, modo, sandbox; modelo, % de contexto, artefactos, cuota más ajustada                         |
 | `git`     | Proyecto, rama, worktree, stash; recuento de archivos, cambios de líneas, commit                                                    |
 | `tokens`  | Tokens de contexto, tokens de sesión de entrada/salida, aciertos de caché (`Cache hit`); tokens de hoy y durante los últimos 7 días |
-| `quotas`  | Plan y modelo; cuotas de 5h y 7d lado a lado; modelos de terceros y Argon debajo                                                    |
+| `quotas`  | Plan y modelo; cuotas de 5h y 7d lado a lado; modelos de terceros debajo                                                            |
 | `full`    | Todo: sesión, proyecto y git; contexto, tokens y caché; ambas cuotas                                                                |
 
 ### Temas
@@ -184,7 +184,6 @@ o `"language": "es"` en `statusline.config.json` (`Settings` con `i` en el edito
 | `fiveHourReset`, `weeklyReset`                                   | Tiempo hasta que se reinicia la cuota, o la hora de reinicio                                                                          |
 | `quota`                                                          | La cuota más próxima a agotarse, junto con su reinicio                                                                                |
 | `thirdPartyFiveHour`, `thirdPartyWeekly`                         | Cuotas de modelos de terceros                                                                                                         |
-| `argonWeekly`, `argonReset`                                      | La cuota semanal propia de Gemini 4 Argon (Google AI Pro) y su reinicio                                                               |
 | `context`, `contextPct`, `contextTokens`                         | Ventana de contexto utilizada: medidor, porcentaje o recuento de tokens                                                               |
 | `git`                                                            | Rama, cambios no confirmados y commits por delante o por detrás (ahead/behind)                                                        |
 | `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Líneas añadidas y eliminadas, archivos preparados/modificados/sin seguimiento/en conflicto, ID de commit, stashes, worktree vinculado |

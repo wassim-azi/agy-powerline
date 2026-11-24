@@ -18,7 +18,7 @@ function sampleData() {
       current_dir: process.cwd(),
       project_dir: process.cwd(),
     },
-    version: "1.5.14",
+    version: "1.5.16",
     context_window: {
       total_input_tokens: 88244,
       total_output_tokens: 61074,
@@ -54,11 +54,6 @@ function sampleData() {
         remaining_fraction: 0.21,
         reset_time: weeklyReset.toISOString(),
         reset_in_seconds: 86400 + 17 * 3600,
-      },
-      "gemini-argon-wtu-weekly": {
-        remaining_fraction: 0.64,
-        reset_time: new Date(now + 4 * 86400 * 1000 + 9 * 3600 * 1000).toISOString(),
-        reset_in_seconds: 4 * 86400 + 9 * 3600,
       },
     },
     agent: { name: "reviewer" },

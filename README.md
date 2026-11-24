@@ -23,7 +23,7 @@ See your model, Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthrop
 </div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline interactive editor: add the reset of Argon's weekly quota by typing argon, preview presets, browse and filter themes with /, compare Pills, Lines and Classic layouts with a live preview of the bar, and inspect meter styles in Settings" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline interactive editor: add the session cost by typing cost, preview presets, browse and filter themes with /, compare Pills, Lines and Classic layouts with a live preview of the bar, and inspect meter styles in Settings" width="850">
 </p>
 
 ## Why agy-powerline?
@@ -31,7 +31,7 @@ See your model, Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthrop
 | Feature                | What you get                                                                                                                                                                                                                                   | Learn more                                                                                                  |
 | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | Quota pace & forecasts | Pace markers show whether your 5h or 7d quota lasts until its reset, and `forecast` adds when it runs out at your current rate                                                                                                                 | [Quota guide](docs/guides/antigravity-quota.md) · [Calculator](https://agy-powerline.com/quota-calculator/) |
-| Multi-provider quotas  | Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash), Anthropic (Claude, Sonnet) and Argon's own weekly quota side by side, as what's left or what's used                                                                                      | [Payload reference](docs/payload.md#quota-buckets)                                                          |
+| Multi-provider quotas  | Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthropic (Claude, Sonnet) 5h and 7d quotas side by side, as what's left or what's used                                                                                               | [Payload reference](docs/payload.md#quota-buckets)                                                          |
 | Context, tokens & cost | Context window used, or measured against its compaction limit, session tokens and cache hits, tokens used today, over 7 or 30 days, and estimated spend, with budget alerts                                                                    | [Widgets](docs/configuration.md#widgets)                                                                    |
 | Agent awareness        | What the agent is doing (including a tool waiting for your approval), subagents and background tasks, queued messages, approval mode and sandbox                                                                                               | [Payload reference](docs/payload.md)                                                                        |
 | Git, with links        | Branch, changes, ahead/behind, worktree and stash, with clickable links to the folder, branch and commit pages, and fish-style shortening of long paths                                                                                        | [Widget options](docs/configuration.md#widget-options)                                                      |
@@ -100,7 +100,7 @@ Start from a preset, then adjust:
 | `agent`   | Agent state, subagents, title, mode, sandbox; model, context %, artifacts, tightest quota |
 | `git`     | Project, branch, worktree, stash; file counts, line changes, commit                       |
 | `tokens`  | Context tokens, session tokens in/out, cache hit; tokens today and over 7 days            |
-| `quotas`  | Plan and model; 5h and 7d quotas side by side; third-party and Argon below                |
+| `quotas`  | Plan and model; 5h and 7d quotas side by side; third-party below                          |
 | `full`    | Everything: session, project and git; context, tokens and cache; both quotas              |
 
 ### Themes
@@ -172,7 +172,6 @@ Preview them all in the [theme gallery](https://agy-powerline.com/themes/) or wi
 | `fiveHourReset`, `weeklyReset`                                   | Time until the quota resets, or the reset time                                                                |
 | `quota`                                                          | The quota closest to running out, with its reset                                                              |
 | `thirdPartyFiveHour`, `thirdPartyWeekly`                         | Third-party model quotas                                                                                      |
-| `argonWeekly`, `argonReset`                                      | Gemini 4 Argon's own weekly quota (Google AI Pro) and its reset                                               |
 | `context`, `contextPct`, `contextTokens`                         | Context window used: meter, percentage or token counts                                                        |
 | `git`                                                            | Branch, uncommitted changes and ahead/behind                                                                  |
 | `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Lines added and removed, staged/modified/untracked/conflicted files, commit ID, stashes, linked worktree      |

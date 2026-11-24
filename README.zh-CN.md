@@ -25,7 +25,7 @@
 </div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline 交互式编辑器：输入 argon 添加 Argon 每周配额的重置时间，预览预设并用 / 筛选主题，实时对比 Pills、Lines 与 Classic 布局，并在 Settings 中查看进度条样式" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline 交互式编辑器：输入 cost 添加会话花费，预览预设并用 / 筛选主题，实时对比 Pills、Lines 与 Classic 布局，并在 Settings 中查看进度条样式" width="850">
 </p>
 
 ## 为什么选择 agy-powerline？
@@ -33,7 +33,7 @@
 | 特性                 | 你能获得什么                                                                                                                                                                     | 了解更多                                                                                             |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | 配额节奏与预测       | 节奏标记让你一眼看出 5h 或 7d 配额能否撑到重置，`forecast` 还会显示按当前速度何时耗尽                                                                                            | [配额指南](docs/guides/antigravity-quota.md) · [计算器](https://agy-powerline.com/quota-calculator/) |
-| 多模型方配额         | 并排显示 Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）、Anthropic（Claude、Sonnet）以及 Argon 专属的每周配额，可显示剩余量或已用量                                       | [Payload 参考](docs/payload.md#quota-buckets)                                                        |
+| 多模型方配额         | 并排显示 Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）和 Anthropic（Claude、Sonnet）的 5h 与 7d 配额，可显示剩余量或已用量                                               | [Payload 参考](docs/payload.md#quota-buckets)                                                        |
 | 上下文、token 与花费 | 上下文窗口用量（也可对照压缩上限）、会话 token 与缓存命中率、今天及 7 天或 30 天内的 token 用量，以及预估花费，并支持预算提醒                                                    | [组件](docs/configuration.md#widgets)                                                                |
 | 智能体状态           | 智能体正在做什么（包括等待你批准的工具）、子智能体与后台任务、排队中的消息、审批模式和沙盒                                                                                       | [Payload 参考](docs/payload.md)                                                                      |
 | 带链接的 git         | 分支、改动、领先/落后、worktree 与 stash，可点击链接直达文件夹、分支和提交页面，并支持 fish 风格缩短长路径                                                                       | [组件选项](docs/configuration.md#widget-options)                                                     |
@@ -102,7 +102,7 @@ Install the agy-powerline statusline: run `npx agy-powerline init --yes`, then t
 | `agent`   | 代理状态、子代理、标题、模式、沙箱；模型、上下文 %、产物、最紧张的配额 |
 | `git`     | 项目、分支、worktree、stash；文件数、改动行数、提交                    |
 | `tokens`  | 上下文 token、会话输入/输出 token、缓存命中率；今天和 7 天的 token     |
-| `quotas`  | 套餐和模型；5h 和 7d 配额并排显示，下方显示第三方和 Argon 配额         |
+| `quotas`  | 套餐和模型；5h 和 7d 配额并排显示，下方显示第三方配额                  |
 | `full`    | 全部：会话、项目和 git；上下文、token 和缓存；两组配额                 |
 
 ### 主题
@@ -184,7 +184,6 @@ npx agy-powerline init --language zh-CN
 | `fiveHourReset`、`weeklyReset`                                   | 距配额重置的时间，或重置时刻                                                                   |
 | `quota`                                                          | 最接近用完的配额及其重置时间                                                                   |
 | `thirdPartyFiveHour`、`thirdPartyWeekly`                         | 第三方模型的配额                                                                               |
-| `argonWeekly`、`argonReset`                                      | Gemini 4 Argon 独立的每周配额（Google AI Pro）及其重置时间                                     |
 | `context`、`contextPct`、`contextTokens`                         | 已用的上下文窗口：进度条、百分比或 token 数                                                    |
 | `git`                                                            | 分支、未提交的更改以及领先/落后的提交数                                                        |
 | `gitChanges`、`gitFiles`、`gitSha`、`gitStash`、`gitWorktree`    | 新增与删除的行数、暂存/修改/未跟踪/冲突的文件数、提交 ID、stash 数、关联的 worktree            |

@@ -1,10 +1,10 @@
 {
   "model": {
-    "id": "Gemini 4 Hydrogen (High)",
-    "display_name": "Gemini 4 Hydrogen (High)",
-    "effort": "high"
+    "id": "Gemini 4 Argon (Low)",
+    "display_name": "Gemini 4 Argon (Low)",
+    "effort": "low"
   },
-  "version": "1.5.14",
+  "version": "1.5.16",
   "product": "antigravity",
   "agent_state": "idle",
   "plan_tier": "Google AI Pro",
@@ -14,14 +14,14 @@
     "project_dir": "/home/user/project"
   },
   "context_window": {
-    "total_input_tokens": 17625,
-    "total_output_tokens": 126,
+    "total_input_tokens": 17873,
+    "total_output_tokens": 193,
     "context_window_size": 1048576,
-    "used_percentage": 1.6808509826660156,
-    "remaining_percentage": 98.31914901733398,
+    "used_percentage": 1.7045021057128906,
+    "remaining_percentage": 98.29549789428711,
     "current_usage": {
-      "input_tokens": 12603,
-      "output_tokens": 126,
+      "input_tokens": 12861,
+      "output_tokens": 193,
       "cache_creation_input_tokens": 0,
       "cache_read_input_tokens": 0
     }
@@ -37,22 +37,17 @@
     "3p-weekly": {
       "remaining_fraction": 0,
       "reset_time": "2026-11-28T12:30:20.000Z",
-      "reset_in_seconds": 508371
+      "reset_in_seconds": 315738
     },
     "gemini-5h": {
-      "remaining_fraction": 0.7504738,
-      "reset_time": "2026-11-22T16:27:31.000Z",
-      "reset_in_seconds": 4202
-    },
-    "gemini-argon-wtu-weekly": {
-      "remaining_fraction": 0.0018366667,
-      "reset_time": "2026-11-28T12:30:27.000Z",
-      "reset_in_seconds": 508378
+      "remaining_fraction": 1,
+      "reset_time": "2026-11-25T01:47:42.000Z",
+      "reset_in_seconds": 17980
     },
     "gemini-weekly": {
-      "remaining_fraction": 0.5164398,
-      "reset_time": "2026-11-28T12:30:11.000Z",
-      "reset_in_seconds": 508362
+      "remaining_fraction": 0.9860519,
+      "reset_time": "2026-11-30T20:55:03.000Z",
+      "reset_in_seconds": 518821
     }
   },
   "vcs": {
@@ -62,5 +57,5 @@
     "enabled": false
   },
   "cycle_mode": "auto",
-  "terminal_width": 129
+  "terminal_width": 198
 }

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Gemini 4 Argon counts toward the Gemini 5h and 7d quotas on Google AI Pro, as on Ultra: `quota` uses them for Argon, and for Orchestrator whatever model plans. The `quotas` preset ends with the third-party row
+- Token widgets (`tokensToday`, `tokensWeek`, `tokensMonth`) take about a third less time to check agy's conversation folder on Windows, which grows since agy 1.5.15 keeps every conversation
+
+### Removed
+
+- `argonWeekly` and `argonReset`: agy no longer sends a separate Argon quota. A config that lists them shows the rest of the bar, and `doctor` reports them as unknown widgets
+
 ## [2.0.0] - 2026-11-22
 
 agy-powerline 2.0 makes the bar yours in one command. `npx agy-powerline` installs it and opens a redesigned editor, a new Settings tab holds every option that applies to the whole bar, the bar now speaks German, Korean and Simplified Chinese, and new widgets track your monthly tokens, your spend and your environment. Configs from 1.x keep working.

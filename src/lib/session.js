@@ -15,15 +15,10 @@ const { resolveLanguage, t } = require("./i18n");
 
 const FIVE_HOURS = 5 * 3600;
 const SEVEN_DAYS = 7 * 86400;
-const ARGON_BUCKET = "gemini-argon-wtu-weekly";
 // The buckets Antigravity sends, with the message key of the short name the bar shows.
 const QUOTA_BUCKETS = {
   "gemini-5h": { key: "tag_5h", window: FIVE_HOURS },
   "gemini-weekly": { key: "tag_7d", window: SEVEN_DAYS },
-  // Gemini 4 Argon on Google AI Pro: a weekly quota of its own, with no 5-hour
-  // window, sent whatever model is in use. On Ultra Argon counts toward the
-  // Gemini buckets and this one isn't sent.
-  [ARGON_BUCKET]: { key: "tag_argon_7d", window: SEVEN_DAYS },
   "3p-5h": { key: "tag_3p_5h", window: FIVE_HOURS },
   "3p-weekly": { key: "tag_3p_7d", window: SEVEN_DAYS },
 };
@@ -290,22 +285,17 @@ function applyWeeklyEmptyZero(fiveHour, weekly, enabled) {
 
 // Which quota group a bucket belongs to.
 function bucketGroup(key) {
-  if (key.startsWith("gemini-argon-")) {
-    return "argon";
-  }
   if (key.startsWith("gemini-")) {
     return "gemini";
   }
   return key.startsWith("3p-") ? "3p" : null;
 }
 
-// The bucket closest to running out for the model in use: the Argon bucket
-// for Argon models, the other gemini-* buckets for Gemini models, 3p-*
-// (third-party) buckets for the others. Argon falls back to the Gemini
-// buckets, where its usage counts when there is no Argon bucket. Orchestrator
-// executes on Gemini 4 Hydrogen whatever its planner, so it draws on the Gemini
-// buckets, plus the Argon bucket when Argon plans. Without a matching bucket
-// every bucket counts. Disabled buckets never do.
+// The bucket closest to running out for the model in use: gemini-* buckets
+// for Gemini models (Argon included) and for Orchestrator, whose executor runs
+// on Gemini 4 Hydrogen whatever its planner; 3p-* (third-party) buckets for the
+// others. Without a matching bucket every bucket counts. Disabled buckets
+// never do.
 function tightestQuota(data, lang) {
   const buckets = data?.quota && typeof data.quota === "object" ? data.quota : {};
   const usable = [];
@@ -323,17 +313,9 @@ function tightestQuota(data, lang) {
     .join(" ")
     .toLowerCase();
   const inGroup = (group) => usable.filter((quota) => bucketGroup(quota.key) === group);
-  let pool;
-  if (model.includes("orchestrator")) {
-    pool = [...inGroup("gemini"), ...(model.includes("argon") ? inGroup("argon") : [])];
-  } else if (model.includes("argon")) {
-    pool = inGroup("argon");
-    pool = pool.length ? pool : inGroup("gemini");
-  } else if (/gemini|hydrogen|neon|carbon|flash/.test(model)) {
-    pool = inGroup("gemini");
-  } else {
-    pool = inGroup("3p");
-  }
+  let pool = inGroup(
+    /gemini|orchestrator|hydrogen|neon|argon|carbon|flash/.test(model) ? "gemini" : "3p"
+  );
   pool = pool.length ? pool : usable;
 
   return pool.reduce((low, quota) => (!low || quota.remaining < low.remaining ? quota : low), null);
@@ -467,7 +449,6 @@ function extractSession(data, config, options = {}) {
       zeroWhenWeeklyEmpty
     ),
     thirdPartyWeekly,
-    argonWeekly: readQuota(data, ARGON_BUCKET, SEVEN_DAYS, lang),
     tightestQuota: tightestQuota(data, lang),
     cwd: firstText(data.cwd, data.workspace?.current_dir),
     project: firstText(data.workspace?.project_dir),
