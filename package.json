@@ -1,6 +1,6 @@
 {
   "name": "agy-powerline",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "agy statusline for Google Antigravity CLI: live Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) and Anthropic (Claude/Sonnet) quota pacing, git, themes and an interactive TUI configurator",
   "bin": {
     "agy-powerline": "src/index.js"
