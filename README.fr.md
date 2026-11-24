@@ -25,7 +25,7 @@ Consultez d’un coup d’œil le modèle utilisé, les quotas Google Gemini (Hy
 </div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="éditeur interactif d’agy-powerline : ajout de la réinitialisation du quota hebdomadaire d’Argon en tapant argon, aperçu des préréglages, filtrage des thèmes avec /, comparaison des dispositions Pills, Lines et Classic en direct et styles de jauge dans Settings" width="850">
+  <img src="assets/demo.gif" alt="éditeur interactif d’agy-powerline : ajout du coût de la session en tapant cost, aperçu des préréglages, filtrage des thèmes avec /, comparaison des dispositions Pills, Lines et Classic en direct et styles de jauge dans Settings" width="850">
 </p>
 
 ## Pourquoi agy-powerline ?
@@ -33,7 +33,7 @@ Consultez d’un coup d’œil le modèle utilisé, les quotas Google Gemini (Hy
 | Fonctionnalité            | Ce que vous obtenez                                                                                                                                                                                                                                                                                             | En savoir plus                                                                                                    |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | Rythme et prévisions      | Des repères de rythme indiquent si votre quota 5h ou 7j tiendra jusqu’à sa réinitialisation, et `forecast` ajoute quand il s’épuisera à votre rythme actuel                                                                                                                                                     | [Guide des quotas](docs/guides/antigravity-quota.md) · [Calculateur](https://agy-powerline.com/quota-calculator/) |
-| Quotas multi-fournisseurs | Les quotas Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash), Anthropic (Claude, Sonnet) et le quota hebdomadaire propre à Argon côte à côte, en restant ou en utilisé                                                                                                                                       | [Référence du payload](docs/payload.md#quota-buckets)                                                             |
+| Quotas multi-fournisseurs | Les quotas sur 5h et 7j de Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) et Anthropic (Claude, Sonnet) côte à côte, en restant ou en utilisé                                                                                                                                                             | [Référence du payload](docs/payload.md#quota-buckets)                                                             |
 | Contexte, jetons et coût  | La fenêtre de contexte utilisée, ou mesurée face à sa limite de compaction, les jetons et le cache de la session, les jetons du jour, sur 7 ou 30 jours, et la dépense estimée, avec alertes de budget                                                                                                          | [Widgets](docs/configuration.md#widgets)                                                                          |
 | Suivi de l’agent          | Ce que fait l’agent (y compris un outil qui attend votre approbation), sous-agents et tâches de fond, messages en file d’attente, mode d’approbation et sandbox                                                                                                                                                 | [Référence du payload](docs/payload.md)                                                                           |
 | Git, avec liens           | Branche, modifications, avance/retard, worktree et stash, avec des liens cliquables vers le dossier, la branche et le commit, et des chemins raccourcis à la manière de fish                                                                                                                                    | [Options des widgets](docs/configuration.md#widget-options)                                                       |
@@ -102,7 +102,7 @@ Choisissez un préréglage comme point de départ, puis personnalisez-le :
 | `agent`    | État de l’agent, sous-agents, titre, mode, sandbox ; modèle, contexte %, artefacts, quota le plus proche de sa limite |
 | `git`      | Projet, branche, worktree, stash ; nombre de fichiers, lignes modifiées, commit                                       |
 | `tokens`   | Tokens du contexte, tokens de la session en entrée et en sortie, cache hit ; tokens du jour et des 7 derniers jours   |
-| `quotas`   | Offre et modèle ; quotas sur 5h et 7j côte à côte ; modèles tiers et Argon en dessous                                 |
+| `quotas`   | Offre et modèle ; quotas sur 5h et 7j côte à côte ; modèles tiers en dessous                                          |
 | `full`     | Toutes les informations : session, projet et Git ; contexte, tokens et cache ; les deux quotas                        |
 
 ### Thèmes
@@ -184,7 +184,6 @@ ou `"language": "fr"` dans `statusline.config.json` (`Settings` via `i` dans l�
 | `fiveHourReset`, `weeklyReset`                                   | Temps restant avant la réinitialisation du quota, ou heure de réinitialisation                                                    |
 | `quota`                                                          | Quota le plus proche de sa limite, avec son heure de réinitialisation                                                             |
 | `thirdPartyFiveHour`, `thirdPartyWeekly`                         | Quotas des modèles tiers                                                                                                          |
-| `argonWeekly`, `argonReset`                                      | Quota hebdomadaire propre à Gemini 4 Argon (Google AI Pro) et sa réinitialisation                                                 |
 | `context`, `contextPct`, `contextTokens`                         | Fenêtre de contexte utilisée : jauge, pourcentage ou nombre de tokens                                                             |
 | `git`                                                            | Branche, modifications non validées et commits en avance ou en retard                                                             |
 | `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Lignes ajoutées et supprimées, fichiers indexés/modifiés/non suivis/en conflit, ID du commit, stashes, worktree lié               |

@@ -25,7 +25,7 @@
 </div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline 인터랙티브 에디터: argon을 입력해 Argon 주간 할당량의 리셋을 추가하고, 프리셋과 / 테마 필터링, Pills·Lines·Classic 레이아웃 실시간 미리보기, Settings의 미터 스타일을 확인하는 모습" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline 인터랙티브 에디터: cost를 입력해 세션 비용을 추가하고, 프리셋과 / 테마 필터링, Pills·Lines·Classic 레이아웃 실시간 미리보기, Settings의 미터 스타일을 확인하는 모습" width="850">
 </p>
 
 ## 왜 agy-powerline인가요?
@@ -33,7 +33,7 @@
 | 기능                 | 제공 내용                                                                                                                                                                                                                                               | 자세히 보기                                                                                               |
 | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | 속도 표시와 예측     | 페이스 마커로 5시간 또는 7일 할당량이 리셋 전까지 유지되는지 확인하고, `forecast`로 현재 속도라면 언제 소진되는지도 표시                                                                                                                                | [할당량 가이드](docs/guides/antigravity-quota.md) · [계산기](https://agy-powerline.com/quota-calculator/) |
-| 다중 모델 할당량     | Google Gemini(Hydrogen, Neon, Argon, Carbon, Flash), Anthropic(Claude, Sonnet), Argon 전용 주간 할당량을 남은 양 또는 사용량으로 나란히 표시                                                                                                            | [페이로드 레퍼런스](docs/payload.md#quota-buckets)                                                        |
+| 다중 모델 할당량     | Google Gemini(Hydrogen, Neon, Argon, Carbon, Flash) 및 Anthropic(Claude, Sonnet)의 5시간/7일 할당량을 남은 양 또는 사용량으로 나란히 표시                                                                                                               | [페이로드 레퍼런스](docs/payload.md#quota-buckets)                                                        |
 | 컨텍스트, 토큰, 비용 | 컨텍스트 창 사용량(압축 한도 기준도 가능), 세션 토큰과 캐시 적중률, 오늘·7일·30일 토큰 사용량, 예상 비용을 예산 알림과 함께 표시                                                                                                                        | [위젯](docs/configuration.md#widgets)                                                                     |
 | 에이전트 상태        | 에이전트가 하는 일(승인을 기다리는 도구 포함), 서브에이전트와 백그라운드 작업, 대기 중인 메시지, 승인 모드, 샌드박스                                                                                                                                    | [페이로드 레퍼런스](docs/payload.md)                                                                      |
 | 링크가 있는 git      | 브랜치, 변경 사항, ahead/behind, worktree, stash를 폴더·브랜치·커밋 페이지로 가는 클릭 가능한 링크, fish 스타일로 줄인 경로와 함께 표시                                                                                                                 | [위젯 옵션](docs/configuration.md#widget-options)                                                         |
@@ -102,7 +102,7 @@ Nerd Font가 없는 터미널에서는 ASCII 모드를 켜세요(`npx agy-powerl
 | `agent`   | 에이전트 상태, 서브에이전트, 제목, 모드, 샌드박스; 모델, 컨텍스트 %, 아티팩트(산출물), 남은 양이 가장 적은 할당량 |
 | `git`     | 프로젝트, 브랜치, 워크트리, 스태시; 파일 수, 변경 줄 수, 커밋                                                     |
 | `tokens`  | 컨텍스트 토큰, 세션 토큰 입/출력, 캐시 적중; 오늘 및 최근 7일간 토큰                                              |
-| `quotas`  | 요금제(플랜)와 모델; 5시간/7일 할당량 나란히; 아래에 서드파티와 Argon                                             |
+| `quotas`  | 요금제(플랜)와 모델; 5시간/7일 할당량 나란히; 아래에 서드파티                                                     |
 | `full`    | 전부: 세션, 프로젝트, git; 컨텍스트, 토큰, 캐시; 양쪽 할당량                                                      |
 
 ### 테마
@@ -184,7 +184,6 @@ npx agy-powerline init --language ko
 | `fiveHourReset`, `weeklyReset`                                   | 할당량이 리셋되기까지 남은 시간 또는 리셋 시각                                                       |
 | `quota`                                                          | 가장 먼저 소진될 가능성이 높은 할당량과 리셋 시각                                                    |
 | `thirdPartyFiveHour`, `thirdPartyWeekly`                         | 서드파티 모델 할당량                                                                                 |
-| `argonWeekly`, `argonReset`                                      | Gemini 4 Argon 자체 주간 할당량(Google AI Pro)과 리셋                                                |
 | `context`, `contextPct`, `contextTokens`                         | 사용 중인 컨텍스트 창: 미터, 백분율 또는 토큰 수                                                     |
 | `git`                                                            | 브랜치, 커밋되지 않은 변경, ahead/behind                                                             |
 | `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | 추가/삭제된 줄, 스테이지/수정/추적 안 됨/충돌 파일 수, 커밋 ID, 스태시, 연결된 워크트리              |

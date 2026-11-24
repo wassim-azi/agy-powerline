@@ -366,7 +366,7 @@ const PRESETS = {
   quotas: {
     id: "quotas",
     name: "Quota watch",
-    description: "Plan and model; 5h and 7d quotas side by side; third-party and Argon",
+    description: "Plan and model; 5h and 7d quotas side by side; third-party below",
     widgets: [
       { id: "plan" },
       { id: "separator" },
@@ -381,9 +381,6 @@ const PRESETS = {
       { id: "thirdPartyFiveHour" },
       { id: "separator" },
       { id: "thirdPartyWeekly" },
-      { id: "lineBreak" },
-      { id: "argonWeekly" },
-      { id: "argonReset" },
     ],
   },
   full: {

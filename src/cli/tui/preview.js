@@ -45,11 +45,6 @@ const PREVIEW_SCENARIOS = [
             reset_time: new Date(now + 5 * 3600 * 1000).toISOString(),
             reset_in_seconds: 5 * 3600,
           },
-          "gemini-argon-wtu-weekly": {
-            remaining_fraction: 0.07,
-            reset_time: new Date(now + 8 * 3600 * 1000).toISOString(),
-            reset_in_seconds: 8 * 3600,
-          },
           "3p-5h": {
             remaining_fraction: 0.09,
             reset_time: new Date(now + 35 * 60 * 1000).toISOString(),

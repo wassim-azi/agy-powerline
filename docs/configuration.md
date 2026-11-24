@@ -63,10 +63,9 @@ Most values come from the JSON Antigravity pipes on stdin; `host`, `os` and `ram
 
 - Local clock (`clock` e.g. `🕒 2:05pm`: the current time, in the format set under [`"clock"`](#reset-times-and-clock); `Clock: 2:05pm` in ASCII mode)
 - Model (`model.display_name`; `"short": true` shows `4 Hydrogen·High` instead of `Gemini 4 Hydrogen (High)`)
-- Tightest quota (`quota` e.g. `⏳ 7d 28.6% rem · 11hr 35m`: of the quota buckets for the model in use, the one closest to running out; the Argon weekly bucket (`Argon 7d`) for Gemini 4 Argon, the other `gemini-*` buckets for the other Gemini models and for Argon on plans without an Argon bucket, those `gemini-*` buckets plus the Argon one for Orchestrator, whose executor runs on Gemini 4 Hydrogen (the Argon bucket only when Argon plans), `3p-*` for the others)
+- Tightest quota (`quota` e.g. `⏳ 7d 28.6% rem · 11hr 35m`: of the quota buckets for the model in use, the one closest to running out; the `gemini-*` buckets for Gemini models, Argon included, and for Orchestrator, whose executor runs on Gemini 4 Hydrogen; `3p-*` for the others)
 - 5h / 7d remaining quota meters (`fiveHourBar`, `weeklyBar`) with consumption-based fill direction, a [pace marker](#quota-pace-marker), and separate reset timers that show a countdown or the [exact reset time](#reset-times-and-clock) (`fiveHourReset`, `weeklyReset`)
 - 3P 5h / 7d remaining quota (5h hidden while `disabled` unless `"showDisabled": true` on `thirdPartyFiveHour`)
-- Argon 7d remaining quota meter and reset timer (`argonWeekly`, `argonReset`, from the `gemini-argon-wtu-weekly` bucket): on Google AI Pro, Gemini 4 Argon has a weekly quota of its own with no 5-hour window, sent whatever model is in use, so you can see it while working on another model. Hidden when the bucket isn't sent, e.g. on Ultra, where Argon counts toward the Gemini 5h / 7d quotas
 - Context bar, %, tokens (`used_percentage`, `context_window_size`; the tokens are the used share of the window, so they always match the %. Without a window size, `current_usage` input plus cached tokens)
 - Working directory (`cwd`, `~` for home), project folder (`workspace.project_dir`)
 - VCS branch with dirty marker and remote sync indicators (`git` — `vcs.branch` `*`, `⇡2 ⇣1` ahead/behind; reads `.git` directly, including packed refs and linked worktrees, and runs `git rev-list` only when the branch tracks an upstream and points at a different commit; with `gitFiles` on the bar, uncommitted files mark it dirty too, not only an unfinished merge or rebase)
@@ -129,7 +128,7 @@ Any widget accepts these options:
 
 ## Quota pace marker
 
-Every 5h, 7d, third-party and Argon quota meter carries a marker, a larger dot `●` in the default Pills meter and `┃` in the others (`|` in ASCII mode), at the point the quota window has reached. The bar fills from the left as quota is used (the light dots are the fill), so you can read it at a glance:
+Every 5h, 7d and third-party quota meter carries a marker, a larger dot `●` in the default Pills meter and `┃` in the others (`|` in ASCII mode), at the point the quota window has reached. The bar fills from the left as quota is used (the light dots are the fill), so you can read it at a glance:
 
 ```
 ⏳ •••••●••••••  72.0% rem    fill behind the marker: you're using quota slower than time passes
@@ -181,7 +180,7 @@ Set `"forecast": "countdown"`, `"forecast": "time"`, or `"forecast": true` (foll
 
 ### Quota perspective (`quotaMode`)
 
-By default (`"quotaMode": "remaining"`), quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) show the percentage remaining (`72.0% rem`). Set `"quotaMode": "used"` — or cycle **Quota display** in the Settings tab (`i`) in the editor — to display quota consumed instead (`28.0% used`), localized in every supported bar language. Meters continue filling left-to-right by usage consumed alongside the pace marker, and warning/danger thresholds continue triggering at the same usage levels.
+By default (`"quotaMode": "remaining"`), quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`) show the percentage remaining (`72.0% rem`). Set `"quotaMode": "used"` — or cycle **Quota display** in the Settings tab (`i`) in the editor — to display quota consumed instead (`28.0% used`), localized in every supported bar language. Meters continue filling left-to-right by usage consumed alongside the pace marker, and warning/danger thresholds continue triggering at the same usage levels.
 
 ### Zero 5h when 7d is 0% (`zeroFiveHourWhenWeeklyEmpty`)
 
@@ -189,7 +188,7 @@ When a 7-day quota reaches `0%` remaining, Antigravity can still report its pair
 
 ## Meter styles
 
-Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"meterStyle"` picks another look for every meter, and `"meter"` on a meter widget (`fiveHourBar`, `weeklyBar`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`, `context`) for that one; the widget's value wins. The editor sets the per-widget one (Enter on a meter widget, then **Meter**).
+Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"meterStyle"` picks another look for every meter, and `"meter"` on a meter widget (`fiveHourBar`, `weeklyBar`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `context`) for that one; the widget's value wins. The editor sets the per-widget one (Enter on a meter widget, then **Meter**).
 
 ```json
 { "meterStyle": "squares", "widgets": [{ "id": "fiveHourBar", "meter": "blocks" }] }
@@ -224,7 +223,7 @@ Pills draw meters as small dots, Lines as larger ones and Classic as blocks. `"m
 ```
 
 - **`format`**: `"countdown"` (`2hr 47m`, the default), `"time"` (`6:33pm`; weekly adds the date, `oct 10, 2:50pm`) or `"both"` (`6:33pm (2hr 47m)`).
-- **`resetFormat`** _(top-level default)_: sets the default format (`"countdown"`, `"time"`, or `"both"`) for all reset timer widgets (`fiveHourReset`, `weeklyReset`, `argonReset`), or cycle **Reset format** in the Settings tab (`i`) in the editor. A widget's own `"format"` still overrides it.
+- **`resetFormat`** _(top-level default)_: sets the default format (`"countdown"`, `"time"`, or `"both"`) for all reset timer widgets (`fiveHourReset`, `weeklyReset`), or cycle **Reset format** in the Settings tab (`i`) in the editor. A widget's own `"format"` still overrides it.
 
 How times look is set once for every widget under `"clock"`:
 
@@ -273,7 +272,7 @@ Quota and context widgets change color as they get low or full: the theme's ok c
 - **`contextCrit`** _(default: `90`%)_: used context at which they turn to the danger color. Antigravity's `exceeds_200k_tokens` also triggers it.
 - **`blink`** _(default: `false`)_: `true` makes danger-level widgets blink; `"warn"` makes caution-level ones blink too. ASCII mode never blinks. Toggle **Alert blink** in the Settings tab (`i`) in the editor, or cycle **Warning sensitivity** (`default`: 30/10% quota and 70/90% context, `early`: 40/20% and 60/80%, `relaxed`: 20/5% and 80/95%; hand-edited values stay `custom` until cycled or reset).
 - **Per widget**: any quota or context widget takes its own `warn`, `crit` and `blink` (e.g. `{"id": "fiveHourBar", "warn": 20, "crit": 10, "blink": true}`).
-- **Visibility per widget**: quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`, `argonWeekly`) and their reset widgets (`fiveHourReset`, `weeklyReset`, `argonReset`) take `showBelow`, a remaining-quota percentage from 0 to 100. The widget hides while more remains and appears at or below the threshold. A reset widget uses its own quota window. Context widgets (`context`, `contextPct`, `contextTokens`) take `showAbove`, a used-context percentage from 0 to 100; they hide below the threshold and appear at or above it, or as soon as Antigravity reports `exceeds_200k_tokens` (the danger color). Both options are unset by default (`always` in the editor); values that aren't numbers from 0 to 100 are ignored.
+- **Visibility per widget**: quota widgets (`quota`, `fiveHourBar`, `fiveHourPct`, `weeklyBar`, `weeklyPct`, `thirdPartyFiveHour`, `thirdPartyWeekly`) and their reset widgets (`fiveHourReset`, `weeklyReset`) take `showBelow`, a remaining-quota percentage from 0 to 100. The widget hides while more remains and appears at or below the threshold. A reset widget uses its own quota window. Context widgets (`context`, `contextPct`, `contextTokens`) take `showAbove`, a used-context percentage from 0 to 100; they hide below the threshold and appear at or above it, or as soon as Antigravity reports `exceeds_200k_tokens` (the danger color). Both options are unset by default (`always` in the editor); values that aren't numbers from 0 to 100 are ignored.
 
 ```json
 {

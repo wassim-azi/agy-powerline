@@ -307,16 +307,18 @@ function signature(file) {
     if (!stat.isFile()) {
       return null;
     }
-    let mtimeMs = stat.mtimeMs;
-    let size = stat.size;
+    // agy keeps every conversation, so this runs for each one on every refresh:
+    // a missing -wal file must not cost a thrown error, which doubles the time
+    // on Windows.
+    let wal;
     try {
-      const wal = fs.statSync(`${file}-wal`);
-      mtimeMs = Math.max(mtimeMs, wal.mtimeMs);
-      size += wal.size;
+      wal = fs.statSync(`${file}-wal`, { throwIfNoEntry: false });
     } catch {
-      // No write-ahead log.
+      // Unreadable write-ahead log: count the database alone.
     }
-    return { mtimeMs, size };
+    return wal
+      ? { mtimeMs: Math.max(stat.mtimeMs, wal.mtimeMs), size: stat.size + wal.size }
+      : { mtimeMs: stat.mtimeMs, size: stat.size };
   } catch {
     return null;
   }

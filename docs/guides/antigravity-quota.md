@@ -12,12 +12,11 @@ Antigravity CLI limits how much you can use each model over a 5-hour window and 
 
 agy sends the state of each quota to the status line as a "bucket": the share left (`remaining_fraction`) and when it resets. The buckets seen so far:
 
-| Bucket                    | Window          | Counts                                               |
-| ------------------------- | --------------- | ---------------------------------------------------- |
-| `gemini-5h`               | 5 hours         | Google Gemini models (Hydrogen, Neon, Carbon, Flash) |
-| `gemini-weekly`           | 7 days          | Google Gemini models (Hydrogen, Neon, Carbon, Flash) |
-| `gemini-argon-wtu-weekly` | 7 days          | Gemini 4 Argon on Google AI Pro (no 5-hour window)   |
-| `3p-5h`, `3p-weekly`      | 5 hours, 7 days | Anthropic models (Claude and Sonnet)                 |
+| Bucket               | Window          | Counts                                                      |
+| -------------------- | --------------- | ----------------------------------------------------------- |
+| `gemini-5h`          | 5 hours         | Google Gemini models (Hydrogen, Neon, Argon, Carbon, Flash) |
+| `gemini-weekly`      | 7 days          | Google Gemini models (Hydrogen, Neon, Argon, Carbon, Flash) |
+| `3p-5h`, `3p-weekly` | 5 hours, 7 days | Anthropic models (Claude and Sonnet)                        |
 
 A bucket that doesn't apply right now can arrive marked `disabled`, and the bar hides it by default. When Antigravity marks `3p-5h` `disabled` while `3p-weekly` is at `0%`, you can either keep showing its payload value with `"showDisabled": true` on `thirdPartyFiveHour` or set `"zeroFiveHourWhenWeeklyEmpty": true` globally so all 5-hour quota widgets show `0.0% rem` (`100.0% used`) whenever their matching 7-day quota is at `0%`. The [payload reference](../payload.md#quota-buckets) has the details.
 
@@ -39,12 +38,11 @@ The marker needs no extra data: it comes from the reset time agy already sends a
 
 ## Show only what you need
 
-- **The `quotas` preset** puts the plan and model first, the 5-hour and 7-day quotas side by side, and the third-party and Argon quotas below: `npx agy-powerline preset quotas`.
+- **The `quotas` preset** puts the plan and model first, the 5-hour and 7-day quotas side by side, and the third-party quotas below: `npx agy-powerline preset quotas`.
 - **The `quota` widget** shows only the bucket closest to running out for the model in use, with its reset: `⏳ Quota: 7d 21.0% rem · 1d 17h`. The `compact` preset uses it to keep the bar on one line.
 - **Percentages instead of meters:** `fiveHourPct` and `weeklyPct`.
 - **Exact reset times** instead of a countdown: set the reset widgets to show the time, or both ([Reset times and clock](../configuration.md#reset-times-and-clock)).
 - **Only when it gets low:** give a quota widget `showBelow`, for example `{ "id": "weeklyBar", "showBelow": 50 }`, and it stays hidden until half the quota is used.
-- **Argon on Google AI Pro:** add `argonWeekly` and `argonReset` to see Argon's weekly quota even while you work with another model.
 
 Add or remove any of them in `npx agy-powerline`, or in the [browser configurator](https://agy-powerline.com/configure/).
 

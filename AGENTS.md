@@ -4,7 +4,7 @@ Instructions for AI coding agents working on agy-powerline. For human guides, fu
 
 Statusline for Google Antigravity CLI (`agy`): Antigravity pipes session JSON to Node on stdin on each refresh and displays stdout. CommonJS, Node >= 20, **zero runtime dependencies**.
 
-**Targeted agy version: 1.5.14.** agy-powerline is built and tested against this Antigravity CLI release (newest fixture `tests/fixtures/antigravity-1.5.14.json`; payload fields in `docs/payload.md`). If `agy --version` is newer, agy's changelog entries after 1.5.14 are what to review for new payload fields, models, modes and quota buckets. Whichever agent does the work (Claude, agy or another) updates this version itself, in the same change that makes agy-powerline follow a newer release, and adds that release's fixture.
+**Targeted agy version: 1.5.16.** agy-powerline is built and tested against this Antigravity CLI release (newest fixture `tests/fixtures/antigravity-1.5.16.json`; payload fields in `docs/payload.md`). If `agy --version` is newer, agy's changelog entries after 1.5.16 are what to review for new payload fields, models, modes and quota buckets. Whichever agent does the work (Claude, agy or another) updates this version itself, in the same change that makes agy-powerline follow a newer release, and adds that release's fixture.
 
 ## Commands
 

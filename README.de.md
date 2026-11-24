@@ -25,7 +25,7 @@ Behalte Modell, Google-Gemini- (Hydrogen, Neon, Argon, Carbon, Flash) und Anthro
 </div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="Interaktiver Editor von agy-powerline: Reset des Argon-Wochenkontingents per Eingabe von argon hinzufügen, Vorlagen und Themes per / filtern, Pills, Lines und Classic in der Live-Vorschau vergleichen und Meter-Stile unter Settings prüfen" width="850">
+  <img src="assets/demo.gif" alt="Interaktiver Editor von agy-powerline: Sitzungskosten per Eingabe von cost hinzufügen, Vorlagen und Themes per / filtern, Pills, Lines und Classic in der Live-Vorschau vergleichen und Meter-Stile unter Settings prüfen" width="850">
 </p>
 
 ## Warum agy-powerline?
@@ -33,7 +33,7 @@ Behalte Modell, Google-Gemini- (Hydrogen, Neon, Argon, Carbon, Flash) und Anthro
 | Funktion                 | Was du bekommst                                                                                                                                                                                                                                                                               | Mehr erfahren                                                                                                   |
 | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | Tempo & Prognosen        | Tempomarkierungen zeigen, ob dein 5h- oder 7T-Kontingent bis zum Reset ausreicht, und `forecast` zeigt, wann es bei deinem aktuellen Tempo aufgebraucht ist                                                                                                                                   | [Kontingent-Guide](docs/guides/antigravity-quota.md) · [Rechner](https://agy-powerline.com/quota-calculator/)   |
-| Mehrere Anbieter         | Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash), Anthropic (Claude, Sonnet) und Argons eigenes Wochenkontingent nebeneinander, als Rest oder als Verbrauch                                                                                                                               | [Payload-Referenz](docs/payload.md#quota-buckets)                                                               |
+| Mehrere Anbieter         | 5h- und 7T-Kontingente von Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) und Anthropic (Claude, Sonnet) nebeneinander, als Rest oder als Verbrauch                                                                                                                                     | [Payload-Referenz](docs/payload.md#quota-buckets)                                                               |
 | Kontext, Tokens & Kosten | Das genutzte Kontextfenster, auf Wunsch gemessen am Komprimierungslimit, Sitzungs-Tokens und Cache-Treffer, Tokens von heute, 7 oder 30 Tagen und die geschätzten Kosten, mit Budgetwarnungen                                                                                                 | [Widgets](docs/configuration.md#widgets)                                                                        |
 | Agentenstatus            | Was der Agent gerade tut (auch ein Tool, das auf deine Freigabe wartet), Subagenten und Hintergrundaufgaben, wartende Nachrichten, Freigabemodus und Sandbox                                                                                                                                  | [Payload-Referenz](docs/payload.md)                                                                             |
 | Git mit Links            | Branch, Änderungen, Ahead/Behind, Worktree und Stash, mit klickbaren Links zu Ordner, Branch und Commit und fish-artig gekürzten Pfaden                                                                                                                                                       | [Widget-Optionen](docs/configuration.md#widget-options)                                                         |
@@ -102,7 +102,7 @@ Starte mit einer Vorlage und passe sie nach Bedarf an:
 | `agent`   | Agent-Status, Subagenten, Titel, Modus, Sandbox; Modell, Kontext-%, Artefakte, knappstes Kontingent |
 | `git`     | Projekt, Branch, Worktree, Stash; Dateianzahl, Zeilenänderungen, Commit                             |
 | `tokens`  | Kontext-Tokens, Sitzungs-Tokens (ein/aus), Cache-Hit; Tokens heute und über 7 Tage                  |
-| `quotas`  | Tarif und Modell; 5h- und 7T-Kontingente nebeneinander; Drittanbieter und Argon darunter            |
+| `quotas`  | Tarif und Modell; 5h- und 7T-Kontingente nebeneinander; Drittanbieter darunter                      |
 | `full`    | Alles: Sitzung, Projekt und Git; Kontext, Tokens und Cache; beide Kontingente                       |
 
 ### Themes
@@ -184,7 +184,6 @@ oder `"language": "de"` in `statusline.config.json` (Tab `Settings` über `i` im
 | `fiveHourReset`, `weeklyReset`                                   | Verbleibende Zeit bis zum Reset des Kontingents oder die Reset-Uhrzeit                                                       |
 | `quota`                                                          | Das Kontingent, das am nächsten an der Erschöpfung liegt, samt Reset                                                         |
 | `thirdPartyFiveHour`, `thirdPartyWeekly`                         | Kontingente für Drittanbieter-Modelle                                                                                        |
-| `argonWeekly`, `argonReset`                                      | Eigenes Wochenkontingent von Gemini 4 Argon (Google AI Pro) und dessen Reset                                                 |
 | `context`, `contextPct`, `contextTokens`                         | Genutztes Kontextfenster: Anzeige, Prozentsatz oder Token-Anzahl                                                             |
 | `git`                                                            | Branch, nicht committete Änderungen sowie Commits voraus/zurück (ahead/behind)                                               |
 | `gitChanges`, `gitFiles`, `gitSha`, `gitStash`, `gitWorktree`    | Hinzugefügte/gelöschte Zeilen, gestagte/geänderte/ungetrackte/konfliktbehaftete Dateien, Commit-ID, Stashes, Worktree        |

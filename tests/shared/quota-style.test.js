@@ -221,16 +221,7 @@ function testResetTimes() {
   );
 
   // Global resetFormat fallback and per-widget format override precedence.
-  const resetPayload = payload({
-    quota: {
-      ...payload().quota,
-      "gemini-argon-wtu-weekly": {
-        remaining_fraction: 0.5,
-        reset_time: "2026-10-12T20:00:00Z",
-        reset_in_seconds: 3 * 86400,
-      },
-    },
-  });
+  const resetPayload = payload();
   for (const layout of ["pills", "lines"]) {
     const globalTime = plain(
       {
@@ -238,7 +229,7 @@ function testResetTimes() {
         clock: utc,
         emojis: false,
         resetFormat: "time",
-        widgets: [{ id: "fiveHourReset" }, { id: "weeklyReset" }, { id: "argonReset" }],
+        widgets: [{ id: "fiveHourReset" }, { id: "weeklyReset" }],
       },
       resetPayload
     );
@@ -256,7 +247,6 @@ function testResetTimes() {
       `${layout}: global resetFormat sets default for reset widgets and per-widget format overrides it`,
       /Reset: 6:33pm/.test(globalTime) &&
         /Reset: oct 10, 2:50pm/.test(globalTime) &&
-        /Argon reset: oct 12, 8:00pm/.test(globalTime) &&
         /Reset: 2hr 47m/.test(override) &&
         !/6:33pm \(2hr 47m\)/.test(override) &&
         /Reset: oct 10, 2:50pm \(1d 17h\)/.test(override)
@@ -433,11 +423,6 @@ function testQuotaMode() {
         reset_time: RESET_AT,
         reset_in_seconds: 86400,
       },
-      "gemini-argon-wtu-weekly": {
-        remaining_fraction: 0.85,
-        reset_time: RESET_AT,
-        reset_in_seconds: 86400,
-      },
     },
   });
 
@@ -449,7 +434,6 @@ function testQuotaMode() {
     { id: "weeklyPct" },
     { id: "thirdPartyFiveHour" },
     { id: "thirdPartyWeekly" },
-    { id: "argonWeekly" },
   ];
 
   for (const layout of ["pills", "lines", "classic"]) {
@@ -468,7 +452,6 @@ function testQuotaMode() {
         /28\.0% used/.test(usedText) &&
         /35\.0% used/.test(usedText) &&
         /60\.0% used/.test(usedText) &&
-        /15\.0% used/.test(usedText) &&
         !/% rem/.test(usedText) &&
         /7d 21\.0% rem/.test(remText) &&
         /72\.0% rem/.test(remText),

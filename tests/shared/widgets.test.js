@@ -985,28 +985,20 @@ function testTightestQuota() {
     claude
   );
 
-  // Google AI Pro sends Argon's own weekly bucket (8.2% left) whatever model
-  // is in use; it is not Flash's quota.
-  const argonPayload = fixture("antigravity-1.4.0-argon.json");
-  const flash = render(argonPayload, quota);
+  // Argon draws on the Gemini buckets like the other Gemini models: on Google
+  // AI Pro, agy 1.5.16 sends no Argon bucket of its own.
+  const argonPayload = fixture("antigravity-1.5.16.json");
+  const argon = render(argonPayload, quota);
   record(
-    "quota leaves the Argon bucket out for other Gemini models",
-    /7d 93\.9% rem/.test(flash) && !/Argon|argon/.test(flash),
-    flash
-  );
-
-  const argonModel = { display_name: "Gemini 4 Argon" };
-  const argon = render({ ...argonPayload, model: argonModel }, quota);
-  record(
-    "quota shows the Argon bucket for an Argon model",
-    /Argon 7d 8\.2% rem/.test(argon) && /6d 13h/.test(argon),
+    "quota uses the Gemini buckets for an Argon model",
+    /7d 98\.6% rem/.test(argon) && !/3P/.test(argon),
     argon
   );
 
   // Unprefixed Gemini codenames or model.id-only Gemini tags still route to
-  // the Argon or Gemini pools instead of falling into 3p.
+  // the Gemini pool instead of falling into 3p.
   const unprefixedArgon = render(
-    { ...argonPayload, model: { id: "gemini-4-argon", display_name: "4 Argon (High)" } },
+    { ...real, model: { id: "argon-high", display_name: "4 Argon (High)" } },
     quota
   );
   const unprefixedHydrogen = render(
@@ -1021,65 +1013,32 @@ function testTightestQuota() {
     { ...real, model: { id: "gemini-4-flash", display_name: "Custom Flash" } },
     quota
   );
+  const unprefixed = [unprefixedArgon, unprefixedHydrogen, unprefixedFlash, idOnlyGemini];
   record(
-    "quota matches Argon and Gemini pools across both display_name and id codenames",
-    /Argon 7d 8\.2% rem/.test(unprefixedArgon) &&
-      /7d 28\.6% rem/.test(unprefixedHydrogen) &&
-      !/3P/.test(unprefixedHydrogen) &&
-      /7d 28\.6% rem/.test(unprefixedFlash) &&
-      !/3P/.test(unprefixedFlash) &&
-      /7d 28\.6% rem/.test(idOnlyGemini) &&
-      !/3P/.test(idOnlyGemini),
-    `${unprefixedArgon} | ${unprefixedHydrogen} | ${unprefixedFlash} | ${idOnlyGemini}`
+    "quota matches the Gemini pool across both display_name and id codenames",
+    unprefixed.every((bar) => /7d 28\.6% rem/.test(bar) && !/3P/.test(bar)),
+    unprefixed.join(" | ")
   );
 
-  // Orchestrator executes on Gemini 4 Hydrogen: the Gemini buckets count,
-  // plus Argon's own bucket when Argon plans; never the 3p buckets.
+  // Orchestrator executes on Gemini 4 Hydrogen whatever its planner: the
+  // Gemini buckets count, never the 3p buckets.
   const orchestrator = (id, display_name) =>
-    render({ ...argonPayload, model: { id, display_name } }, quota);
-  const carbonPlanner = orchestrator("gemini-pro-orchestrator", "Orchestrator (Carbon)");
-  const argonPlanner = orchestrator("gemini-pro-orchestrator-argon", "Orchestrator (Argon)");
-  const bareOrchestrator = render({ ...real, model: { display_name: "Orchestrator" } }, quota);
+    render({ ...real, model: { id, display_name } }, quota);
+  const planners = [
+    orchestrator("gemini-pro-orchestrator", "Orchestrator (Carbon)"),
+    orchestrator("gemini-pro-orchestrator-argon", "Orchestrator (Argon)"),
+    render({ ...real, model: { display_name: "Orchestrator" } }, quota),
+  ];
   record(
-    "quota routes Orchestrator to the Gemini buckets, and to Argon's when Argon plans",
-    /7d 93\.9% rem/.test(carbonPlanner) &&
-      !/Argon/.test(carbonPlanner) &&
-      /Argon 7d 8\.2% rem/.test(argonPlanner) &&
-      /7d 28\.6% rem/.test(bareOrchestrator) &&
-      !/3P/.test(bareOrchestrator),
-    `${carbonPlanner} | ${argonPlanner} | ${bareOrchestrator}`
+    "quota routes Orchestrator to the Gemini buckets whatever its planner",
+    planners.every((bar) => /7d 28\.6% rem/.test(bar) && !/3P/.test(bar)),
+    planners.join(" | ")
   );
   record(
     "short model names keep the Orchestrator planner",
     shortModelName("Orchestrator (Carbon)") === "Orchestrator·Carbon" &&
       shortModelName("Orchestrator (Argon)", true) === "Orchestrator Argon"
   );
-
-  // Ultra: no Argon bucket, Argon counts toward the Gemini buckets.
-  const ultra = render({ ...real, model: argonModel }, quota);
-  record(
-    "quota uses the Gemini buckets for Argon without an Argon bucket",
-    /7d 28\.6% rem/.test(ultra) && !/3P/.test(ultra),
-    ultra
-  );
-
-  const argonWidgets = [{ id: "argonWeekly" }, { id: "argonReset" }];
-  const argonPills = render(argonPayload, argonWidgets);
-  record(
-    "argonWeekly and argonReset show Argon's own quota whatever the model",
-    /🔮 Argon 7d: .*8\.2% rem/.test(argonPills) && /Argon reset: 6d 13h/.test(argonPills),
-    argonPills
-  );
-  const argonLines = render(argonPayload, argonWidgets, { layout: "lines" });
-  record(
-    "lines argonWeekly and argonReset show Argon's quota and reset",
-    /Argon 7d: .*8\.2% rem/.test(argonLines) && /Argon reset: 6d 13h/.test(argonLines),
-    argonLines
-  );
-  for (const layout of LAYOUT_ORDER) {
-    const hidden = render(real, argonWidgets, { layout });
-    record(`${layout} Argon widgets hide without an Argon bucket`, hidden.trim() === "", hidden);
-  }
 
   const unknown = render(
     {
@@ -1164,10 +1123,8 @@ function testWidgetThresholds() {
     { id: "weeklyPct", keys: ["gemini-weekly"] },
     { id: "thirdPartyFiveHour", keys: ["3p-5h"] },
     { id: "thirdPartyWeekly", keys: ["3p-weekly"] },
-    { id: "argonWeekly", keys: ["gemini-argon-wtu-weekly"] },
     { id: "fiveHourReset", keys: ["gemini-5h"] },
     { id: "weeklyReset", keys: ["gemini-weekly"] },
-    { id: "argonReset", keys: ["gemini-argon-wtu-weekly"] },
   ];
 
   for (const layout of LAYOUT_ORDER) {
@@ -1185,7 +1142,6 @@ function testWidgetThresholds() {
   const resetWidgets = [
     { id: "fiveHourReset", own: "gemini-5h", other: "gemini-weekly" },
     { id: "weeklyReset", own: "gemini-weekly", other: "gemini-5h" },
-    { id: "argonReset", own: "gemini-argon-wtu-weekly", other: "gemini-weekly" },
   ];
   for (const layout of LAYOUT_ORDER) {
     for (const { id, own, other } of resetWidgets) {

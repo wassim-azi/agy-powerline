@@ -25,7 +25,7 @@
 </div>
 
 <p align="center">
-  <img src="assets/demo.gif" alt="agy-powerline の対話式エディター：argon と入力して Argon の週間クォータのリセットを追加し、プリセットや / でのテーマ検索、Pills・Lines・Classic レイアウトのライブプレビュー、Settings のメータースタイルを表示" width="850">
+  <img src="assets/demo.gif" alt="agy-powerline の対話式エディター：cost と入力してセッションのコストを追加し、プリセットや / でのテーマ検索、Pills・Lines・Classic レイアウトのライブプレビュー、Settings のメータースタイルを表示" width="850">
 </p>
 
 ## なぜ agy-powerline？
@@ -33,7 +33,7 @@
 | 機能                           | できること                                                                                                                                                                                                                                                  | 詳しく見る                                                                                                     |
 | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | ペース表示と予測               | ペースマーカーで 5h または 7d のクォータがリセットまでもつかがわかり、`forecast` で今のペースではいつ尽きるかも表示                                                                                                                                         | [クォータガイド](docs/guides/antigravity-quota.md) · [計算機](https://agy-powerline.com/quota-calculator/)     |
-| マルチプロバイダーのクォータ   | Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）、Anthropic（Claude、Sonnet）、Argon 専用の週間クォータを横並びで、残量または使用量として表示                                                                                                          | [ペイロードリファレンス](docs/payload.md#quota-buckets)                                                        |
+| マルチプロバイダーのクォータ   | Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）と Anthropic（Claude、Sonnet）の 5h・7d クォータを横並びで、残量または使用量として表示                                                                                                                 | [ペイロードリファレンス](docs/payload.md#quota-buckets)                                                        |
 | コンテキスト・トークン・コスト | コンテキストウィンドウの使用量（圧縮される上限に対する表示も可）、セッションのトークンとキャッシュヒット、今日・7 日間・30 日間のトークン、推定コストを予算アラート付きで表示                                                                               | [ウィジェット](docs/configuration.md#widgets)                                                                  |
 | エージェントの状況             | エージェントの動作（承認待ちのツールを含む）、サブエージェントとバックグラウンドタスク、キュー内のメッセージ、承認モード、サンドボックス                                                                                                                    | [ペイロードリファレンス](docs/payload.md)                                                                      |
 | リンク付きの git               | ブランチ、変更、ahead/behind、worktree、stash を、フォルダー・ブランチ・コミットのページへのクリックできるリンクと、fish 風に短縮したパスで表示                                                                                                             | [ウィジェットのオプション](docs/configuration.md#widget-options)                                               |
@@ -102,7 +102,7 @@ Nerd Font のないターミナルでは、ASCII モードをオンにしてく�
 | `agent`    | エージェントの状態、サブエージェント、タイトル、モード、サンドボックス；モデル、コンテキスト %、アーティファクト（成果物）、最も残りの少ないクォータ |
 | `git`      | プロジェクト、ブランチ、worktree、stash；ファイル数、変更行数、コミット                                                                              |
 | `tokens`   | コンテキストのトークン、セッションの入出力トークン、キャッシュヒット；今日と 7 日間のトークン                                                        |
-| `quotas`   | プランとモデル；5h と 7d のクォータを横並びに、その下にサードパーティと Argon                                                                        |
+| `quotas`   | プランとモデル；5h と 7d のクォータを横並びに、その下にサードパーティ                                                                                |
 | `full`     | すべて：セッション、プロジェクト、git；コンテキスト、トークン、キャッシュ；両方のクォータ                                                            |
 
 ### テーマ
@@ -184,7 +184,6 @@ npx agy-powerline init --language ja
 | `fiveHourReset`、`weeklyReset`                                   | クォータがリセットされるまでの時間、またはリセット時刻                                                                               |
 | `quota`                                                          | 最も早く尽きそうなクォータとそのリセット                                                                                             |
 | `thirdPartyFiveHour`、`thirdPartyWeekly`                         | サードパーティモデルのクォータ                                                                                                       |
-| `argonWeekly`、`argonReset`                                      | Gemini 4 Argon 専用の週間クォータ（Google AI Pro）とそのリセット                                                                     |
 | `context`、`contextPct`、`contextTokens`                         | 使用中のコンテキストウィンドウ：メーター、パーセント、またはトークン数                                                               |
 | `git`                                                            | ブランチ、未コミットの変更、ahead/behind                                                                                             |
 | `gitChanges`、`gitFiles`、`gitSha`、`gitStash`、`gitWorktree`    | 追加・削除された行数、ステージ済/変更/未追跡/競合ファイル数、コミット ID、stash 数、リンクされた worktree                            |

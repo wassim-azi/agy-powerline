@@ -28,7 +28,6 @@ const METER_WIDGETS = [
   "weeklyBar",
   "thirdPartyFiveHour",
   "thirdPartyWeekly",
-  "argonWeekly",
   "context",
 ];
 
@@ -44,7 +43,6 @@ function payload() {
       "gemini-weekly": quota,
       "3p-5h": quota,
       "3p-weekly": quota,
-      "gemini-argon-wtu-weekly": quota,
     },
     terminal_width: 0,
   };

@@ -12,13 +12,13 @@
 # then move poster.png over editor-poster.png.
 #
 # One quick take of configure, the editor with its live preview, tab by
-# tab: add Gemini 4 Argon's reset timer from the Add list by typing
-# "argon", preview presets, browse and filter themes with "/", step through
+# tab: add the session cost from the Add list by typing "cost", preview
+# presets, browse and filter themes with "/", step through
 # Classic, Pills, and Lines layouts, and finish on Meter style in Settings.
 #
 # It starts from demo-config.json in a fresh temporary AGY_POWERLINE_HOME, so
 # it never touches your real ~/.agy-powerline or agy settings. That config
-# has 16 widgets on 3 rows, in the Classic layout and the dark-mono theme,
+# has 15 widgets on 3 rows, in the Classic layout and the dark-mono theme,
 # and no bar-wide meterStyle: one would draw every layout's meters the same
 # way, so the Layout tab couldn't show each layout's own look.
 
@@ -67,16 +67,15 @@ Sleep 1.5s
 # that way applies nothing, so the widgets and theme stay.
 
 # Widgets: the details panel follows the cursor over the first 3 rows, then
-# Up wraps around to Argon 7d, the last widget. Add (a), filtered by typing,
-# offers only Argon's reset timer (Argon 7d is one per bar and already in)
-# and puts it right after the selected widget.
+# Up wraps around to 3P 7d, the last widget. Add (a), filtered by typing,
+# offers only Session Cost and puts it right after the selected widget.
 Down@600ms 2
 Sleep 600ms
 Up@500ms 3
 Sleep 600ms
 Type "a"
 Sleep 600ms
-Type@120ms "argon"
+Type@120ms "cost"
 Sleep 1s
 Enter
 Sleep 1.5s

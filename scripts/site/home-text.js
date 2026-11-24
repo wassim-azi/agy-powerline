@@ -119,7 +119,7 @@ const HOME_TEXT = {
     shots: {
       editor: [
         "Editor",
-        "The agy-powerline editor in a terminal: adding Argon's reset timer, previewing presets, filtering themes, switching between Classic, Pills and Lines, and the Settings tab",
+        "The agy-powerline editor in a terminal: adding the session cost, previewing presets, filtering themes, switching between Classic, Pills and Lines, and the Settings tab",
       ],
       windows: [
         "agy session",
@@ -174,7 +174,7 @@ const HOME_TEXT = {
       ],
       [
         "Which quotas does it show?",
-        'The Google Gemini (Hydrogen, Neon, Carbon, Flash) 5-hour and 7-day quotas, the Anthropic (Claude and Sonnet) 5-hour and 7-day quotas, and Gemini 4 Argon\'s weekly quota on Google AI Pro, each with its reset time. The <a href="/guides/antigravity-quota/">quota guide</a> explains the meters.',
+        'The Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) 5-hour and 7-day quotas, and the Anthropic (Claude and Sonnet) 5-hour and 7-day quotas, each with its reset time. The <a href="/guides/antigravity-quota/">quota guide</a> explains the meters.',
       ],
     ],
     allQuestions: "All questions →",
@@ -306,7 +306,7 @@ const HOME_TEXT = {
     shots: {
       editor: [
         "Éditeur",
-        "L'éditeur d'agy-powerline dans un terminal : ajout du compte à rebours d'Argon, aperçu des préréglages, filtre des thèmes, passage de Classic à Pills et Lines, et l'onglet Settings",
+        "L'éditeur d'agy-powerline dans un terminal : ajout du coût de la session, aperçu des préréglages, filtre des thèmes, passage de Classic à Pills et Lines, et l'onglet Settings",
       ],
       windows: [
         "Session agy",
@@ -361,7 +361,7 @@ const HOME_TEXT = {
       ],
       [
         "Quels quotas affiche-t-elle ?",
-        'Les quotas Google Gemini (Hydrogen, Neon, Carbon, Flash) sur 5 heures et 7 jours, les quotas Anthropic (Claude et Sonnet) sur 5 heures et 7 jours, et le quota hebdomadaire de Gemini 4 Argon sur Google AI Pro, chacun avec sa remise à zéro. Le <a href="/guides/antigravity-quota/">guide des quotas</a> (en anglais) explique les jauges.',
+        'Les quotas Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) sur 5 heures et 7 jours, et les quotas Anthropic (Claude et Sonnet) sur 5 heures et 7 jours, chacun avec sa remise à zéro. Le <a href="/guides/antigravity-quota/">guide des quotas</a> (en anglais) explique les jauges.',
       ],
     ],
     allQuestions: "Toutes les questions (en anglais) →",
@@ -493,7 +493,7 @@ const HOME_TEXT = {
     shots: {
       editor: [
         "Editor",
-        "El editor de agy-powerline en una terminal: añade el reinicio de Argon, previsualiza ajustes predefinidos, filtra temas, cambia entre Classic, Pills y Lines, y muestra la pestaña Settings",
+        "El editor de agy-powerline en una terminal: añade el coste de la sesión, previsualiza ajustes predefinidos, filtra temas, cambia entre Classic, Pills y Lines, y muestra la pestaña Settings",
       ],
       windows: [
         "Sesión de agy",
@@ -548,7 +548,7 @@ const HOME_TEXT = {
       ],
       [
         "¿Qué cuotas muestra?",
-        'Las cuotas de Google Gemini (Hydrogen, Neon, Carbon, Flash) de 5 horas y 7 días, las cuotas de Anthropic (Claude y Sonnet) de 5 horas y 7 días, y la cuota semanal de Gemini 4 Argon en Google AI Pro, cada una con su hora de reinicio. La <a href="/guides/antigravity-quota/">guía de cuotas</a> (en inglés) explica los medidores.',
+        'Las cuotas de Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash) de 5 horas y 7 días, y las cuotas de Anthropic (Claude y Sonnet) de 5 horas y 7 días, cada una con su hora de reinicio. La <a href="/guides/antigravity-quota/">guía de cuotas</a> (en inglés) explica los medidores.',
       ],
     ],
     allQuestions: "Todas las preguntas (en inglés) →",
@@ -672,7 +672,7 @@ const HOME_TEXT = {
     shots: {
       editor: [
         "エディター",
-        "ターミナルで動く agy-powerline のエディター：Argon のリセットタイマーを追加し、プリセットをプレビューし、テーマを絞り込み、Classic・Pills・Lines を切り替え、Settings タブを表示",
+        "ターミナルで動く agy-powerline のエディター：セッションのコストを追加し、プリセットをプレビューし、テーマを絞り込み、Classic・Pills・Lines を切り替え、Settings タブを表示",
       ],
       windows: [
         "agy のセッション",
@@ -727,7 +727,7 @@ const HOME_TEXT = {
       ],
       [
         "どのクォータを表示しますか？",
-        'Google Gemini（Hydrogen、Neon、Carbon、Flash）の 5 時間と 7 日間のクォータ、Anthropic（Claude と Sonnet）の 5 時間と 7 日間のクォータ、Google AI Pro での Gemini 4 Argon の週間クォータを、それぞれのリセット時刻とともに表示します。メーターの見方は<a href="/guides/antigravity-quota/">クォータのガイド</a>（英語）で説明しています。',
+        'Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）の 5 時間と 7 日間のクォータ、Anthropic（Claude と Sonnet）の 5 時間と 7 日間のクォータを、それぞれのリセット時刻とともに表示します。メーターの見方は<a href="/guides/antigravity-quota/">クォータのガイド</a>（英語）で説明しています。',
       ],
     ],
     allQuestions: "すべての質問（英語）→",
@@ -839,7 +839,7 @@ const HOME_TEXT = {
     shots: {
       editor: [
         "编辑器",
-        "终端中的 agy-powerline 编辑器：添加 Argon 重置计时器、预览预设、筛选主题、在 Classic、Pills 和 Lines 之间切换，以及 Settings 选项卡",
+        "终端中的 agy-powerline 编辑器：添加会话花费、预览预设、筛选主题、在 Classic、Pills 和 Lines 之间切换，以及 Settings 选项卡",
       ],
       windows: [
         "agy 会话",
@@ -890,7 +890,7 @@ const HOME_TEXT = {
       ],
       [
         "会显示哪些配额？",
-        '涵盖 Google Gemini（Hydrogen、Neon、Carbon、Flash）的 5 小时与 7 天配额、Anthropic（Claude 与 Sonnet）的 5 小时与 7 天配额，以及 Google AI Pro 下 Gemini 4 Argon 的每周配额，每一项都带有重置时间。进度条说明见<a href="/guides/antigravity-quota/">配额指南</a>（英文）。',
+        '涵盖 Google Gemini（Hydrogen、Neon、Argon、Carbon、Flash）的 5 小时与 7 天配额、以及 Anthropic（Claude 与 Sonnet）的 5 小时与 7 天配额，每一项都带有重置时间。进度条说明见<a href="/guides/antigravity-quota/">配额指南</a>（英文）。',
       ],
     ],
     allQuestions: "查看全部问题（英文）→",
@@ -1008,7 +1008,7 @@ const HOME_TEXT = {
     shots: {
       editor: [
         "에디터",
-        "터미널에서 실행되는 agy-powerline 에디터: Argon 리셋 타이머 추가, 프리셋 미리보기, 테마 필터, Classic·Pills·Lines 전환, Settings 탭",
+        "터미널에서 실행되는 agy-powerline 에디터: 세션 비용 추가, 프리셋 미리보기, 테마 필터, Classic·Pills·Lines 전환, Settings 탭",
       ],
       windows: [
         "agy 세션",
@@ -1060,7 +1060,7 @@ const HOME_TEXT = {
       ],
       [
         "어떤 할당량이 표시되나요?",
-        'Google Gemini(Hydrogen, Neon, Carbon, Flash) 5시간 및 7일 할당량, Anthropic(Claude 및 Sonnet) 5시간 및 7일 할당량, Google AI Pro의 Gemini 4 Argon 주간 할당량을 각각 리셋 시간과 함께 표시합니다. 막대 읽는 법은 <a href="/guides/antigravity-quota/">할당량 가이드</a> (영어)를 참고하세요.',
+        'Google Gemini(Hydrogen, Neon, Argon, Carbon, Flash) 5시간 및 7일 할당량, Anthropic(Claude 및 Sonnet) 5시간 및 7일 할당량을 각각 리셋 시간과 함께 표시합니다. 막대 읽는 법은 <a href="/guides/antigravity-quota/">할당량 가이드</a> (영어)를 참고하세요.',
       ],
     ],
     allQuestions: "모든 질문 보기 (영어) →",
@@ -1192,7 +1192,7 @@ const HOME_TEXT = {
     shots: {
       editor: [
         "Editor",
-        "Der agy-powerline-Editor im Terminal: Argons Reset-Timer hinzufügen, Presets ansehen, Themes filtern, zwischen Classic, Pills und Lines wechseln und der Settings-Tab",
+        "Der agy-powerline-Editor im Terminal: Sitzungskosten hinzufügen, Presets ansehen, Themes filtern, zwischen Classic, Pills und Lines wechseln und der Settings-Tab",
       ],
       windows: [
         "agy-Sitzung",
@@ -1247,7 +1247,7 @@ const HOME_TEXT = {
       ],
       [
         "Welche Kontingente werden angezeigt?",
-        'Die 5-Stunden- und 7-Tage-Kontingente von Google Gemini (Hydrogen, Neon, Carbon, Flash), die 5-Stunden- und 7-Tage-Kontingente von Anthropic (Claude und Sonnet) sowie das Wochenkontingent von Gemini 4 Argon in Google AI Pro, jeweils mit Reset-Zeit. Der <a href="/guides/antigravity-quota/">Kontingent-Guide</a> (auf Englisch) erklärt die Anzeigen.',
+        'Die 5-Stunden- und 7-Tage-Kontingente von Google Gemini (Hydrogen, Neon, Argon, Carbon, Flash), und die 5-Stunden- und 7-Tage-Kontingente von Anthropic (Claude und Sonnet), jeweils mit Reset-Zeit. Der <a href="/guides/antigravity-quota/">Kontingent-Guide</a> (auf Englisch) erklärt die Anzeigen.',
       ],
     ],
     allQuestions: "Alle Fragen (auf Englisch) →",

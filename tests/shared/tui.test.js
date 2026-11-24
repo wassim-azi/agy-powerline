@@ -735,10 +735,10 @@ async function testAddPosition() {
   const widgets = [{ id: "model" }, { id: "plan" }, { id: "sandbox" }, { id: "project" }];
   const ids = (config) => config.widgets.map((w) => w.id).join(",");
 
-  const added = await runConfigureKeys({ widgets }, [DOWN, DOWN, "a", ..."argon", "\r"]);
+  const added = await runConfigureKeys({ widgets }, [DOWN, DOWN, "a", ..."weeklyreset", "\r"]);
   record(
     "Add inserts the picked widget after the selected one, not after the Add list's row",
-    ids(added.saved).startsWith("model,plan,sandbox,argonWeekly,project")
+    ids(added.saved).startsWith("model,plan,sandbox,weeklyReset,project")
   );
 
   const listMoved = await runConfigureKeys({ widgets }, [DOWN, "a", DOWN, DOWN, DOWN, "\r"]);

@@ -1,6 +1,6 @@
 # What Antigravity CLI sends to your status line
 
-On every refresh, Antigravity CLI (`agy`) starts the command in `statusLine.command`, writes one JSON object to its standard input, and shows what the command prints. This page lists the fields that object actually contains, taken from real payloads of agy 1.3.0 to 1.5.14 (the anonymized files in [`tests/fixtures/`](https://github.com/wassim-azi/agy-powerline/tree/main/tests/fixtures)), with what each one means and which agy-powerline widget reads it.
+On every refresh, Antigravity CLI (`agy`) starts the command in `statusLine.command`, writes one JSON object to its standard input, and shows what the command prints. This page lists the fields that object actually contains, taken from real payloads of agy 1.3.0 to 1.5.16 (the anonymized files in [`tests/fixtures/`](https://github.com/wassim-azi/agy-powerline/tree/main/tests/fixtures)), with what each one means and which agy-powerline widget reads it.
 
 - [How the payload arrives](#how-the-payload-arrives)
 - [Fields](#fields)
@@ -78,13 +78,12 @@ agy-powerline never prints, logs or saves `email`, `session_id` or `conversation
 
 `quota` holds one object per bucket. These are the bucket names seen so far:
 
-| Bucket                    | Window  | What it counts                                                                                                                                                                            | Widgets                                       |
-| ------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| `gemini-5h`               | 5 hours | Google Gemini models (Hydrogen, Neon, Carbon, Flash), and Orchestrator, whose executor runs on Gemini 4 Hydrogen                                                                          | `fiveHourBar`, `fiveHourPct`, `fiveHourReset` |
-| `gemini-weekly`           | 7 days  | Google Gemini models (Hydrogen, Neon, Carbon, Flash), and Orchestrator                                                                                                                    | `weeklyBar`, `weeklyPct`, `weeklyReset`       |
-| `gemini-argon-wtu-weekly` | 7 days  | Gemini 4 Argon on Google AI Pro, which has a weekly quota of its own and no 5-hour window. Sent whatever model is in use; not sent on Ultra, where Argon counts toward the Gemini buckets | `argonWeekly`, `argonReset`                   |
-| `3p-5h`                   | 5 hours | Anthropic models (Claude, Sonnet); can be `disabled`                                                                                                                                      | `thirdPartyFiveHour`                          |
-| `3p-weekly`               | 7 days  | Anthropic models (Claude, Sonnet)                                                                                                                                                         | `thirdPartyWeekly`                            |
+| Bucket          | Window  | What it counts                                                                                                          | Widgets                                       |
+| --------------- | ------- | ----------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| `gemini-5h`     | 5 hours | Google Gemini models (Hydrogen, Neon, Argon, Carbon, Flash), and Orchestrator, whose executor runs on Gemini 4 Hydrogen | `fiveHourBar`, `fiveHourPct`, `fiveHourReset` |
+| `gemini-weekly` | 7 days  | Google Gemini models (Hydrogen, Neon, Argon, Carbon, Flash), and Orchestrator                                           | `weeklyBar`, `weeklyPct`, `weeklyReset`       |
+| `3p-5h`         | 5 hours | Anthropic models (Claude, Sonnet); can be `disabled`                                                                    | `thirdPartyFiveHour`                          |
+| `3p-weekly`     | 7 days  | Anthropic models (Claude, Sonnet)                                                                                       | `thirdPartyWeekly`                            |
 
 The payload doesn't say how long a window is. agy-powerline takes 5 hours and 7 days from the bucket name, and from that and `reset_in_seconds` works out how far into the window you are: that point is the [pace marker](configuration.md#quota-pace-marker). The [quota calculator](https://agy-powerline.com/quota-calculator/) does the same sum in your browser.
 
